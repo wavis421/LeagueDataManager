@@ -3,13 +3,12 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.sql.Date;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -39,10 +38,23 @@ public class StudentTable extends JPanel {
 		tableModel = new StudentTableModel(studentList);
 		table = new JTable(tableModel);
 
+		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
+
+		// Configure column widths
+		table.getColumnModel().getColumn(tableModel.getColumnForGender()).setMaxWidth(35);
+		table.getColumnModel().getColumn(tableModel.getColumnForClientID()).setMaxWidth(75);
+		table.getColumnModel().getColumn(tableModel.getColumnForStartDate()).setMaxWidth(105);
+		table.getColumnModel().getColumn(tableModel.getColumnForGradYear()).setMaxWidth(95);
+		table.getColumnModel().getColumn(tableModel.getColumnForHomeLocation()).setMaxWidth(165);
+
+		table.getColumnModel().getColumn(tableModel.getColumnForStartDate()).setPreferredWidth(100);
+		table.getColumnModel().getColumn(tableModel.getColumnForGradYear()).setPreferredWidth(90);
+		table.getColumnModel().getColumn(tableModel.getColumnForHomeLocation()).setPreferredWidth(160);
+
 		table.setDefaultRenderer(Object.class, new StudentTableRenderer());
 		table.setAutoCreateRowSorter(true);
 
@@ -66,7 +78,12 @@ public class StudentTable extends JPanel {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			setText((String) value);
+			if (value instanceof Integer)
+				setText(String.valueOf(value));
+			else if (value instanceof Date)
+				setText(((Date) value).toString());
+			else
+				setText((String) value);
 
 			if (column != -1) {
 				setFont(CustomFonts.TABLE_TEXT_FONT);
@@ -78,12 +95,7 @@ public class StudentTable extends JPanel {
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
 				super.setVerticalAlignment(TOP);
-				if (column == tableModel.getColumnForStudentName()) {
-					super.setText(" " + super.getText());
-					super.setHorizontalAlignment(LEFT);
-				} else {
-					super.setHorizontalAlignment(CENTER);
-				}
+				super.setHorizontalAlignment(CENTER);
 			}
 			return this;
 		}

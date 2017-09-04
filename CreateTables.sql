@@ -9,15 +9,21 @@ BEGIN
 		PRIMARY KEY (StudentID),
 		
 		# Student data
-		LastName varchar(25) DEFAULT NULL,
 		FirstName varchar(20) DEFAULT NULL,
+		LastName varchar(25) DEFAULT NULL,
 		GithubName varchar(50) DEFAULT NULL,
-		Gender CHAR DEFAULT NULL,
-		BirthDate date DEFAULT NULL,
+		Gender int(11) DEFAULT 0,
+		GradYear int(11) DEFAULT NULL,
 		
 		StartDate date DEFAULT NULL,
-		Location varchar(25) DEFAULT NULL,
-
+		Location int(11) DEFAULT 0,
+		CurrentClass varchar(25) DEFAULT NULL,
+		NumClasses int(11) DEFAULT 0,
+		
+		# Unique ID from FrontDesk database
+		ClientID int(11) NOT NULL,
+		
+		UNIQUE KEY (ClientID),
 		UNIQUE KEY (GithubName)
 	) ENGINE=InnoDB;
 	

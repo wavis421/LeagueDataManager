@@ -8,7 +8,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -31,13 +30,12 @@ public class MainFrame extends JFrame {
 	/* Private constants */
 	private static final int PREF_FRAME_WIDTH = 975;
 	private static final int PREF_FRAME_HEIGHT = 700;
-	private static final Dimension PREF_FRAME_DIMENSION = new Dimension(PREF_FRAME_WIDTH - 15, PREF_FRAME_HEIGHT - 60);
 
 	/* Private instance variables */
 	private static Controller controller;
 	private JPanel mainPanel;
 	private JPanel tablePanel;
-	private StudentTable table;
+	private StudentTable studentTable;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 
@@ -61,8 +59,8 @@ public class MainFrame extends JFrame {
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
 		controller = new Controller((JFrame) MainFrame.this);
-		table = new StudentTable(controller.getAllStudents());
-		tablePanel = table.getTablePanel();
+		studentTable = new StudentTable(controller.getAllStudents());
+		tablePanel = studentTable.getTablePanel();
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
 		tablePanel.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
@@ -119,7 +117,7 @@ public class MainFrame extends JFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentsItem, importActivityLogItem, exitItem);
-		createStudentMenuListeners(studentAddItem, studentEditMenu, studentRemoveMenu, studentViewAllMenu);
+		createStudentMenuListeners(studentEditMenu, studentRemoveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewAllItem);
 
 		return menuBar;
@@ -150,15 +148,8 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createStudentMenuListeners(JMenuItem studentAdd, JMenu studentEdit, JMenu studentRemove,
-			JMenuItem studentViewAll) {
+	private void createStudentMenuListeners(JMenu studentEdit, JMenu studentRemove, JMenuItem studentViewAll) {
 		// Set up listeners for STUDENT menu
-		studentAdd.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// controller.addStudent("Avis", "Wendy", "wavis421");
-				// refreshStudentTable();
-			}
-		});
 		studentEdit.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 
@@ -186,6 +177,6 @@ public class MainFrame extends JFrame {
 	}
 
 	private void refreshStudentTable() {
-		table.setData(controller.getAllStudents());
+		studentTable.setData(controller.getAllStudents());
 	}
 }

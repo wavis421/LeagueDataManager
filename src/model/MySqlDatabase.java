@@ -4,12 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import sun.net.www.content.image.jpeg;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 public class MySqlDatabase {
 	private static Connection dbConnection = null;
@@ -48,7 +49,8 @@ public class MySqlDatabase {
 					JOptionPane.showMessageDialog(null,
 							"Exceeded maximum connection attempts.\nPlease try again later.");
 					// Exit program
-					// TODO: Figure out how to dispose of MainFrame
+					// TODO: Should have 1 place where program exits
+					// TODO: Add cleanup of MainFrame
 					System.exit(0);
 				}
 			} else
@@ -75,81 +77,151 @@ public class MySqlDatabase {
 						.prepareStatement("SELECT * FROM Students ORDER BY LastName, FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					nameList.add(new StudentModel(0, result.getString("LastName"), result.getString("FirstName"),
-							result.getString("GithubName")));
+					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear")));
 				}
 
 				result.close();
 				selectStmt.close();
 				break;
 
-			} catch (SQLException e) {
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
 			}
 		}
 		return nameList;
 	}
-	
+
 	public StudentModel getStudentByGithubName(String githubName) {
 		StudentModel student = null;
-		
+
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE GithubName=?;");
 				selectStmt.setString(1, githubName);
-				
+
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
-					student = new StudentModel(result.getInt("StudentId"), 
-							result.getString("LastName"), result.getString("FirstName"),
-							result.getString("GithubName"));
+					student = new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("HomeLocation"),
+							result.getInt("GradYear"));
 				}
 
 				result.close();
 				selectStmt.close();
 				break;
 
-			} catch (SQLException e) {
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				break;
 			}
 		}
 		return student;
 	}
-	
-	public void addStudent(String lastName, String firstName, String githubName) {
+
+	public void addStudent(int clientID, String lastName, String firstName, String githubName, String gender,
+			String firstVisitDate, String homeLocation, String gradYear) {
+
+		int gradYearAsInt = 0;
+
+		if (githubName.equals("") || githubName.equals("\"\"")) {
+			System.out.println(firstName + " " + lastName + "(" + clientID + ") does not have a github user name");
+			githubName = null;
+		}
+		if (gradYear != null && !gradYear.equals("") && !gradYear.equals("\"\""))
+			gradYearAsInt = Integer.parseInt(gradYear);
+
 		for (int i = 0; i < 2; i++) {
-			if (getStudentByGithubName(githubName) != null) {
-				// TODO: Add this to log file
-				System.out.println("Student with github name " + githubName + " already exists");
-				break;
-			}
 			try {
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
-						"INSERT INTO Students (lastName, firstName, githubName) "
-								+ "VALUES (?, ?, ?);");
+						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, Gender, StartDate, Location, GradYear) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
+				addStudentStmt.setInt(col++, clientID);
 				addStudentStmt.setString(col++, lastName);
 				addStudentStmt.setString(col++, firstName);
 				addStudentStmt.setString(col++, githubName);
+				addStudentStmt.setInt(col++, GenderModel.convertStringToGender(gender));
+				if (!firstVisitDate.equals(""))
+					addStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
+				else
+					addStudentStmt.setDate(col++, null);
+				addStudentStmt.setInt(col++, LocationModel.convertStringToLocation(homeLocation));
+				addStudentStmt.setInt(col++, gradYearAsInt);
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
 				break;
 
-			} catch (SQLException e) {
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
+
+			} catch (SQLIntegrityConstraintViolationException e2) {
+				// Student already exists, so update instead
+				updateStudent(clientID, lastName, firstName, githubName, firstVisitDate, homeLocation, gradYearAsInt);
+				break;
+
+			} catch (SQLException e3) {
+				System.out.println("Add student database failure: " + e3.getMessage());
+				break;
 			}
+		}
+	}
+
+	private void updateStudent(int clientID, String lastName, String firstName, String githubName,
+			String firstVisitDate, String homeLocation, int gradYear) {
+
+		PreparedStatement updateStudentStmt;
+		try {
+			updateStudentStmt = dbConnection.prepareStatement(
+					"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=? "
+							+ "WHERE ClientID=?;");
+
+			int col = 1;
+			updateStudentStmt.setString(col++, lastName);
+			updateStudentStmt.setString(col++, firstName);
+			updateStudentStmt.setString(col++, githubName);
+			if (!firstVisitDate.equals(""))
+				updateStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
+			else {
+				updateStudentStmt.setDate(col++, null);
+				System.out.println(firstName + " " + lastName + " has no first Visit Date");
+			}
+			updateStudentStmt.setInt(col++, LocationModel.convertStringToLocation(homeLocation));
+			updateStudentStmt.setInt(col++, gradYear);
+			updateStudentStmt.setInt(col++, clientID);
+
+			updateStudentStmt.executeUpdate();
+			updateStudentStmt.close();
+			return;
+			
+		} catch (SQLException e) {
+			System.out.println("Update student database failure: " + e.getMessage());
 		}
 	}
 }

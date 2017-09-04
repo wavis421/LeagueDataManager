@@ -1,22 +1,48 @@
 package model;
 
-public class StudentModel implements Comparable<StudentModel> {
-	private int personID;
-	private String lastName, firstName, githubName, location, classTime;
+import java.sql.Date;
 
-	public StudentModel(int personID, String lastName, String firstName, String githubName) {
-		this.personID = personID;
+public class StudentModel implements Comparable<StudentModel> {
+	private int studentID, clientID;
+	private String lastName, firstName, githubName;
+	private int homeLocation, gender, gradYear;
+	private Date startDate;
+
+	public StudentModel(int personID, int clientID, String lastName, String firstName, String githubName,
+			int gender, Date startDate, int homeLocation, int gradYear) {
+		this.studentID = personID;
+		this.clientID = clientID;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.githubName = githubName;
+		this.homeLocation = homeLocation;
+		this.gender = gender;
+		this.gradYear = gradYear;
+		this.startDate = startDate;
 	}
 
 	public String toString() {
-		return firstName + " " + lastName;
+		return firstName + " " + lastName + " (" + clientID + ")";
+	}
+	
+	public int getClientID() {
+		return clientID;
+	}
+
+	public int getGender() {
+		return gender;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public int getGradYear() {
+		return gradYear;
 	}
 
 	public int getPersonID() {
-		return personID;
+		return studentID;
 	}
 
 	public String getLastName() {
@@ -31,12 +57,8 @@ public class StudentModel implements Comparable<StudentModel> {
 		return githubName;
 	}
 	
-	public String getLocation() {
-		return location;
-	}
-	
-	public String getClassTime() {
-		return classTime;
+	public int getHomeLocation() {
+		return homeLocation;
 	}
 	
 	@Override
