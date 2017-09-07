@@ -44,8 +44,12 @@ public class ActivityTable extends JPanel {
 
 		// Configure column widths
 		table.getColumnModel().getColumn(activityTableModel.getColumnForClientID()).setMaxWidth(75);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setMaxWidth(105);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setMaxWidth(100);
 		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setPreferredWidth(100);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setMaxWidth(250);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setPreferredWidth(210);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setMaxWidth(220);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setPreferredWidth(180);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());

@@ -89,4 +89,8 @@ public class ActivityTableModel extends AbstractTableModel {
 	public int getColumnForServiceDate() {
 		return SERVICE_DATE_COLUMN;
 	}
+	
+	public int getColumnForEventName() {
+		return EVENT_NAME_COLUMN;
+	}
 }
