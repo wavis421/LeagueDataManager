@@ -51,10 +51,7 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		if (columnIndex == SERVICE_DATE_COLUMN)
-			return Date.class;
-		else
-			return String.class;
+		return String.class;
 	}
 
 	@Override
