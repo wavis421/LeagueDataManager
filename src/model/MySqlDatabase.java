@@ -70,7 +70,6 @@ public class MySqlDatabase {
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
-		String githubName;
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -79,12 +78,8 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					githubName = result.getString("GithubName");
-					if (githubName != null && !githubName.equals(""))
-						githubName = parseGithubName(githubName);
-
 					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							result.getString("LastName"), result.getString("FirstName"), githubName,
+							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
 							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
 							result.getInt("GradYear")));
 				}
@@ -185,6 +180,9 @@ public class MySqlDatabase {
 			System.out.println(firstName + " " + lastName + "(" + clientID + ") does not have a github user name");
 			githubName = null;
 		}
+		else
+			githubName = parseGithubName(githubName);
+		
 		if (gradYear != null && !gradYear.equals("") && !gradYear.equals("\"\""))
 			gradYearAsInt = Integer.parseInt(gradYear);
 
