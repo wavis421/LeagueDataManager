@@ -38,6 +38,7 @@ BEGIN
 			ON DELETE CASCADE,
 		
 		# Activity data
+		ScheduleID int(11) DEFAULT 0,
 		ServiceDate date DEFAULT NULL,
 		EventName varchar(50) DEFAULT NULL,
 		Comments varchar(100) DEFAULT NULL,

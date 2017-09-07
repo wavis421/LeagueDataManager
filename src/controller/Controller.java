@@ -29,8 +29,9 @@ public class Controller {
 
 	// CSV Enrollment table indices
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
-	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 4;
-	private static final int CSV_ACTIVITY_CLIENTID_IDX = 6;
+	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 2;
+	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
+	private static final int CSV_ACTIVITY_SCHEDULEID_IDX = 4;
 
 	private MySqlDatabase sqlDb;
 	private JFrame parent;
@@ -88,7 +89,6 @@ public class Controller {
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Error line: " + line);
 			// e.printStackTrace();
 		}
@@ -106,33 +106,35 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// CSV file has the following columns:
-		// Student name, service date, dow, time, event name, visitID, clientID
+		// Student name, service date, event name, clientID, Schedule ID
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
 			line = br.readLine();
 
 			while (line != null) {
-				// Create new student
+				// Read next line of CSV file and split into columns
 				String[] fields = line.split(",");
 
+				// Pre-process some columns
 				String serviceDate = fields[CSV_ACTIVITY_SERVICE_DATE_IDX];
-				int paren = fields[CSV_ACTIVITY_EVENT_NAME_IDX].indexOf('(');
+				String eventName = fields[CSV_ACTIVITY_EVENT_NAME_IDX];
+				int paren = eventName.indexOf('(');
 				if (paren > 0)
-					fields[CSV_ACTIVITY_EVENT_NAME_IDX] = fields[CSV_ACTIVITY_EVENT_NAME_IDX].substring(0, paren);
+					eventName = eventName.substring(0, paren);
 				
-				if (!fields[CSV_ACTIVITY_EVENT_NAME_IDX].equals("") && !fields[CSV_ACTIVITY_EVENT_NAME_IDX].equals("\"\"") && 
-						!fields[CSV_ACTIVITY_EVENT_NAME_IDX].contains("iAROC") && !fields[CSV_ACTIVITY_EVENT_NAME_IDX].contains("iARoC") &&
-						!fields[CSV_ACTIVITY_EVENT_NAME_IDX].contains("Intro to Java Workshop") && 
-						!serviceDate.equals("") && serviceDate.compareTo("2017-07-01") > 0) {
+				// Create new student
+				if (!eventName.equals("") && !eventName.equals("\"\"") && 
+						//!eventName.contains("iAROC") && !eventName.contains("iARoC") &&
+						//!eventName.contains("Intro to Java Workshop") && 
+						!serviceDate.equals("")) {
 					
 					sqlDb.addActivity(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]), fields[CSV_ACTIVITY_SERVICE_DATE_IDX],
-							fields[CSV_ACTIVITY_EVENT_NAME_IDX], "");
+							eventName, "");
 				}
 
 				line = br.readLine();
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Error line: " + line);
 			// e.printStackTrace();
 		}

@@ -162,17 +162,12 @@ public class MainFrame extends JFrame {
 		});
 		studentViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				mainPanel.remove(tablePanel);
+				// Remove data from tables
+				removeDataFromTables();
 
-				// TODO: Make this a method
-				studentTable.removeData();
-				if (activityTable != null)
-					activityTable.removeData();
-
+				// Add student table and header
 				studentTable.setData(tablePanel, controller.getAllStudents());
-
 				headerLabel.setText(STUDENT_TITLE);
-				mainPanel.add(tablePanel, BorderLayout.CENTER);
 			}
 		});
 	}
@@ -181,21 +176,23 @@ public class MainFrame extends JFrame {
 		// Set up listeners for Activities menu
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				mainPanel.remove(tablePanel);
+				// Remove data from tables
+				removeDataFromTables();
 
-				// TODO: Make this a method
-				studentTable.removeData();
-				if (activityTable != null)
-					activityTable.removeData();
-
+				// Add activity table and header
 				if (activityTable == null)
 					activityTable = new ActivityTable(tablePanel, controller.getAllActivities());
 				else
 					activityTable.setData(tablePanel, controller.getAllActivities());
-
 				headerLabel.setText(ACTIVITY_TITLE);
-				mainPanel.add(tablePanel, BorderLayout.CENTER);
 			}
 		});
+	}
+	
+	private void removeDataFromTables() {
+		// Remove data from Student table and Activities table
+		studentTable.removeData();
+		if (activityTable != null)
+			activityTable.removeData();
 	}
 }
