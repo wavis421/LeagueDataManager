@@ -66,7 +66,7 @@ public class MySqlDatabase {
 	}
 
 	/*
-	 * ------- Database Queries -------
+	 * ------- Student Database Queries -------
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
@@ -256,6 +256,9 @@ public class MySqlDatabase {
 		}
 	}
 
+	/*
+	 * ------- Activity Database Queries -------
+	 */
 	public ArrayList<ActivityModel> getAllActivities() {
 		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
 
@@ -295,47 +298,45 @@ public class MySqlDatabase {
 		return activityList;
 	}
 
-	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
+	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
+		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+
 		for (int i = 0; i < 2; i++) {
-			int studentID = getStudentIDFromClientID(clientID);
-			if (studentID < 0) {
-				System.out.println("No student for Client ID " + clientID);
-				break;
-			}
-
 			try {
-				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities ("
-						+ "StudentID, ServiceDate, EventName, Comments) VALUES (" + "?, ?, ?, ?);");
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
+								+ "EventName='" + className + "' ORDER BY EventName, ServiceDate, Students.LastName;");
+				ResultSet result = selectStmt.executeQuery();
 
-				int col = 1;
-				addActivityStmt.setInt(col++, studentID);
-				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-				addActivityStmt.setString(col++, eventName);
-				addActivityStmt.setString(col++, comments);
+				while (result.next()) {
+					activityList
+							.add(new ActivityModel(result.getInt("Students.ClientID"),
+									result.getString("Students.FirstName") + " "
+											+ result.getString("Students.LastName"),
+									result.getDate("ServiceDate"), result.getString("EventName"),
+									result.getString("Comments")));
+				}
 
-				addActivityStmt.executeUpdate();
-				addActivityStmt.close();
+				result.close();
+				selectStmt.close();
 				break;
 
 			} catch (CommunicationsException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
-			} catch (SQLIntegrityConstraintViolationException e2) {
-				// Activity already exists
-				break;
-
-			} catch (SQLException e3) {
-				System.out.println(
-						"Add activity failure for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
 				break;
 			}
 		}
+		return activityList;
 	}
-	
+
 	public ArrayList<String> getAllClassNames() {
 		ArrayList<String> classList = new ArrayList<String>();
 
@@ -367,43 +368,70 @@ public class MySqlDatabase {
 		}
 		return classList;
 	}
-	
-	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
-		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
 
+	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
 		for (int i = 0; i < 2; i++) {
+			int studentID = getStudentIDFromClientID(clientID);
+			if (studentID < 0) {
+				System.out.println("No student for Client ID " + clientID);
+				break;
+			}
+
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-						+ "EventName='" + className + "' ORDER BY EventName, ServiceDate, Students.LastName;");
-				ResultSet result = selectStmt.executeQuery();
+				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities ("
+						+ "StudentID, ServiceDate, EventName, Comments) VALUES (" + "?, ?, ?, ?);");
 
-				while (result.next()) {
-					activityList
-							.add(new ActivityModel(result.getInt("Students.ClientID"),
-									result.getString("Students.FirstName") + " "
-											+ result.getString("Students.LastName"),
-									result.getDate("ServiceDate"), result.getString("EventName"),
-									result.getString("Comments")));
-				}
+				int col = 1;
+				addActivityStmt.setInt(col++, studentID);
+				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				addActivityStmt.setString(col++, eventName);
+				addActivityStmt.setString(col++, comments);
 
-				result.close();
-				selectStmt.close();
+				addActivityStmt.executeUpdate();
+				addActivityStmt.close();
 				break;
 
 			} catch (CommunicationsException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
-			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
-				e2.printStackTrace();
+			} catch (SQLIntegrityConstraintViolationException e2) {
+				// Activity already exists, so update
+				if (!comments.equals(""))
+					updateActivity(studentID, serviceDate, eventName, comments);
+				break;
+
+			} catch (SQLException e3) {
+				System.out.println(
+						"Add activity failure for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
 				break;
 			}
 		}
-		return activityList;
+	}
+
+	private void updateActivity(int studentID, String serviceDate, String eventName, String comments) {
+		PreparedStatement updateActivityStmt;
+		try {
+			// The only field that should be updated is the comments
+			updateActivityStmt = dbConnection.prepareStatement(
+					"UPDATE Activities SET Comments=? WHERE StudentID=? AND ServiceDate=? AND EventName=?;");
+
+			int col = 1;
+			updateActivityStmt.setString(col++, comments);
+			updateActivityStmt.setInt(col++, studentID);
+			updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+			updateActivityStmt.setString(col++, eventName);
+
+			updateActivityStmt.executeUpdate();
+			updateActivityStmt.close();
+			System.out.println("Updated student ID = " + studentID + ", comments: " + comments);
+			return;
+
+		} catch (SQLException e) {
+			System.out.println("Update activities database failure: " + e.getMessage());
+		}
 	}
 }
