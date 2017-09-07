@@ -29,7 +29,8 @@ public class MySqlConnection {
 
 	public static Connection connectToServer(JFrame parent, String dataBaseName, String user, String password)
 			throws SQLException {
-		// Set cursor to "wait" cursor
+		// Save current cursor and set to "wait" cursor
+		Cursor cursor = parent.getCursor();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// If re-connecting, close current database connection
@@ -43,8 +44,8 @@ public class MySqlConnection {
 			connectSSH();
 		connectToDataBase(dataBaseName, user, password);
 
-		// Set cursor back to default
-		parent.setCursor(Cursor.getDefaultCursor());
+		// Set cursor back to original setting
+		parent.setCursor(cursor);
 		return connection;
 	}
 

@@ -298,8 +298,10 @@ public class MySqlDatabase {
 	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
 		for (int i = 0; i < 2; i++) {
 			int studentID = getStudentIDFromClientID(clientID);
-			if (studentID < 0)
+			if (studentID < 0) {
+				System.out.println("No student for Client ID " + clientID);
 				break;
+			}
 
 			try {
 				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities ("
@@ -332,5 +334,76 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+	}
+	
+	public ArrayList<String> getAllClassNames() {
+		ArrayList<String> classList = new ArrayList<String>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT EventName "
+						+ "FROM Activities WHERE EventName != '' GROUP BY EventName ORDER BY EventName;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					classList.add(result.getString("EventName"));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Class Name database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return classList;
+	}
+	
+	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
+		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
+						+ "EventName='" + className + "' ORDER BY EventName, ServiceDate, Students.LastName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					activityList
+							.add(new ActivityModel(result.getInt("Students.ClientID"),
+									result.getString("Students.FirstName") + " "
+											+ result.getString("Students.LastName"),
+									result.getDate("ServiceDate"), result.getString("EventName"),
+									result.getString("Comments")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return activityList;
 	}
 }

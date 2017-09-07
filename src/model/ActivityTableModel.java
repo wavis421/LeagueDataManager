@@ -13,7 +13,7 @@ public class ActivityTableModel extends AbstractTableModel {
 	private static final int COMMENTS_COLUMN = 4;
 
 	private ArrayList<ActivityModel> activitiesList;
-	private String colNames[] = { " Client ID ", " Student Name ", " Date ", " Event ", " Comments " };
+	private String colNames[] = { " Client ID ", " Student Name ", " Date ", " Class Name ", " Comments " };
 
 	public ActivityTableModel(ArrayList<ActivityModel> activities) {
 		this.activitiesList = activities;

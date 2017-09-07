@@ -28,7 +28,7 @@ public class StudentTable extends JPanel {
 
 	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
 		this.tablePanel = tablePanel;
-		
+
 		studentTableModel = new StudentTableModel(studentList);
 		table = new JTable(studentTableModel);
 
@@ -68,19 +68,19 @@ public class StudentTable extends JPanel {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
-		
+
 		studentTableModel.setData(studentList);
 		studentTableModel.fireTableDataChanged();
 	}
 
 	public void removeData() {
-		System.out.println("Student row count = " + studentTableModel.getRowCount());
-		
+		System.out.println("Remove data, student table rows = " + studentTableModel.getRowCount());
+
 		if (studentTableModel.getRowCount() > 0) {
 			studentTableModel.removeAll();
 			studentTableModel.fireTableDataChanged();
 		}
-		
+
 		scrollPane.setVisible(false);
 	}
 

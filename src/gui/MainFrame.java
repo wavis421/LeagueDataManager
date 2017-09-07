@@ -9,8 +9,10 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -36,7 +38,7 @@ public class MainFrame extends JFrame {
 	private static final int PREF_TABLE_PANEL_HEIGHT = PREF_FRAME_HEIGHT - 58;
 
 	private static final String STUDENT_TITLE = "League Student Info";
-	private static final String ACTIVITY_TITLE = "League Activity Data";
+	private static final String ACTIVITY_TITLE = "League Attendance Data";
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -59,7 +61,6 @@ public class MainFrame extends JFrame {
 		mainPanel = new JPanel(new BorderLayout());
 		add(mainPanel);
 
-		headerLabel.setText(STUDENT_TITLE);
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
 		headerLabel.setFont(CustomFonts.TITLE_FONT);
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
@@ -95,7 +96,7 @@ public class MainFrame extends JFrame {
 		// Set up top level menus and add to menu bar
 		JMenu fileMenu = new JMenu("File");
 		JMenu studentMenu = new JMenu("Students");
-		JMenu activitiesMenu = new JMenu("Activities");
+		JMenu activitiesMenu = new JMenu("Attendance");
 
 		menuBar.add(fileMenu);
 		menuBar.add(studentMenu);
@@ -103,7 +104,7 @@ public class MainFrame extends JFrame {
 
 		// Add file sub-menus
 		JMenuItem importStudentsItem = new JMenuItem("Import Students...  ");
-		JMenuItem importActivityLogItem = new JMenuItem("Import Activity Log...  ");
+		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentsItem);
 		fileMenu.add(importActivityLogItem);
@@ -117,13 +118,15 @@ public class MainFrame extends JFrame {
 		studentMenu.add(studentViewAllMenu);
 
 		// Add activities sub-menus
+		JMenu activitiesViewByClassMenu = new JMenu("View by Class ");
 		JMenuItem activitiesViewAllItem = new JMenuItem("View all ");
+		activitiesMenu.add(activitiesViewByClassMenu);
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
 		createFileMenuListeners(importStudentsItem, importActivityLogItem, exitItem);
 		createStudentMenuListeners(studentRemoveMenu, studentViewAllMenu);
-		createActivityMenuListeners(activitiesViewAllItem);
+		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
 	}
@@ -134,6 +137,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
+					refreshStudentTable();
 				}
 			}
 		});
@@ -141,6 +145,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
+					refreshActivityTable();
 				}
 			}
 		});
@@ -162,33 +167,71 @@ public class MainFrame extends JFrame {
 		});
 		studentViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Remove data from tables
-				removeDataFromTables();
-
-				// Add student table and header
-				studentTable.setData(tablePanel, controller.getAllStudents());
-				headerLabel.setText(STUDENT_TITLE);
+				refreshStudentTable();
 			}
 		});
 	}
 
-	private void createActivityMenuListeners(JMenuItem activitiesViewAll) {
+	private void createActivityMenuListeners(JMenu activitiesViewByClass, JMenuItem activitiesViewAll) {
 		// Set up listeners for Activities menu
+		activitiesViewByClass.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				activitiesViewByClass.removeAll();
+				activitiesViewByClass.getPopupMenu().setLayout(new GridLayout(20, 1));
+				ArrayList<String> classList = controller.getAllClassNames();
+
+				for (int i = 0; i < classList.size(); i++) {
+					JMenuItem classItem = new JMenuItem(classList.get(i).toString());
+					activitiesViewByClass.add(classItem);
+
+					classItem.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent ev) {
+							classList.clear();
+							activitiesViewByClass.removeAll();
+
+							// Remove data being displayed
+							removeDataFromTables();
+
+							// Add activity table and header
+							if (activityTable == null)
+								activityTable = new ActivityTable(tablePanel,
+										controller.getActivitiesByClassName(classItem.getText()));
+							else
+								activityTable.setData(tablePanel, controller.getActivitiesByClassName(classItem.getText()));
+							headerLabel.setText(ACTIVITY_TITLE);
+						}
+					});
+				}
+			}
+		});
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Remove data from tables
-				removeDataFromTables();
-
-				// Add activity table and header
-				if (activityTable == null)
-					activityTable = new ActivityTable(tablePanel, controller.getAllActivities());
-				else
-					activityTable.setData(tablePanel, controller.getAllActivities());
-				headerLabel.setText(ACTIVITY_TITLE);
+				refreshActivityTable();
 			}
 		});
 	}
-	
+
+	private void refreshStudentTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add student table and header
+		studentTable.setData(tablePanel, controller.getAllStudents());
+		headerLabel.setText(STUDENT_TITLE);
+	}
+
+	private void refreshActivityTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add activity table and header
+		if (activityTable == null)
+			activityTable = new ActivityTable(tablePanel, controller.getAllActivities());
+		else
+			activityTable.setData(tablePanel, controller.getAllActivities());
+		headerLabel.setText(ACTIVITY_TITLE);
+	}
+
 	private void removeDataFromTables() {
 		// Remove data from Student table and Activities table
 		studentTable.removeData();

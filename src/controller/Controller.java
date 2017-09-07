@@ -31,7 +31,6 @@ public class Controller {
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
 	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 2;
 	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
-	private static final int CSV_ACTIVITY_SCHEDULEID_IDX = 4;
 
 	private MySqlDatabase sqlDb;
 	private JFrame parent;
@@ -58,6 +57,14 @@ public class Controller {
 	public ArrayList<ActivityModel> getAllActivities() {
 		return sqlDb.getAllActivities();
 	}
+	
+	public ArrayList<String> getAllClassNames() {
+		return sqlDb.getAllClassNames();
+	}
+	
+	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
+		return sqlDb.getActivitiesByClassName(className);
+	}
 
 	/*
 	 * ------- File save/restore items -------
@@ -82,8 +89,9 @@ public class Controller {
 				String[] fields = line.split(",");
 
 				sqlDb.addStudent(Integer.parseInt(fields[CSV_STUDENT_CLIENTID_IDX]), fields[CSV_STUDENT_LASTNAME_IDX],
-						fields[CSV_STUDENT_FIRSTNAME_IDX], fields[CSV_STUDENT_GITHUB_IDX], fields[CSV_STUDENT_GENDER_IDX],
-						fields[CSV_STUDENT_STARTDATE_IDX], fields[CSV_STUDENT_LOCATION_IDX], fields[CSV_STUDENT_GRAD_YEAR_IDX]);
+						fields[CSV_STUDENT_FIRSTNAME_IDX], fields[CSV_STUDENT_GITHUB_IDX],
+						fields[CSV_STUDENT_GENDER_IDX], fields[CSV_STUDENT_STARTDATE_IDX],
+						fields[CSV_STUDENT_LOCATION_IDX], fields[CSV_STUDENT_GRAD_YEAR_IDX]);
 
 				line = br.readLine();
 			}
@@ -120,15 +128,11 @@ public class Controller {
 				int paren = eventName.indexOf('(');
 				if (paren > 0)
 					eventName = eventName.substring(0, paren);
-				
+
 				// Create new student
-				if (!eventName.equals("") && !eventName.equals("\"\"") && 
-						//!eventName.contains("iAROC") && !eventName.contains("iARoC") &&
-						//!eventName.contains("Intro to Java Workshop") && 
-						!serviceDate.equals("")) {
-					
-					sqlDb.addActivity(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]), fields[CSV_ACTIVITY_SERVICE_DATE_IDX],
-							eventName, "");
+				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
+					sqlDb.addActivity(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]),
+							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName, "");
 				}
 
 				line = br.readLine();
