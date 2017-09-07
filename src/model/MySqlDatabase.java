@@ -70,15 +70,21 @@ public class MySqlDatabase {
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
+		String githubName;
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students ORDER BY LastName, FirstName;");
 				ResultSet result = selectStmt.executeQuery();
+
 				while (result.next()) {
+					githubName = result.getString("GithubName");
+					if (githubName != null && !githubName.equals(""))
+						githubName = parseGithubName(githubName);
+
 					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
+							result.getString("LastName"), result.getString("FirstName"), githubName,
 							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
 							result.getInt("GradYear")));
 				}
@@ -254,6 +260,15 @@ public class MySqlDatabase {
 		} catch (SQLException e) {
 			System.out.println("Update student database failure: " + e.getMessage());
 		}
+	}
+
+	private String parseGithubName(String githubName) {
+		int index = githubName.indexOf('(');
+		if (index != -1)
+			githubName = githubName.substring(0, index);
+		githubName.trim();
+
+		return githubName;
 	}
 
 	/*
