@@ -31,7 +31,7 @@ public class StudentTableModel extends AbstractTableModel {
 	public void removeAll() {
 		studentList.clear();
 	}
-	
+
 	public int getNumStudents() {
 		return studentList.size();
 	}
@@ -67,7 +67,7 @@ public class StudentTableModel extends AbstractTableModel {
 
 		switch (col) {
 		case CLIENT_ID_COLUMN:
-			return student.getClientID();
+			return String.valueOf(student.getClientID());
 		case STUDENT_NAME_COLUMN:
 			return student.getFirstName() + " " + student.getLastName();
 		case GENDER_COLUMN:
@@ -77,7 +77,10 @@ public class StudentTableModel extends AbstractTableModel {
 		case HOME_LOCATION_COLUMN:
 			return LocationModel.convertLocationToString(student.getHomeLocation());
 		case START_DATE_COLUMN:
-			return student.getStartDate();
+			if (student.getStartDate() == null)
+				return "";
+			else
+				return student.getStartDate().toString();
 		case GRAD_YEAR_COLUMN:
 			if (student.getGradYear() == 0)
 				return "";

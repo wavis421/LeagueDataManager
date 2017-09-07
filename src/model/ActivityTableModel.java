@@ -65,11 +65,11 @@ public class ActivityTableModel extends AbstractTableModel {
 
 		switch (col) {
 		case CLIENT_ID_COLUMN:
-			return activities.getClientID();
+			return String.valueOf(activities.getClientID());
 		case STUDENT_NAME_COLUMN:
 			return activities.getStudentName();
 		case SERVICE_DATE_COLUMN:
-			return activities.getServiceDate();
+			return activities.getServiceDate().toString();
 		case EVENT_NAME_COLUMN:
 			return activities.getEventName();
 		case COMMENTS_COLUMN:
