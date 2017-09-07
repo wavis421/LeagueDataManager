@@ -38,8 +38,11 @@ BEGIN
 			ON DELETE CASCADE,
 		
 		# Activity data
-		ActivityDate date DEFAULT NULL,
-		RecipesCompleted varchar(200)
+		ServiceDate date DEFAULT NULL,
+		EventName varchar(50) DEFAULT NULL,
+		Comments varchar(100) DEFAULT NULL,
+		
+		UNIQUE KEY(StudentID, EventName, ServiceDate)
 				
 	) ENGINE=InnoDB;
 

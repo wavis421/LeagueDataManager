@@ -28,6 +28,10 @@ public class StudentTableModel extends AbstractTableModel {
 		System.out.println("Num Students: " + studentList.size());
 	}
 
+	public void removeAll() {
+		studentList.clear();
+	}
+	
 	public int getNumStudents() {
 		return studentList.size();
 	}

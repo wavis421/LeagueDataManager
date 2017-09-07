@@ -139,6 +139,37 @@ public class MySqlDatabase {
 		return student;
 	}
 
+	public int getStudentIDFromClientID(int clientID) {
+		int studentID = -1;
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT StudentID FROM Students WHERE ClientID=?;");
+				selectStmt.setInt(1, clientID);
+
+				ResultSet result = selectStmt.executeQuery();
+				if (result.next())
+					studentID = result.getInt("StudentID");
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student ID database error: " + e2.getMessage());
+				break;
+			}
+		}
+		return studentID;
+	}
+
 	public void addStudent(int clientID, String lastName, String firstName, String githubName, String gender,
 			String firstVisitDate, String homeLocation, String gradYear) {
 
@@ -219,9 +250,87 @@ public class MySqlDatabase {
 			updateStudentStmt.executeUpdate();
 			updateStudentStmt.close();
 			return;
-			
+
 		} catch (SQLException e) {
 			System.out.println("Update student database failure: " + e.getMessage());
+		}
+	}
+
+	public ArrayList<ActivityModel> getAllActivities() {
+		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
+								+ "ORDER BY EventName, ServiceDate, Students.LastName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					activityList
+							.add(new ActivityModel(result.getInt("Students.ClientID"),
+									result.getString("Students.FirstName") + " "
+											+ result.getString("Students.LastName"),
+									result.getDate("ServiceDate"), result.getString("EventName"),
+									result.getString("Comments")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return activityList;
+	}
+
+	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
+		for (int i = 0; i < 2; i++) {
+			int studentID = getStudentIDFromClientID(clientID);
+			if (studentID < 0)
+				break;
+
+			try {
+				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities ("
+						+ "StudentID, ServiceDate, EventName, Comments) VALUES (" + "?, ?, ?, ?);");
+
+				int col = 1;
+				addActivityStmt.setInt(col++, studentID);
+				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				addActivityStmt.setString(col++, eventName);
+				addActivityStmt.setString(col++, comments);
+
+				addActivityStmt.executeUpdate();
+				addActivityStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLIntegrityConstraintViolationException e2) {
+				// Activity already exists
+				break;
+
+			} catch (SQLException e3) {
+				System.out.println(
+						"Add activity failure for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
+				break;
+			}
 		}
 	}
 }

@@ -15,22 +15,22 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
-import model.StudentModel;
-import model.StudentTableModel;
+import model.ActivityModel;
+import model.ActivityTableModel;
 
-public class StudentTable extends JPanel {
+public class ActivityTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private JPanel tablePanel;
 	private JTable table;
-	private StudentTableModel studentTableModel;
+	private ActivityTableModel activityTableModel;
 	private JScrollPane scrollPane;
 
-	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
+	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
 		this.tablePanel = tablePanel;
-		
-		studentTableModel = new StudentTableModel(studentList);
-		table = new JTable(studentTableModel);
+
+		activityTableModel = new ActivityTableModel(activitiesList);
+		table = new JTable(activityTableModel);
 
 		createTablePanel();
 	}
@@ -43,49 +43,45 @@ public class StudentTable extends JPanel {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGender()).setMaxWidth(35);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForClientID()).setMaxWidth(75);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForStartDate()).setMaxWidth(105);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGradYear()).setMaxWidth(95);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForHomeLocation()).setMaxWidth(165);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForClientID()).setMaxWidth(75);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setMaxWidth(120);
 
-		table.getColumnModel().getColumn(studentTableModel.getColumnForStartDate()).setPreferredWidth(100);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGradYear()).setPreferredWidth(90);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForHomeLocation()).setPreferredWidth(160);
-
-		table.setDefaultRenderer(Object.class, new StudentTableRenderer());
+		// Set table properties
+		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());
 		table.setAutoCreateRowSorter(true);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setPreferredSize(new Dimension(0, tablePanel.getPreferredSize().height - 70));
+		scrollPane.setPreferredSize(
+				new Dimension(tablePanel.getPreferredSize().width, tablePanel.getPreferredSize().height - 70));
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList) {
+	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
-		
-		studentTableModel.setData(studentList);
-		studentTableModel.fireTableDataChanged();
+
+		activityTableModel.setData(activityList);
+		activityTableModel.fireTableDataChanged();
 	}
 
 	public void removeData() {
-		System.out.println("Student row count = " + studentTableModel.getRowCount());
-		
-		if (studentTableModel.getRowCount() > 0) {
-			studentTableModel.removeAll();
-			studentTableModel.fireTableDataChanged();
+		System.out.println("Remove data, activity table rows = " + activityTableModel.getRowCount());
+
+		if (activityTableModel.getRowCount() > 0) {
+			activityTableModel.removeAll();
+			activityTableModel.fireTableDataChanged();
 		}
-		
+
 		scrollPane.setVisible(false);
 	}
 
-	public class StudentTableRenderer extends JLabel implements TableCellRenderer {
-		private StudentTableRenderer() {
+	// TODO: share this table renderer
+	public class ActivityTableRenderer extends JLabel implements TableCellRenderer {
+		private ActivityTableRenderer() {
 			super();
 			super.setOpaque(true);
 		}
