@@ -5,11 +5,12 @@ import java.sql.Time;
 
 public class ActivityModel implements Comparable<ActivityModel> {
 	private int clientID;
-	private String studentName, eventName;
+	private String eventName;
 	private Date serviceDate;
 	private String comments;
+	private StudentNameModel studentName;
 
-	public ActivityModel(int clientID, String studentName, Date serviceDate, String eventName, String comments) {
+	public ActivityModel(int clientID, StudentNameModel studentName, Date serviceDate, String eventName, String comments) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.serviceDate = serviceDate;
@@ -21,16 +22,11 @@ public class ActivityModel implements Comparable<ActivityModel> {
 		return studentName + " (" + clientID + ")";
 	}
 
-	@Override
-	public int compareTo(ActivityModel otherPerson) {
-		return this.getStudentName().compareTo(otherPerson.getStudentName());
-	}
-
 	public int getClientID() {
 		return clientID;
 	}
 
-	public String getStudentName() {
+	public StudentNameModel getStudentName() {
 		return studentName;
 	}
 
@@ -44,5 +40,10 @@ public class ActivityModel implements Comparable<ActivityModel> {
 
 	public String getComments() {
 		return comments;
+	}
+
+	@Override
+	public int compareTo(ActivityModel otherPerson) {
+		return this.getStudentName().compareTo(otherPerson.getStudentName());
 	}
 }

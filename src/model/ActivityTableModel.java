@@ -51,7 +51,10 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return String.class;
+		if (columnIndex == STUDENT_NAME_COLUMN)
+			return StudentNameModel.class;
+		else
+			return String.class;
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class ActivityTableModel extends AbstractTableModel {
 	public int getColumnForServiceDate() {
 		return SERVICE_DATE_COLUMN;
 	}
-	
+
 	public int getColumnForEventName() {
 		return EVENT_NAME_COLUMN;
 	}

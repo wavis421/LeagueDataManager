@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 
 import model.ActivityModel;
 import model.ActivityTableModel;
+import model.StudentNameModel;
 
 public class ActivityTable extends JPanel {
 	private static final int ROW_GAP = 5;
@@ -98,6 +99,8 @@ public class ActivityTable extends JPanel {
 				setText(String.valueOf(value));
 			else if (value instanceof Date)
 				setText(((Date) value).toString());
+			else if (value instanceof StudentNameModel)
+				setText(((StudentNameModel) value).toString());
 			else
 				setText((String) value);
 

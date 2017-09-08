@@ -53,7 +53,10 @@ public class StudentTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return String.class;
+		if (columnIndex == STUDENT_NAME_COLUMN)
+			return StudentNameModel.class;
+		else
+			return String.class;
 	}
 
 	@Override
@@ -69,7 +72,7 @@ public class StudentTableModel extends AbstractTableModel {
 		case CLIENT_ID_COLUMN:
 			return String.valueOf(student.getClientID());
 		case STUDENT_NAME_COLUMN:
-			return student.getFirstName() + " " + student.getLastName();
+			return student.getNameModel();
 		case GENDER_COLUMN:
 			return GenderModel.convertGenderToString(student.getGender());
 		case GITHUB_NAME_COLUMN:

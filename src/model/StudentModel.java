@@ -1,19 +1,20 @@
 package model;
 
 import java.sql.Date;
+import java.util.Comparator;
 
 public class StudentModel implements Comparable<StudentModel> {
 	private int studentID, clientID;
 	private String lastName, firstName, githubName;
 	private int homeLocation, gender, gradYear;
 	private Date startDate;
+	private StudentNameModel nameModel;
 
-	public StudentModel(int personID, int clientID, String lastName, String firstName, String githubName,
+	public StudentModel(int personID, int clientID, StudentNameModel nameModel, String githubName,
 			int gender, Date startDate, int homeLocation, int gradYear) {
 		this.studentID = personID;
 		this.clientID = clientID;
-		this.lastName = lastName;
-		this.firstName = firstName;
+		this.nameModel = nameModel;
 		this.githubName = githubName;
 		this.homeLocation = homeLocation;
 		this.gender = gender;
@@ -22,7 +23,7 @@ public class StudentModel implements Comparable<StudentModel> {
 	}
 
 	public String toString() {
-		return firstName + " " + lastName + " (" + clientID + ")";
+		return nameModel.toString() + " (" + clientID + ")";
 	}
 	
 	public int getClientID() {
@@ -46,13 +47,17 @@ public class StudentModel implements Comparable<StudentModel> {
 	}
 
 	public String getLastName() {
-		return lastName;
+		return nameModel.getLastName();
 	}
 
 	public String getFirstName() {
-		return firstName;
+		return nameModel.getFirstName();
 	}
 
+	public StudentNameModel getNameModel() {
+		return nameModel;
+	}
+	
 	public String getGithubName() {
 		return githubName;
 	}
@@ -60,12 +65,12 @@ public class StudentModel implements Comparable<StudentModel> {
 	public int getHomeLocation() {
 		return homeLocation;
 	}
-	
+
 	@Override
-	public int compareTo(StudentModel otherPerson) {
-		int comp = this.getLastName().compareTo(otherPerson.getLastName());
+	public int compareTo(StudentModel otherName) {
+		int comp = this.getLastName().compareTo(otherName.getLastName());
 		if (comp == 0)
-			return (this.getFirstName().compareTo(otherPerson.getFirstName()));
+			return (this.getFirstName().compareTo(otherName.getFirstName()));
 		else
 			return comp;
 	}

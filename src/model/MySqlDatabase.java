@@ -79,9 +79,9 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
-							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
-							result.getInt("GradYear")));
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("Location"), result.getInt("GradYear")));
 				}
 
 				result.close();
@@ -116,9 +116,9 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
 					student = new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							result.getString("LastName"), result.getString("FirstName"), result.getString("GithubName"),
-							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("HomeLocation"),
-							result.getInt("GradYear"));
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("HomeLocation"), result.getInt("GradYear"));
 				}
 
 				result.close();
@@ -179,10 +179,9 @@ public class MySqlDatabase {
 		if (githubName.equals("") || githubName.equals("\"\"")) {
 			System.out.println(firstName + " " + lastName + "(" + clientID + ") does not have a github user name");
 			githubName = null;
-		}
-		else
+		} else
 			githubName = parseGithubName(githubName);
-		
+
 		if (gradYear != null && !gradYear.equals("") && !gradYear.equals("\"\""))
 			gradYearAsInt = Integer.parseInt(gradYear);
 
@@ -279,16 +278,15 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
-								+ "ORDER BY EventName, ServiceDate, Students.LastName;");
+								+ "ORDER BY EventName, ServiceDate, Students.LastName, Students.FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					activityList
-							.add(new ActivityModel(result.getInt("Students.ClientID"),
-									result.getString("Students.FirstName") + " "
-											+ result.getString("Students.LastName"),
-									result.getDate("ServiceDate"), result.getString("EventName"),
-									result.getString("Comments")));
+					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
+							new StudentNameModel(result.getString("Students.FirstName"),
+									result.getString("Students.LastName")),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("Comments")));
 				}
 
 				result.close();
@@ -318,16 +316,16 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "EventName='" + className + "' ORDER BY EventName, ServiceDate, Students.LastName;");
+								+ "EventName='" + className
+								+ "' ORDER BY EventName, ServiceDate, Students.LastName, Students.FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					activityList
-							.add(new ActivityModel(result.getInt("Students.ClientID"),
-									result.getString("Students.FirstName") + " "
-											+ result.getString("Students.LastName"),
-									result.getDate("ServiceDate"), result.getString("EventName"),
-									result.getString("Comments")));
+					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
+							new StudentNameModel(result.getString("Students.FirstName"),
+									result.getString("Students.LastName")),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("Comments")));
 				}
 
 				result.close();

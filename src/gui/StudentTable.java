@@ -16,6 +16,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
 import model.StudentModel;
+import model.StudentNameModel;
 import model.StudentTableModel;
 
 public class StudentTable extends JPanel {
@@ -97,6 +98,8 @@ public class StudentTable extends JPanel {
 				setText(String.valueOf(value));
 			else if (value instanceof Date)
 				setText(((Date) value).toString());
+			else if (value instanceof StudentNameModel)
+				setText(((StudentNameModel) value).toString());
 			else
 				setText((String) value);
 
