@@ -26,11 +26,13 @@ public class ActivityTable extends JPanel {
 	private JTable table;
 	private ActivityTableModel activityTableModel;
 	private JScrollPane scrollPane;
+	private boolean includeClassName;
 
-	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
+	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList, boolean includeClassName) {
 		this.tablePanel = tablePanel;
+		this.includeClassName = includeClassName;
 
-		activityTableModel = new ActivityTableModel(activitiesList);
+		activityTableModel = new ActivityTableModel(activitiesList, includeClassName);
 		table = new JTable(activityTableModel);
 
 		createTablePanel();
@@ -43,14 +45,7 @@ public class ActivityTable extends JPanel {
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
-		// Configure column widths
-		table.getColumnModel().getColumn(activityTableModel.getColumnForClientID()).setMaxWidth(75);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setMaxWidth(100);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setPreferredWidth(100);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setMaxWidth(250);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setPreferredWidth(210);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setMaxWidth(220);
-		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setPreferredWidth(180);
+		configureColumnWidths();
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());
@@ -65,13 +60,23 @@ public class ActivityTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
+	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList, boolean includeClassName) {
+		if (this.includeClassName != includeClassName) {
+			this.includeClassName = includeClassName;
+
+			// Update table model
+			activityTableModel = new ActivityTableModel(activityList, includeClassName);
+			table.setModel(activityTableModel);
+			configureColumnWidths();
+
+		} else {
+			activityTableModel.setData(activityList);
+			activityTableModel.fireTableDataChanged();
+		}
+
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
-
-		activityTableModel.setData(activityList);
-		activityTableModel.fireTableDataChanged();
 	}
 
 	public void removeData() {
@@ -83,6 +88,20 @@ public class ActivityTable extends JPanel {
 		}
 
 		scrollPane.setVisible(false);
+	}
+
+	private void configureColumnWidths() {
+		// Configure column widths
+		table.getColumnModel().getColumn(activityTableModel.getColumnForClientID()).setMaxWidth(75);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setMaxWidth(100);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForServiceDate()).setPreferredWidth(100);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setMaxWidth(220);
+		table.getColumnModel().getColumn(activityTableModel.getColumnForStudentName()).setPreferredWidth(180);
+
+		if (includeClassName) {
+			table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setMaxWidth(250);
+			table.getColumnModel().getColumn(activityTableModel.getColumnForEventName()).setPreferredWidth(210);
+		}
 	}
 
 	// TODO: share this table renderer

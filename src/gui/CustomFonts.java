@@ -17,7 +17,7 @@ public class CustomFonts {
 	public static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
 
 	// Header and title fonts
-	public static final Font TITLE_FONT = JTFTools.decodeFont("Serif-italic-36");
+	public static final Font TITLE_FONT = JTFTools.decodeFont("Serif-italic-24");
 
 	// Table fonts
 	public static final Font TABLE_HEADER_FONT = JTFTools.decodeFont("Dialog-bold-15");

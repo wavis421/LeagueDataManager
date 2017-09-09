@@ -195,10 +195,11 @@ public class MainFrame extends JFrame {
 							// Add activity table and header
 							if (activityTable == null)
 								activityTable = new ActivityTable(tablePanel,
-										controller.getActivitiesByClassName(classItem.getText()));
+										controller.getActivitiesByClassName(classItem.getText()), false);
 							else
-								activityTable.setData(tablePanel, controller.getActivitiesByClassName(classItem.getText()));
-							headerLabel.setText(ACTIVITY_TITLE);
+								activityTable.setData(tablePanel,
+										controller.getActivitiesByClassName(classItem.getText()), false);
+							headerLabel.setText(ACTIVITY_TITLE + "  for  \"" + classItem.getText() + "\"");
 						}
 					});
 				}
@@ -226,9 +227,9 @@ public class MainFrame extends JFrame {
 
 		// Add activity table and header
 		if (activityTable == null)
-			activityTable = new ActivityTable(tablePanel, controller.getAllActivities());
+			activityTable = new ActivityTable(tablePanel, controller.getAllActivities(), true);
 		else
-			activityTable.setData(tablePanel, controller.getAllActivities());
+			activityTable.setData(tablePanel, controller.getAllActivities(), true);
 		headerLabel.setText(ACTIVITY_TITLE);
 	}
 
