@@ -105,7 +105,10 @@ public class ActivityTable extends JPanel {
 				setText((String) value);
 
 			if (column != -1) {
-				setFont(CustomFonts.TABLE_TEXT_FONT);
+				if (value instanceof StudentNameModel && ((StudentNameModel) value).getIsInMasterDb() == false)
+					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
+				else
+					setFont(CustomFonts.TABLE_TEXT_FONT);
 				super.setForeground(Color.black);
 
 				if (isSelected)
@@ -113,7 +116,6 @@ public class ActivityTable extends JPanel {
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				super.setVerticalAlignment(TOP);
 				super.setHorizontalAlignment(CENTER);
 			}
 			return this;

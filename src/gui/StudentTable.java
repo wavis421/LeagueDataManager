@@ -9,9 +9,11 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListCellRenderer;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
@@ -104,7 +106,10 @@ public class StudentTable extends JPanel {
 				setText((String) value);
 
 			if (column != -1) {
-				setFont(CustomFonts.TABLE_TEXT_FONT);
+				if (value instanceof StudentNameModel && ((StudentNameModel) value).getIsInMasterDb() == false)
+					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
+				else
+					setFont(CustomFonts.TABLE_TEXT_FONT);
 				super.setForeground(Color.black);
 
 				if (isSelected)
@@ -112,7 +117,6 @@ public class StudentTable extends JPanel {
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				super.setVerticalAlignment(TOP);
 				super.setHorizontalAlignment(CENTER);
 			}
 			return this;

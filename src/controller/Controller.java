@@ -84,6 +84,10 @@ public class Controller {
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
 			line = br.readLine();
 
+			// Before adding students, clear all 'in master db' flag.
+			// This flag will be set after each student is added or updated.
+			sqlDb.markAllStudentsAsNotInDb();
+			
 			while (line != null) {
 				// Create new student
 				String[] fields = line.split(",");

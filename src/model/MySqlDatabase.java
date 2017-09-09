@@ -79,7 +79,8 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName")),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
 							result.getInt("Location"), result.getInt("GradYear")));
 				}
@@ -116,7 +117,8 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
 					student = new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName")),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
 							result.getInt("HomeLocation"), result.getInt("GradYear"));
 				}
@@ -188,8 +190,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
-						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, Gender, StartDate, Location, GradYear) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, Gender, StartDate, Location, GradYear, isInMasterDb) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, clientID);
@@ -227,13 +229,37 @@ public class MySqlDatabase {
 		}
 	}
 
+	public void markAllStudentsAsNotInDb() {
+		// This is used prior to a Student DB import. The Student DB field
+		// 'isInMasterDb' is cleared to detect obsolete entries after import.
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement updateStudentStmt = dbConnection
+						.prepareStatement("UPDATE Students SET isInMasterDb=0;");
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				return;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e) {
+				System.out.println("Update student database failure: " + e.getMessage());
+			}
+		}
+	}
+
 	private void updateStudent(int clientID, String lastName, String firstName, String githubName,
 			String firstVisitDate, String homeLocation, int gradYear) {
 
 		PreparedStatement updateStudentStmt;
 		try {
 			updateStudentStmt = dbConnection.prepareStatement(
-					"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=? "
+					"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
 							+ "WHERE ClientID=?;");
 
 			int col = 1;
@@ -248,7 +274,8 @@ public class MySqlDatabase {
 			}
 			updateStudentStmt.setInt(col++, LocationModel.convertStringToLocation(homeLocation));
 			updateStudentStmt.setInt(col++, gradYear);
-			updateStudentStmt.setInt(col++, clientID);
+			updateStudentStmt.setInt(col++, 1);
+			updateStudentStmt.setInt(col, clientID);
 
 			updateStudentStmt.executeUpdate();
 			updateStudentStmt.close();
@@ -284,7 +311,7 @@ public class MySqlDatabase {
 				while (result.next()) {
 					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
 							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName")),
+									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("Comments")));
 				}
@@ -323,7 +350,7 @@ public class MySqlDatabase {
 				while (result.next()) {
 					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
 							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName")),
+									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("Comments")));
 				}

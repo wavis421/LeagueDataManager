@@ -17,6 +17,7 @@ BEGIN
 		
 		StartDate date DEFAULT NULL,
 		Location int(11) DEFAULT 0,
+		isInMasterDb BOOLEAN DEFAULT FALSE,
 		CurrentClass varchar(25) DEFAULT NULL,
 		NumClasses int(11) DEFAULT 0,
 		
