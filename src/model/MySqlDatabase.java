@@ -305,7 +305,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
-								+ "ORDER BY EventName, ServiceDate, Students.LastName, Students.FirstName;");
+								+ "ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -344,7 +344,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
 								+ "EventName='" + className
-								+ "' ORDER BY EventName, ServiceDate, Students.LastName, Students.FirstName;");
+								+ "' ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {

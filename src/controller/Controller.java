@@ -57,17 +57,17 @@ public class Controller {
 	public ArrayList<ActivityModel> getAllActivities() {
 		return sqlDb.getAllActivities();
 	}
-	
+
 	public ArrayList<String> getAllClassNames() {
 		return sqlDb.getAllClassNames();
 	}
-	
+
 	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
 		return sqlDb.getActivitiesByClassName(className);
 	}
 
 	/*
-	 * ------- File save/restore items -------
+	 * ------- File import/export -------
 	 */
 	public void importStudentsFromFile(File file) {
 		// TODO: Fix this to get path from user
@@ -82,12 +82,15 @@ public class Controller {
 		// Last Name, Client ID, gender, year graduating high school, Github account
 		// name
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
+			// Toss header line
 			line = br.readLine();
+			if (line != null)
+				line = br.readLine();
 
 			// Before adding students, clear all 'in master db' flag.
 			// This flag will be set after each student is added or updated.
 			sqlDb.markAllStudentsAsNotInDb();
-			
+
 			while (line != null) {
 				// Create new student
 				String[] fields = line.split(",");
@@ -120,7 +123,10 @@ public class Controller {
 		// CSV file has the following columns:
 		// Student name, service date, event name, clientID, Schedule ID
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
+			// Toss header line
 			line = br.readLine();
+			if (line != null)
+				line = br.readLine();
 
 			while (line != null) {
 				// Read next line of CSV file and split into columns
