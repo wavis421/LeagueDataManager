@@ -375,6 +375,46 @@ public class MySqlDatabase {
 		return activityList;
 	}
 
+	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
+		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
+								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
+								+ studentName.getLastName()
+								+ "' ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
+							new StudentNameModel(result.getString("Students.FirstName"),
+									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("Comments")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return activityList;
+	}
+
 	public ArrayList<String> getAllClassNames() {
 		ArrayList<String> classList = new ArrayList<String>();
 
@@ -405,6 +445,39 @@ public class MySqlDatabase {
 			}
 		}
 		return classList;
+	}
+
+	public ArrayList<StudentNameModel> getAllStudentNames() {
+		ArrayList<StudentNameModel> studentList = new ArrayList<StudentNameModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT LastName, FirstName, isInMasterDb FROM Students ORDER BY LastName, FirstName;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					studentList.add(new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+							result.getBoolean("isInMasterDb")));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student Name database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return studentList;
 	}
 
 	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {

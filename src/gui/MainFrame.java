@@ -12,6 +12,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -23,11 +25,14 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import controller.Controller;
+import model.StudentNameModel;
+import model.StudentTableModel;
 
 public class MainFrame extends JFrame {
 	/* Private constants */
@@ -37,8 +42,12 @@ public class MainFrame extends JFrame {
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;
 	private static final int PREF_TABLE_PANEL_HEIGHT = PREF_FRAME_HEIGHT - 58;
 
+	private static final int POPUP_WIDTH = 240;
+	private static final int POPUP_HEIGHT_1ROW = 30;
+	private static final int POPUP_HEIGHT_2ROWS = 50;
+
 	private static final String STUDENT_TITLE = "League Student Info";
-	private static final String ACTIVITY_TITLE = "League Attendance Data";
+	private static final String ACTIVITY_TITLE = "League Attendance";
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -70,6 +79,7 @@ public class MainFrame extends JFrame {
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		headerLabel.setText(STUDENT_TITLE);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
+		createStudentTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
@@ -208,6 +218,54 @@ public class MainFrame extends JFrame {
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshActivityTable();
+			}
+		});
+	}
+
+	private void createStudentTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
+		JMenuItem showStudentActivityItem = new JMenuItem("Show activities ");
+		tablePopup.add(removeStudentItem);
+		tablePopup.add(showStudentActivityItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+
+		// POP UP action listeners
+		removeStudentItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				System.out.println("Remove student: not yet implemented");
+				studentTable.getTable().clearSelection();
+			}
+		});
+		showStudentActivityItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name for selected row/column
+				int modelRow = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
+				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
+				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
+						model.getColumnForStudentName());
+
+				// Remove data being displayed
+				removeDataFromTables();
+
+				// Display activity table for selected student
+				if (activityTable == null) {
+					activityTable = new ActivityTable(tablePanel, controller.getActivitiesByStudentName(studentName),
+							true);
+				} else {
+					activityTable.setData(tablePanel, controller.getActivitiesByStudentName(studentName), true);
+				}
+				headerLabel.setText(ACTIVITY_TITLE + "  for  " + studentName);
+				studentTable.getTable().clearSelection();
+			}
+		});
+		studentTable.getTable().addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON3 && studentTable.getTable().getSelectedRow() != -1) {
+					// TODO: If student is in Master DB, do not allow removal
+					tablePopup.show(studentTable.getTable(), e.getX(), e.getY());
+				}
 			}
 		});
 	}

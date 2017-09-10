@@ -80,8 +80,6 @@ public class ActivityTable extends JPanel {
 	}
 
 	public void removeData() {
-		System.out.println("Remove data, activity table rows = " + activityTableModel.getRowCount());
-
 		if (activityTableModel.getRowCount() > 0) {
 			activityTableModel.removeAll();
 			activityTableModel.fireTableDataChanged();

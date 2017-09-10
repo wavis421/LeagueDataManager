@@ -35,7 +35,7 @@ public class ActivityTableModel extends AbstractTableModel {
 			colNames = colNamesWithClass;
 		else
 			colNames = colNamesNoClass;
-		
+
 		activitiesList.clear();
 		activitiesList = db;
 		System.out.println("Num Activities (1): " + activitiesList.size());

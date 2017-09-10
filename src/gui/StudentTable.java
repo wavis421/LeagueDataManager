@@ -9,11 +9,9 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListCellRenderer;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
@@ -67,6 +65,10 @@ public class StudentTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
+	public JTable getTable() {
+		return table;
+	}
+
 	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList) {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
@@ -77,8 +79,6 @@ public class StudentTable extends JPanel {
 	}
 
 	public void removeData() {
-		System.out.println("Remove data, student table rows = " + studentTableModel.getRowCount());
-
 		if (studentTableModel.getRowCount() > 0) {
 			studentTableModel.removeAll();
 			studentTableModel.fireTableDataChanged();

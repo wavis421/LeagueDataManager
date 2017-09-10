@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import model.ActivityModel;
 import model.MySqlDatabase;
 import model.StudentModel;
+import model.StudentNameModel;
 
 public class Controller {
 	// TODO: Get rid of NumVisits when exporting from FrontDesk
@@ -64,6 +65,14 @@ public class Controller {
 
 	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
 		return sqlDb.getActivitiesByClassName(className);
+	}
+
+	public ArrayList<StudentNameModel> getAllStudentNames() {
+		return sqlDb.getAllStudentNames();
+	}
+
+	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
+		return sqlDb.getActivitiesByStudentName(studentName);
 	}
 
 	/*
