@@ -55,24 +55,28 @@ public class Controller {
 		return sqlDb.getAllStudents();
 	}
 
+	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
+		return sqlDb.getStudentsNotInMasterDB();
+	}
+	
 	public ArrayList<ActivityModel> getAllActivities() {
 		return sqlDb.getAllActivities();
-	}
-
-	public ArrayList<String> getAllClassNames() {
-		return sqlDb.getAllClassNames();
 	}
 
 	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
 		return sqlDb.getActivitiesByClassName(className);
 	}
 
+	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
+		return sqlDb.getActivitiesByStudentName(studentName);
+	}
+	
 	public ArrayList<StudentNameModel> getAllStudentNames() {
 		return sqlDb.getAllStudentNames();
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
-		return sqlDb.getActivitiesByStudentName(studentName);
+	public ArrayList<String> getAllClassNames() {
+		return sqlDb.getAllClassNames();
 	}
 
 	/*

@@ -26,6 +26,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -122,9 +123,9 @@ public class MainFrame extends JFrame {
 		fileMenu.add(exitItem);
 
 		// Add Students sub-menus
-		JMenu studentRemoveMenu = new JMenu("Remove student ");
+		JMenuItem studentNotInMasterMenu = new JMenuItem("View students not in master DB ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
-		studentMenu.add(studentRemoveMenu);
+		studentMenu.add(studentNotInMasterMenu);
 		studentMenu.add(studentViewAllMenu);
 
 		// Add activities sub-menus
@@ -135,7 +136,7 @@ public class MainFrame extends JFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentsItem, importActivityLogItem, exitItem);
-		createStudentMenuListeners(studentRemoveMenu, studentViewAllMenu);
+		createStudentMenuListeners(studentNotInMasterMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
@@ -168,11 +169,16 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createStudentMenuListeners(JMenu studentRemove, JMenuItem studentViewAll) {
+	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentViewAll) {
 		// Set up listeners for STUDENT menu
-		studentRemove.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
+		studentNotInMaster.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Remove data being displayed
+				removeDataFromTables();
 
+				// Add student table and header
+				studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
+				headerLabel.setText(STUDENT_TITLE);
 			}
 		});
 		studentViewAll.addActionListener(new ActionListener() {
@@ -262,9 +268,21 @@ public class MainFrame extends JFrame {
 		});
 		studentTable.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON3 && studentTable.getTable().getSelectedRow() != -1) {
-					// TODO: If student is in Master DB, do not allow removal
-					tablePopup.show(studentTable.getTable(), e.getX(), e.getY());
+				JTable table = studentTable.getTable();
+				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
+					int row = table.convertRowIndexToModel(table.getSelectedRow());
+					StudentTableModel model = (StudentTableModel) table.getModel();
+					
+					// Either add or remove the "remove student" item
+					if (((StudentNameModel) model.getValueAt(row,
+							model.getColumnForStudentName())).getIsInMasterDb()) {
+						tablePopup.remove(removeStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+					} else {
+						tablePopup.add(removeStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+					}
+					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
 		});

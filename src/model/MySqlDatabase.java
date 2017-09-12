@@ -105,6 +105,44 @@ public class MySqlDatabase {
 		return nameList;
 	}
 
+	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
+		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+		
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb "
+								+ "ORDER BY LastName, FirstName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					studentList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("Location"), result.getInt("GradYear")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return studentList;
+	}
+	
 	public StudentModel getStudentByGithubName(String githubName) {
 		StudentModel student = null;
 
