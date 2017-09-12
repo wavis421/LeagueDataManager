@@ -15,6 +15,7 @@ import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 public class MySqlDatabase {
 	private static Connection dbConnection = null;
 	private JFrame parent;
+	private ArrayList<LogDataModel> logData = new ArrayList<LogDataModel>();
 
 	public MySqlDatabase(JFrame parent) {
 		this.parent = parent;
@@ -66,6 +67,17 @@ public class MySqlDatabase {
 	}
 
 	/*
+	 * ------- Logging Activity -------
+	 */
+	public void clearDbLogData() {
+		logData.clear();
+	}
+
+	public ArrayList<LogDataModel> getDbLogData() {
+		return (ArrayList<LogDataModel>) logData.clone();
+	}
+
+	/*
 	 * ------- Student Database Queries -------
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
@@ -107,12 +119,11 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
-		
+
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb "
-								+ "ORDER BY LastName, FirstName;");
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Students WHERE NOT isInMasterDb " + "ORDER BY LastName, FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -142,7 +153,7 @@ public class MySqlDatabase {
 		}
 		return studentList;
 	}
-	
+
 	public StudentModel getStudentByGithubName(String githubName) {
 		StudentModel student = null;
 
@@ -214,16 +225,29 @@ public class MySqlDatabase {
 	public void addStudent(int clientID, String lastName, String firstName, String githubName, String gender,
 			String firstVisitDate, String homeLocation, String gradYear) {
 
-		int gradYearAsInt = 0;
+		int gradYearAsInt = 0, homeLocNum = 0;
 
 		if (githubName.equals("") || githubName.equals("\"\"")) {
-			System.out.println(firstName + " " + lastName + "(" + clientID + ") does not have a github user name");
+			logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
+					new StudentNameModel(firstName, lastName, true), clientID, "Missing Github user name"));
 			githubName = null;
 		} else
 			githubName = parseGithubName(githubName);
 
-		if (gradYear != null && !gradYear.equals("") && !gradYear.equals("\"\""))
+		if (gradYear == null || gradYear.equals("") || gradYear.equals("\"\""))
+			logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
+					new StudentNameModel(firstName, lastName, true), clientID, "Missing Graduation Year"));
+		else
 			gradYearAsInt = Integer.parseInt(gradYear);
+
+		if (firstVisitDate.equals(""))
+			logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
+					new StudentNameModel(firstName, lastName, true), clientID, "Missing First Visit date"));
+
+		homeLocNum = LocationModel.convertStringToLocation(homeLocation);
+		if (homeLocNum == 0)
+			logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
+					new StudentNameModel(firstName, lastName, true), clientID, "Missing Home Location"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -241,11 +265,19 @@ public class MySqlDatabase {
 					addStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
 				else
 					addStudentStmt.setDate(col++, null);
-				addStudentStmt.setInt(col++, LocationModel.convertStringToLocation(homeLocation));
+				addStudentStmt.setInt(col++, homeLocNum);
 				addStudentStmt.setInt(col++, gradYearAsInt);
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
+
+				if (githubName == null)
+					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
+							new StudentNameModel(firstName, lastName, true), clientID,
+							"Added student, missing Github user name"));
+				else
+					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
+							new StudentNameModel(firstName, lastName, true), clientID, "Added student"));
 				break;
 
 			} catch (CommunicationsException e1) {
@@ -257,7 +289,7 @@ public class MySqlDatabase {
 
 			} catch (SQLIntegrityConstraintViolationException e2) {
 				// Student already exists, so update instead
-				updateStudent(clientID, lastName, firstName, githubName, firstVisitDate, homeLocation, gradYearAsInt);
+				updateStudent(clientID, lastName, firstName, githubName, firstVisitDate, homeLocNum, gradYearAsInt);
 				break;
 
 			} catch (SQLException e3) {
@@ -292,7 +324,7 @@ public class MySqlDatabase {
 	}
 
 	private void updateStudent(int clientID, String lastName, String firstName, String githubName,
-			String firstVisitDate, String homeLocation, int gradYear) {
+			String firstVisitDate, int homeLocNum, int gradYear) {
 
 		PreparedStatement updateStudentStmt;
 		try {
@@ -308,9 +340,8 @@ public class MySqlDatabase {
 				updateStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
 			else {
 				updateStudentStmt.setDate(col++, null);
-				System.out.println(firstName + " " + lastName + " has no first Visit Date");
 			}
-			updateStudentStmt.setInt(col++, LocationModel.convertStringToLocation(homeLocation));
+			updateStudentStmt.setInt(col++, homeLocNum);
 			updateStudentStmt.setInt(col++, gradYear);
 			updateStudentStmt.setInt(col++, 1);
 			updateStudentStmt.setInt(col, clientID);

@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 public class StudentTableModel extends AbstractTableModel {
-	private static final int CLIENT_ID_COLUMN = 0;
-	private static final int STUDENT_NAME_COLUMN = 1;
-	private static final int GENDER_COLUMN = 2;
-	private static final int GITHUB_NAME_COLUMN = 3;
-	private static final int HOME_LOCATION_COLUMN = 4;
-	private static final int START_DATE_COLUMN = 5;
-	private static final int GRAD_YEAR_COLUMN = 6;
+	public static final int CLIENT_ID_COLUMN = 0;
+	public static final int STUDENT_NAME_COLUMN = 1;
+	public static final int GENDER_COLUMN = 2;
+	public static final int GITHUB_NAME_COLUMN = 3;
+	public static final int HOME_LOCATION_COLUMN = 4;
+	public static final int START_DATE_COLUMN = 5;
+	public static final int GRAD_YEAR_COLUMN = 6;
 
 	private ArrayList<StudentModel> studentList;
-	private String colNames[] = { " Client ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
-			" Grad Year " };
+	private final String colNames[] = { " Client ID ", " Student Name ", " G ", " Github ", " Home Loc ",
+			" Start Date ", " Grad Year " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;
@@ -91,29 +91,5 @@ public class StudentTableModel extends AbstractTableModel {
 				return String.valueOf(student.getGradYear());
 		}
 		return null;
-	}
-
-	public int getColumnForStudentName() {
-		return STUDENT_NAME_COLUMN;
-	}
-
-	public int getColumnForGender() {
-		return GENDER_COLUMN;
-	}
-
-	public int getColumnForClientID() {
-		return CLIENT_ID_COLUMN;
-	}
-
-	public int getColumnForStartDate() {
-		return START_DATE_COLUMN;
-	}
-
-	public int getColumnForGradYear() {
-		return GRAD_YEAR_COLUMN;
-	}
-
-	public int getColumnForHomeLocation() {
-		return HOME_LOCATION_COLUMN;
 	}
 }

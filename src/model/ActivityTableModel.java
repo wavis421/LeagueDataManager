@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 public class ActivityTableModel extends AbstractTableModel {
-	private static final int CLIENT_ID_COLUMN = 0;
-	private static final int STUDENT_NAME_COLUMN = 1;
-	private static final int SERVICE_DATE_COLUMN = 2;
-	private static final int CLASS_NAME_COLUMN = 3;
-	private static final int COMMENTS_COLUMN_WITH_CLASS = 4;
-	private static final int COMMENTS_COLUMN_NO_CLASS = 3;
+	public static final int CLIENT_ID_COLUMN = 0;
+	public static final int STUDENT_NAME_COLUMN = 1;
+	public static final int SERVICE_DATE_COLUMN = 2;
+	public static final int CLASS_NAME_COLUMN = 3;
+	public static final int COMMENTS_COLUMN_WITH_CLASS = 4;
+	public static final int COMMENTS_COLUMN_NO_CLASS = 3;
 
 	private ArrayList<ActivityModel> activitiesList;
 	private boolean includeClassName;
@@ -107,21 +107,5 @@ public class ActivityTableModel extends AbstractTableModel {
 			}
 		}
 		return null;
-	}
-
-	public int getColumnForStudentName() {
-		return STUDENT_NAME_COLUMN;
-	}
-
-	public int getColumnForClientID() {
-		return CLIENT_ID_COLUMN;
-	}
-
-	public int getColumnForServiceDate() {
-		return SERVICE_DATE_COLUMN;
-	}
-
-	public int getColumnForEventName() {
-		return CLASS_NAME_COLUMN;
 	}
 }

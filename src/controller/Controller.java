@@ -10,8 +10,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import model.ActivityModel;
+import model.LogDataModel;
 import model.MySqlDatabase;
 import model.StudentModel;
 import model.StudentNameModel;
@@ -49,6 +51,13 @@ public class Controller {
 	}
 
 	/*
+	 * ------- Logging Activity -------
+	 */
+	public ArrayList<LogDataModel> getDbLogData() {
+		return sqlDb.getDbLogData();
+	}
+	
+	/*
 	 * ------- Database Queries -------
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
@@ -58,7 +67,7 @@ public class Controller {
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		return sqlDb.getStudentsNotInMasterDB();
 	}
-	
+
 	public ArrayList<ActivityModel> getAllActivities() {
 		return sqlDb.getAllActivities();
 	}
@@ -70,7 +79,7 @@ public class Controller {
 	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
 		return sqlDb.getActivitiesByStudentName(studentName);
 	}
-	
+
 	public ArrayList<StudentNameModel> getAllStudentNames() {
 		return sqlDb.getAllStudentNames();
 	}
@@ -89,6 +98,9 @@ public class Controller {
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Clear log data
+		sqlDb.clearDbLogData();
 
 		// CSV file has the following columns:
 		// Birth date, Completed Visits, Home Location, First Visit Date, First Name,
@@ -123,6 +135,10 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		if (sqlDb.getDbLogData().size() > 0)
+			JOptionPane.showMessageDialog(parent, "Please see Log Data -- some errors/warnings have occurred");
 	}
 
 	public void importActivitiesFromFile(File file) {

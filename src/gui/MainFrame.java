@@ -49,6 +49,7 @@ public class MainFrame extends JFrame {
 
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String ACTIVITY_TITLE = "League Attendance";
+	private static final String LOG_DATA_TITLE = "Database Import Logging Data";
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -57,6 +58,7 @@ public class MainFrame extends JFrame {
 	private JLabel headerLabel = new JLabel();
 	private StudentTable studentTable;
 	private ActivityTable activityTable;
+	private LogTable logTable;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 
@@ -116,9 +118,12 @@ public class MainFrame extends JFrame {
 		// Add file sub-menus
 		JMenuItem importStudentsItem = new JMenuItem("Import Students...  ");
 		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
+		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentsItem);
 		fileMenu.add(importActivityLogItem);
+		fileMenu.addSeparator();
+		fileMenu.add(viewLogDataItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -135,14 +140,15 @@ public class MainFrame extends JFrame {
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
-		createFileMenuListeners(importStudentsItem, importActivityLogItem, exitItem);
+		createFileMenuListeners(importStudentsItem, importActivityLogItem, viewLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem exitItem) {
+	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem viewLogData,
+			JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		importStudents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -158,6 +164,11 @@ public class MainFrame extends JFrame {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
 					refreshActivityTable();
 				}
+			}
+		});
+		viewLogData.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshLogTable();
 			}
 		});
 		exitItem.addActionListener(new ActionListener() {
@@ -250,7 +261,7 @@ public class MainFrame extends JFrame {
 				int modelRow = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
 				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-						model.getColumnForStudentName());
+						model.STUDENT_NAME_COLUMN);
 
 				// Remove data being displayed
 				removeDataFromTables();
@@ -272,10 +283,9 @@ public class MainFrame extends JFrame {
 				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
 					int row = table.convertRowIndexToModel(table.getSelectedRow());
 					StudentTableModel model = (StudentTableModel) table.getModel();
-					
+
 					// Either add or remove the "remove student" item
-					if (((StudentNameModel) model.getValueAt(row,
-							model.getColumnForStudentName())).getIsInMasterDb()) {
+					if (((StudentNameModel) model.getValueAt(row, model.STUDENT_NAME_COLUMN)).getIsInMasterDb()) {
 						tablePopup.remove(removeStudentItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 					} else {
@@ -309,10 +319,24 @@ public class MainFrame extends JFrame {
 		headerLabel.setText(ACTIVITY_TITLE);
 	}
 
+	private void refreshLogTable() {		
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add log data table and header
+		if (logTable == null)
+			logTable = new LogTable(tablePanel, controller.getDbLogData());
+		else
+			logTable.setData(tablePanel, controller.getDbLogData());
+		headerLabel.setText(LOG_DATA_TITLE);
+	}
+	
 	private void removeDataFromTables() {
 		// Remove data from Student table and Activities table
 		studentTable.removeData();
 		if (activityTable != null)
 			activityTable.removeData();
+		if (logTable != null)
+			logTable.removeData();
 	}
 }

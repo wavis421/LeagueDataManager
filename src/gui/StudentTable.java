@@ -44,15 +44,15 @@ public class StudentTable extends JPanel {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGender()).setMaxWidth(35);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForClientID()).setMaxWidth(75);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForStartDate()).setMaxWidth(105);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGradYear()).setMaxWidth(95);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForHomeLocation()).setMaxWidth(165);
+		table.getColumnModel().getColumn(StudentTableModel.GENDER_COLUMN).setMaxWidth(35);
+		table.getColumnModel().getColumn(StudentTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+		table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setMaxWidth(105);
+		table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setMaxWidth(95);
+		table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setMaxWidth(165);
 
-		table.getColumnModel().getColumn(studentTableModel.getColumnForStartDate()).setPreferredWidth(100);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForGradYear()).setPreferredWidth(90);
-		table.getColumnModel().getColumn(studentTableModel.getColumnForHomeLocation()).setPreferredWidth(160);
+		table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setPreferredWidth(90);
+		table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setPreferredWidth(160);
 
 		table.setDefaultRenderer(Object.class, new StudentTableRenderer());
 		table.setAutoCreateRowSorter(true);

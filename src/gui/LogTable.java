@@ -15,25 +15,23 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
-import model.ActivityModel;
-import model.ActivityTableModel;
+import model.LogDataModel;
+import model.LogTableModel;
 import model.StudentNameModel;
 
-public class ActivityTable extends JPanel {
+public class LogTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private JPanel tablePanel;
 	private JTable table;
-	private ActivityTableModel activityTableModel;
+	private LogTableModel logTableModel;
 	private JScrollPane scrollPane;
-	private boolean includeClassName;
 
-	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList, boolean includeClassName) {
+	public LogTable(JPanel tablePanel, ArrayList<LogDataModel> logList) {
 		this.tablePanel = tablePanel;
-		this.includeClassName = includeClassName;
 
-		activityTableModel = new ActivityTableModel(activitiesList, includeClassName);
-		table = new JTable(activityTableModel);
+		logTableModel = new LogTableModel(logList);
+		table = new JTable(logTableModel);
 
 		createTablePanel();
 	}
@@ -48,7 +46,7 @@ public class ActivityTable extends JPanel {
 		configureColumnWidths();
 
 		// Set table properties
-		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());
+		table.setDefaultRenderer(Object.class, new LogTableRenderer());
 		table.setAutoCreateRowSorter(true);
 
 		tablePanel.setLayout(new BorderLayout());
@@ -60,29 +58,19 @@ public class ActivityTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList, boolean includeClassName) {
-		if (this.includeClassName != includeClassName) {
-			this.includeClassName = includeClassName;
-
-			// Update table model
-			activityTableModel = new ActivityTableModel(activityList, includeClassName);
-			table.setModel(activityTableModel);
-			configureColumnWidths();
-
-		} else {
-			activityTableModel.setData(activityList);
-			activityTableModel.fireTableDataChanged();
-		}
-
+	public void setData(JPanel tablePanel, ArrayList<LogDataModel> logList) {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
+
+		logTableModel.setData(logList);
+		logTableModel.fireTableDataChanged();
 	}
 
 	public void removeData() {
-		if (activityTableModel.getRowCount() > 0) {
-			activityTableModel.removeAll();
-			activityTableModel.fireTableDataChanged();
+		if (logTableModel.getRowCount() > 0) {
+			logTableModel.removeAll();
+			logTableModel.fireTableDataChanged();
 		}
 
 		scrollPane.setVisible(false);
@@ -90,21 +78,14 @@ public class ActivityTable extends JPanel {
 
 	private void configureColumnWidths() {
 		// Configure column widths
-		table.getColumnModel().getColumn(ActivityTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(ActivityTableModel.SERVICE_DATE_COLUMN).setMaxWidth(100);
-		table.getColumnModel().getColumn(ActivityTableModel.SERVICE_DATE_COLUMN).setPreferredWidth(100);
-		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
-		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
-
-		if (includeClassName) {
-			table.getColumnModel().getColumn(ActivityTableModel.CLASS_NAME_COLUMN).setMaxWidth(250);
-			table.getColumnModel().getColumn(ActivityTableModel.CLASS_NAME_COLUMN).setPreferredWidth(210);
-		}
+		table.getColumnModel().getColumn(LogTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
+		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
 	}
 
 	// TODO: share this table renderer
-	public class ActivityTableRenderer extends JLabel implements TableCellRenderer {
-		private ActivityTableRenderer() {
+	public class LogTableRenderer extends JLabel implements TableCellRenderer {
+		private LogTableRenderer() {
 			super();
 			super.setOpaque(true);
 		}
@@ -133,7 +114,10 @@ public class ActivityTable extends JPanel {
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				super.setHorizontalAlignment(CENTER);
+				if (column == LogTableModel.STATUS_COLUMN)
+					super.setHorizontalAlignment(LEFT);
+				else
+					super.setHorizontalAlignment(CENTER);
 			}
 			return this;
 		}
