@@ -67,6 +67,10 @@ public class Controller {
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		return sqlDb.getStudentsNotInMasterDB();
 	}
+	
+	public void removeStudentByClientID(int clientID) {
+		sqlDb.removeStudentByClientID(clientID);
+	}
 
 	public ArrayList<ActivityModel> getAllActivities() {
 		return sqlDb.getAllActivities();

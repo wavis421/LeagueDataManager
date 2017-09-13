@@ -48,8 +48,12 @@ public class MainFrame extends JFrame {
 	private static final int POPUP_HEIGHT_2ROWS = 50;
 
 	private static final String STUDENT_TITLE = "League Student Info";
+	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "League Students not in Master DB";
 	private static final String ACTIVITY_TITLE = "League Attendance";
 	private static final String LOG_DATA_TITLE = "Database Import Logging Data";
+
+	private static final int CURR_TABLE_ALL_STUDENTS = 0;
+	private static final int CURR_TABLE_STUDENTS_NOT_IN_MASTER_DB = 1;
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -59,6 +63,7 @@ public class MainFrame extends JFrame {
 	private StudentTable studentTable;
 	private ActivityTable activityTable;
 	private LogTable logTable;
+	private int currentStudentTable;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 
@@ -82,6 +87,7 @@ public class MainFrame extends JFrame {
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		headerLabel.setText(STUDENT_TITLE);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
+		currentStudentTable = CURR_TABLE_ALL_STUDENTS;
 		createStudentTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
@@ -154,7 +160,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
-					refreshStudentTable();
+					refreshStudentTable(CURR_TABLE_ALL_STUDENTS);
 				}
 			}
 		});
@@ -184,17 +190,13 @@ public class MainFrame extends JFrame {
 		// Set up listeners for STUDENT menu
 		studentNotInMaster.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Remove data being displayed
-				removeDataFromTables();
-
-				// Add student table and header
-				studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
-				headerLabel.setText(STUDENT_TITLE);
+				// Show all students not in master database
+				refreshStudentTable(CURR_TABLE_STUDENTS_NOT_IN_MASTER_DB);
 			}
 		});
 		studentViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable();
+				refreshStudentTable(CURR_TABLE_ALL_STUDENTS);
 			}
 		});
 	}
@@ -251,8 +253,17 @@ public class MainFrame extends JFrame {
 		// POP UP action listeners
 		removeStudentItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				System.out.println("Remove student: not yet implemented");
+				// Get row, model, and clientID for the row
+				int row = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
+				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
+				int clientID = Integer.parseInt((String) model.getValueAt(row, StudentTableModel.CLIENT_ID_COLUMN));
+
+				// Remove student from database
+				controller.removeStudentByClientID(clientID);
 				studentTable.getTable().clearSelection();
+
+				// Refresh current table
+				refreshStudentTable(currentStudentTable);
 			}
 		});
 		showStudentActivityItem.addActionListener(new ActionListener() {
@@ -261,7 +272,7 @@ public class MainFrame extends JFrame {
 				int modelRow = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
 				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-						model.STUDENT_NAME_COLUMN);
+						StudentTableModel.STUDENT_NAME_COLUMN);
 
 				// Remove data being displayed
 				removeDataFromTables();
@@ -285,7 +296,8 @@ public class MainFrame extends JFrame {
 					StudentTableModel model = (StudentTableModel) table.getModel();
 
 					// Either add or remove the "remove student" item
-					if (((StudentNameModel) model.getValueAt(row, model.STUDENT_NAME_COLUMN)).getIsInMasterDb()) {
+					if (((StudentNameModel) model.getValueAt(row, StudentTableModel.STUDENT_NAME_COLUMN))
+							.getIsInMasterDb()) {
 						tablePopup.remove(removeStudentItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 					} else {
@@ -298,13 +310,21 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void refreshStudentTable() {
+	private void refreshStudentTable(int tableType) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add student table and header
-		studentTable.setData(tablePanel, controller.getAllStudents());
-		headerLabel.setText(STUDENT_TITLE);
+		if (tableType == CURR_TABLE_ALL_STUDENTS) {
+			headerLabel.setText(STUDENT_TITLE);
+			studentTable.setData(tablePanel, controller.getAllStudents());
+		} else {
+			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
+			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
+		}
+
+		// Update current table type
+		currentStudentTable = tableType;
 	}
 
 	private void refreshActivityTable() {
@@ -319,7 +339,7 @@ public class MainFrame extends JFrame {
 		headerLabel.setText(ACTIVITY_TITLE);
 	}
 
-	private void refreshLogTable() {		
+	private void refreshLogTable() {
 		// Remove data being displayed
 		removeDataFromTables();
 
@@ -330,7 +350,7 @@ public class MainFrame extends JFrame {
 			logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(LOG_DATA_TITLE);
 	}
-	
+
 	private void removeDataFromTables() {
 		// Remove data from Student table and Activities table
 		studentTable.removeData();

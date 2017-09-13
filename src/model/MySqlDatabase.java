@@ -116,6 +116,33 @@ public class MySqlDatabase {
 		}
 		return nameList;
 	}
+	
+	public void removeStudentByClientID(int clientID) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement deleteStudentStmt = dbConnection
+						.prepareStatement("DELETE FROM Students WHERE ClientID=?;");
+
+				// Delete student
+				deleteStudentStmt.setInt(1, clientID);
+				deleteStudentStmt.executeUpdate();
+				deleteStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Remove Student database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+	}
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
