@@ -60,6 +60,10 @@ public class ActivityTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
+	public JTable getTable() {
+		return table;
+	}
+
 	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList, boolean includeClassName) {
 		if (this.includeClassName != includeClassName) {
 			this.includeClassName = includeClassName;

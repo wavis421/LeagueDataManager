@@ -63,6 +63,10 @@ public class Controller {
 	public ArrayList<StudentModel> getAllStudents() {
 		return sqlDb.getAllStudents();
 	}
+	
+	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
+		return sqlDb.getStudentByClientID(clientID);
+	}
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		return sqlDb.getStudentsNotInMasterDB();

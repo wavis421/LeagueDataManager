@@ -196,7 +196,7 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("HomeLocation"), result.getInt("GradYear"));
+							result.getInt("Location"), result.getInt("GradYear"));
 				}
 
 				result.close();
@@ -218,6 +218,43 @@ public class MySqlDatabase {
 		return student;
 	}
 
+	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
+		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE ClientID=?;");
+				selectStmt.setInt(1, clientID);
+
+				ResultSet result = selectStmt.executeQuery();
+				if (result.next()) {
+					studentList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("Location"), result.getInt("GradYear")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database: " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				break;
+			}
+		}
+		return studentList;
+	}
+	
 	public int getStudentIDFromClientID(int clientID) {
 		int studentID = -1;
 		for (int i = 0; i < 2; i++) {
