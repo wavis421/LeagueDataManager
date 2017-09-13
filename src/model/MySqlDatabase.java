@@ -229,25 +229,25 @@ public class MySqlDatabase {
 
 		if (githubName.equals("") || githubName.equals("\"\"")) {
 			logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
-					new StudentNameModel(firstName, lastName, true), clientID, "Missing Github user name"));
+					new StudentNameModel(firstName, lastName, true), clientID));
 			githubName = null;
 		} else
 			githubName = parseGithubName(githubName);
 
 		if (gradYear == null || gradYear.equals("") || gradYear.equals("\"\""))
 			logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
-					new StudentNameModel(firstName, lastName, true), clientID, "Missing Graduation Year"));
+					new StudentNameModel(firstName, lastName, true), clientID));
 		else
 			gradYearAsInt = Integer.parseInt(gradYear);
 
 		if (firstVisitDate.equals(""))
 			logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
-					new StudentNameModel(firstName, lastName, true), clientID, "Missing First Visit date"));
+					new StudentNameModel(firstName, lastName, true), clientID));
 
 		homeLocNum = LocationModel.convertStringToLocation(homeLocation);
 		if (homeLocNum == 0)
 			logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
-					new StudentNameModel(firstName, lastName, true), clientID, "Missing Home Location"));
+					new StudentNameModel(firstName, lastName, true), clientID));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -272,12 +272,11 @@ public class MySqlDatabase {
 				addStudentStmt.close();
 
 				if (githubName == null)
-					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
-							new StudentNameModel(firstName, lastName, true), clientID,
-							"Added student, missing Github user name"));
+					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT_NO_GITHUB,
+							new StudentNameModel(firstName, lastName, true), clientID));
 				else
 					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
-							new StudentNameModel(firstName, lastName, true), clientID, "Added student"));
+							new StudentNameModel(firstName, lastName, true), clientID));
 				break;
 
 			} catch (CommunicationsException e1) {
