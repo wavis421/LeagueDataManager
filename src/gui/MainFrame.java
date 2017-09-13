@@ -32,6 +32,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import controller.Controller;
+import model.ActivityModel;
 import model.ActivityTableModel;
 import model.StudentNameModel;
 import model.StudentTableModel;
@@ -53,9 +54,9 @@ public class MainFrame extends JFrame {
 	private static final String ACTIVITY_TITLE = "League Attendance";
 	private static final String LOG_DATA_TITLE = "Database Import Logging Data";
 
-	private static final int CURR_TABLE_ALL_STUDENTS = 0;
-	private static final int CURR_TABLE_STUDENTS_NOT_IN_MASTER_DB = 1;
-	private static final int CURR_TABLE_BY_STUDENT = 2;
+	private static final int STUDENT_TABLE_ALL = 0;
+	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
+	private static final int STUDENT_TABLE_BY_STUDENT = 2;
 
 	/* Private instance variables */
 	private static Controller controller;
@@ -89,7 +90,7 @@ public class MainFrame extends JFrame {
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		headerLabel.setText(STUDENT_TITLE);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
-		currentStudentTable = CURR_TABLE_ALL_STUDENTS;
+		currentStudentTable = STUDENT_TABLE_ALL;
 		createStudentTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
@@ -162,7 +163,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
-					refreshStudentTable(CURR_TABLE_ALL_STUDENTS, 0);
+					refreshStudentTable(STUDENT_TABLE_ALL, 0);
 				}
 			}
 		});
@@ -170,7 +171,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-					refreshActivityTable();
+					refreshActivityTable(controller.getAllActivities(), "", true);
 				}
 			}
 		});
@@ -193,12 +194,12 @@ public class MainFrame extends JFrame {
 		studentNotInMaster.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Show all students not in master database
-				refreshStudentTable(CURR_TABLE_STUDENTS_NOT_IN_MASTER_DB, 0);
+				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
 		studentViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(CURR_TABLE_ALL_STUDENTS, 0);
+				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
 	}
@@ -224,14 +225,8 @@ public class MainFrame extends JFrame {
 							removeDataFromTables();
 
 							// Add activity table and header
-							if (activityTable == null) {
-								activityTable = new ActivityTable(tablePanel,
-										controller.getActivitiesByClassName(classItem.getText()), false);
-								createActivityTablePopups();
-							} else
-								activityTable.setData(tablePanel,
-										controller.getActivitiesByClassName(classItem.getText()), false);
-							headerLabel.setText(ACTIVITY_TITLE + "  for  \"" + classItem.getText() + "\"");
+							refreshActivityTable(controller.getActivitiesByClassName(classItem.getText()),
+									"  for  \"" + classItem.getText() + "\"", false);
 						}
 					});
 				}
@@ -239,7 +234,7 @@ public class MainFrame extends JFrame {
 		});
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable();
+				refreshActivityTable(controller.getAllActivities(), "", true);
 			}
 		});
 	}
@@ -280,14 +275,7 @@ public class MainFrame extends JFrame {
 				removeDataFromTables();
 
 				// Display activity table for selected student
-				if (activityTable == null) {
-					activityTable = new ActivityTable(tablePanel, controller.getActivitiesByStudentName(studentName),
-							true);
-					createActivityTablePopups();
-				} else {
-					activityTable.setData(tablePanel, controller.getActivitiesByStudentName(studentName), true);
-				}
-				headerLabel.setText(ACTIVITY_TITLE + "  for  " + studentName);
+				refreshActivityTable(controller.getActivitiesByStudentName(studentName), "  for  " + studentName, true);
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -341,7 +329,7 @@ public class MainFrame extends JFrame {
 				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
 				int clientID = Integer.parseInt((String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN));
 
-				refreshStudentTable(CURR_TABLE_BY_STUDENT, clientID);
+				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -360,32 +348,32 @@ public class MainFrame extends JFrame {
 		removeDataFromTables();
 
 		// Add student table and header
-		if (tableType == CURR_TABLE_ALL_STUDENTS) {
+		if (tableType == STUDENT_TABLE_ALL) {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getAllStudents());
-		} else if (tableType == CURR_TABLE_STUDENTS_NOT_IN_MASTER_DB) {
+		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
 		} else { // CURR_TABLE_BY_STUDENT
 			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel,  controller.getStudentByClientID(clientID));
+			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID));
 		}
 
 		// Update current table type
 		currentStudentTable = tableType;
 	}
 
-	private void refreshActivityTable() {
+	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension, boolean includeClass) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add activity table and header
 		if (activityTable == null) {
-			activityTable = new ActivityTable(tablePanel, controller.getAllActivities(), true);
+			activityTable = new ActivityTable(tablePanel, list, includeClass);
 			createActivityTablePopups();
 		} else
-			activityTable.setData(tablePanel, controller.getAllActivities(), true);
-		headerLabel.setText(ACTIVITY_TITLE);
+			activityTable.setData(tablePanel, list, includeClass);
+		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 	}
 
 	private void refreshLogTable() {
