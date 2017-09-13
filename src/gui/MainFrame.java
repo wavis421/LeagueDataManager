@@ -58,6 +58,10 @@ public class MainFrame extends JFrame {
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
 
+	private static final int ACTIVITY_TABLE_ALL = 0;
+	private static final int ACTIVITY_TABLE_BY_CLASS = 1;
+	private static final int ACTIVITY_TABLE_BY_STUDENT = 2;
+
 	/* Private instance variables */
 	private static Controller controller;
 	private JPanel mainPanel;
@@ -67,6 +71,7 @@ public class MainFrame extends JFrame {
 	private ActivityTable activityTable;
 	private LogTable logTable;
 	private int currentStudentTable;
+	private int currentActivityTable;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 
@@ -171,7 +176,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-					refreshActivityTable(controller.getAllActivities(), "", true);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "", true);
 				}
 			}
 		});
@@ -221,11 +226,9 @@ public class MainFrame extends JFrame {
 							classList.clear();
 							activitiesViewByClass.removeAll();
 
-							// Remove data being displayed
-							removeDataFromTables();
-
 							// Add activity table and header
-							refreshActivityTable(controller.getActivitiesByClassName(classItem.getText()),
+							refreshActivityTable(ACTIVITY_TABLE_BY_CLASS,
+									controller.getActivitiesByClassName(classItem.getText()),
 									"  for  \"" + classItem.getText() + "\"", false);
 						}
 					});
@@ -234,7 +237,7 @@ public class MainFrame extends JFrame {
 		});
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable(controller.getAllActivities(), "", true);
+				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "", true);
 			}
 		});
 	}
@@ -271,11 +274,9 @@ public class MainFrame extends JFrame {
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 						StudentTableModel.STUDENT_NAME_COLUMN);
 
-				// Remove data being displayed
-				removeDataFromTables();
-
 				// Display activity table for selected student
-				refreshActivityTable(controller.getActivitiesByStudentName(studentName), "  for  " + studentName, true);
+				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByStudentName(studentName),
+						"  for  " + studentName, true);
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -306,9 +307,8 @@ public class MainFrame extends JFrame {
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
-		tablePopup.add(showStudentClassItem);
 		tablePopup.add(showStudentInfoItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+		tablePopup.add(showStudentClassItem);
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
@@ -318,7 +318,9 @@ public class MainFrame extends JFrame {
 				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
 				String className = (String) model.getValueAt(row, ActivityTableModel.CLASS_NAME_COLUMN);
 
-				System.out.println("Show class info not yet implemented: " + className);
+				// Add activity table and header
+				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(className),
+						"  for  \"" + className + "\"", false);
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -337,6 +339,14 @@ public class MainFrame extends JFrame {
 			public void mousePressed(MouseEvent e) {
 				JTable table = activityTable.getTable();
 				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
+					// Either add or remove the "view by class" item
+					if (currentActivityTable == ACTIVITY_TABLE_BY_CLASS) {
+						tablePopup.remove(showStudentClassItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+					} else {
+						tablePopup.add(showStudentClassItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+					}
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
@@ -363,7 +373,8 @@ public class MainFrame extends JFrame {
 		currentStudentTable = tableType;
 	}
 
-	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension, boolean includeClass) {
+	private void refreshActivityTable(int tableType, ArrayList<ActivityModel> list, String titleExtension,
+			boolean includeClass) {
 		// Remove data being displayed
 		removeDataFromTables();
 
@@ -374,6 +385,8 @@ public class MainFrame extends JFrame {
 		} else
 			activityTable.setData(tablePanel, list, includeClass);
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
+
+		currentActivityTable = tableType;
 	}
 
 	private void refreshLogTable() {

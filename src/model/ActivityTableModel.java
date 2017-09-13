@@ -15,8 +15,8 @@ public class ActivityTableModel extends AbstractTableModel {
 	private ArrayList<ActivityModel> activitiesList;
 	private boolean includeClassName;
 	private final String[] colNamesWithClass = { " Client ID ", " Student Name ", " Date ", " Class Name ",
-			" Comments " };
-	private final String[] colNamesNoClass = { " Client ID ", " Student Name ", " Date ", " Comments " };
+			" Github Comments " };
+	private final String[] colNamesNoClass = { " Client ID ", " Student Name ", " Date ", " Github Comments " };
 	private String[] colNames;
 
 	public ActivityTableModel(ArrayList<ActivityModel> activities, boolean includeClassName) {
