@@ -76,10 +76,11 @@ public class MainFrame extends JFrame {
 	private FileFilterCsv fileFilter;
 
 	public MainFrame() {
+		super("League Data Manager");
 		setLayout(new BorderLayout());
 		setBackground(Color.WHITE);
 
-		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24.png"));
+		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
 		setIconImage(icon.getImage());
 
 		// Create components
@@ -176,7 +177,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "", true);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 				}
 			}
 		});
@@ -229,7 +230,7 @@ public class MainFrame extends JFrame {
 							// Add activity table and header
 							refreshActivityTable(ACTIVITY_TABLE_BY_CLASS,
 									controller.getActivitiesByClassName(classItem.getText()),
-									"  for  \"" + classItem.getText() + "\"", false);
+									"  for  \"" + classItem.getText() + "\"");
 						}
 					});
 				}
@@ -237,7 +238,7 @@ public class MainFrame extends JFrame {
 		});
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "", true);
+				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 			}
 		});
 	}
@@ -276,7 +277,7 @@ public class MainFrame extends JFrame {
 
 				// Display activity table for selected student
 				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByStudentName(studentName),
-						"  for  " + studentName, true);
+						"  for  " + studentName);
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -316,11 +317,11 @@ public class MainFrame extends JFrame {
 				// Get class name for selected row/column
 				int row = activityTable.getTable().convertRowIndexToModel(activityTable.getTable().getSelectedRow());
 				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
-				String className = (String) model.getValueAt(row, ActivityTableModel.CLASS_NAME_COLUMN);
+				String className = (String) model.getValueAt(row, ActivityTableModel.GITHUB_COMMENTS_COLUMN);
 
 				// Add activity table and header
 				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(className),
-						"  for  \"" + className + "\"", false);
+						"  for  \"" + className + "\"");
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -373,17 +374,16 @@ public class MainFrame extends JFrame {
 		currentStudentTable = tableType;
 	}
 
-	private void refreshActivityTable(int tableType, ArrayList<ActivityModel> list, String titleExtension,
-			boolean includeClass) {
+	private void refreshActivityTable(int tableType, ArrayList<ActivityModel> list, String titleExtension) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add activity table and header
 		if (activityTable == null) {
-			activityTable = new ActivityTable(tablePanel, list, includeClass);
+			activityTable = new ActivityTable(tablePanel, list);
 			createActivityTablePopups();
 		} else
-			activityTable.setData(tablePanel, list, includeClass);
+			activityTable.setData(tablePanel, list);
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 
 		currentActivityTable = tableType;

@@ -1,23 +1,22 @@
 package model;
 
-import java.sql.Date;
-import java.sql.Time;
+import java.util.ArrayList;
 
 public class ActivityModel implements Comparable<ActivityModel> {
 	private int clientID;
-	private String eventName;
-	private Date serviceDate;
-	private String comments;
 	private StudentNameModel studentName;
+	private ArrayList<ActivityEventModel> activityEventList = new ArrayList<ActivityEventModel>();
 
-	public ActivityModel(int clientID, StudentNameModel studentName, Date serviceDate, String eventName, String comments) {
+	public ActivityModel(int clientID, StudentNameModel studentName, ActivityEventModel event) {
 		this.clientID = clientID;
 		this.studentName = studentName;
-		this.serviceDate = serviceDate;
-		this.eventName = eventName;
-		this.comments = comments;
+		this.activityEventList.add(event);
 	}
 
+	public void addActivityData(ActivityEventModel event) {
+		activityEventList.add(event);
+	}
+	
 	public String toString() {
 		return studentName + " (" + clientID + ")";
 	}
@@ -30,16 +29,8 @@ public class ActivityModel implements Comparable<ActivityModel> {
 		return studentName;
 	}
 
-	public String getEventName() {
-		return eventName;
-	}
-
-	public Date getServiceDate() {
-		return serviceDate;
-	}
-
-	public String getComments() {
-		return comments;
+	public ArrayList<ActivityEventModel> getActivityEventList() {
+		return activityEventList;
 	}
 
 	@Override

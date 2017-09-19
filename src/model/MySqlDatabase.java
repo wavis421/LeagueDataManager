@@ -116,7 +116,7 @@ public class MySqlDatabase {
 		}
 		return nameList;
 	}
-	
+
 	public void removeStudentByClientID(int clientID) {
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -254,7 +254,7 @@ public class MySqlDatabase {
 		}
 		return studentList;
 	}
-	
+
 	public int getStudentIDFromClientID(int clientID) {
 		int studentID = -1;
 		for (int i = 0; i < 2; i++) {
@@ -437,16 +437,9 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
-								+ "ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
+								+ "ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
-
-				while (result.next()) {
-					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
-							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
-							result.getDate("ServiceDate"), result.getString("EventName"),
-							result.getString("Comments")));
-				}
+				getActivitiesList(activityList, result);
 
 				result.close();
 				selectStmt.close();
@@ -476,16 +469,9 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
 								+ "EventName='" + className
-								+ "' ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
+								+ "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
-
-				while (result.next()) {
-					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
-							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
-							result.getDate("ServiceDate"), result.getString("EventName"),
-							result.getString("Comments")));
-				}
+				getActivitiesList(activityList, result);
 
 				result.close();
 				selectStmt.close();
@@ -516,16 +502,9 @@ public class MySqlDatabase {
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
 								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
 								+ studentName.getLastName()
-								+ "' ORDER BY ServiceDate DESC, EventName, Students.LastName, Students.FirstName;");
+								+ "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
-
-				while (result.next()) {
-					activityList.add(new ActivityModel(result.getInt("Students.ClientID"),
-							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
-							result.getDate("ServiceDate"), result.getString("EventName"),
-							result.getString("Comments")));
-				}
+				getActivitiesList(activityList, result);
 
 				result.close();
 				selectStmt.close();
@@ -545,6 +524,37 @@ public class MySqlDatabase {
 			}
 		}
 		return activityList;
+	}
+
+	private void getActivitiesList(ArrayList<ActivityModel> activityList, ResultSet result) {
+		int lastClientID = -1;
+		ActivityModel lastActivityModel = null;
+
+		try {
+			while (result.next()) {
+				int thisClientID = result.getInt("Students.ClientID");
+				if (lastClientID == thisClientID) {
+					// Add more data to existing client
+					lastActivityModel.addActivityData(new ActivityEventModel(result.getDate("ServiceDate"),
+							result.getString("EventName"), result.getString("Comments")));
+
+				} else {
+					// Create student model for new client
+					lastActivityModel = new ActivityModel(thisClientID,
+							new StudentNameModel(result.getString("Students.FirstName"),
+									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
+							new ActivityEventModel(result.getDate("ServiceDate"), result.getString("EventName"),
+									result.getString("Comments")));
+					activityList.add(lastActivityModel);
+					lastClientID = thisClientID;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.out.println("Get Activity database error: " + e.getMessage());
+			e.printStackTrace();
+			return;
+		}
 	}
 
 	public ArrayList<String> getAllClassNames() {

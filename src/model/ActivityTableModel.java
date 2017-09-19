@@ -7,46 +7,33 @@ import javax.swing.table.AbstractTableModel;
 public class ActivityTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
-	public static final int SERVICE_DATE_COLUMN = 2;
-	public static final int CLASS_NAME_COLUMN = 3;
-	public static final int COMMENTS_COLUMN_WITH_CLASS = 4;
-	public static final int COMMENTS_COLUMN_NO_CLASS = 3;
+	public static final int GITHUB_COMMENTS_COLUMN = 2;
+	private static final int TABLE_NUM_COLUMNS = 3;
 
-	private ArrayList<ActivityModel> activitiesList;
-	private boolean includeClassName;
-	private final String[] colNamesWithClass = { " Client ID ", " Student Name ", " Date ", " Class Name ",
-			" Github Comments " };
-	private final String[] colNamesNoClass = { " Client ID ", " Student Name ", " Date ", " Github Comments " };
-	private String[] colNames;
+	private Object[][] tableObjects;
+	private final String[] colNames = { " Client ID ", " Student Name ", " Github Comments " };
 
-	public ActivityTableModel(ArrayList<ActivityModel> activities, boolean includeClassName) {
-		this.activitiesList = activities;
-		this.includeClassName = includeClassName;
-		System.out.println("Num Activities (0): " + activitiesList.size());
-
-		if (includeClassName)
-			colNames = colNamesWithClass;
-		else
-			colNames = colNamesNoClass;
+	public ActivityTableModel(ArrayList<ActivityModel> activities) {
+		initializeTableData(activities);
 	}
 
 	public void setData(ArrayList<ActivityModel> db) {
-		if (includeClassName)
-			colNames = colNamesWithClass;
-		else
-			colNames = colNamesNoClass;
+		initializeTableData(db);
+	}
 
-		activitiesList.clear();
-		activitiesList = db;
-		System.out.println("Num Activities (1): " + activitiesList.size());
+	private void initializeTableData(ArrayList<ActivityModel> db) {
+		tableObjects = new Object[db.size()][TABLE_NUM_COLUMNS];
+		
+		for (int row = 0; row < db.size(); row++) {
+			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
+			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
+			tableObjects[row][GITHUB_COMMENTS_COLUMN] = db.get(row).getActivityEventList().toArray();
+		}
+		System.out.println("Num Activities: " + db.size());
 	}
 
 	public void removeAll() {
-		activitiesList.clear();
-	}
-
-	public int getNumStudents() {
-		return activitiesList.size();
+		// TODO: How to clear array data?
 	}
 
 	@Override
@@ -61,51 +48,21 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return activitiesList.size();
+		return tableObjects.length;
 	}
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		if (columnIndex == STUDENT_NAME_COLUMN)
-			return StudentNameModel.class;
-		else
-			return String.class;
+		return tableObjects[0][columnIndex].getClass();
 	}
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		ActivityModel activities = activitiesList.get(row);
-
-		if (colNames == colNamesWithClass) {
-			switch (col) {
-			case CLIENT_ID_COLUMN:
-				return String.valueOf(activities.getClientID());
-			case STUDENT_NAME_COLUMN:
-				return activities.getStudentName();
-			case SERVICE_DATE_COLUMN:
-				return activities.getServiceDate().toString();
-			case CLASS_NAME_COLUMN:
-				return activities.getEventName();
-			case COMMENTS_COLUMN_WITH_CLASS:
-				return activities.getComments();
-			}
-		} else { // No class-name column
-			switch (col) {
-			case CLIENT_ID_COLUMN:
-				return String.valueOf(activities.getClientID());
-			case STUDENT_NAME_COLUMN:
-				return activities.getStudentName();
-			case SERVICE_DATE_COLUMN:
-				return activities.getServiceDate().toString();
-			case COMMENTS_COLUMN_NO_CLASS:
-				return activities.getComments();
-			}
-		}
-		return null;
+		return tableObjects[row][col];
 	}
 }
