@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -440,6 +441,7 @@ public class MySqlDatabase {
 								+ "ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
+				Collections.sort(activityList);
 
 				result.close();
 				selectStmt.close();
@@ -472,6 +474,7 @@ public class MySqlDatabase {
 								+ "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
+				Collections.sort(activityList);
 
 				result.close();
 				selectStmt.close();
@@ -505,6 +508,7 @@ public class MySqlDatabase {
 								+ "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
+				Collections.sort(activityList);
 
 				result.close();
 				selectStmt.close();
