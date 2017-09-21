@@ -22,6 +22,6 @@ public class ActivityEventModel {
 	}
 
 	public String getGithubComments() {
-		return githubComments;
+		return "- " + githubComments;
 	}
 }

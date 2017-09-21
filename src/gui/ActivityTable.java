@@ -35,6 +35,7 @@ public class ActivityTable extends JPanel {
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
 	private ActivityTableModel activityTableModel;
 	private JScrollPane tableScrollPane;
+	private int eventTableSelectedRow = -1;
 
 	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
 		this.parentTablePanel = tablePanel;
@@ -43,7 +44,7 @@ public class ActivityTable extends JPanel {
 		activityTableModel = new ActivityTableModel(activitiesList);
 		mainTable = new JTable(activityTableModel);
 		createTablePanel();
-		
+
 		// Create event sub-table with github comments by date
 		createEventTable(activitiesList);
 	}
@@ -66,8 +67,8 @@ public class ActivityTable extends JPanel {
 		parentTablePanel.setLayout(new BorderLayout());
 		tableScrollPane = new JScrollPane(mainTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		tableScrollPane.setPreferredSize(
-				new Dimension(parentTablePanel.getPreferredSize().width, parentTablePanel.getPreferredSize().height - 70));
+		tableScrollPane.setPreferredSize(new Dimension(parentTablePanel.getPreferredSize().width,
+				parentTablePanel.getPreferredSize().height - 70));
 		tableScrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		parentTablePanel.add(tableScrollPane, BorderLayout.NORTH);
 	}
@@ -78,13 +79,13 @@ public class ActivityTable extends JPanel {
 
 	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
 		this.parentTablePanel = tablePanel;
-		
+
 		// Set data for main table
 		activityTableModel.setData(activityList);
-		
+
 		// Create github sub-table
 		createEventTable(activityList);
-		
+
 		// Update table
 		activityTableModel.fireTableDataChanged();
 		tableScrollPane.setVisible(true);
@@ -120,13 +121,16 @@ public class ActivityTable extends JPanel {
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(180);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(180);
 
+			// Add renderer
+			eventTable.setDefaultRenderer(Object.class, new ActivityTableRenderer());
+
 			// Add table to event panel and array list
 			githubEventTableList.add(eventTable);
 			githubEventPanel.add(eventTable);
 		}
 	}
 
-	// Renderer for main table
+	// ===== NESTED Class: Renderer for main table ===== //
 	public class ActivityTableRenderer extends JLabel implements TableCellRenderer {
 
 		private ActivityTableRenderer() {
@@ -138,19 +142,26 @@ public class ActivityTable extends JPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 
+			// Set foreground/background colors
 			super.setForeground(Color.black);
 			if (isSelected)
 				super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
 			else
 				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
-			super.setHorizontalAlignment(CENTER);
+
+			// All columns centered except Github Comments
+			if (table != mainTable && column == EVENT_TABLE_COMMENTS_COLUMN)
+				super.setHorizontalAlignment(LEFT);
+			else
+				super.setHorizontalAlignment(CENTER);
 
 			if (value instanceof String) {
-				// Used for class name column
+				// String columns
 				super.setText((String) value);
 				return this;
 
 			} else if (value instanceof StudentNameModel) {
+				// Students not in master DB are in italics
 				if (((StudentNameModel) value).getIsInMasterDb() == false)
 					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
 				else
@@ -159,15 +170,25 @@ public class ActivityTable extends JPanel {
 				StudentNameModel student = (StudentNameModel) value;
 				super.setText(student.toString());
 				return this;
-				
+
 			} else {
 				// Github comments column
+				if (isSelected && row != eventTableSelectedRow) {
+					// Selecting a new row; remove previous selection
+					for (int i = 0; i < githubEventTableList.size(); i++)
+						githubEventTableList.get(i).clearSelection();
+
+					// Add and track current row selection and update
+					githubEventTableList.get(row).selectAll();
+					eventTableSelectedRow = row;
+					mainTable.repaint();
+				}
 				return githubEventTableList.get(row);
 			}
 		}
 	}
 
-	// Model for Github sub-table
+	// ===== NESTED Class: Model for Github sub-table ===== //
 	public class EventTableModel extends AbstractTableModel {
 		ArrayList<ActivityEventModel> inputData;
 

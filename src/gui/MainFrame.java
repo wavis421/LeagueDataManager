@@ -339,16 +339,30 @@ public class MainFrame extends JFrame {
 		activityTable.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				JTable table = activityTable.getTable();
-				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
-					// Either add or remove the "view by class" item
-					if (currentActivityTable == ACTIVITY_TABLE_BY_CLASS) {
-						tablePopup.remove(showStudentClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-					} else {
-						tablePopup.add(showStudentClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() > -1) {
+					if (table.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
+						// Either add or remove the "view by class" item
+						if (currentActivityTable == ACTIVITY_TABLE_BY_CLASS) {
+							tablePopup.remove(showStudentClassItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+						} else {
+							tablePopup.add(showStudentClassItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+						}
+						tablePopup.show(table, e.getX(), e.getY());
+
+					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+						System.out.println("Right mouse click for comments column not yet implemented");
 					}
-					tablePopup.show(table, e.getX(), e.getY());
+				}
+			}
+
+			public void mouseClicked(MouseEvent e) {
+				JTable table = activityTable.getTable();
+				if (e.getClickCount() == 2 && table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+					int row = table.getSelectedRow();
+					if (row > -1)
+						System.out.println("Double mouse click not yet implemented");
 				}
 			}
 		});
