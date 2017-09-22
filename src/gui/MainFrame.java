@@ -74,6 +74,7 @@ public class MainFrame extends JFrame {
 	private int currentActivityTable;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
+	private String selectedClassName;
 
 	public MainFrame() {
 		super("League Data Manager");
@@ -310,18 +311,14 @@ public class MainFrame extends JFrame {
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				// Get class name for selected row/column
-				int row = activityTable.getTable().convertRowIndexToModel(activityTable.getTable().getSelectedRow());
-				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
-				String className = (String) model.getValueAt(row, ActivityTableModel.GITHUB_COMMENTS_COLUMN);
-
-				// Add activity table and header
-				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(className),
-						"  for  \"" + className + "\"");
+				// Add activity table and header for selected class
+				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(selectedClassName),
+						"  for  \"" + selectedClassName + "\"");
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -339,20 +336,28 @@ public class MainFrame extends JFrame {
 		activityTable.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				JTable table = activityTable.getTable();
-				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() > -1) {
+
+				if (e.getButton() == MouseEvent.BUTTON1 && table.getSelectedRow() > -1
+						&& table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+					// Highlight selected row in github event table
+					activityTable.setSelectedEventRow(table.getSelectedRow(), e.getY());
+
+				} else if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() > -1) {
 					if (table.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
-						// Either add or remove the "view by class" item
-						if (currentActivityTable == ACTIVITY_TABLE_BY_CLASS) {
-							tablePopup.remove(showStudentClassItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-						} else {
-							tablePopup.add(showStudentClassItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-						}
+						// Show student's info
+						tablePopup.remove(showStudentClassItem);
+						tablePopup.add(showStudentInfoItem);
 						tablePopup.show(table, e.getX(), e.getY());
 
-					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
-						System.out.println("Right mouse click for comments column not yet implemented");
+					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
+							&& currentActivityTable != ACTIVITY_TABLE_BY_CLASS) {
+						// Show students by class name
+						selectedClassName = activityTable.getClassNameByRow(table.getSelectedRow(), e.getY());
+						if (selectedClassName != null) {
+							tablePopup.remove(showStudentInfoItem);
+							tablePopup.add(showStudentClassItem);
+							tablePopup.show(table, e.getX(), e.getY());
+						}
 					}
 				}
 			}

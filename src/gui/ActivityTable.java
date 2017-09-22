@@ -21,7 +21,8 @@ import model.ActivityTableModel;
 import model.StudentNameModel;
 
 public class ActivityTable extends JPanel {
-	private static final int ROW_HEIGHT = 65;
+	private static final int TEXT_HEIGHT = 16;
+	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -35,7 +36,8 @@ public class ActivityTable extends JPanel {
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
 	private ActivityTableModel activityTableModel;
 	private JScrollPane tableScrollPane;
-	private int eventTableSelectedRow = -1;
+	private int eventTableSelectedRow = -1; // table row
+	private int eventSelectedRow = -1; // row within table row
 
 	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
 		this.parentTablePanel = tablePanel;
@@ -75,6 +77,31 @@ public class ActivityTable extends JPanel {
 
 	public JTable getTable() {
 		return mainTable;
+	}
+
+	public void setSelectedEventRow(int selectedRow, int yPos) {
+		eventSelectedRow = getEventRow(selectedRow, yPos);
+		mainTable.repaint();   // TODO: This is probably overkill
+	}
+
+	public String getClassNameByRow(int selectedRow, int yPos) {
+		JTable table = githubEventTableList.get(selectedRow);
+		int eventRow = getEventRow(selectedRow, yPos);
+
+		if (eventRow > -1) {
+			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_CLASS_NAME_COLUMN);
+		} else
+			return null;
+	}
+
+	private int getEventRow(int selectedRow, int yPos) {
+		// Compute row based on Y-position in event table
+		JTable table = githubEventTableList.get(selectedRow);
+		int row = (yPos - (selectedRow * ROW_HEIGHT)) / TEXT_HEIGHT;
+		if (row < table.getModel().getRowCount())
+			return row;
+		else
+			return -1;
 	}
 
 	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
@@ -157,6 +184,9 @@ public class ActivityTable extends JPanel {
 
 			if (value instanceof String) {
 				// String columns
+				if (table != mainTable && isSelected && eventSelectedRow == row)
+					super.setForeground(CustomFonts.ICON_COLOR);
+
 				super.setText((String) value);
 				return this;
 
