@@ -470,8 +470,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "EventName='" + className
-								+ "' ORDER BY ClientID, ServiceDate DESC;");
+								+ "EventName='" + className + "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -504,11 +503,41 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
 								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
-								+ studentName.getLastName()
-								+ "' ORDER BY ClientID, ServiceDate DESC;");
+								+ studentName.getLastName() + "' ORDER BY ClientID, ServiceDate DESC;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return activityList;
+	}
+
+	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
+		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
+								+ "ClientID='" + clientID + "' ORDER BY LastName, FirstName, ServiceDate DESC;");
+				ResultSet result = selectStmt.executeQuery();
+				getActivitiesList(activityList, result);
 
 				result.close();
 				selectStmt.close();

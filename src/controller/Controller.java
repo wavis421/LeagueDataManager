@@ -87,6 +87,10 @@ public class Controller {
 	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
 		return sqlDb.getActivitiesByStudentName(studentName);
 	}
+	
+	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
+		return sqlDb.getActivitiesByClientID(clientID);
+	}
 
 	public ArrayList<StudentNameModel> getAllStudentNames() {
 		return sqlDb.getAllStudentNames();

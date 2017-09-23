@@ -285,8 +285,9 @@ public class MainFrame extends JFrame {
 		studentTable.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				JTable table = studentTable.getTable();
-				if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
-					int row = table.convertRowIndexToModel(table.getSelectedRow());
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					row = table.convertRowIndexToModel(row);
 					StudentTableModel model = (StudentTableModel) table.getModel();
 
 					// Either add or remove the "remove student" item
@@ -336,13 +337,14 @@ public class MainFrame extends JFrame {
 		activityTable.getTable().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				JTable table = activityTable.getTable();
+				int row = table.getSelectedRow();
 
-				if (e.getButton() == MouseEvent.BUTTON1 && table.getSelectedRow() > -1
+				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
 						&& table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
 					// Highlight selected row in github event table
-					activityTable.setSelectedEventRow(table.getSelectedRow(), e.getY());
+					activityTable.setSelectedEventRow(table.convertRowIndexToModel(row), e.getY());
 
-				} else if (e.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() > -1) {
+				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
 					if (table.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
 						// Show student's info
 						tablePopup.remove(showStudentClassItem);
@@ -352,7 +354,7 @@ public class MainFrame extends JFrame {
 					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
 							&& currentActivityTable != ACTIVITY_TABLE_BY_CLASS) {
 						// Show students by class name
-						selectedClassName = activityTable.getClassNameByRow(table.getSelectedRow(), e.getY());
+						selectedClassName = activityTable.getClassNameByRow(table.convertRowIndexToModel(row), e.getY());
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);
 							tablePopup.add(showStudentClassItem);
@@ -361,13 +363,17 @@ public class MainFrame extends JFrame {
 					}
 				}
 			}
-
 			public void mouseClicked(MouseEvent e) {
 				JTable table = activityTable.getTable();
 				if (e.getClickCount() == 2 && table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
 					int row = table.getSelectedRow();
-					if (row > -1)
-						System.out.println("Double mouse click not yet implemented");
+					if (row > -1) {
+						row = table.convertRowIndexToModel(row);
+						String clientID = (String) table.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
+						activityTable.showActivitiesByPerson(
+								table.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN).toString(),
+								controller.getActivitiesByClientID(clientID));
+					}
 				}
 			}
 		});

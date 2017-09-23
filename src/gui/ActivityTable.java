@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,6 +24,9 @@ import model.StudentNameModel;
 public class ActivityTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
+	
+	private static final int POPUP_WINDOW_WIDTH = 900;
+	private static final int POPUP_WINDOW_HEIGHT = 300; 
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -45,34 +49,36 @@ public class ActivityTable extends JPanel {
 		// Create main table-model and table
 		activityTableModel = new ActivityTableModel(activitiesList);
 		mainTable = new JTable(activityTableModel);
-		createTablePanel();
+		tableScrollPane = createTablePanel(mainTable, parentTablePanel);
 
 		// Create event sub-table with github comments by date
 		createEventTable(activitiesList);
 	}
 
-	private void createTablePanel() {
+	private JScrollPane createTablePanel(JTable table, JPanel panel) {
 		// Set up table parameters
-		mainTable.setFont(CustomFonts.TABLE_TEXT_FONT);
-		mainTable.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column height and width
-		mainTable.setRowHeight(ROW_HEIGHT);
-		mainTable.getColumnModel().getColumn(ActivityTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		mainTable.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
-		mainTable.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
+		table.setRowHeight(ROW_HEIGHT);
+		table.getColumnModel().getColumn(ActivityTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
+		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
 
 		// Set table properties
-		mainTable.setDefaultRenderer(Object.class, new ActivityTableRenderer());
-		mainTable.setAutoCreateRowSorter(true);
+		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());
+		table.setAutoCreateRowSorter(true);
 
-		parentTablePanel.setLayout(new BorderLayout());
-		tableScrollPane = new JScrollPane(mainTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+		panel.setLayout(new BorderLayout());
+		JScrollPane scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		tableScrollPane.setPreferredSize(new Dimension(parentTablePanel.getPreferredSize().width,
-				parentTablePanel.getPreferredSize().height - 70));
-		tableScrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-		parentTablePanel.add(tableScrollPane, BorderLayout.NORTH);
+		scrollPane
+				.setPreferredSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height - 70));
+		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		panel.add(scrollPane, BorderLayout.NORTH);
+		
+		return scrollPane;
 	}
 
 	public JTable getTable() {
@@ -81,7 +87,7 @@ public class ActivityTable extends JPanel {
 
 	public void setSelectedEventRow(int selectedRow, int yPos) {
 		eventSelectedRow = getEventRow(selectedRow, yPos);
-		mainTable.repaint();   // TODO: This is probably overkill
+		mainTable.repaint(); // TODO: This is probably overkill
 	}
 
 	public String getClassNameByRow(int selectedRow, int yPos) {
@@ -155,6 +161,24 @@ public class ActivityTable extends JPanel {
 			githubEventTableList.add(eventTable);
 			githubEventPanel.add(eventTable);
 		}
+	}
+
+	public void showActivitiesByPerson(String studentName, ArrayList<ActivityModel> arrayList) {
+		JFrame frame = new JFrame("Activities for " + studentName);
+		ActivityTableModel model = new ActivityTableModel(arrayList);
+		JTable table = new JTable(model);
+		JPanel panel = new JPanel();
+		
+		table.setCellSelectionEnabled(false);
+		table.clearSelection();
+		panel.setPreferredSize(new Dimension(POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT));
+		JScrollPane scrollPane = createTablePanel(table, panel);
+		frame.add(scrollPane);
+
+		frame.setLocation(parentTablePanel.getLocation().x + 50, parentTablePanel.getLocation().y + 50);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
 	}
 
 	// ===== NESTED Class: Renderer for main table ===== //
