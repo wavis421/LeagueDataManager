@@ -248,7 +248,7 @@ public class MainFrame extends JFrame {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
-		JMenuItem showStudentActivityItem = new JMenuItem("Show activities ");
+		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
 		tablePopup.add(showStudentActivityItem);
 		tablePopup.add(removeStudentItem);
 
