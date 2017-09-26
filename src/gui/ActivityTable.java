@@ -24,9 +24,9 @@ import model.StudentNameModel;
 public class ActivityTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
-	
+
 	private static final int POPUP_WINDOW_WIDTH = 900;
-	private static final int POPUP_WINDOW_HEIGHT = 300; 
+	private static final int POPUP_WINDOW_HEIGHT = 300;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -35,7 +35,6 @@ public class ActivityTable extends JPanel {
 	private static final int EVENT_TABLE_NUM_COLUMNS = 3;
 
 	private JPanel parentTablePanel;
-	private JPanel githubEventPanel = new JPanel();
 	private JTable mainTable;
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
 	private ActivityTableModel activityTableModel;
@@ -49,13 +48,15 @@ public class ActivityTable extends JPanel {
 		// Create main table-model and table
 		activityTableModel = new ActivityTableModel(activitiesList);
 		mainTable = new JTable(activityTableModel);
-		tableScrollPane = createTablePanel(mainTable, parentTablePanel);
 
 		// Create event sub-table with github comments by date
-		createEventTable(activitiesList);
+		createEventTable(activitiesList, githubEventTableList);
+
+		// Configure table panel
+		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList);
 	}
 
-	private JScrollPane createTablePanel(JTable table, JPanel panel) {
+	private JScrollPane createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList) {
 		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
@@ -67,7 +68,7 @@ public class ActivityTable extends JPanel {
 		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
 
 		// Set table properties
-		table.setDefaultRenderer(Object.class, new ActivityTableRenderer());
+		table.setDefaultRenderer(Object.class, new ActivityTableRenderer(eventList));
 		table.setAutoCreateRowSorter(true);
 
 		panel.setLayout(new BorderLayout());
@@ -77,7 +78,7 @@ public class ActivityTable extends JPanel {
 				.setPreferredSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height - 70));
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		panel.add(scrollPane, BorderLayout.NORTH);
-		
+
 		return scrollPane;
 	}
 
@@ -117,7 +118,7 @@ public class ActivityTable extends JPanel {
 		activityTableModel.setData(activityList);
 
 		// Create github sub-table
-		createEventTable(activityList);
+		createEventTable(activityList, githubEventTableList);
 
 		// Update table
 		activityTableModel.fireTableDataChanged();
@@ -130,14 +131,13 @@ public class ActivityTable extends JPanel {
 		if (activityTableModel.getRowCount() > 0) {
 			activityTableModel.removeAll();
 			githubEventTableList.clear();
-			githubEventPanel.removeAll();
 
 			activityTableModel.fireTableDataChanged();
 		}
 		tableScrollPane.setVisible(false);
 	}
 
-	private void createEventTable(ArrayList<ActivityModel> tableData) {
+	private void createEventTable(ArrayList<ActivityModel> tableData, ArrayList<JTable> eventList) {
 		for (int i = 0; i < tableData.size(); i++) {
 			// Create github sub-table
 			ArrayList<ActivityEventModel> eventData = tableData.get(i).getActivityEventList();
@@ -155,11 +155,10 @@ public class ActivityTable extends JPanel {
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(180);
 
 			// Add renderer
-			eventTable.setDefaultRenderer(Object.class, new ActivityTableRenderer());
+			eventTable.setDefaultRenderer(Object.class, new ActivityTableRenderer(null));
 
 			// Add table to event panel and array list
-			githubEventTableList.add(eventTable);
-			githubEventPanel.add(eventTable);
+			eventList.add(eventTable);
 		}
 	}
 
@@ -168,11 +167,14 @@ public class ActivityTable extends JPanel {
 		ActivityTableModel model = new ActivityTableModel(arrayList);
 		JTable table = new JTable(model);
 		JPanel panel = new JPanel();
-		
+		ArrayList<JTable> eventList = new ArrayList<JTable>();
+
 		table.setCellSelectionEnabled(false);
 		table.clearSelection();
 		panel.setPreferredSize(new Dimension(POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT));
-		JScrollPane scrollPane = createTablePanel(table, panel);
+
+		createEventTable(arrayList, eventList);
+		JScrollPane scrollPane = createTablePanel(table, panel, eventList);
 		frame.add(scrollPane);
 
 		frame.setLocation(parentTablePanel.getLocation().x + 50, parentTablePanel.getLocation().y + 50);
@@ -184,9 +186,12 @@ public class ActivityTable extends JPanel {
 	// ===== NESTED Class: Renderer for main table ===== //
 	public class ActivityTableRenderer extends JLabel implements TableCellRenderer {
 
-		private ActivityTableRenderer() {
+		ArrayList<JTable> eventTable;
+
+		private ActivityTableRenderer(ArrayList<JTable> eventTable) {
 			super();
 			super.setOpaque(true);
+			this.eventTable = eventTable;
 		}
 
 		@Override
@@ -227,17 +232,18 @@ public class ActivityTable extends JPanel {
 
 			} else {
 				// Github comments column
+				int modelRow = table.convertRowIndexToModel(row);
 				if (isSelected && row != eventTableSelectedRow) {
 					// Selecting a new row; remove previous selection
-					for (int i = 0; i < githubEventTableList.size(); i++)
-						githubEventTableList.get(i).clearSelection();
+					for (int i = 0; i < eventTable.size(); i++)
+						eventTable.get(i).clearSelection();
 
 					// Add and track current row selection and update
-					githubEventTableList.get(row).selectAll();
+					eventTable.get(modelRow).selectAll();
 					eventTableSelectedRow = row;
 					mainTable.repaint();
 				}
-				return githubEventTableList.get(row);
+				return eventTable.get(modelRow);
 			}
 		}
 	}

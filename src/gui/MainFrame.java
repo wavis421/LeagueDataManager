@@ -368,7 +368,6 @@ public class MainFrame extends JFrame {
 				if (e.getClickCount() == 2 && table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
 					int row = table.getSelectedRow();
 					if (row > -1) {
-						row = table.convertRowIndexToModel(row);
 						String clientID = (String) table.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
 						activityTable.showActivitiesByPerson(
 								table.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN).toString(),
