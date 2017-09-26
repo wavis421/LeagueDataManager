@@ -438,7 +438,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
-								+ "ORDER BY ClientID, ServiceDate DESC;");
+								+ "ORDER BY ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -470,7 +470,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "EventName='" + className + "' ORDER BY ClientID, ServiceDate DESC;");
+								+ "EventName='" + className + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -503,7 +503,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
 								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
-								+ studentName.getLastName() + "' ORDER BY ClientID, ServiceDate DESC;");
+								+ studentName.getLastName() + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -535,9 +535,10 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "ClientID='" + clientID + "' ORDER BY LastName, FirstName, ServiceDate DESC;");
+								+ "ClientID='" + clientID + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
+				Collections.sort(activityList);
 
 				result.close();
 				selectStmt.close();

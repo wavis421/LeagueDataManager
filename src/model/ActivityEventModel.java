@@ -14,7 +14,7 @@ public class ActivityEventModel {
 		if (githubComments.equals(""))
 			this.githubComments = githubComments;
 		else
-			this.githubComments = "> " + githubComments;
+			this.githubComments = "  > " + githubComments;
 	}
 
 	public String getEventName() {
