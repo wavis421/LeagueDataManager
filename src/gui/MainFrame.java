@@ -145,8 +145,10 @@ public class MainFrame extends JFrame {
 
 		// Add Students sub-menus
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View students not in master DB ");
+		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students with no Attendance data");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
 		studentMenu.add(studentNotInMasterMenu);
+		studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentViewAllMenu);
 
 		// Add activities sub-menus
@@ -157,7 +159,7 @@ public class MainFrame extends JFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentsItem, importActivityLogItem, viewLogDataItem, exitItem);
-		createStudentMenuListeners(studentNotInMasterMenu, studentViewAllMenu);
+		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
@@ -196,12 +198,18 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentViewAll) {
+	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentRemoveInvactive, JMenuItem studentViewAll) {
 		// Set up listeners for STUDENT menu
 		studentNotInMaster.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Show all students not in master database
 				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
+			}
+		});
+		studentRemoveInvactive.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.removeInactiveStudents();
+				// TODO: Refresh table
 			}
 		});
 		studentViewAll.addActionListener(new ActionListener() {
@@ -273,11 +281,12 @@ public class MainFrame extends JFrame {
 				// Get student name for selected row/column
 				int modelRow = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
 				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
+				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 						StudentTableModel.STUDENT_NAME_COLUMN);
 
 				// Display activity table for selected student
-				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByStudentName(studentName),
+				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
 						"  for  " + studentName);
 				studentTable.getTable().clearSelection();
 			}

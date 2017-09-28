@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import model.ActivityModel;
+import model.StudentImportModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.StudentModel;
@@ -56,14 +57,14 @@ public class Controller {
 	public ArrayList<LogDataModel> getDbLogData() {
 		return sqlDb.getDbLogData();
 	}
-	
+
 	/*
 	 * ------- Database Queries -------
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
 		return sqlDb.getAllStudents();
 	}
-	
+
 	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
 		return sqlDb.getStudentByClientID(clientID);
 	}
@@ -71,7 +72,15 @@ public class Controller {
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		return sqlDb.getStudentsNotInMasterDB();
 	}
-	
+
+	public void removeInactiveStudents() {
+		sqlDb.clearDbLogData();
+		sqlDb.removeInactiveStudents();
+		
+		if (sqlDb.getDbLogData().size() > 0)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data for list of students removed");
+	}
+
 	public void removeStudentByClientID(int clientID) {
 		sqlDb.removeStudentByClientID(clientID);
 	}
@@ -87,7 +96,7 @@ public class Controller {
 	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
 		return sqlDb.getActivitiesByStudentName(studentName);
 	}
-	
+
 	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
 		return sqlDb.getActivitiesByClientID(clientID);
 	}
@@ -107,6 +116,7 @@ public class Controller {
 		// TODO: Fix this to get path from user
 		Path pathToFile = Paths.get("C:\\Users\\Wendy\\workspace\\LeagueDataManager\\" + file.getName());
 		String line = "";
+		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -124,21 +134,22 @@ public class Controller {
 			if (line != null)
 				line = br.readLine();
 
-			// Before adding students, clear all 'in master db' flag.
-			// This flag will be set after each student is added or updated.
-			sqlDb.markAllStudentsAsNotInDb();
-
 			while (line != null) {
-				// Create new student
+				// Add student to list
 				String[] fields = line.split(",");
 
-				sqlDb.addStudent(Integer.parseInt(fields[CSV_STUDENT_CLIENTID_IDX]), fields[CSV_STUDENT_LASTNAME_IDX],
-						fields[CSV_STUDENT_FIRSTNAME_IDX], fields[CSV_STUDENT_GITHUB_IDX],
-						fields[CSV_STUDENT_GENDER_IDX], fields[CSV_STUDENT_STARTDATE_IDX],
-						fields[CSV_STUDENT_LOCATION_IDX], fields[CSV_STUDENT_GRAD_YEAR_IDX]);
+				studentList.add(new StudentImportModel(Integer.parseInt(fields[CSV_STUDENT_CLIENTID_IDX]),
+						fields[CSV_STUDENT_LASTNAME_IDX], fields[CSV_STUDENT_FIRSTNAME_IDX],
+						fields[CSV_STUDENT_GITHUB_IDX], fields[CSV_STUDENT_GENDER_IDX],
+						fields[CSV_STUDENT_STARTDATE_IDX], fields[CSV_STUDENT_LOCATION_IDX],
+						fields[CSV_STUDENT_GRAD_YEAR_IDX]));
 
 				line = br.readLine();
 			}
+
+			// Update changes in database
+			if (studentList.size() > 0)
+				sqlDb.importStudents(studentList);
 
 		} catch (IOException e) {
 			System.out.println("Error line: " + line);
@@ -150,7 +161,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (sqlDb.getDbLogData().size() > 0)
-			JOptionPane.showMessageDialog(parent, "Please see Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 
 	public void importActivitiesFromFile(File file) {

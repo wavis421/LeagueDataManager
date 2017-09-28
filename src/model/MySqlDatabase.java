@@ -151,7 +151,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Students WHERE NOT isInMasterDb " + "ORDER BY LastName, FirstName;");
+						"SELECT * FROM Students WHERE NOT isInMasterDb ORDER BY LastName, FirstName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -180,6 +180,42 @@ public class MySqlDatabase {
 			}
 		}
 		return studentList;
+	}
+
+	public void removeInactiveStudents() {
+		// Remove any student not in master DB who have no activity data
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb AND "
+								+ "(SELECT COUNT(*) FROM Activities WHERE Activities.StudentID = Students.StudentID) = 0;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					logData.add(new LogDataModel(LogDataModel.REMOVE_INACTIVE_STUDENT,
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), false),
+							result.getInt("ClientID")));
+
+					removeStudentByClientID(result.getInt("ClientID"));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
 	}
 
 	public StudentModel getStudentByGithubName(String githubName) {
@@ -287,33 +323,114 @@ public class MySqlDatabase {
 		return studentID;
 	}
 
-	public void addStudent(int clientID, String lastName, String firstName, String githubName, String gender,
-			String firstVisitDate, String homeLocation, String gradYear) {
+	public void importStudents(ArrayList<StudentImportModel> importList) {
+		ArrayList<StudentImportModel> dbList = getAllStudentsAsImportData();
+		int dbListIdx = 0;
+		int dbListSize = dbList.size();
 
-		int gradYearAsInt = 0, homeLocNum = 0;
+		StudentImportModel dbStudent;
+		for (int i = 0; i < importList.size(); i++) {
+			StudentImportModel importStudent = importList.get(i);
 
-		if (githubName.equals("") || githubName.equals("\"\"")) {
-			logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
-					new StudentNameModel(firstName, lastName, true), clientID));
-			githubName = null;
-		} else
-			githubName = parseGithubName(githubName);
+			// Log any missing data
+			if (importStudent.getGithubName().equals("")) {
+				logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID()));
+			}
 
-		if (gradYear == null || gradYear.equals("") || gradYear.equals("\"\""))
-			logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
-					new StudentNameModel(firstName, lastName, true), clientID));
-		else
-			gradYearAsInt = Integer.parseInt(gradYear);
+			if (importStudent.getGradYear() == 0)
+				logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID()));
 
-		if (firstVisitDate.equals(""))
-			logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
-					new StudentNameModel(firstName, lastName, true), clientID));
+			if (importStudent.getStartDate().equals(""))
+				logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID()));
 
-		homeLocNum = LocationModel.convertStringToLocation(homeLocation);
-		if (homeLocNum == 0)
-			logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
-					new StudentNameModel(firstName, lastName, true), clientID));
+			if (importStudent.getHomeLocation() == 0)
+				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID()));
 
+			// If at end of DB list, then default operation is insert (1)
+			int compare = 1;
+			if (dbListIdx < dbListSize) {
+				dbStudent = dbList.get(dbListIdx);
+				compare = dbStudent.compareTo(importStudent);
+			}
+
+			if (compare == 0) {
+				// ClientID and all data matches
+				dbListIdx++;
+				continue;
+
+			} else if (compare == -1) {
+				// Extra clientID in database
+				while (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() < importStudent.getClientID()) {
+					// Mark student as not in master DB
+					updateStudent(dbList.get(dbListIdx), 0);
+					dbListIdx++;
+				}
+				if (dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
+					// Now that clientID's match, compare and update again
+					if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
+						updateStudent(importStudent, 1);
+					}
+					dbListIdx++;
+				}
+
+			} else if (compare == 1) {
+				// Insert new student into DB
+				insertStudent(importStudent);
+
+			} else {
+				// ClientID matches but data has changed
+				updateStudent(importStudent, 1);
+				dbListIdx++;
+			}
+		}
+	}
+
+	private ArrayList<StudentImportModel> getAllStudentsAsImportData() {
+		ArrayList<StudentImportModel> nameList = new ArrayList<StudentImportModel>();
+
+		// Convert student data to import data format
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students ORDER BY ClientID;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					nameList.add(new StudentImportModel(result.getInt("ClientID"), result.getString("LastName"),
+							result.getString("FirstName"), result.getString("GithubName"), result.getInt("Gender"),
+							result.getDate("StartDate").toString(), result.getInt("Location"),
+							result.getInt("GradYear"), result.getInt("isInMasterDb")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Student database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return nameList;
+	}
+
+	private void insertStudent(StudentImportModel student) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
@@ -321,27 +438,32 @@ public class MySqlDatabase {
 								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1);");
 
 				int col = 1;
-				addStudentStmt.setInt(col++, clientID);
-				addStudentStmt.setString(col++, lastName);
-				addStudentStmt.setString(col++, firstName);
-				addStudentStmt.setString(col++, githubName);
-				addStudentStmt.setInt(col++, GenderModel.convertStringToGender(gender));
-				if (!firstVisitDate.equals(""))
-					addStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
+				addStudentStmt.setInt(col++, student.getClientID());
+				addStudentStmt.setString(col++, student.getLastName());
+				addStudentStmt.setString(col++, student.getFirstName());
+				if (student.getGithubName().equals(""))
+					addStudentStmt.setString(col++, null);
+				else
+					addStudentStmt.setString(col++, student.getGithubName());
+				addStudentStmt.setInt(col++, student.getGender());
+				if (!student.getStartDate().equals(""))
+					addStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
 				else
 					addStudentStmt.setDate(col++, null);
-				addStudentStmt.setInt(col++, homeLocNum);
-				addStudentStmt.setInt(col++, gradYearAsInt);
+				addStudentStmt.setInt(col++, student.getHomeLocation());
+				addStudentStmt.setInt(col++, student.getGradYear());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
 
-				if (githubName == null)
+				if (student.getGithubName() == null)
 					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT_NO_GITHUB,
-							new StudentNameModel(firstName, lastName, true), clientID));
+							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
+							student.getClientID()));
 				else
 					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
-							new StudentNameModel(firstName, lastName, true), clientID));
+							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
+							student.getClientID()));
 				break;
 
 			} catch (CommunicationsException e1) {
@@ -351,28 +473,44 @@ public class MySqlDatabase {
 					connectDatabase();
 				}
 
-			} catch (SQLIntegrityConstraintViolationException e2) {
-				// Student already exists, so update instead
-				updateStudent(clientID, lastName, firstName, githubName, firstVisitDate, homeLocNum, gradYearAsInt);
-				break;
-
-			} catch (SQLException e3) {
-				System.out.println("Add student database failure: " + e3.getMessage());
+			} catch (SQLException e2) {
+				System.out.println("Add student database failure: " + e2.getMessage());
 				break;
 			}
 		}
 	}
 
-	public void markAllStudentsAsNotInDb() {
-		// This is used prior to a Student DB import. The Student DB field
-		// 'isInMasterDb' is cleared to detect obsolete entries after import.
+	private void updateStudent(StudentImportModel student, int isInDb) {
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement updateStudentStmt = dbConnection
-						.prepareStatement("UPDATE Students SET isInMasterDb=0;");
+				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
+						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
+								+ "WHERE ClientID=?;");
+
+				int col = 1;
+				updateStudentStmt.setString(col++, student.getLastName());
+				updateStudentStmt.setString(col++, student.getFirstName());
+				if (student.getGithubName().equals(""))
+					updateStudentStmt.setString(col++, null);
+				else
+					updateStudentStmt.setString(col++, student.getGithubName());
+				if (!student.getStartDate().equals(""))
+					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
+				else {
+					updateStudentStmt.setDate(col++, null);
+				}
+				updateStudentStmt.setInt(col++, student.getHomeLocation());
+				updateStudentStmt.setInt(col++, student.getGradYear());
+				updateStudentStmt.setInt(col++, isInDb);
+				updateStudentStmt.setInt(col, student.getClientID());
+
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
-				return;
+
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT,
+						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
+						student.getClientID()));
+				break;
 
 			} catch (CommunicationsException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
@@ -381,51 +519,11 @@ public class MySqlDatabase {
 					connectDatabase();
 				}
 
-			} catch (SQLException e) {
-				System.out.println("Update student database failure: " + e.getMessage());
+			} catch (SQLException e2) {
+				System.out.println("Update student database failure: " + e2.getMessage());
+				break;
 			}
 		}
-	}
-
-	private void updateStudent(int clientID, String lastName, String firstName, String githubName,
-			String firstVisitDate, int homeLocNum, int gradYear) {
-
-		PreparedStatement updateStudentStmt;
-		try {
-			updateStudentStmt = dbConnection.prepareStatement(
-					"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
-							+ "WHERE ClientID=?;");
-
-			int col = 1;
-			updateStudentStmt.setString(col++, lastName);
-			updateStudentStmt.setString(col++, firstName);
-			updateStudentStmt.setString(col++, githubName);
-			if (!firstVisitDate.equals(""))
-				updateStudentStmt.setDate(col++, java.sql.Date.valueOf(firstVisitDate));
-			else {
-				updateStudentStmt.setDate(col++, null);
-			}
-			updateStudentStmt.setInt(col++, homeLocNum);
-			updateStudentStmt.setInt(col++, gradYear);
-			updateStudentStmt.setInt(col++, 1);
-			updateStudentStmt.setInt(col, clientID);
-
-			updateStudentStmt.executeUpdate();
-			updateStudentStmt.close();
-			return;
-
-		} catch (SQLException e) {
-			System.out.println("Update student database failure: " + e.getMessage());
-		}
-	}
-
-	private String parseGithubName(String githubName) {
-		int index = githubName.indexOf('(');
-		if (index != -1)
-			githubName = githubName.substring(0, index);
-		githubName.trim();
-
-		return githubName;
 	}
 
 	/*
@@ -470,7 +568,9 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "EventName='" + className + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
+								+ "EventName=? ORDER BY ClientID, ServiceDate DESC, EventName;");
+				selectStmt.setString(1, className);
+
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -535,7 +635,9 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "ClientID='" + clientID + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
+								+ "ClientID=? ORDER BY ClientID, ServiceDate DESC, EventName;");
+				selectStmt.setInt(1, Integer.parseInt(clientID));
+
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -665,8 +767,8 @@ public class MySqlDatabase {
 			}
 
 			try {
-				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities ("
-						+ "StudentID, ServiceDate, EventName, Comments) VALUES (" + "?, ?, ?, ?);");
+				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities "
+						+ "(StudentID, ServiceDate, EventName, Comments) VALUES (?, ?, ?, ?);");
 
 				int col = 1;
 				addActivityStmt.setInt(col++, studentID);
