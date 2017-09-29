@@ -20,16 +20,15 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class Controller {
-	// TODO: Get rid of NumVisits when exporting from FrontDesk
 	// CSV Student Table indices
-	private static final int CSV_STUDENT_LOCATION_IDX = 2;
-	private static final int CSV_STUDENT_STARTDATE_IDX = 3;
-	private static final int CSV_STUDENT_FIRSTNAME_IDX = 4;
-	private static final int CSV_STUDENT_LASTNAME_IDX = 5;
-	private static final int CSV_STUDENT_CLIENTID_IDX = 6;
-	private static final int CSV_STUDENT_GENDER_IDX = 7;
-	private static final int CSV_STUDENT_GRAD_YEAR_IDX = 8;
-	private static final int CSV_STUDENT_GITHUB_IDX = 9;
+	private static final int CSV_STUDENT_LOCATION_IDX = 0;
+	private static final int CSV_STUDENT_STARTDATE_IDX = 1;
+	private static final int CSV_STUDENT_FIRSTNAME_IDX = 2;
+	private static final int CSV_STUDENT_LASTNAME_IDX = 3;
+	private static final int CSV_STUDENT_CLIENTID_IDX = 4;
+	private static final int CSV_STUDENT_GENDER_IDX = 5;
+	private static final int CSV_STUDENT_GRAD_YEAR_IDX = 6;
+	private static final int CSV_STUDENT_GITHUB_IDX = 7;
 
 	// CSV Enrollment table indices
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
@@ -113,8 +112,7 @@ public class Controller {
 	 * ------- File import/export -------
 	 */
 	public void importStudentsFromFile(File file) {
-		// TODO: Fix this to get path from user
-		Path pathToFile = Paths.get("C:\\Users\\Wendy\\workspace\\LeagueDataManager\\" + file.getName());
+		Path pathToFile = Paths.get(file.getAbsolutePath());
 		String line = "";
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
@@ -165,8 +163,7 @@ public class Controller {
 	}
 
 	public void importActivitiesFromFile(File file) {
-		// TODO: Fix this to get path from user
-		Path pathToFile = Paths.get("C:\\Users\\Wendy\\workspace\\LeagueDataManager\\" + file.getName());
+		Path pathToFile = Paths.get(file.getAbsolutePath());
 		String line = "";
 
 		// Set cursor to "wait" cursor

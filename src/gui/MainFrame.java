@@ -209,7 +209,7 @@ public class MainFrame extends JFrame {
 		studentRemoveInvactive.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.removeInactiveStudents();
-				// TODO: Refresh table
+				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
 		studentViewAll.addActionListener(new ActionListener() {

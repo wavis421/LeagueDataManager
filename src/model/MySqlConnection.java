@@ -2,9 +2,9 @@ package model;
 
 import java.awt.Cursor;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -131,11 +131,11 @@ public class MySqlConnection {
 
 	// TODO: MySqlDatabase should use this method
 	// Works ONLY FOR single query (one SELECT or one DELETE etc)
-	public static ResultSet executeMyQuery(String query, String dataBaseName) {
+	public static ResultSet executeMyQuery(String query) {
 		ResultSet resultSet = null;
 
 		try {
-			Statement stmt = connection.createStatement();
+			PreparedStatement stmt = connection.prepareStatement(query);
 			resultSet = stmt.executeQuery(query);
 
 		} catch (SQLException e) {

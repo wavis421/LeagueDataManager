@@ -349,7 +349,7 @@ public class MySqlDatabase {
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID()));
 
-			if (importStudent.getHomeLocation() == 0)
+			if (importStudent.getHomeLocation() == LocationModel.CLASS_LOCATION_UNKNOWN)
 				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID()));
@@ -370,7 +370,8 @@ public class MySqlDatabase {
 				// Extra clientID in database
 				while (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() < importStudent.getClientID()) {
 					// Mark student as not in master DB
-					updateStudent(dbList.get(dbListIdx), 0);
+					if (dbList.get(dbListIdx).getIsInMasterDb() == 1)
+						updateStudent(dbList.get(dbListIdx), 0);
 					dbListIdx++;
 				}
 				if (dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {

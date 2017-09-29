@@ -2,7 +2,7 @@ package model;
 
 public class LocationModel {
 	// This method seems to be more efficient than ENUM type
-	private static final int CLASS_LOCATION_UNKNOWN = 0;
+	public static final int CLASS_LOCATION_UNKNOWN = 0;
 	private static final int CLASS_LOCATION_CARMEL_VALLEY = 1;
 	private static final int CLASS_LOCATION_DOWNTOWN_CENTRAL_LIBRARY = 2;
 	private static final int CLASS_LOCATION_MALCOLM_X = 3;
