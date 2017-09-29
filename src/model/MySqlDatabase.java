@@ -763,7 +763,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			int studentID = getStudentIDFromClientID(clientID);
 			if (studentID < 0) {
-				System.out.println("No student for Client ID " + clientID);
+				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, new StudentNameModel("", "", false),
+						clientID));
 				break;
 			}
 

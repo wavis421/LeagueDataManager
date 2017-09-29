@@ -75,7 +75,7 @@ public class Controller {
 	public void removeInactiveStudents() {
 		sqlDb.clearDbLogData();
 		sqlDb.removeInactiveStudents();
-		
+
 		if (sqlDb.getDbLogData().size() > 0)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data for list of students removed");
 	}
@@ -123,9 +123,8 @@ public class Controller {
 		sqlDb.clearDbLogData();
 
 		// CSV file has the following columns:
-		// Birth date, Completed Visits, Home Location, First Visit Date, First Name,
-		// Last Name, Client ID, gender, year graduating high school, Github account
-		// name
+		// Home Location, First Visit Date, First Name, Last Name,
+		// Client ID, gender, high school grad year, Github user name
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
 			// Toss header line
 			line = br.readLine();
@@ -170,6 +169,9 @@ public class Controller {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
+		// Clear log data
+		sqlDb.clearDbLogData();
+
 		// CSV file has the following columns:
 		// Student name, service date, event name, clientID, Schedule ID
 		try (BufferedReader br = Files.newBufferedReader(pathToFile)) {
@@ -206,5 +208,9 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		if (sqlDb.getDbLogData().size() > 0)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 }

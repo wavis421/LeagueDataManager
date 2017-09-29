@@ -21,7 +21,6 @@ public class LocationModel {
 		else if (classString.startsWith("Wilson Middle School"))
 			return CLASS_LOCATION_WILSON_MIDDLE_SCHOOL;
 		else {
-			System.out.println("Unexpected class string: " + classString);
 			return CLASS_LOCATION_UNKNOWN;
 		}
 	}
