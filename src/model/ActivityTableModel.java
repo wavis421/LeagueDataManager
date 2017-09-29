@@ -23,7 +23,7 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	private void initializeTableData(ArrayList<ActivityModel> db) {
 		tableObjects = new Object[db.size()][TABLE_NUM_COLUMNS];
-		
+
 		for (int row = 0; row < db.size(); row++) {
 			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
 			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
@@ -33,7 +33,12 @@ public class ActivityTableModel extends AbstractTableModel {
 	}
 
 	public void removeAll() {
-		// TODO: How to clear array data?
+		for (int i = 0; i < tableObjects.length; i++) {
+			for (int j = 0; j < TABLE_NUM_COLUMNS; j++) {
+				tableObjects[i][j] = null;
+			}
+		}
+		tableObjects = null;
 	}
 
 	@Override
@@ -48,7 +53,10 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return tableObjects.length;
+		if (tableObjects == null)
+			return 0;
+		else
+			return tableObjects.length;
 	}
 
 	@Override

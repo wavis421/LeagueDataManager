@@ -13,9 +13,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import model.ActivityModel;
-import model.StudentImportModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
 
@@ -144,6 +144,7 @@ public class Controller {
 
 				line = br.readLine();
 			}
+			br.close();
 
 			// Update changes in database
 			if (studentList.size() > 0)
@@ -196,6 +197,7 @@ public class Controller {
 
 				line = br.readLine();
 			}
+			br.close();
 
 		} catch (IOException e) {
 			System.out.println("Error line: " + line);

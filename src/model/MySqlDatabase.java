@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
+import gui.MainFrame;
+
 public class MySqlDatabase {
 	private static Connection dbConnection = null;
 	private JFrame parent;
@@ -45,15 +47,13 @@ public class MySqlDatabase {
 						"Failure connecting to database", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
 				if (answer == JOptionPane.NO_OPTION) {
 					// Exit program
-					// TODO: Figure out how to dispose of MainFrame
-					System.exit(0);
+					MainFrame.shutdown();
+
 				} else if (connectAttempts >= MAX_CONNECTION_ATTEMPTS) {
 					JOptionPane.showMessageDialog(null,
 							"Exceeded maximum connection attempts.\nPlease try again later.");
 					// Exit program
-					// TODO: Should have 1 place where program exits
-					// TODO: Add cleanup of MainFrame
-					System.exit(0);
+					MainFrame.shutdown();
 				}
 			} else
 				break;

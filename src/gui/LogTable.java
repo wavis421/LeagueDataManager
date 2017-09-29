@@ -70,7 +70,6 @@ public class LogTable extends JPanel {
 	public void removeData() {
 		if (logTableModel.getRowCount() > 0) {
 			logTableModel.removeAll();
-			logTableModel.fireTableDataChanged();
 		}
 
 		scrollPane.setVisible(false);

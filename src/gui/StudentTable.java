@@ -81,7 +81,6 @@ public class StudentTable extends JPanel {
 	public void removeData() {
 		if (studentTableModel.getRowCount() > 0) {
 			studentTableModel.removeAll();
-			studentTableModel.fireTableDataChanged();
 		}
 
 		scrollPane.setVisible(false);

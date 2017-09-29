@@ -2,8 +2,6 @@ package model;
 
 import java.awt.Cursor;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.swing.JFrame;
@@ -12,6 +10,8 @@ import javax.swing.JOptionPane;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+
+import gui.MainFrame;
 
 public class MySqlConnection {
 	// Constants
@@ -34,7 +34,7 @@ public class MySqlConnection {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// If re-connecting, close current database connection
-		CloseDataBaseConnection();
+		closeDataBaseConnection();
 		if (session != null && !session.isConnected()) {
 			session = null;
 		}
@@ -67,13 +67,14 @@ public class MySqlConnection {
 			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
 
 		} catch (Exception e) {
-			// TODO: Figure out how to exit cleanly (maybe in Utilities?)
+			// Ask if user wants to exit
 			if (JOptionPane.showOptionDialog(null,
 					"Failed to establish a secure SSH tunnel.\n(" + e.getMessage() + ")\n"
 							+ "Please make sure Program Planner is not already running.\n\nDo you want to continue?\n",
 					"Failed to create secure connection", 0, JOptionPane.PLAIN_MESSAGE, null,
 					new String[] { "Yes", "Exit Program" }, 0) != JOptionPane.YES_OPTION) {
-				System.exit(0);
+
+				MainFrame.shutdown();
 			}
 		}
 	}
@@ -107,11 +108,11 @@ public class MySqlConnection {
 	}
 
 	public static void closeConnections() {
-		CloseDataBaseConnection();
-		CloseSSHConnection();
+		closeDataBaseConnection();
+		closeSSHConnection();
 	}
 
-	private static void CloseDataBaseConnection() {
+	private static void closeDataBaseConnection() {
 		try {
 			if (connection != null) {
 				connection.close();
@@ -122,26 +123,10 @@ public class MySqlConnection {
 		connection = null;
 	}
 
-	private static void CloseSSHConnection() {
+	private static void closeSSHConnection() {
 		if (session != null) {
 			session.disconnect();
 			session = null;
 		}
-	}
-
-	// TODO: MySqlDatabase should use this method
-	// Works ONLY FOR single query (one SELECT or one DELETE etc)
-	public static ResultSet executeMyQuery(String query) {
-		ResultSet resultSet = null;
-
-		try {
-			PreparedStatement stmt = connection.prepareStatement(query);
-			resultSet = stmt.executeQuery(query);
-
-		} catch (SQLException e) {
-			System.out.println("Database query error: " + e.getMessage());
-		}
-
-		return resultSet;
 	}
 }

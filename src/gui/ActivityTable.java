@@ -134,8 +134,6 @@ public class ActivityTable extends JPanel {
 		if (activityTableModel.getRowCount() > 0) {
 			activityTableModel.removeAll();
 			githubEventTableList.clear();
-
-			activityTableModel.fireTableDataChanged();
 		}
 		tableScrollPane.setVisible(false);
 	}

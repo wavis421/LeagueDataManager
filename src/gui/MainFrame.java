@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -37,7 +39,7 @@ import model.ActivityTableModel;
 import model.StudentNameModel;
 import model.StudentTableModel;
 
-public class MainFrame extends JFrame {
+public class MainFrame {
 	/* Private constants */
 	private static final int PREF_FRAME_WIDTH = 975;
 	private static final int PREF_FRAME_HEIGHT = 700;
@@ -75,25 +77,26 @@ public class MainFrame extends JFrame {
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 	private String selectedClassName;
+	private static JFrame frame = new JFrame();
 
 	public MainFrame() {
-		super("League Data Manager");
-		setLayout(new BorderLayout());
-		setBackground(Color.WHITE);
+		frame.setTitle("League Data Manager");
+		frame.setLayout(new BorderLayout());
+		frame.setBackground(Color.WHITE);
 
 		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
-		setIconImage(icon.getImage());
+		frame.setIconImage(icon.getImage());
 
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
-		add(mainPanel);
+		frame.add(mainPanel);
 
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
 		headerLabel.setFont(CustomFonts.TITLE_FONT);
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
-		controller = new Controller((JFrame) MainFrame.this);
+		controller = new Controller(frame);
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		headerLabel.setText(STUDENT_TITLE);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
@@ -108,15 +111,22 @@ public class MainFrame extends JFrame {
 		fileChooser = new JFileChooser();
 		fileFilter = new FileFilterCsv();
 
-		setJMenuBar(createMenuBar());
+		frame.setJMenuBar(createMenuBar());
 		fileChooser.addChoosableFileFilter(fileFilter);
 		fileChooser.setFileFilter(fileFilter);
 
 		// Make form visible
-		pack();
-		setSize(PREF_FRAME_WIDTH, PREF_FRAME_HEIGHT);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
+		frame.pack();
+		frame.setSize(PREF_FRAME_WIDTH, PREF_FRAME_HEIGHT);
+		frame.setVisible(true);
+
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				shutdown();
+			}
+		});
 	}
 
 	private JMenuBar createMenuBar() {
@@ -145,7 +155,7 @@ public class MainFrame extends JFrame {
 
 		// Add Students sub-menus
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View students not in master DB ");
-		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students with no Attendance data");
+		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
 		studentMenu.add(studentNotInMasterMenu);
 		studentMenu.add(studentRemoveInactiveMenu);
@@ -170,7 +180,7 @@ public class MainFrame extends JFrame {
 		// Set up listeners for FILE menu
 		importStudents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
 					refreshStudentTable(STUDENT_TABLE_ALL, 0);
 				}
@@ -178,7 +188,7 @@ public class MainFrame extends JFrame {
 		});
 		importActivites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
 					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 				}
@@ -191,14 +201,13 @@ public class MainFrame extends JFrame {
 		});
 		exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.disconnectDatabase();
-				dispose();
-				System.gc();
+				shutdown();
 			}
 		});
 	}
 
-	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentRemoveInvactive, JMenuItem studentViewAll) {
+	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentRemoveInvactive,
+			JMenuItem studentViewAll) {
 		// Set up listeners for STUDENT menu
 		studentNotInMaster.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -363,7 +372,8 @@ public class MainFrame extends JFrame {
 					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
 							&& currentActivityTable != ACTIVITY_TABLE_BY_CLASS) {
 						// Show students by class name
-						selectedClassName = activityTable.getClassNameByRow(table.convertRowIndexToModel(row), e.getY());
+						selectedClassName = activityTable.getClassNameByRow(table.convertRowIndexToModel(row),
+								e.getY());
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);
 							tablePopup.add(showStudentClassItem);
@@ -372,6 +382,7 @@ public class MainFrame extends JFrame {
 					}
 				}
 			}
+
 			public void mouseClicked(MouseEvent e) {
 				JTable table = activityTable.getTable();
 				if (e.getClickCount() == 2 && table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
@@ -441,5 +452,12 @@ public class MainFrame extends JFrame {
 			activityTable.removeData();
 		if (logTable != null)
 			logTable.removeData();
+	}
+
+	public static void shutdown() {
+		// Disconnect database and dispose of frame before exiting
+		controller.disconnectDatabase();
+		frame.dispose();
+		System.exit(0);
 	}
 }
