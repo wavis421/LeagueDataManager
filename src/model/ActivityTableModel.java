@@ -61,7 +61,10 @@ public class ActivityTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return tableObjects[0][columnIndex].getClass();
+		if (tableObjects == null || tableObjects.length == 0)
+			return Object.class;
+		else
+			return tableObjects[0][columnIndex].getClass();
 	}
 
 	@Override

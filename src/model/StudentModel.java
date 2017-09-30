@@ -3,15 +3,14 @@ package model;
 import java.sql.Date;
 
 public class StudentModel implements Comparable<StudentModel> {
-	private int studentID, clientID;
+	private int clientID;
 	private String githubName;
 	private int homeLocation, gender, gradYear;
 	private Date startDate;
 	private StudentNameModel nameModel;
 
-	public StudentModel(int personID, int clientID, StudentNameModel nameModel, String githubName, int gender,
+	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender,
 			Date startDate, int homeLocation, int gradYear) {
-		this.studentID = personID;
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.githubName = githubName;
@@ -39,10 +38,6 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public int getGradYear() {
 		return gradYear;
-	}
-
-	public int getPersonID() {
-		return studentID;
 	}
 
 	public String getLastName() {

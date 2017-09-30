@@ -91,7 +91,7 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					nameList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+					nameList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
@@ -155,7 +155,7 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					studentList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+					studentList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
@@ -188,7 +188,7 @@ public class MySqlDatabase {
 			try {
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb AND "
-								+ "(SELECT COUNT(*) FROM Activities WHERE Activities.StudentID = Students.StudentID) = 0;");
+								+ "(SELECT COUNT(*) FROM Activities WHERE Activities.ClientID = Students.ClientID) = 0;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -229,7 +229,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
-					student = new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+					student = new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
@@ -266,7 +266,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				if (result.next()) {
-					studentList.add(new StudentModel(result.getInt("StudentID"), result.getInt("ClientID"),
+					studentList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
@@ -290,37 +290,6 @@ public class MySqlDatabase {
 			}
 		}
 		return studentList;
-	}
-
-	public int getStudentIDFromClientID(int clientID) {
-		int studentID = -1;
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT StudentID FROM Students WHERE ClientID=?;");
-				selectStmt.setInt(1, clientID);
-
-				ResultSet result = selectStmt.executeQuery();
-				if (result.next())
-					studentID = result.getInt("StudentID");
-
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				}
-
-			} catch (SQLException e2) {
-				System.out.println("Get Student ID database error: " + e2.getMessage());
-				break;
-			}
-		}
-		return studentID;
 	}
 
 	public void importStudents(ArrayList<StudentImportModel> importList) {
@@ -508,7 +477,7 @@ public class MySqlDatabase {
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT,
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_INFO,
 						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
 						student.getClientID()));
 				break;
@@ -536,8 +505,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID "
-								+ "ORDER BY ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID "
+								+ "ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -568,8 +537,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "EventName=? ORDER BY ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
+								+ "EventName=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -602,9 +571,10 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
-								+ studentName.getLastName() + "' ORDER BY ClientID, ServiceDate DESC, EventName;");
+								+ studentName.getLastName()
+								+ "' ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getActivitiesList(activityList, result);
 				Collections.sort(activityList);
@@ -635,8 +605,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.StudentID = Students.StudentID AND "
-								+ "ClientID=? ORDER BY ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
+								+ "Activities.ClientID=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();
@@ -761,19 +731,13 @@ public class MySqlDatabase {
 
 	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
 		for (int i = 0; i < 2; i++) {
-			int studentID = getStudentIDFromClientID(clientID);
-			if (studentID < 0) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, new StudentNameModel("", "", false),
-						clientID));
-				break;
-			}
-
+			// TODO: Make sure student exists before trying to add data
 			try {
 				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities "
-						+ "(StudentID, ServiceDate, EventName, Comments) VALUES (?, ?, ?, ?);");
+						+ "(ClientID, ServiceDate, EventName, Comments) VALUES (?, ?, ?, ?);");
 
 				int col = 1;
-				addActivityStmt.setInt(col++, studentID);
+				addActivityStmt.setInt(col++, clientID);
 				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 				addActivityStmt.setString(col++, eventName);
 				addActivityStmt.setString(col++, comments);
@@ -790,9 +754,9 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLIntegrityConstraintViolationException e2) {
-				// Activity already exists, so update
+				// Attendance data already exists, so update
 				if (!comments.equals(""))
-					updateActivity(studentID, serviceDate, eventName, comments);
+					updateActivity(clientID, serviceDate, eventName, comments);
 				break;
 
 			} catch (SQLException e3) {
@@ -803,22 +767,24 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void updateActivity(int studentID, String serviceDate, String eventName, String comments) {
+	private void updateActivity(int clientID, String serviceDate, String eventName, String comments) {
 		PreparedStatement updateActivityStmt;
 		try {
 			// The only field that should be updated is the comments
 			updateActivityStmt = dbConnection.prepareStatement(
-					"UPDATE Activities SET Comments=? WHERE StudentID=? AND ServiceDate=? AND EventName=?;");
+					"UPDATE Activities SET Comments=? WHERE ClientID=? AND ServiceDate=? AND EventName=?;");
 
 			int col = 1;
 			updateActivityStmt.setString(col++, comments);
-			updateActivityStmt.setInt(col++, studentID);
+			updateActivityStmt.setInt(col++, clientID);
 			updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 			updateActivityStmt.setString(col++, eventName);
 
 			updateActivityStmt.executeUpdate();
 			updateActivityStmt.close();
-			System.out.println("Updated student ID = " + studentID + ", comments: " + comments);
+
+			logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, new StudentNameModel("", "", true),
+					clientID));
 			return;
 
 		} catch (SQLException e) {
