@@ -14,10 +14,10 @@ public class LogDataModel {
 	public static final int STUDENT_NOT_FOUND = 10;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
-			"Missing First Visit date", "Missing Home Location", "Adding new Student",
-			"Adding new Student with no Github user name", "Updating Student Information", 
-			"Updating Student Attendance Data", "Invalid Class Name",
-			"Removing inactive student", "Attendance data with no matching student"};
+			"Missing First Visit date", "Missing Home Location", "Added new Student",
+			"Added new Student with no Github user name", "Updated Student Information", 
+			"Updated Student Attendance Data", "Invalid Class Name",
+			"Removed inactive student", "Attendance data with no matching student"};
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

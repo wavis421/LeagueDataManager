@@ -761,7 +761,7 @@ public class MySqlDatabase {
 
 			} catch (SQLException e3) {
 				System.out.println(
-						"Add activity failure for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
+						"Failed to add attendance data for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
 				break;
 			}
 		}
