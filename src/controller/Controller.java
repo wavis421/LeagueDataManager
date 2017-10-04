@@ -109,7 +109,7 @@ public class Controller {
 	}
 
 	/*
-	 * ------- File import/export -------
+	 * ------- File & data import/export -------
 	 */
 	public void importStudentsFromFile(File file) {
 		Path pathToFile = Paths.get(file.getAbsolutePath());
@@ -194,7 +194,7 @@ public class Controller {
 				// Create new student
 				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
 					sqlDb.addActivity(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]),
-							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName, "");
+							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName);
 				}
 
 				line = br.readLine();
@@ -205,6 +205,23 @@ public class Controller {
 			System.out.println("Error line: " + line);
 			// e.printStackTrace();
 		}
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		if (sqlDb.getDbLogData().size() > 0)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+	}
+
+	public void importGithubComments() {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Clear log data
+		sqlDb.clearDbLogData();
+
+		sqlDb.importGithubComments();
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());

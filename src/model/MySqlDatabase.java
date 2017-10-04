@@ -1,5 +1,7 @@
 package model;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +10,11 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -194,7 +201,7 @@ public class MySqlDatabase {
 				while (result.next()) {
 					logData.add(new LogDataModel(LogDataModel.REMOVE_INACTIVE_STUDENT,
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), false),
-							result.getInt("ClientID")));
+							result.getInt("ClientID"), ""));
 
 					removeStudentByClientID(result.getInt("ClientID"));
 				}
@@ -305,23 +312,23 @@ public class MySqlDatabase {
 			if (importStudent.getGithubName().equals("")) {
 				logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID()));
+						importStudent.getClientID(), ""));
 			}
 
 			if (importStudent.getGradYear() == 0)
 				logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID()));
+						importStudent.getClientID(), ""));
 
 			if (importStudent.getStartDate().equals(""))
 				logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID()));
+						importStudent.getClientID(), ""));
 
 			if (importStudent.getHomeLocation() == LocationModel.CLASS_LOCATION_UNKNOWN)
 				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID()));
+						importStudent.getClientID(), ""));
 
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
@@ -429,11 +436,11 @@ public class MySqlDatabase {
 				if (student.getGithubName() == null)
 					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT_NO_GITHUB,
 							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-							student.getClientID()));
+							student.getClientID(), ""));
 				else
 					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
 							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-							student.getClientID()));
+							student.getClientID(), ""));
 				break;
 
 			} catch (CommunicationsException e1) {
@@ -479,7 +486,7 @@ public class MySqlDatabase {
 
 				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_INFO,
 						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-						student.getClientID()));
+						student.getClientID(), ""));
 				break;
 
 			} catch (CommunicationsException e1) {
@@ -633,6 +640,43 @@ public class MySqlDatabase {
 		return activityList;
 	}
 
+	private ArrayList<ActivityEventModel> getEventsWithNoComments() {
+		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
+								+ "Comments IS NULL AND GithubName IS NOT NULL;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					eventList.add(new ActivityEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
+							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
+							result.getString("Comments"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Activity database error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return eventList;
+	}
+
 	private void getActivitiesList(ArrayList<ActivityModel> activityList, ResultSet result) {
 		int lastClientID = -1;
 		ActivityModel lastActivityModel = null;
@@ -642,16 +686,21 @@ public class MySqlDatabase {
 				int thisClientID = result.getInt("Students.ClientID");
 				if (lastClientID == thisClientID) {
 					// Add more data to existing client
-					lastActivityModel.addActivityData(new ActivityEventModel(result.getDate("ServiceDate"),
-							result.getString("EventName"), result.getString("Comments")));
+					lastActivityModel.addActivityData(new ActivityEventModel(result.getInt("ClientID"),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 
 				} else {
 					// Create student model for new client
 					lastActivityModel = new ActivityModel(thisClientID,
 							new StudentNameModel(result.getString("Students.FirstName"),
 									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
-							new ActivityEventModel(result.getDate("ServiceDate"), result.getString("EventName"),
-									result.getString("Comments")));
+							result.getString("GithubName"),
+							new ActivityEventModel(result.getInt("CLientID"), result.getDate("ServiceDate"),
+									result.getString("EventName"), result.getString("GithubName"),
+									result.getString("RepoName"), result.getString("Comments"), new StudentNameModel(
+											result.getString("FirstName"), result.getString("LastName"), true)));
 					activityList.add(lastActivityModel);
 					lastClientID = thisClientID;
 				}
@@ -729,18 +778,17 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
-	public void addActivity(int clientID, String serviceDate, String eventName, String comments) {
+	public void addActivity(int clientID, String serviceDate, String eventName) {
 		for (int i = 0; i < 2; i++) {
 			// TODO: Make sure student exists before trying to add data
 			try {
-				PreparedStatement addActivityStmt = dbConnection.prepareStatement("INSERT INTO Activities "
-						+ "(ClientID, ServiceDate, EventName, Comments) VALUES (?, ?, ?, ?);");
+				PreparedStatement addActivityStmt = dbConnection.prepareStatement(
+						"INSERT INTO Activities " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
 
 				int col = 1;
 				addActivityStmt.setInt(col++, clientID);
 				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 				addActivityStmt.setString(col++, eventName);
-				addActivityStmt.setString(col++, comments);
 
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
@@ -754,41 +802,114 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLIntegrityConstraintViolationException e2) {
-				// Attendance data already exists, so update
-				if (!comments.equals(""))
-					updateActivity(clientID, serviceDate, eventName, comments);
+				// Attendance data already exists, do nothing
 				break;
 
 			} catch (SQLException e3) {
-				System.out.println(
-						"Failed to add attendance data for ID=" + clientID + ", event=" + eventName + ": " + e3.getMessage());
+				System.out.println("Failed to add attendance data for ID=" + clientID + ", event=" + eventName + ": "
+						+ e3.getMessage());
 				break;
 			}
 		}
 	}
 
-	private void updateActivity(int clientID, String serviceDate, String eventName, String comments) {
+	private void updateActivity(int clientID, StudentNameModel nameModel, String serviceDate, String repoName,
+			String comments) {
 		PreparedStatement updateActivityStmt;
 		try {
-			// The only field that should be updated is the comments
+			// The only fields that should be updated are the comments and repo name
 			updateActivityStmt = dbConnection.prepareStatement(
-					"UPDATE Activities SET Comments=? WHERE ClientID=? AND ServiceDate=? AND EventName=?;");
+					"UPDATE Activities SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
 
 			int col = 1;
 			updateActivityStmt.setString(col++, comments);
+			updateActivityStmt.setString(col++, repoName);
 			updateActivityStmt.setInt(col++, clientID);
 			updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-			updateActivityStmt.setString(col++, eventName);
 
 			updateActivityStmt.executeUpdate();
 			updateActivityStmt.close();
 
-			logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, new StudentNameModel("", "", true),
-					clientID));
+			logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
+					" for repo " + repoName + " (" + serviceDate + ")"));
 			return;
 
 		} catch (SQLException e) {
 			System.out.println("Update activities database failure: " + e.getMessage());
+		}
+	}
+
+	// TODO: Get this from file
+	private static final String token = "223bcb4816e95309f88c1154377f721e3d77568a";
+
+	public void importGithubComments() {
+		// Get all activities w/ github name and no comments
+		ArrayList<ActivityEventModel> eventList = getEventsWithNoComments();
+
+		for (int i = 0; i < eventList.size(); i++) {
+			// Get commit info for each student/date combo
+			ActivityEventModel event = eventList.get(i);
+			String url = "https://api.github.com/search/commits?q=committer-name:\"" + event.getGithubName().trim()
+					+ "\"+committer-date:" + event.getServiceDate().toString().trim();
+			String[] command = { "C:\\curl\\curl.exe", "-u", "wavis421:" + token, "-H",
+					"Accept:application/vnd.github.cloak-preview+json", url };
+
+			ProcessBuilder process = new ProcessBuilder(command);
+			Process p;
+			try {
+				p = process.start();
+				processGithubInputStream(event, p.getInputStream());
+
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}
+
+	private void processGithubInputStream(ActivityEventModel event, InputStream inputStream) {
+		JsonReader commitReader;
+
+		try {
+			commitReader = Json.createReader(inputStream);
+			JsonObject jsonObject = commitReader.readObject();
+
+			// Get commit items from JSON input stream
+			JsonArray commitJsonArray = jsonObject.getJsonArray("items");
+
+			if (commitJsonArray == null) {
+				// Error occurred -- no JSON data
+				System.out.println("Error occurred: " + jsonObject.getString("message"));
+				commitReader.close();
+				return;
+			}
+
+			if (commitJsonArray.size() == 0) {
+				// No data found for this github username/date combo
+				logData.add(new LogDataModel(LogDataModel.MISSING_COMMIT_DATA, event.getStudentNameModel(),
+						event.getClientID(), " " + event.getGithubName() + " (" + event.getServiceDate() + ")"));
+				commitReader.close();
+				return;
+			}
+
+			for (int i = 0; i < commitJsonArray.size(); i++) {
+				// Process each commit
+				JsonObject value = (JsonObject) commitJsonArray.get(i);
+				String repository = ((JsonObject) value.getJsonObject("repository")).getString("name");
+				String message = value.getJsonObject("commit").getString("message");
+
+				// Trim message to get only summary data
+				int idx = message.indexOf("\n");
+				if (idx > -1)
+					message = message.trim().substring(0, idx);
+
+				// Update comments & repo name
+				updateActivity(event.getClientID(), event.getStudentNameModel(), event.getServiceDate().toString(),
+						repository, message);
+			}
+			commitReader.close();
+
+		} catch (JsonException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 }

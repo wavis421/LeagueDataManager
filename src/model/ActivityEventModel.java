@@ -3,18 +3,28 @@ package model;
 import java.sql.Date;
 
 public class ActivityEventModel {
+	private int clientID;
 	private String eventName;
 	private Date serviceDate;
-	private String githubComments;
+	private String githubName, githubComments, repoName;
+	private StudentNameModel nameModel;
 
-	public ActivityEventModel(Date serviceDate, String eventName, String githubComments) {
+	public ActivityEventModel(int clientID, Date serviceDate, String eventName, String githubName, String repoName,
+			String githubComments, StudentNameModel nameModel) {
+		this.clientID = clientID;
 		this.serviceDate = serviceDate;
 		this.eventName = eventName;
-		githubComments = githubComments.trim();
-		if (githubComments.equals(""))
-			this.githubComments = githubComments;
+		this.githubName = githubName;
+		this.repoName = repoName;
+		this.nameModel = nameModel;
+		if (githubComments == null || githubComments.equals(""))
+			this.githubComments = "";
 		else
-			this.githubComments = "  > " + githubComments;
+			this.githubComments = "  > " + githubComments.trim();
+	}
+
+	public int getClientID() {
+		return clientID;
 	}
 
 	public String getEventName() {
@@ -25,7 +35,19 @@ public class ActivityEventModel {
 		return serviceDate;
 	}
 
+	public String getGithubName() {
+		return githubName;
+	}
+
 	public String getGithubComments() {
 		return githubComments;
+	}
+
+	public String getRepoName() {
+		return repoName;
+	}
+
+	public StudentNameModel getStudentNameModel() {
+		return nameModel;
 	}
 }

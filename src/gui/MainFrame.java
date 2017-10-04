@@ -144,10 +144,12 @@ public class MainFrame {
 		// Add file sub-menus
 		JMenuItem importStudentsItem = new JMenuItem("Import Students...  ");
 		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
+		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentsItem);
 		fileMenu.add(importActivityLogItem);
+		fileMenu.add(importGithubItem);
 		fileMenu.addSeparator();
 		fileMenu.add(viewLogDataItem);
 		fileMenu.addSeparator();
@@ -168,15 +170,15 @@ public class MainFrame {
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
-		createFileMenuListeners(importStudentsItem, importActivityLogItem, viewLogDataItem, exitItem);
+		createFileMenuListeners(importStudentsItem, importActivityLogItem, importGithubItem, viewLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem viewLogData,
-			JMenuItem exitItem) {
+	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem importGithub,
+			JMenuItem viewLogData, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		importStudents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -192,6 +194,12 @@ public class MainFrame {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
 					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 				}
+			}
+		});
+		importGithub.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.importGithubComments();
+				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 			}
 		});
 		viewLogData.addActionListener(new ActionListener() {
