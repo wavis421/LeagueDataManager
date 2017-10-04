@@ -20,7 +20,6 @@ import javax.swing.table.TableCellRenderer;
 
 import model.ActivityEventModel;
 import model.ActivityModel;
-import model.ActivityTableModel;
 import model.StudentNameModel;
 
 public class ActivityTable extends JPanel {

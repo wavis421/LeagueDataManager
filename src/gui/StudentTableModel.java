@@ -1,8 +1,13 @@
-package model;
+package gui;
 
 import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
+
+import model.GenderModel;
+import model.LocationModel;
+import model.StudentModel;
+import model.StudentNameModel;
 
 public class StudentTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;

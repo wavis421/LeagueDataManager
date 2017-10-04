@@ -16,7 +16,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 
 import model.LogDataModel;
-import model.LogTableModel;
 import model.StudentNameModel;
 
 public class LogTable extends JPanel {

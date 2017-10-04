@@ -1,8 +1,11 @@
-package model;
+package gui;
 
 import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
+
+import model.LogDataModel;
+import model.StudentNameModel;
 
 public class LogTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;

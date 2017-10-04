@@ -1,8 +1,10 @@
-package model;
+package gui;
 
 import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
+
+import model.ActivityModel;
 
 public class ActivityTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;

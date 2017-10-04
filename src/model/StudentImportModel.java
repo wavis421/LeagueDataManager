@@ -7,7 +7,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear) {
-		
+
 		// CSV File data
 		this.clientID = clientID;
 		this.lastName = lastName;
@@ -18,14 +18,24 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.homeLocation = LocationModel.convertStringToLocation(homeLocation);
 		if (gradYear.equals("") || gradYear.equals("\"\""))
 			this.gradYear = 0;
-		else
-			this.gradYear = Integer.parseInt(gradYear);
+		else {
+			try {
+				this.gradYear = Integer.parseInt(gradYear);
+
+			} catch (NumberFormatException e) {
+				// TODO: Log this error
+				System.out.println("Invalid field '" + gradYear + "' in Grad Year for " + firstName + " " + lastName
+						+ " (" + clientID + ")");
+				this.gradYear = 0;
+			}
+		}
+
 		isInMasterDb = 1;
 	}
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb) {
-		
+
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
 		this.lastName = lastName;
@@ -89,22 +99,22 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public int getIsInMasterDb() {
 		return isInMasterDb;
 	}
-	
+
 	@Override
 	public int compareTo(StudentImportModel other) {
 		if (clientID < other.getClientID())
 			return -1;
-		
+
 		else if (clientID > other.getClientID())
 			return 1;
-		
+
 		// Client ID matches
 		else if (lastName.equals(other.getLastName()) && firstName.equals(other.getFirstName())
 				&& githubName.equals(other.getGithubName()) && startDate.equals(other.getStartDate())
 				&& homeLocation == other.getHomeLocation() && gender == other.getGender()
 				&& gradYear == other.getGradYear() && isInMasterDb == other.getIsInMasterDb())
 			return 0;
-		
+
 		else {
 			// Client ID matches but data does not
 			return -2;

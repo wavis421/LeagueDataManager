@@ -35,9 +35,7 @@ import javax.swing.event.ChangeListener;
 
 import controller.Controller;
 import model.ActivityModel;
-import model.ActivityTableModel;
 import model.StudentNameModel;
-import model.StudentTableModel;
 
 public class MainFrame {
 	/* Private constants */

@@ -861,16 +861,14 @@ public class MySqlDatabase {
 				processGithubInputStream(event, p.getInputStream());
 
 			} catch (IOException e) {
-				System.out.println(e.getMessage());
+				System.out.println("Error importing Github comments: " + e.getMessage());
 			}
 		}
 	}
 
 	private void processGithubInputStream(ActivityEventModel event, InputStream inputStream) {
-		JsonReader commitReader;
-
 		try {
-			commitReader = Json.createReader(inputStream);
+			JsonReader commitReader = Json.createReader(inputStream);
 			JsonObject jsonObject = commitReader.readObject();
 
 			// Get commit items from JSON input stream
@@ -878,7 +876,7 @@ public class MySqlDatabase {
 
 			if (commitJsonArray == null) {
 				// Error occurred -- no JSON data
-				System.out.println("Error occurred: " + jsonObject.getString("message"));
+				System.out.println("Error while parsing Github input stream: " + jsonObject.getString("message"));
 				commitReader.close();
 				return;
 			}
@@ -909,7 +907,7 @@ public class MySqlDatabase {
 			commitReader.close();
 
 		} catch (JsonException e) {
-			System.out.println(e.getMessage());
+			System.out.println("Failure parsing Github input stream: " + e.getMessage());
 		}
 	}
 }

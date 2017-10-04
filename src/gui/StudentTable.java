@@ -17,7 +17,6 @@ import javax.swing.table.TableCellRenderer;
 
 import model.StudentModel;
 import model.StudentNameModel;
-import model.StudentTableModel;
 
 public class StudentTable extends JPanel {
 	private static final int ROW_GAP = 5;
