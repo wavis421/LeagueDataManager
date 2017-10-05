@@ -14,13 +14,16 @@ public class LogDataModel {
 	public static final int STUDENT_NOT_FOUND = 10;
 	public static final int MISSING_COMMIT_DATA = 11;
 	public static final int INVALID_GRAD_YEAR = 12;
+	public static final int GITHUB_IMPORT_FAILURE = 13;
+	public static final int GITHUB_PARSING_ERROR = 14;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Added new Student",
 			"Added new Student with no Github user name", "Updated Student Information", 
 			"Updated Student Attendance Data", "Invalid Class Name",
 			"Removed inactive student", "Attendance data with no matching student",
-			"Missing commit data for Github user", "Invalid Grad Year field"};
+			"Missing commit data for Github user", "Invalid Grad Year field", "Failure importing Github data",
+			"Failure parsing Github data"};
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

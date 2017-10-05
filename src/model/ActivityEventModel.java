@@ -15,6 +15,8 @@ public class ActivityEventModel {
 		this.serviceDate = serviceDate;
 		this.eventName = eventName;
 		this.githubName = githubName;
+		if (githubName != null)
+			this.githubName = githubName.trim();
 		this.repoName = repoName;
 		this.nameModel = nameModel;
 		if (githubComments == null || githubComments.equals(""))

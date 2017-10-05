@@ -15,8 +15,12 @@ import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonStructure;
+import javax.json.stream.JsonParsingException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import org.joda.time.DateTime;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
@@ -530,7 +534,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
 				e2.printStackTrace();
 				break;
 			}
@@ -564,7 +568,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
 				e2.printStackTrace();
 				break;
 			}
@@ -598,7 +602,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
 				e2.printStackTrace();
 				break;
 			}
@@ -632,7 +636,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
 				e2.printStackTrace();
 				break;
 			}
@@ -669,7 +673,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Activity database error: " + e2.getMessage());
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
 				e2.printStackTrace();
 				break;
 			}
@@ -707,7 +711,7 @@ public class MySqlDatabase {
 			}
 
 		} catch (SQLException e) {
-			System.out.println("Get Activity database error: " + e.getMessage());
+			System.out.println("Get Attendance DB error: " + e.getMessage());
 			e.printStackTrace();
 			return;
 		}
@@ -816,84 +820,159 @@ public class MySqlDatabase {
 	private void updateActivity(int clientID, StudentNameModel nameModel, String serviceDate, String repoName,
 			String comments) {
 		PreparedStatement updateActivityStmt;
-		try {
-			// The only fields that should be updated are the comments and repo name
-			updateActivityStmt = dbConnection.prepareStatement(
-					"UPDATE Activities SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
-
-			int col = 1;
-			updateActivityStmt.setString(col++, comments);
-			updateActivityStmt.setString(col++, repoName);
-			updateActivityStmt.setInt(col++, clientID);
-			updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-
-			updateActivityStmt.executeUpdate();
-			updateActivityStmt.close();
-
-			logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
-					" for repo " + repoName + " (" + serviceDate + ")"));
-			return;
-
-		} catch (SQLException e) {
-			System.out.println("Update activities database failure: " + e.getMessage());
-		}
-	}
-
-	// TODO: Get this from file
-	private static final String token = "223bcb4816e95309f88c1154377f721e3d77568a";
-
-	public void importGithubComments() {
-		// Get all activities w/ github name and no comments
-		ArrayList<ActivityEventModel> eventList = getEventsWithNoComments();
-
-		for (int i = 0; i < eventList.size(); i++) {
-			// Get commit info for each student/date combo
-			ActivityEventModel event = eventList.get(i);
-			String url = "https://api.github.com/search/commits?q=committer-name:\"" + event.getGithubName().trim()
-					+ "\"+committer-date:" + event.getServiceDate().toString().trim();
-			String[] command = { "C:\\curl\\curl.exe", "-u", "wavis421:" + token, "-H",
-					"Accept:application/vnd.github.cloak-preview+json", url };
-
-			ProcessBuilder process = new ProcessBuilder(command);
-			Process p;
+		for (int i = 0; i < 2; i++) {
 			try {
-				p = process.start();
-				processGithubInputStream(event, p.getInputStream());
+				// The only fields that should be updated are the comments and repo name
+				updateActivityStmt = dbConnection.prepareStatement(
+						"UPDATE Activities SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
 
-			} catch (IOException e) {
-				System.out.println("Error importing Github comments: " + e.getMessage());
+				int col = 1;
+				updateActivityStmt.setString(col++, comments);
+				updateActivityStmt.setString(col++, repoName);
+				updateActivityStmt.setInt(col++, clientID);
+				updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+
+				updateActivityStmt.executeUpdate();
+				updateActivityStmt.close();
+
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
+						" for repo " + repoName + " (" + serviceDate + ")"));
+				return;
+
+			} catch (SQLException e) {
+				System.out.println("Update attendance DB failure for " + nameModel.toString() + ": " + e.getMessage());
 			}
 		}
 	}
 
-	private void processGithubInputStream(ActivityEventModel event, InputStream inputStream) {
+	// TODO: Get this from a file or website
+	private static final String token = "223bcb4816e95309f88c1154377f721e3d77568a";
+
+	public void importGithubComments() {
+		// Get all activities w/ github user name and no comments
+		ArrayList<ActivityEventModel> eventList = getEventsWithNoComments();
+		String lastGithubUser = "";
+		JsonArray repoJsonArray = null;
+
+		for (int i = 0; i < eventList.size(); i++) {
+			// Get commit info from DB for each student/date combo
+			ActivityEventModel event = eventList.get(i);
+			String gitUser = event.getGithubName();
+
+			if (!gitUser.equals(lastGithubUser)) {
+				// New github user, get new repo array
+				lastGithubUser = gitUser;
+				repoJsonArray = getReposForGithubUser(event);
+				if (repoJsonArray == null)
+					continue;
+
+			} else if (repoJsonArray == null) {
+				// This git account does not exist!!
+				continue;
+			}
+
+			DateTime startDate = new DateTime(event.getServiceDate().toString());
+			DateTime endDate = startDate.plusDays(1);
+
+			for (int j = 0; j < repoJsonArray.size(); j++) {
+				// Get commits data for each repo/date match
+				String repoName = ((JsonObject) repoJsonArray.get(j)).getString("name").trim();
+				String url = "https://api.github.com/repos/" + event.getGithubName() + "/" + repoName
+						+ "/commits?since=" + startDate.toString("YYYY-MM-dd") + "&until="
+						+ endDate.toString("YYYY-MM-dd");
+				InputStream commitStream = executeCurlCommand(url);
+
+				if (commitStream == null) {
+					logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+							event.getClientID(), " for user '" + event.getGithubName() + "'"));
+					continue;
+				}
+				processGithubCommitsStream(event, commitStream, repoName);
+			}
+		}
+	}
+
+	private InputStream executeCurlCommand(String url) {
+		String[] command = { "C:\\curl\\curl.exe", "-u", "wavis421:" + token, url };
+
+		ProcessBuilder process = new ProcessBuilder(command);
+		Process p;
+		InputStream inputStream = null;
+
+		try {
+			p = process.start();
+			inputStream = p.getInputStream();
+
+		} catch (IOException e) {
+			System.out.println("Error executing Curl command: " + e.getMessage());
+		}
+		return inputStream;
+	}
+
+	private JsonArray getReposForGithubUser(ActivityEventModel event) {
+		// Get all repos for this github user
+		String url = "https://api.github.com/users/" + event.getGithubName() + "/repos";
+		InputStream inputStream = executeCurlCommand(url);
+		JsonArray jsonArray = null;
+
+		if (inputStream == null) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+					event.getClientID(), " for Github user '" + event.getGithubName() + "'"));
+			return null;
+		}
+
+		try {
+			// Get all repos for this user
+			JsonReader repoReader = Json.createReader(inputStream);
+			JsonStructure repoStruct = repoReader.read();
+
+			if (repoStruct instanceof JsonObject) {
+				// Expecting an array of data, so this is an error!
+				logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+						event.getClientID(), " for Github user '" + event.getGithubName() + "': "
+								+ ((JsonObject) repoStruct).getString("message")));
+
+			} else {
+				jsonArray = (JsonArray) repoStruct;
+			}
+
+			repoReader.close();
+			inputStream.close();
+
+		} catch (JsonParsingException e1) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_PARSING_ERROR, event.getStudentNameModel(),
+					event.getClientID(), " for Github user '" + event.getGithubName() + "'"));
+
+		} catch (IOException e2) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+					event.getClientID(), " (IO Excpetion) for Github user '" + event.getGithubName() + "'"));
+		}
+
+		return jsonArray;
+	}
+
+	private void processGithubCommitsStream(ActivityEventModel event, InputStream inputStream, String repoName) {
 		try {
 			JsonReader commitReader = Json.createReader(inputStream);
-			JsonObject jsonObject = commitReader.readObject();
+			JsonStructure jsonStruct = commitReader.read();
 
-			// Get commit items from JSON input stream
-			JsonArray commitJsonArray = jsonObject.getJsonArray("items");
-
-			if (commitJsonArray == null) {
-				// Error occurred -- no JSON data
-				System.out.println("Error while parsing Github input stream: " + jsonObject.getString("message"));
+			if (jsonStruct instanceof JsonObject) {
 				commitReader.close();
 				return;
 			}
 
-			if (commitJsonArray.size() == 0) {
-				// No data found for this github username/date combo
-				logData.add(new LogDataModel(LogDataModel.MISSING_COMMIT_DATA, event.getStudentNameModel(),
-						event.getClientID(), " " + event.getGithubName() + " (" + event.getServiceDate() + ")"));
+			// Get commit items from JSON input stream
+			JsonArray commitJsonArray = (JsonArray) jsonStruct;
+
+			if (commitJsonArray == null || commitJsonArray.size() == 0) {
+				// No JSON data (repository is empty)
 				commitReader.close();
 				return;
 			}
 
 			for (int i = 0; i < commitJsonArray.size(); i++) {
 				// Process each commit
-				JsonObject value = (JsonObject) commitJsonArray.get(i);
-				String repository = ((JsonObject) value.getJsonObject("repository")).getString("name");
-				String message = value.getJsonObject("commit").getString("message");
+				String message = ((JsonObject) commitJsonArray.get(i)).getJsonObject("commit").getString("message");
 
 				// Trim message to get only summary data
 				int idx = message.indexOf("\n");
@@ -902,7 +981,7 @@ public class MySqlDatabase {
 
 				// Update comments & repo name
 				updateActivity(event.getClientID(), event.getStudentNameModel(), event.getServiceDate().toString(),
-						repository, message);
+						repoName, message);
 			}
 			commitReader.close();
 
