@@ -32,6 +32,7 @@ public class Controller {
 	private static final int CSV_STUDENT_GITHUB_IDX = 7;
 
 	// CSV Enrollment table indices
+	private static final int CSV_ACTIVITY_STUDENT_NAME_IDX = 0;
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
 	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 2;
 	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
@@ -196,7 +197,7 @@ public class Controller {
 				// Create new student
 				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
 					eventList.add(new ActivityEventModel(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]),
-							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName));
+							fields[CSV_ACTIVITY_STUDENT_NAME_IDX], fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName));
 				}
 
 				line = br.readLine();

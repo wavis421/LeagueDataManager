@@ -863,7 +863,9 @@ public class MySqlDatabase {
 								importEvent.getEventName());
 
 					} else
-						logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, null, importEvent.getClientID(),
+						logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
+								new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
+								importEvent.getClientID(),
 								": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
 				}
 
@@ -872,7 +874,9 @@ public class MySqlDatabase {
 				addActivity(importEvent.getClientID(), importEvent.getServiceDateString(), importEvent.getEventName());
 
 			} else {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, null, importEvent.getClientID(),
+				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
+						new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
+						importEvent.getClientID(),
 						": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
 			}
 		}

@@ -26,8 +26,9 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
-	public ActivityEventModel(int clientID, String serviceDate, String eventName) {
+	public ActivityEventModel(int clientID, String studentName, String serviceDate, String eventName) {
 		this.clientID = clientID;
+		this.nameModel = new StudentNameModel(studentName, "", false);
 		this.serviceDateString = serviceDate;
 		this.eventName = eventName;
 	}
