@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import model.ActivityEventModel;
 import model.ActivityModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
@@ -165,6 +166,7 @@ public class Controller {
 	public void importActivitiesFromFile(File file) {
 		Path pathToFile = Paths.get(file.getAbsolutePath());
 		String line = "";
+		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -193,13 +195,17 @@ public class Controller {
 
 				// Create new student
 				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
-					sqlDb.addActivity(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]),
-							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName);
+					eventList.add(new ActivityEventModel(Integer.parseInt(fields[CSV_ACTIVITY_CLIENTID_IDX]),
+							fields[CSV_ACTIVITY_SERVICE_DATE_IDX], eventName));
 				}
 
 				line = br.readLine();
 			}
 			br.close();
+
+			// Update changes in database
+			if (eventList.size() > 0)
+				sqlDb.importActivities(eventList);
 
 		} catch (IOException e) {
 			System.out.println("Error line: " + line);

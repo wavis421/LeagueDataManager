@@ -2,10 +2,11 @@ package model;
 
 import java.sql.Date;
 
-public class ActivityEventModel {
+public class ActivityEventModel implements Comparable<ActivityEventModel> {
 	private int clientID;
 	private String eventName;
 	private Date serviceDate;
+	private String serviceDateString;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 
@@ -25,6 +26,12 @@ public class ActivityEventModel {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
+	public ActivityEventModel(int clientID, String serviceDate, String eventName) {
+		this.clientID = clientID;
+		this.serviceDateString = serviceDate;
+		this.eventName = eventName;
+	}
+
 	public int getClientID() {
 		return clientID;
 	}
@@ -35,6 +42,13 @@ public class ActivityEventModel {
 
 	public Date getServiceDate() {
 		return serviceDate;
+	}
+
+	public String getServiceDateString() {
+		if (serviceDateString != null)
+			return serviceDateString;
+		else
+			return serviceDate.toString();
 	}
 
 	public String getGithubName() {
@@ -51,5 +65,24 @@ public class ActivityEventModel {
 
 	public StudentNameModel getStudentNameModel() {
 		return nameModel;
+	}
+
+	@Override
+	public int compareTo(ActivityEventModel other) {
+		if (clientID < other.getClientID())
+			return -1;
+
+		else if (clientID > other.getClientID())
+			return 1;
+
+		else {
+			// Client ID matches
+			int comp = this.getServiceDateString().compareTo(other.getServiceDateString());
+			if (comp != 0)
+				// Dates in descending order
+				return -comp;
+			else
+				return this.getEventName().compareTo(other.getEventName());
+		}
 	}
 }

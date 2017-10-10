@@ -644,11 +644,51 @@ public class MySqlDatabase {
 		return activityList;
 	}
 
+	private ArrayList<ActivityEventModel> getAllEvents() {
+		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get attendance data from the DB for all students that have a github user name
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID "
+								+ "ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					eventList.add(new ActivityEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
+							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
+							result.getString("Comments"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException e1) {
+				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				System.out.println("Get Attendance DB error: " + e2.getMessage());
+				e2.printStackTrace();
+				break;
+			}
+		}
+		return eventList;
+	}
+
 	private ArrayList<ActivityEventModel> getEventsWithNoComments() {
 		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// Get attendance data from the DB for all students that have a github user name
+				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "Comments IS NULL AND GithubName IS NOT NULL;");
@@ -685,6 +725,8 @@ public class MySqlDatabase {
 		int lastClientID = -1;
 		ActivityModel lastActivityModel = null;
 
+		// Process DB query result containing activities by grouping the activities by
+		// student and then adding the resulting Activity Model to the the activityList.
 		try {
 			while (result.next()) {
 				int thisClientID = result.getInt("Students.ClientID");
@@ -782,9 +824,70 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
+	public void importActivities(ArrayList<ActivityEventModel> importList) {
+		ArrayList<ActivityEventModel> dbList = getAllEvents();
+		ArrayList<StudentModel> studentList = getAllStudents();
+		int dbListIdx = 0;
+		int dbListSize = dbList.size();
+		Collections.sort(importList);
+
+		ActivityEventModel dbActivity;
+		for (int i = 0; i < importList.size(); i++) {
+			ActivityEventModel importEvent = importList.get(i);
+
+			// If at end of DB list, then default operation is insert (1)
+			int compare = 1;
+			if (dbListIdx < dbListSize) {
+				dbActivity = dbList.get(dbListIdx);
+				compare = dbActivity.compareTo(importEvent);
+			}
+
+			if (compare == 0) {
+				// All data matches, so continue through list
+				dbListIdx++;
+				continue;
+
+			} else if (compare == -1) {
+				// Extra events in DB; toss data until caught up with import list
+				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0) {
+					dbListIdx++;
+				}
+
+				// Caught up, now compare again and process
+				if (dbListIdx < dbListSize) {
+					if (dbList.get(dbListIdx).compareTo(importEvent) == 0) {
+						dbListIdx++;
+
+					} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
+						addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
+								importEvent.getEventName());
+
+					} else
+						logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, null, importEvent.getClientID(),
+								": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+				}
+
+			} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
+				// New event, insert into DB
+				addActivity(importEvent.getClientID(), importEvent.getServiceDateString(), importEvent.getEventName());
+
+			} else {
+				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND, null, importEvent.getClientID(),
+						": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+			}
+		}
+	}
+
+	private boolean isClientInStudentList(ArrayList<StudentModel> list, int clientID) {
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getClientID() == clientID)
+				return true;
+		}
+		return false;
+	}
+
 	public void addActivity(int clientID, String serviceDate, String eventName) {
 		for (int i = 0; i < 2; i++) {
-			// TODO: Make sure student exists before trying to add data
 			try {
 				PreparedStatement addActivityStmt = dbConnection.prepareStatement(
 						"INSERT INTO Activities " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
@@ -796,6 +899,8 @@ public class MySqlDatabase {
 
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
+
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, null, clientID, ""));
 				break;
 
 			} catch (CommunicationsException e1) {
