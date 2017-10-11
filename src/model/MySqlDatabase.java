@@ -860,7 +860,7 @@ public class MySqlDatabase {
 
 					} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
 						addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
-								importEvent.getEventName());
+								importEvent.getEventName(), dbList.get(dbListIdx).getStudentNameModel());
 
 					} else
 						logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
@@ -871,7 +871,8 @@ public class MySqlDatabase {
 
 			} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
 				// New event, insert into DB
-				addActivity(importEvent.getClientID(), importEvent.getServiceDateString(), importEvent.getEventName());
+				addActivity(importEvent.getClientID(), importEvent.getServiceDateString(), importEvent.getEventName(),
+						dbList.get(dbListIdx).getStudentNameModel());
 
 			} else {
 				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
@@ -890,7 +891,7 @@ public class MySqlDatabase {
 		return false;
 	}
 
-	public void addActivity(int clientID, String serviceDate, String eventName) {
+	public void addActivity(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement addActivityStmt = dbConnection.prepareStatement(
@@ -904,7 +905,7 @@ public class MySqlDatabase {
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, null, clientID, ""));
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, ""));
 				break;
 
 			} catch (CommunicationsException e1) {
@@ -996,7 +997,55 @@ public class MySqlDatabase {
 							event.getClientID(), " for user '" + event.getGithubName() + "'"));
 					continue;
 				}
+				// TODO: If more than 1 commit for this date, append comments
 				processGithubCommitsStream(event, commitStream, repoName);
+			}
+		}
+	}
+
+	// Repo name format: level-X-module-Y-username
+	private static final String URL_MODULE_PATTERN_MATCH = "module-";
+	private static final int modulePatternLength = URL_MODULE_PATTERN_MATCH.length();
+
+	public void importGithubCommentsByLevel(int level) {
+		// Get all activities w/ github user name and no comments
+		ArrayList<ActivityEventModel> eventList = getEventsWithNoComments();
+
+		JsonArray repoJsonArray = getReposByLevel(level);
+		if (repoJsonArray == null) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, new StudentNameModel("", "", false), 0,
+					" for Level " + level));
+			return;
+		}
+
+		for (int i = 0; i < repoJsonArray.size(); i++) {
+			// Parse repo to get user name; allow for multiple digit module #
+			String repoName = ((JsonObject) repoJsonArray.get(i)).getString("name");
+			int idx = repoName.indexOf(URL_MODULE_PATTERN_MATCH) + modulePatternLength;
+			idx += (repoName.substring(idx)).indexOf('-') + 1;
+			String userName = repoName.substring(idx);
+
+			// Search for user in eventList
+			for (int j = 0; j < eventList.size(); j++) {
+				ActivityEventModel event = eventList.get(j);
+				if (userName.equals(event.getGithubName())) {
+					DateTime startDate = new DateTime(event.getServiceDate().toString());
+					DateTime endDate = startDate.plusDays(1);
+
+					// Get commits data for repo/date match
+					String url = "https://api.github.com/repos/League-Level" + level + "-Student/" + repoName
+							+ "/commits?since=" + startDate.toString("YYYY-MM-dd") + "&until="
+							+ endDate.toString("YYYY-MM-dd");
+					InputStream commitStream = executeCurlCommand(url);
+
+					if (commitStream == null) {
+						logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+								event.getClientID(), " for user '" + userName + "'"));
+						continue;
+					}
+					// TODO: If more than 1 commit for this date, append comments
+					processGithubCommitsStream(event, commitStream, repoName);
+				}
 			}
 		}
 	}
@@ -1020,13 +1069,14 @@ public class MySqlDatabase {
 
 	private JsonArray getReposForGithubUser(ActivityEventModel event) {
 		// Get all repos for this github user
-		String url = "https://api.github.com/users/" + event.getGithubName() + "/repos";
+		String gitUser = event.getGithubName();
+		String url = "https://api.github.com/users/" + gitUser + "/repos";
 		InputStream inputStream = executeCurlCommand(url);
 		JsonArray jsonArray = null;
 
 		if (inputStream == null) {
 			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-					event.getClientID(), " for Github user '" + event.getGithubName() + "'"));
+					event.getClientID(), " for Github user '" + gitUser + "'"));
 			return null;
 		}
 
@@ -1038,8 +1088,8 @@ public class MySqlDatabase {
 			if (repoStruct instanceof JsonObject) {
 				// Expecting an array of data, so this is an error!
 				logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-						event.getClientID(), " for Github user '" + event.getGithubName() + "': "
-								+ ((JsonObject) repoStruct).getString("message")));
+						event.getClientID(),
+						" for Github user '" + gitUser + "': " + ((JsonObject) repoStruct).getString("message")));
 
 			} else {
 				jsonArray = (JsonArray) repoStruct;
@@ -1050,13 +1100,49 @@ public class MySqlDatabase {
 
 		} catch (JsonParsingException e1) {
 			logData.add(new LogDataModel(LogDataModel.GITHUB_PARSING_ERROR, event.getStudentNameModel(),
-					event.getClientID(), " for Github user '" + event.getGithubName() + "'"));
+					event.getClientID(), " for Github user '" + event.getGithubName() + "': " + e1.getMessage()));
 
 		} catch (IOException e2) {
 			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-					event.getClientID(), " (IO Excpetion) for Github user '" + event.getGithubName() + "'"));
+					event.getClientID(), " (IO Excpetion) for Github user '" + event.getGithubName() + "': " + e2.getMessage()));
+		}
+		return jsonArray;
+	}
+
+	private JsonArray getReposByLevel(int level) {
+		// Get all repos for this level
+		String url = "https://api.github.com/users/League-Level" + level + "-Student/repos";
+		InputStream inputStream = executeCurlCommand(url);
+		JsonArray jsonArray = null;
+
+		if (inputStream == null) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, new StudentNameModel("", "", false), 0,
+					" for Level " + level + ": Input Stream null"));
+			return null;
 		}
 
+		try {
+			// Get all repos for this level
+			JsonReader repoReader = Json.createReader(inputStream);
+			JsonStructure repoStruct = repoReader.read();
+
+			if (repoStruct instanceof JsonObject) {
+				// Expecting an array of data, so this is an error!
+				logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, new StudentNameModel("", "", false), 0,
+						" for Level " + level + ": " + ((JsonObject) repoStruct).getString("message")));
+			} else {
+				jsonArray = (JsonArray) repoStruct;
+			}
+
+			repoReader.close();
+			inputStream.close();
+
+		} catch (JsonParsingException e1) {
+			System.out.println("Github parsing error for Level " + level + ": " + e1.getMessage());
+
+		} catch (IOException e2) {
+			System.out.println("IO Exception while parsing Level " + level + ": " + e2.getMessage());
+		}
 		return jsonArray;
 	}
 

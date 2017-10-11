@@ -143,11 +143,13 @@ public class MainFrame {
 		JMenuItem importStudentsItem = new JMenuItem("Import Students...  ");
 		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
+		JMenuItem importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0... ");
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentsItem);
 		fileMenu.add(importActivityLogItem);
 		fileMenu.add(importGithubItem);
+		fileMenu.add(importGithubLevel0Item);
 		fileMenu.addSeparator();
 		fileMenu.add(viewLogDataItem);
 		fileMenu.addSeparator();
@@ -168,7 +170,8 @@ public class MainFrame {
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
-		createFileMenuListeners(importStudentsItem, importActivityLogItem, importGithubItem, viewLogDataItem, exitItem);
+		createFileMenuListeners(importStudentsItem, importActivityLogItem, importGithubItem, importGithubLevel0Item,
+				viewLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
@@ -176,7 +179,7 @@ public class MainFrame {
 	}
 
 	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem importGithub,
-			JMenuItem viewLogData, JMenuItem exitItem) {
+			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		importStudents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -197,6 +200,12 @@ public class MainFrame {
 		importGithub.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.importGithubComments();
+				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+			}
+		});
+		importGithubLevel0.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.importGithubCommentsByLevel(0);
 				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 			}
 		});

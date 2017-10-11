@@ -237,4 +237,21 @@ public class Controller {
 		if (sqlDb.getDbLogData().size() > 0)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
+	
+	public void importGithubCommentsByLevel(int level) {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Clear log data
+		sqlDb.clearDbLogData();
+
+		sqlDb.importGithubCommentsByLevel(level);
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		if (sqlDb.getDbLogData().size() > 0)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+	}
 }

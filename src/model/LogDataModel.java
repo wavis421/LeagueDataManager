@@ -19,11 +19,10 @@ public class LogDataModel {
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Added new Student",
-			"Added new Student with no Github user name", "Updated Student Information", 
-			"Updated Student Attendance Data", "Invalid Class Name",
-			"Removed inactive student", "Attendance data with no matching student",
-			"Missing commit data for Github user", "Invalid Grad Year field", "Failure importing Github data",
-			"Failure parsing Github data"};
+			"Added new Student with no Github user name", "Updated Student Information",
+			"Updated Student Attendance Data", "Invalid Class Name", "Removed inactive student",
+			"Attendance data with no matching student", "Missing commit data for Github user",
+			"Invalid Grad Year field", "Failure importing Github data", "Failure parsing Github data" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
