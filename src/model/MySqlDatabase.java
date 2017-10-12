@@ -858,7 +858,7 @@ public class MySqlDatabase {
 					if (dbList.get(dbListIdx).compareTo(importEvent) == 0) {
 						dbListIdx++;
 
-					} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
+					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
 						addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
 								importEvent.getEventName(), dbList.get(dbListIdx).getStudentNameModel());
 
@@ -869,26 +869,32 @@ public class MySqlDatabase {
 								": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
 				}
 
-			} else if (isClientInStudentList(studentList, importEvent.getClientID())) {
-				// New event, insert into DB
-				addActivity(importEvent.getClientID(), importEvent.getServiceDateString(), importEvent.getEventName(),
-						dbList.get(dbListIdx).getStudentNameModel());
-
 			} else {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
-						new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
-						importEvent.getClientID(),
-						": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+				// Data does not match existing student
+				int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
+
+				if (idx >= 0) {
+					// Student exists in DB, so add activity data for this student
+					addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
+							importEvent.getEventName(), studentList.get(idx).getNameModel());
+
+				} else {
+					// Student not found
+					logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
+							new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
+							importEvent.getClientID(),
+							": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+				}
 			}
 		}
 	}
 
-	private boolean isClientInStudentList(ArrayList<StudentModel> list, int clientID) {
+	private int getClientIdxInStudentList(ArrayList<StudentModel> list, int clientID) {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getClientID() == clientID)
-				return true;
+				return i;
 		}
-		return false;
+		return -1;
 	}
 
 	public void addActivity(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
@@ -1104,7 +1110,8 @@ public class MySqlDatabase {
 
 		} catch (IOException e2) {
 			logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-					event.getClientID(), " (IO Excpetion) for Github user '" + event.getGithubName() + "': " + e2.getMessage()));
+					event.getClientID(),
+					" (IO Excpetion) for Github user '" + event.getGithubName() + "': " + e2.getMessage()));
 		}
 		return jsonArray;
 	}
