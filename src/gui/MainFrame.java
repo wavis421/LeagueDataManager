@@ -144,6 +144,7 @@ public class MainFrame {
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
 		JMenuItem importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0... ");
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
+		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentsItem);
 		fileMenu.add(importActivityLogItem);
@@ -151,6 +152,7 @@ public class MainFrame {
 		fileMenu.add(importGithubLevel0Item);
 		fileMenu.addSeparator();
 		fileMenu.add(viewLogDataItem);
+		fileMenu.add(clearLogDataItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -170,7 +172,7 @@ public class MainFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentsItem, importActivityLogItem, importGithubItem, importGithubLevel0Item,
-				viewLogDataItem, exitItem);
+				viewLogDataItem, clearLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
@@ -178,7 +180,7 @@ public class MainFrame {
 	}
 
 	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem importGithub,
-			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem exitItem) {
+			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		importStudents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -210,6 +212,12 @@ public class MainFrame {
 		});
 		viewLogData.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				refreshLogTable();
+			}
+		});
+		clearLogData.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.clearDbLogData();
 				refreshLogTable();
 			}
 		});

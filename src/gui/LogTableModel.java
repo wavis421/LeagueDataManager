@@ -68,7 +68,10 @@ public class LogTableModel extends AbstractTableModel {
 
 		switch (col) {
 		case CLIENT_ID_COLUMN:
-			return String.valueOf(logData.getClientID());
+			if (logData.getClientID() == 0)
+				return "";
+			else
+				return String.valueOf(logData.getClientID());
 		case STUDENT_NAME_COLUMN:
 			return logData.getStudentName();
 		case STATUS_COLUMN:

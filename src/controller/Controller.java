@@ -45,10 +45,6 @@ public class Controller {
 		this.parent = parent;
 		sqlDb = new MySqlDatabase(parent);
 	}
-	
-	public String getLogDataTitle() {
-		return loggingDataTitle;
-	}
 
 	/*
 	 * ------- Database Connections -------
@@ -60,8 +56,16 @@ public class Controller {
 	/*
 	 * ------- Logging Activity -------
 	 */
+	public String getLogDataTitle() {
+		return loggingDataTitle;
+	}
+	
 	public ArrayList<LogDataModel> getDbLogData() {
 		return sqlDb.getDbLogData();
+	}
+	
+	public void clearDbLogData() {
+		sqlDb.clearDbLogData();
 	}
 
 	/*
@@ -81,10 +85,11 @@ public class Controller {
 
 	public void removeInactiveStudents() {
 		loggingDataTitle = "Remove Inactive Students Log Data";
-		sqlDb.clearDbLogData();
+		int origLogSize = sqlDb.getDbLogData().size();
+		
 		sqlDb.removeInactiveStudents();
 
-		if (sqlDb.getDbLogData().size() > 0)
+		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data for list of students removed");
 	}
 
@@ -129,7 +134,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Students Log Data";
-		sqlDb.clearDbLogData();
+		int origLogSize = sqlDb.getDbLogData().size();
 
 		// CSV file has the following columns:
 		// Home Location, First Visit Date, First Name, Last Name,
@@ -167,7 +172,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (sqlDb.getDbLogData().size() > 0)
+		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 
@@ -181,7 +186,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Attendance Log Data";
-		sqlDb.clearDbLogData();
+		int origLogSize = sqlDb.getDbLogData().size();
 
 		// CSV file has the following columns:
 		// Student name, service date, event name, clientID, Schedule ID
@@ -225,7 +230,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (sqlDb.getDbLogData().size() > 0)
+		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 
@@ -235,7 +240,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Github Comments Log Data";
-		sqlDb.clearDbLogData();
+		int origLogSize = sqlDb.getDbLogData().size();
 
 		sqlDb.importGithubComments();
 
@@ -243,7 +248,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (sqlDb.getDbLogData().size() > 0)
+		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 	
@@ -253,7 +258,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
-		sqlDb.clearDbLogData();
+		int origLogSize = sqlDb.getDbLogData().size();
 
 		sqlDb.importGithubCommentsByLevel(level);
 
@@ -261,7 +266,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (sqlDb.getDbLogData().size() > 0)
+		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 }

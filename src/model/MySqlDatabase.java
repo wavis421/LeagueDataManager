@@ -1057,7 +1057,7 @@ public class MySqlDatabase {
 	}
 
 	private InputStream executeCurlCommand(String url) {
-		String[] command = { "C:\\curl\\curl.exe", "-u", "wavis421:" + token, url };
+		String[] command = { "C:\\Program Files\\curl\\curl.exe", "-u", "wavis421:" + token, url };
 
 		ProcessBuilder process = new ProcessBuilder(command);
 		Process p;
