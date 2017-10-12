@@ -470,7 +470,8 @@ public class MainFrame {
 
 	public static void shutdown() {
 		// Disconnect database and dispose of frame before exiting
-		controller.disconnectDatabase();
+		if (controller != null)
+			controller.disconnectDatabase();
 		frame.dispose();
 		System.exit(0);
 	}
