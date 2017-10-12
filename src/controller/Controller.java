@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 
 import model.ActivityEventModel;
 import model.ActivityModel;
+import model.GitApiController;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.StudentImportModel;
@@ -38,12 +39,14 @@ public class Controller {
 	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
 
 	private MySqlDatabase sqlDb;
+	private GitApiController gitController;
 	private JFrame parent;
 	private String loggingDataTitle = "Logging Data";
 
 	public Controller(JFrame parent) {
 		this.parent = parent;
 		sqlDb = new MySqlDatabase(parent);
+		gitController = new GitApiController(sqlDb);
 	}
 
 	/*
@@ -242,7 +245,7 @@ public class Controller {
 		loggingDataTitle = "Import Github Comments Log Data";
 		int origLogSize = sqlDb.getDbLogData().size();
 
-		sqlDb.importGithubComments();
+		gitController.importGithubComments();
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
@@ -260,7 +263,7 @@ public class Controller {
 		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
 		int origLogSize = sqlDb.getDbLogData().size();
 
-		sqlDb.importGithubCommentsByLevel(level);
+		gitController.importGithubCommentsByLevel(level);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
