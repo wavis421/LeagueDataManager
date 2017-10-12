@@ -98,7 +98,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Students ORDER BY LastName, FirstName;");
+						.prepareStatement("SELECT * FROM Students ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -162,7 +162,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Students WHERE NOT isInMasterDb ORDER BY LastName, FirstName;");
+						"SELECT * FROM Students WHERE NOT isInMasterDb ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -797,7 +797,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT LastName, FirstName, isInMasterDb FROM Students ORDER BY LastName, FirstName;");
+						"SELECT LastName, FirstName, isInMasterDb FROM Students ORDER BY FirstName, LastName;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
