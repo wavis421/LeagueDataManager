@@ -39,10 +39,15 @@ public class Controller {
 
 	private MySqlDatabase sqlDb;
 	private JFrame parent;
+	private String loggingDataTitle = "Logging Data";
 
 	public Controller(JFrame parent) {
 		this.parent = parent;
 		sqlDb = new MySqlDatabase(parent);
+	}
+	
+	public String getLogDataTitle() {
+		return loggingDataTitle;
 	}
 
 	/*
@@ -75,6 +80,7 @@ public class Controller {
 	}
 
 	public void removeInactiveStudents() {
+		loggingDataTitle = "Remove Inactive Students Log Data";
 		sqlDb.clearDbLogData();
 		sqlDb.removeInactiveStudents();
 
@@ -122,6 +128,7 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Clear log data
+		loggingDataTitle = "Import Students Log Data";
 		sqlDb.clearDbLogData();
 
 		// CSV file has the following columns:
@@ -173,6 +180,7 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Clear log data
+		loggingDataTitle = "Import Attendance Log Data";
 		sqlDb.clearDbLogData();
 
 		// CSV file has the following columns:
@@ -226,6 +234,7 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Clear log data
+		loggingDataTitle = "Import Github Comments Log Data";
 		sqlDb.clearDbLogData();
 
 		sqlDb.importGithubComments();
@@ -243,6 +252,7 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Clear log data
+		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
 		sqlDb.clearDbLogData();
 
 		sqlDb.importGithubCommentsByLevel(level);

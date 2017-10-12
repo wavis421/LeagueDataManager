@@ -52,7 +52,6 @@ public class MainFrame {
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "League Students not in Master DB";
 	private static final String ACTIVITY_TITLE = "League Attendance";
-	private static final String LOG_DATA_TITLE = "Database Import Logging Data";
 
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
@@ -457,7 +456,7 @@ public class MainFrame {
 			logTable = new LogTable(tablePanel, controller.getDbLogData());
 		else
 			logTable.setData(tablePanel, controller.getDbLogData());
-		headerLabel.setText(LOG_DATA_TITLE);
+		headerLabel.setText(controller.getLogDataTitle());
 	}
 
 	private void removeDataFromTables() {
