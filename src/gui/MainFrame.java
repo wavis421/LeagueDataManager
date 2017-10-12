@@ -35,6 +35,7 @@ import javax.swing.event.ChangeListener;
 
 import controller.Controller;
 import model.ActivityModel;
+import model.LogDataModel;
 import model.StudentNameModel;
 
 public class MainFrame {
@@ -96,9 +97,13 @@ public class MainFrame {
 		controller = new Controller(frame);
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		headerLabel.setText(STUDENT_TITLE);
-		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
 		currentStudentTable = STUDENT_TABLE_ALL;
+		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
+		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
+		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
+
 		createStudentTablePopups();
+		createActivityTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
@@ -317,8 +322,8 @@ public class MainFrame {
 						StudentTableModel.STUDENT_NAME_COLUMN);
 
 				// Display activity table for selected student
-				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
-						"  for  " + studentName);
+				activityTable.showActivitiesByPerson(studentName.toString(),
+						controller.getActivitiesByClientID(clientID));
 				studentTable.getTable().clearSelection();
 			}
 		});
@@ -445,11 +450,7 @@ public class MainFrame {
 		removeDataFromTables();
 
 		// Add activity table and header
-		if (activityTable == null) {
-			activityTable = new ActivityTable(tablePanel, list);
-			createActivityTablePopups();
-		} else
-			activityTable.setData(tablePanel, list);
+		activityTable.setData(tablePanel, list);
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 
 		currentActivityTable = tableType;
@@ -460,20 +461,15 @@ public class MainFrame {
 		removeDataFromTables();
 
 		// Add log data table and header
-		if (logTable == null)
-			logTable = new LogTable(tablePanel, controller.getDbLogData());
-		else
-			logTable.setData(tablePanel, controller.getDbLogData());
+		logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(controller.getLogDataTitle());
 	}
 
 	private void removeDataFromTables() {
 		// Remove data from Student table and Activities table
 		studentTable.removeData();
-		if (activityTable != null)
-			activityTable.removeData();
-		if (logTable != null)
-			logTable.removeData();
+		activityTable.removeData();
+		logTable.removeData();
 	}
 
 	public static void shutdown() {
