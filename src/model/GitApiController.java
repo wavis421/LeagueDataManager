@@ -28,7 +28,7 @@ public class GitApiController {
 	}
 
 	public void importGithubComments(String startDate) {
-		// Get all activities w/ github user name and no comments
+		// Get all activities since 'startDate' w/ github user name and no comments
 		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
 		String lastGithubUser = "";
 		JsonArray repoJsonArray = null;
@@ -39,7 +39,7 @@ public class GitApiController {
 			String gitUser = event.getGithubName();
 
 			if (!gitUser.equals(lastGithubUser)) {
-				// New github user, get new repo array
+				// New github user, need to get new repo array
 				lastGithubUser = gitUser;
 				repoJsonArray = getReposForGithubUser(event);
 				if (repoJsonArray == null)
@@ -50,15 +50,11 @@ public class GitApiController {
 				continue;
 			}
 
-			DateTime startDay = new DateTime(event.getServiceDate().toString());
-			DateTime endDay = startDay.plusDays(1);
-
 			for (int j = 0; j < repoJsonArray.size(); j++) {
 				// Get commits data for each repo/date match
 				String repoName = ((JsonObject) repoJsonArray.get(j)).getString("name").trim();
 				String url = "https://api.github.com/repos/" + event.getGithubName() + "/" + repoName
-						+ "/commits?since=" + startDay.toString("YYYY-MM-dd") + "&until="
-						+ endDay.toString("YYYY-MM-dd");
+						+ "/commits?since=" + startDate;
 				InputStream commitStream = executeCurlCommand(url);
 
 				if (commitStream == null) {
@@ -67,8 +63,8 @@ public class GitApiController {
 									event.getClientID(), " for user '" + event.getGithubName() + "'"));
 					continue;
 				}
-				// TODO: If more than 1 commit for this date, append comments
-				processGithubCommitsStream(event, commitStream, repoName);
+				// Process all commits for this use since 'startDate'
+				processGithubCommitsStream(eventList, commitStream, repoName);
 			}
 		}
 	}
@@ -89,19 +85,15 @@ public class GitApiController {
 			String repoName = ((JsonObject) repoJsonArray.get(i)).getString("name");
 			int idx = repoName.indexOf(URL_MODULE_PATTERN_MATCH) + modulePatternLength;
 			idx += (repoName.substring(idx)).indexOf('-') + 1;
-			String userName = repoName.substring(idx);
+			String userName = repoName.substring(idx); 
 
 			// Search for user in eventList
 			for (int j = 0; j < eventList.size(); j++) {
 				ActivityEventModel event = eventList.get(j);
 				if (userName.equals(event.getGithubName())) {
-					DateTime startDay = new DateTime(event.getServiceDate().toString());
-					DateTime endDay = startDay.plusDays(1);
-
-					// Get commits data for repo/date match
+					// Get commits data for this user
 					String url = "https://api.github.com/repos/League-Level" + level + "-Student/" + repoName
-							+ "/commits?since=" + startDay.toString("YYYY-MM-dd") + "&until="
-							+ endDay.toString("YYYY-MM-dd");
+							+ "/commits?since=" + startDate;
 					InputStream commitStream = executeCurlCommand(url);
 
 					if (commitStream == null) {
@@ -109,8 +101,8 @@ public class GitApiController {
 								event.getStudentNameModel(), event.getClientID(), " for user '" + userName + "'"));
 						continue;
 					}
-					// TODO: If more than 1 commit for this date, append comments
-					processGithubCommitsStream(event, commitStream, repoName);
+					// Process all commits for this use since 'startDate'
+					processGithubCommitsStream(eventList, commitStream, repoName);
 				}
 			}
 		}
@@ -215,8 +207,10 @@ public class GitApiController {
 		return jsonArray;
 	}
 
-	private void processGithubCommitsStream(ActivityEventModel event, InputStream inputStream, String repoName) {
+	private void processGithubCommitsStream(ArrayList<ActivityEventModel> eventList, InputStream inputStream,
+			String repoName) {
 		try {
+			// Read json input stream
 			JsonReader commitReader = Json.createReader(inputStream);
 			JsonStructure jsonStruct = commitReader.read();
 
@@ -236,16 +230,27 @@ public class GitApiController {
 
 			for (int i = 0; i < commitJsonArray.size(); i++) {
 				// Process each commit
-				String message = ((JsonObject) commitJsonArray.get(i)).getJsonObject("commit").getString("message");
+				JsonObject commitObj = ((JsonObject) commitJsonArray.get(i)).getJsonObject("commit");
+				String date = commitObj.getJsonObject("committer").getString("date");
+				String gituser = commitObj.getJsonObject("committer").getString("name");
 
-				// Trim message to get only summary data
-				int idx = message.indexOf("\n");
-				if (idx > -1)
-					message = message.trim().substring(0, idx);
+				// Find name & date match in event list
+				// TODO: Append multiple commits on single date
+				for (int j = 0; j < eventList.size(); j++) {
+					ActivityEventModel event = eventList.get(j);
+					if (date.startsWith(event.getServiceDate().toString()) && event.getGithubName().equals(gituser)) {
+						// Trim message to get only summary data
+						String message = commitObj.getString("message");
+						int idx = message.indexOf("\n");
+						if (idx > -1)
+							message = message.trim().substring(0, idx);
 
-				// Update comments & repo name
-				sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(),
-						event.getServiceDate().toString(), repoName, message);
+						// Update comments & repo name, continue to next commit
+						sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(),
+								event.getServiceDate().toString(), repoName, message);
+						break;
+					}
+				}
 			}
 			commitReader.close();
 
