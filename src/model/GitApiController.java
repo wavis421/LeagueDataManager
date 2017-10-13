@@ -27,9 +27,9 @@ public class GitApiController {
 		this.sqlDb = sqlDb;
 	}
 
-	public void importGithubComments() {
+	public void importGithubComments(String startDate) {
 		// Get all activities w/ github user name and no comments
-		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments();
+		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
 		String lastGithubUser = "";
 		JsonArray repoJsonArray = null;
 
@@ -50,15 +50,15 @@ public class GitApiController {
 				continue;
 			}
 
-			DateTime startDate = new DateTime(event.getServiceDate().toString());
-			DateTime endDate = startDate.plusDays(1);
+			DateTime startDay = new DateTime(event.getServiceDate().toString());
+			DateTime endDay = startDay.plusDays(1);
 
 			for (int j = 0; j < repoJsonArray.size(); j++) {
 				// Get commits data for each repo/date match
 				String repoName = ((JsonObject) repoJsonArray.get(j)).getString("name").trim();
 				String url = "https://api.github.com/repos/" + event.getGithubName() + "/" + repoName
-						+ "/commits?since=" + startDate.toString("YYYY-MM-dd") + "&until="
-						+ endDate.toString("YYYY-MM-dd");
+						+ "/commits?since=" + startDay.toString("YYYY-MM-dd") + "&until="
+						+ endDay.toString("YYYY-MM-dd");
 				InputStream commitStream = executeCurlCommand(url);
 
 				if (commitStream == null) {
@@ -73,9 +73,9 @@ public class GitApiController {
 		}
 	}
 
-	public void importGithubCommentsByLevel(int level) {
+	public void importGithubCommentsByLevel(int level, String startDate) {
 		// Get all activities w/ github user name and no comments
-		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments();
+		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
 
 		JsonArray repoJsonArray = getReposByLevel(level);
 		if (repoJsonArray == null) {
@@ -95,13 +95,13 @@ public class GitApiController {
 			for (int j = 0; j < eventList.size(); j++) {
 				ActivityEventModel event = eventList.get(j);
 				if (userName.equals(event.getGithubName())) {
-					DateTime startDate = new DateTime(event.getServiceDate().toString());
-					DateTime endDate = startDate.plusDays(1);
+					DateTime startDay = new DateTime(event.getServiceDate().toString());
+					DateTime endDay = startDay.plusDays(1);
 
 					// Get commits data for repo/date match
 					String url = "https://api.github.com/repos/League-Level" + level + "-Student/" + repoName
-							+ "/commits?since=" + startDate.toString("YYYY-MM-dd") + "&until="
-							+ endDate.toString("YYYY-MM-dd");
+							+ "/commits?since=" + startDay.toString("YYYY-MM-dd") + "&until="
+							+ endDay.toString("YYYY-MM-dd");
 					InputStream commitStream = executeCurlCommand(url);
 
 					if (commitStream == null) {

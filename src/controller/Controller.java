@@ -237,7 +237,7 @@ public class Controller {
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 
-	public void importGithubComments() {
+	public void importGithubComments(String startDate) {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -245,7 +245,7 @@ public class Controller {
 		loggingDataTitle = "Import Github Comments Log Data";
 		int origLogSize = sqlDb.getDbLogData().size();
 
-		gitController.importGithubComments();
+		gitController.importGithubComments(startDate);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
@@ -255,7 +255,7 @@ public class Controller {
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 	
-	public void importGithubCommentsByLevel(int level) {
+	public void importGithubCommentsByLevel(int level, String startDate) {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -263,7 +263,7 @@ public class Controller {
 		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
 		int origLogSize = sqlDb.getDbLogData().size();
 
-		gitController.importGithubCommentsByLevel(level);
+		gitController.importGithubCommentsByLevel(level, startDate);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());

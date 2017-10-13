@@ -1,7 +1,5 @@
 package model;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,17 +8,8 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
-import javax.json.stream.JsonParsingException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
-import org.joda.time.DateTime;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
@@ -682,7 +671,7 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	public ArrayList<ActivityEventModel> getEventsWithNoComments() {
+	public ArrayList<ActivityEventModel> getEventsWithNoComments(String startDate) {
 		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
 
 		for (int i = 0; i < 2; i++) {
@@ -691,7 +680,9 @@ public class MySqlDatabase {
 				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
-								+ "Comments IS NULL AND GithubName IS NOT NULL;");
+								+ "Comments IS NULL AND GithubName IS NOT NULL AND "
+								+ "ServiceDate >= ?;");
+				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {

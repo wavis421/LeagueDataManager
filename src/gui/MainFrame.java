@@ -205,14 +205,24 @@ public class MainFrame {
 		});
 		importGithub.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.importGithubComments();
-				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importGithubComments(startDate);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
 			}
 		});
 		importGithubLevel0.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.importGithubCommentsByLevel(0);
-				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importGithubCommentsByLevel(0, startDate);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
 			}
 		});
 		viewLogData.addActionListener(new ActionListener() {
