@@ -60,6 +60,14 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 		return githubComments;
 	}
 
+	public void setGithubComments(String comments) {
+		// Add comments to existing github comments if unique
+		if (githubComments.equals(""))
+			githubComments = comments.trim();
+		else if (!githubComments.contains(comments))
+			githubComments += " / " + comments.trim();
+	}
+	
 	public String getRepoName() {
 		return repoName;
 	}

@@ -681,7 +681,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "Comments IS NULL AND GithubName IS NOT NULL AND "
-								+ "ServiceDate >= ?;");
+								+ "ServiceDate >= ? ORDER BY GithubName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();
 

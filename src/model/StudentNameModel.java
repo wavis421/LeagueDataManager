@@ -31,9 +31,9 @@ public class StudentNameModel implements Comparable<StudentNameModel> {
 
 	@Override
 	public int compareTo(StudentNameModel otherName) {
-		int comp = this.getLastName().compareTo(otherName.getLastName());
+		int comp = this.getFirstName().compareTo(otherName.getFirstName());
 		if (comp == 0)
-			return this.getFirstName().compareTo(otherName.getFirstName());
+			return this.getLastName().compareTo(otherName.getLastName());
 		else
 			return comp;
 	}

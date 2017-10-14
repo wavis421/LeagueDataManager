@@ -12,8 +12,6 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.stream.JsonParsingException;
 
-import org.joda.time.DateTime;
-
 public class GitApiController {
 	// Repo name format: level-X-module-Y-username
 	private static final String URL_MODULE_PATTERN_MATCH = "module-";
@@ -53,8 +51,7 @@ public class GitApiController {
 			for (int j = 0; j < repoJsonArray.size(); j++) {
 				// Get commits data for each repo/date match
 				String repoName = ((JsonObject) repoJsonArray.get(j)).getString("name").trim();
-				String url = "https://api.github.com/repos/" + event.getGithubName() + "/" + repoName
-						+ "/commits?since=" + startDate;
+				String url = "https://api.github.com/repos/" + gitUser + "/" + repoName + "/commits?since=" + startDate;
 				InputStream commitStream = executeCurlCommand(url);
 
 				if (commitStream == null) {
@@ -64,7 +61,7 @@ public class GitApiController {
 					continue;
 				}
 				// Process all commits for this use since 'startDate'
-				processGithubCommitsStream(eventList, commitStream, repoName);
+				processGithubCommitsStream(eventList, commitStream, gitUser, repoName);
 			}
 		}
 	}
@@ -85,12 +82,12 @@ public class GitApiController {
 			String repoName = ((JsonObject) repoJsonArray.get(i)).getString("name");
 			int idx = repoName.indexOf(URL_MODULE_PATTERN_MATCH) + modulePatternLength;
 			idx += (repoName.substring(idx)).indexOf('-') + 1;
-			String userName = repoName.substring(idx); 
+			String githubUser = repoName.substring(idx);
 
 			// Search for user in eventList
 			for (int j = 0; j < eventList.size(); j++) {
 				ActivityEventModel event = eventList.get(j);
-				if (userName.equals(event.getGithubName())) {
+				if (githubUser.equals(event.getGithubName())) {
 					// Get commits data for this user
 					String url = "https://api.github.com/repos/League-Level" + level + "-Student/" + repoName
 							+ "/commits?since=" + startDate;
@@ -98,11 +95,11 @@ public class GitApiController {
 
 					if (commitStream == null) {
 						sqlDb.getDbLogData().add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE,
-								event.getStudentNameModel(), event.getClientID(), " for user '" + userName + "'"));
+								event.getStudentNameModel(), event.getClientID(), " for user '" + githubUser + "'"));
 						continue;
 					}
 					// Process all commits for this use since 'startDate'
-					processGithubCommitsStream(eventList, commitStream, repoName);
+					processGithubCommitsStream(eventList, commitStream, githubUser, repoName);
 				}
 			}
 		}
@@ -208,7 +205,7 @@ public class GitApiController {
 	}
 
 	private void processGithubCommitsStream(ArrayList<ActivityEventModel> eventList, InputStream inputStream,
-			String repoName) {
+			String githubName, String repoName) {
 		try {
 			// Read json input stream
 			JsonReader commitReader = Json.createReader(inputStream);
@@ -232,22 +229,21 @@ public class GitApiController {
 				// Process each commit
 				JsonObject commitObj = ((JsonObject) commitJsonArray.get(i)).getJsonObject("commit");
 				String date = commitObj.getJsonObject("committer").getString("date");
-				String gituser = commitObj.getJsonObject("committer").getString("name");
 
-				// Find name & date match in event list
-				// TODO: Append multiple commits on single date
+				// Find gituser & date match in event list; append multiple comments
 				for (int j = 0; j < eventList.size(); j++) {
 					ActivityEventModel event = eventList.get(j);
-					if (date.startsWith(event.getServiceDate().toString()) && event.getGithubName().equals(gituser)) {
-						// Trim message to get only summary data
+					if (date.startsWith(event.getServiceDateString()) && githubName.equals(event.getGithubName())) {
+						// Trim github message to get only summary data
 						String message = commitObj.getString("message");
 						int idx = message.indexOf("\n");
 						if (idx > -1)
 							message = message.trim().substring(0, idx);
 
 						// Update comments & repo name, continue to next commit
+						event.setGithubComments(message);
 						sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(),
-								event.getServiceDate().toString(), repoName, message);
+								event.getServiceDate().toString(), repoName, event.getGithubComments());
 						break;
 					}
 				}
