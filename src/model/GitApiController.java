@@ -250,18 +250,6 @@ public class GitApiController {
 			}
 			commitReader.close();
 
-			// Now that all events for this user are updated, update all remaining
-			// events that are still blank so that we won't need to look at them again
-			for (int i = 0; i < eventList.size(); i++) {
-				ActivityEventModel event = eventList.get(i);
-				if (event.getGithubComments().equals("")) {
-					if (githubName.equals(event.getGithubName()) && event.getRepoName() == null) {
-						sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(),
-								event.getServiceDateString(), repoName, "");
-					}
-				}
-			}
-
 		} catch (JsonException e) {
 			System.out.println("Failure parsing Github input stream: " + e.getMessage());
 		}
