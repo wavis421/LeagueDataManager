@@ -20,7 +20,7 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 			this.githubName = githubName.trim();
 		this.repoName = repoName;
 		this.nameModel = nameModel;
-		if (githubComments == null || githubComments.equals(""))
+		if (githubComments == null || githubComments.trim().equals(""))
 			this.githubComments = "";
 		else
 			this.githubComments = "  > " + githubComments.trim();
