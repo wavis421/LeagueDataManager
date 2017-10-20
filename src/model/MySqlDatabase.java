@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
 import gui.MainFrame;
 
@@ -103,7 +104,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -131,7 +132,7 @@ public class MySqlDatabase {
 				deleteStudentStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -167,7 +168,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -204,7 +205,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -241,7 +242,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -278,7 +279,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -385,7 +386,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -437,7 +438,7 @@ public class MySqlDatabase {
 							student.getClientID(), ""));
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -483,7 +484,7 @@ public class MySqlDatabase {
 						student.getClientID(), ""));
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -516,7 +517,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -550,7 +551,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -584,7 +585,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -618,7 +619,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -656,7 +657,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -697,7 +698,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -767,7 +768,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -800,7 +801,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
@@ -906,7 +907,7 @@ public class MySqlDatabase {
 				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, ""));
 				break;
 
-			} catch (CommunicationsException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
 				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
