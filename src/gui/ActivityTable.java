@@ -26,7 +26,7 @@ public class ActivityTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
-	private static final int POPUP_WINDOW_WIDTH = 900;
+	private static final int POPUP_WINDOW_WIDTH = 1100;
 	private static final int POPUP_WINDOW_HEIGHT = 300;
 
 	// Columns for embedded event table

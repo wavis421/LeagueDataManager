@@ -39,7 +39,7 @@ BEGIN
 		ServiceDate date DEFAULT NULL,
 		EventName varchar(50) DEFAULT NULL,
 		RepoName varchar(50) DEFAULT NULL,
-		Comments varchar(100) DEFAULT NULL,
+		Comments varchar(150) DEFAULT NULL,
 		
 		UNIQUE KEY(ClientID, EventName, ServiceDate)
 				

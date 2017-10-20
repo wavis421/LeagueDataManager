@@ -16,6 +16,7 @@ import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import gui.MainFrame;
 
 public class MySqlDatabase {
+	private static final int COMMENT_WIDTH = 150;
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private ArrayList<LogDataModel> logData = new ArrayList<LogDataModel>();
@@ -934,6 +935,8 @@ public class MySqlDatabase {
 						"UPDATE Activities SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
 
 				int col = 1;
+				if (comments.length() >= COMMENT_WIDTH)
+					comments = comments.substring(0, COMMENT_WIDTH);
 				updateActivityStmt.setString(col++, comments);
 				updateActivityStmt.setString(col++, repoName);
 				updateActivityStmt.setInt(col++, clientID);
