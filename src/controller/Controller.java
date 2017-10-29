@@ -17,6 +17,7 @@ import model.ActivityModel;
 import model.GitApiController;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.Pike13ApiController;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
@@ -40,6 +41,7 @@ public class Controller {
 
 	private MySqlDatabase sqlDb;
 	private GitApiController gitController;
+	private Pike13ApiController pike13Controller;
 	private JFrame parent;
 	private String loggingDataTitle = "Logging Data";
 
@@ -47,6 +49,7 @@ public class Controller {
 		this.parent = parent;
 		sqlDb = new MySqlDatabase(parent);
 		gitController = new GitApiController(sqlDb);
+		pike13Controller = new Pike13ApiController();
 	}
 
 	/*
@@ -62,11 +65,11 @@ public class Controller {
 	public String getLogDataTitle() {
 		return loggingDataTitle;
 	}
-	
+
 	public ArrayList<LogDataModel> getDbLogData() {
 		return sqlDb.getDbLogData();
 	}
-	
+
 	public void clearDbLogData() {
 		sqlDb.clearDbLogData();
 	}
@@ -89,7 +92,7 @@ public class Controller {
 	public void removeInactiveStudents() {
 		loggingDataTitle = "Remove Inactive Students Log Data";
 		int origLogSize = sqlDb.getDbLogData().size();
-		
+
 		sqlDb.removeInactiveStudents();
 
 		if (sqlDb.getDbLogData().size() > origLogSize)
@@ -179,6 +182,30 @@ public class Controller {
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 
+	public void importStudentsFromPike13() {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Clear log data
+		loggingDataTitle = "Import Students Log Data";
+		int origLogSize = sqlDb.getDbLogData().size();
+
+		// Get data from Pike13
+		ArrayList<StudentImportModel> studentList = pike13Controller.getClients();
+
+		// Update changes in database
+		if (studentList.size() > 0)
+			sqlDb.importStudents(studentList);
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		System.out.println("Pike13 Students: " + studentList.size());
+		if (sqlDb.getDbLogData().size() > origLogSize)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+	}
+
 	public void importActivitiesFromFile(File file) {
 		Path pathToFile = Paths.get(file.getAbsolutePath());
 		String line = "";
@@ -254,7 +281,7 @@ public class Controller {
 		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
-	
+
 	public void importGithubCommentsByLevel(int level, String startDate) {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

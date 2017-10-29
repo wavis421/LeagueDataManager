@@ -144,14 +144,16 @@ public class MainFrame {
 		menuBar.add(activitiesMenu);
 
 		// Add file sub-menus
-		JMenuItem importStudentsItem = new JMenuItem("Import Students...  ");
+		JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
+		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13... ");
 		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
 		JMenuItem importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0... ");
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
-		fileMenu.add(importStudentsItem);
+		fileMenu.add(importStudentFileItem);
+		fileMenu.add(importStudentPike13Item);
 		fileMenu.add(importActivityLogItem);
 		fileMenu.add(importGithubItem);
 		fileMenu.add(importGithubLevel0Item);
@@ -176,23 +178,30 @@ public class MainFrame {
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
-		createFileMenuListeners(importStudentsItem, importActivityLogItem, importGithubItem, importGithubLevel0Item,
-				viewLogDataItem, clearLogDataItem, exitItem);
+		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogItem,
+				importGithubItem, importGithubLevel0Item, viewLogDataItem, clearLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenuItem importStudents, JMenuItem importActivites, JMenuItem importGithub,
-			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem exitItem) {
+	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
+			JMenuItem importActivites, JMenuItem importGithub, JMenuItem importGithubLevel0, JMenuItem viewLogData,
+			JMenuItem clearLogData, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
-		importStudents.addActionListener(new ActionListener() {
+		importStudentFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
 					refreshStudentTable(STUDENT_TABLE_ALL, 0);
 				}
+			}
+		});
+		importStudentsPike13.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.importStudentsFromPike13();
+				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
 		importActivites.addActionListener(new ActionListener() {
