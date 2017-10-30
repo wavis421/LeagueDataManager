@@ -145,16 +145,18 @@ public class MainFrame {
 
 		// Add file sub-menus
 		JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
-		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13... ");
-		JMenuItem importActivityLogItem = new JMenuItem("Import Attendance Log...  ");
+		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
+		JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
+		JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
-		JMenuItem importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0... ");
+		JMenuItem importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0...  ");
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 		fileMenu.add(importStudentFileItem);
 		fileMenu.add(importStudentPike13Item);
-		fileMenu.add(importActivityLogItem);
+		fileMenu.add(importActivityLogFileItem);
+		fileMenu.add(importActivityLogPike13Item);
 		fileMenu.add(importGithubItem);
 		fileMenu.add(importGithubLevel0Item);
 		fileMenu.addSeparator();
@@ -178,8 +180,9 @@ public class MainFrame {
 		activitiesMenu.add(activitiesViewAllItem);
 
 		// Create listeners
-		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogItem,
-				importGithubItem, importGithubLevel0Item, viewLogDataItem, clearLogDataItem, exitItem);
+		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
+				importActivityLogPike13Item, importGithubItem, importGithubLevel0Item, viewLogDataItem,
+				clearLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 
@@ -187,8 +190,8 @@ public class MainFrame {
 	}
 
 	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
-			JMenuItem importActivites, JMenuItem importGithub, JMenuItem importGithubLevel0, JMenuItem viewLogData,
-			JMenuItem clearLogData, JMenuItem exitItem) {
+			JMenuItem importActivitesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
+			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		importStudentFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -204,12 +207,18 @@ public class MainFrame {
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
-		importActivites.addActionListener(new ActionListener() {
+		importActivitesFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
 					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 				}
+			}
+		});
+		importActivitiesPike13.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.importActivitiesFromPike13();
+				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 			}
 		});
 		importGithub.addActionListener(new ActionListener() {

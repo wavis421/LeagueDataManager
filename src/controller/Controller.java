@@ -263,6 +263,30 @@ public class Controller {
 		if (sqlDb.getDbLogData().size() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
+	
+	public void importActivitiesFromPike13() {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Clear log data
+		loggingDataTitle = "Import Students Log Data";
+		int origLogSize = sqlDb.getDbLogData().size();
+
+		// Get data from Pike13
+		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment();
+
+		// Update changes in database
+		if (eventList.size() > 0)
+			sqlDb.importActivities(eventList);
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+
+		// Report if log data collected during import
+		System.out.println("Pike13 Enrollments: " + eventList.size());
+		if (sqlDb.getDbLogData().size() > origLogSize)
+			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+	}
 
 	public void importGithubComments(String startDate) {
 		// Set cursor to "wait" cursor

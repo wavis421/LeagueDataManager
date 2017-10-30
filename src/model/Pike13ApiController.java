@@ -26,10 +26,15 @@ public class Pike13ApiController {
 	private final int HOME_LOC_IDX = 6;
 	private final int FIRST_VISIT_IDX = 7;
 
-	// Custom field names
+	// Custom field names for client data
 	private final String GENDER_NAME = "custom_field_106320";
 	private final String GITHUB_NAME = "custom_field_127885";
 	private final String GRAD_YEAR_NAME = "custom_field_145902";
+
+	// Indices for enrollment data
+	private final int FULL_NAME_IDX = 1;
+	private final int SERVICE_DATE_IDX = 2;
+	private final int EVENT_NAME_IDX = 3;
 
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
@@ -43,65 +48,65 @@ public class Pike13ApiController {
 			// Filter on Dependents NULL and has membership
 			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\",\"\"],[\"eq\",\"has_membership\",\"t\"]]]}}}";
 
+	// Getting enrollment data is in 2 parts since page info gets inserted in middle
+	private final String getEnrollmentData1 = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500";
+
+	private final String getEnrollmentData2 = "},"
+			// Filter on State completed and since date
+			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
+			+ "           [\"btw\",\"service_date\",[\"2017-09-01\",\"2017-10-29\"]],"
+			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
+			+ "}}}";
+
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
 		try {
-			String query = "https://jtl.pike13.com/desk/api/v3/reports/clients/queries";
-
 			// Get URL connection with authorization
-			URL url = new URL(query);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			String basicAuth = "Bearer " + SECRET_TOKEN;
-			conn.setRequestProperty("Authorization", basicAuth);
-			conn.setRequestProperty("User-Agent", USER_AGENT);
-
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-type", "application/vnd.api+json; charset=UTF-8");
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
+			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/clients/queries");
 
 			// Send the query
-			OutputStream outputStream = conn.getOutputStream();
-			outputStream.write(getClientData.getBytes("UTF-8"));
-			outputStream.flush();
-			outputStream.close();
+			sendQueryToUrl(conn, getClientData);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
 				System.out.println("HTTP Connection error " + responseCode + ": " + conn.getResponseMessage());
-				return null;
+				return studentList;
 			}
 
 			// Get input stream and read data
-			InputStream inputStream = conn.getInputStream();
-			JsonReader repoReader = Json.createReader(inputStream);
-			JsonObject jsonObj = (JsonObject) repoReader.read();
-			JsonArray jsonArray = jsonObj.getJsonObject("data").getJsonObject("attributes").getJsonArray("rows");
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null)
+				return studentList;
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
 				// Get fields for each person
 				JsonArray personArray = (JsonArray) jsonArray.get(i);
-				String firstName = stripField(personArray.get(FIRST_NAME_IDX).toString());
+				String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
 
 				if (!firstName.startsWith("Guest")) {
 					// Get fields for this Json array entry
 					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
-							stripField(personArray.get(LAST_NAME_IDX).toString()),
-							stripField(personArray.get(FIRST_NAME_IDX).toString()),
-							stripField(personArray.get(GITHUB_IDX).toString()),
-							stripField(personArray.get(GENDER_IDX).toString()),
-							stripField(personArray.get(FIRST_VISIT_IDX).toString()),
-							stripField(personArray.get(HOME_LOC_IDX).toString()),
-							stripField(personArray.get(GRAD_YEAR_IDX).toString()));
+							stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
+							stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
+							stripQuotes(personArray.get(GITHUB_IDX).toString()),
+							stripQuotes(personArray.get(GENDER_IDX).toString()),
+							stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
+							stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
+							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
 
 					studentList.add(model);
 				}
 			}
 
-			repoReader.close();
-			inputStream.close();
 			conn.disconnect();
 
 		} catch (IOException e1) {
@@ -111,7 +116,115 @@ public class Pike13ApiController {
 		return studentList;
 	}
 
-	private String stripField(String fieldData) {
+	public ArrayList<ActivityEventModel> getEnrollment() {
+		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+		boolean hasMore = false;
+		String lastKey = "";
+
+		try {
+			do {
+				// Get URL connection with authorization
+				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/enrollments/queries");
+
+				// Send the query; insert page info if necessary
+				if (hasMore)
+					sendQueryToUrl(conn,
+							getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + getEnrollmentData2);
+				else
+					sendQueryToUrl(conn, getEnrollmentData1 + getEnrollmentData2);
+
+				// Check result
+				int responseCode = conn.getResponseCode();
+				if (responseCode != HttpURLConnection.HTTP_OK) {
+					System.out.println("HTTP Connection error " + responseCode + ": " + conn.getResponseMessage());
+					return eventList;
+				}
+
+				// Get input stream and read data
+				JsonObject jsonObj = readInputStream(conn);
+				if (jsonObj == null)
+					return eventList;
+				JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+				for (int i = 0; i < jsonArray.size(); i++) {
+					// Get fields for each event
+					JsonArray eventArray = (JsonArray) jsonArray.get(i);
+					String eventName = stripQuotes(eventArray.get(EVENT_NAME_IDX).toString());
+					String serviceDate = stripQuotes(eventArray.get(SERVICE_DATE_IDX).toString());
+
+					// Add event to list
+					if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
+						eventList.add(new ActivityEventModel(eventArray.getInt(CLIENT_ID_IDX),
+								stripQuotes(eventArray.get(FULL_NAME_IDX).toString()), serviceDate, eventName));
+					}
+				}
+
+				// Check to see if there are more pages
+				hasMore = jsonObj.getBoolean("has_more");
+				lastKey = jsonObj.getString("last_key");
+				
+				conn.disconnect();
+
+			} while (hasMore);
+
+		} catch (IOException e1) {
+			System.out.println("IO Exception getting Pike13 data: " + e1.getMessage());
+		}
+
+		return eventList;
+	}
+
+	private HttpURLConnection connectUrl(String queryUrl) {
+		try {
+			// Get URL connection with authorization
+			URL url = new URL(queryUrl);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			String basicAuth = "Bearer " + SECRET_TOKEN;
+			conn.setRequestProperty("Authorization", basicAuth);
+			conn.setRequestProperty("User-Agent", USER_AGENT);
+
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-type", "application/vnd.api+json; charset=UTF-8");
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			return conn;
+
+		} catch (IOException e) {
+			System.out.println("IO Exception getting Pike13 data: " + e.getMessage());
+		}
+		return null;
+	}
+
+	private void sendQueryToUrl(HttpURLConnection conn, String getCommand) {
+		try {
+			OutputStream outputStream = conn.getOutputStream();
+			outputStream.write(getCommand.getBytes("UTF-8"));
+			outputStream.flush();
+			outputStream.close();
+
+		} catch (IOException e) {
+			System.out.println("IO Exception sending Pike13 query: " + e.getMessage());
+		}
+	}
+
+	private JsonObject readInputStream(HttpURLConnection conn) {
+		try {
+			// Get input stream and read data
+			InputStream inputStream = conn.getInputStream();
+			JsonReader repoReader = Json.createReader(inputStream);
+			JsonObject object = ((JsonObject) repoReader.read()).getJsonObject("data").getJsonObject("attributes");
+			
+			repoReader.close();
+			inputStream.close();
+			return object;
+
+		} catch (IOException e) {
+			System.out.println("Failure reading Pike13 Input Stream: " + e.getMessage());
+		}
+		return null;
+	}
+
+	private String stripQuotes(String fieldData) {
 		// Strip off quotes around field string
 		if (fieldData.equals("\"\"") || fieldData.startsWith("null"))
 			return "";
