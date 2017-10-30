@@ -12,6 +12,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.joda.time.DateTime;
+
 public class Pike13ApiController {
 	private final String SECRET_TOKEN = "KxjMhMHLUrhrZ6IeJ4OsSsuFAJyM0hGfFi4NdI4D";
 	private final String USER_AGENT = "Mozilla/5.0";
@@ -60,7 +62,7 @@ public class Pike13ApiController {
 	private final String getEnrollmentData2 = "},"
 			// Filter on State completed and since date
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "           [\"btw\",\"service_date\",[\"2017-09-01\",\"2017-10-29\"]],"
+			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
 			+ "}}}";
 
@@ -116,22 +118,25 @@ public class Pike13ApiController {
 		return studentList;
 	}
 
-	public ArrayList<ActivityEventModel> getEnrollment() {
+	public ArrayList<ActivityEventModel> getEnrollment(String startDate) {
 		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
 		boolean hasMore = false;
 		String lastKey = "";
+
+		// Insert start date and end date into enrollment command string
+		String enroll2 = getEnrollmentData2.replaceFirst("0000-00-00", startDate);
+		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
 
 		try {
 			do {
 				// Get URL connection with authorization
 				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/enrollments/queries");
 
-				// Send the query; insert page info if necessary
+				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn,
-							getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + getEnrollmentData2);
+					sendQueryToUrl(conn, getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
 				else
-					sendQueryToUrl(conn, getEnrollmentData1 + getEnrollmentData2);
+					sendQueryToUrl(conn, getEnrollmentData1 + enroll2);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
@@ -162,7 +167,7 @@ public class Pike13ApiController {
 				// Check to see if there are more pages
 				hasMore = jsonObj.getBoolean("has_more");
 				lastKey = jsonObj.getString("last_key");
-				
+
 				conn.disconnect();
 
 			} while (hasMore);
@@ -213,7 +218,7 @@ public class Pike13ApiController {
 			InputStream inputStream = conn.getInputStream();
 			JsonReader repoReader = Json.createReader(inputStream);
 			JsonObject object = ((JsonObject) repoReader.read()).getJsonObject("data").getJsonObject("attributes");
-			
+
 			repoReader.close();
 			inputStream.close();
 			return object;

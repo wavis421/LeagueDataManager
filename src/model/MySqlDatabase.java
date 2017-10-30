@@ -904,7 +904,8 @@ public class MySqlDatabase {
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, ""));
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, 
+						" for " + serviceDate));
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {

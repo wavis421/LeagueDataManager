@@ -217,8 +217,13 @@ public class MainFrame {
 		});
 		importActivitiesPike13.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				controller.importActivitiesFromPike13();
-				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importActivitiesFromPike13(startDate);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
 			}
 		});
 		importGithub.addActionListener(new ActionListener() {

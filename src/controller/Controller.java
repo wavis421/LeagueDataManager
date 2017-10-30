@@ -264,7 +264,7 @@ public class Controller {
 			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
 	}
 	
-	public void importActivitiesFromPike13() {
+	public void importActivitiesFromPike13(String startDate) {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -273,7 +273,7 @@ public class Controller {
 		int origLogSize = sqlDb.getDbLogData().size();
 
 		// Get data from Pike13
-		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment();
+		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
