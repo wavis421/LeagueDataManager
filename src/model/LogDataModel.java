@@ -10,18 +10,20 @@ public class LogDataModel {
 	public static final int ADD_NEW_STUDENT_NO_GITHUB = 6;
 	public static final int UPDATE_STUDENT_INFO = 7;
 	public static final int UPDATE_STUDENT_ATTENDANCE = 8;
-	public static final int INVALID_CLASS_NAME = 9;
-	public static final int REMOVE_INACTIVE_STUDENT = 10;
-	public static final int STUDENT_NOT_FOUND = 11;
-	public static final int INVALID_GRAD_YEAR = 12;
-	public static final int GITHUB_IMPORT_FAILURE = 13;
-	public static final int GITHUB_PARSING_ERROR = 14;
+	public static final int UPDATE_GITHUB_COMMENTS = 9;
+	public static final int INVALID_CLASS_NAME = 10;
+	public static final int REMOVE_INACTIVE_STUDENT = 11;
+	public static final int STUDENT_NOT_FOUND = 12;
+	public static final int INVALID_GRAD_YEAR = 13;
+	public static final int GITHUB_IMPORT_FAILURE = 14;
+	public static final int GITHUB_PARSING_ERROR = 15;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
 			"Added new Student with no Github user name", "Updated Student Info", "Updated Student Attendance",
-			"Invalid Class Name", "Removed inactive student", "Attendance data with no matching student",
-			"Invalid Grad Year field", "Failure importing Github data", "Failure parsing Github data" };
+			"Updated Github Comments", "Invalid Class Name", "Removed inactive student",
+			"Attendance data with no matching student", "Invalid Grad Year field", "Failure importing Github data",
+			"Failure parsing Github data" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

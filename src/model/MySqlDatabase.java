@@ -953,7 +953,7 @@ public class MySqlDatabase {
 				updateActivityStmt.executeUpdate();
 				updateActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
+				logData.add(new LogDataModel(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
 						" for repo " + repoName + " (" + serviceDate + ")"));
 				return;
 
