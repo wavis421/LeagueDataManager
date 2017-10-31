@@ -27,7 +27,7 @@ public class ActivityTable extends JPanel {
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
 	private static final int POPUP_WINDOW_WIDTH = 1200;
-	private static final int POPUP_WINDOW_HEIGHT = 300;
+	private static final int POPUP_WINDOW_HEIGHT = 600;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -222,6 +222,7 @@ public class ActivityTable extends JPanel {
 				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
 			// All columns centered except Github Comments
+			super.setVerticalAlignment(TOP);
 			if (table != mainTable && column == EVENT_TABLE_COMMENTS_COLUMN)
 				super.setHorizontalAlignment(LEFT);
 			else
