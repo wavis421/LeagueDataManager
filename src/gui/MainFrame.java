@@ -424,7 +424,7 @@ public class MainFrame {
 				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
 						&& table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
 					// Highlight selected row in github event table
-					activityTable.setSelectedEventRow(table.convertRowIndexToModel(row), e.getY());
+					activityTable.setSelectedEventRow(row, e.getY());
 
 				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
 					if (table.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
@@ -436,7 +436,7 @@ public class MainFrame {
 					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
 							&& currentActivityTable != ACTIVITY_TABLE_BY_CLASS) {
 						// Show students by class name
-						selectedClassName = activityTable.getClassNameByRow(table.convertRowIndexToModel(row),
+						selectedClassName = activityTable.getClassNameByRow(row, table.convertRowIndexToModel(row),
 								e.getY());
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);

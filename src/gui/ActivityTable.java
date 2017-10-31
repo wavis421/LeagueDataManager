@@ -94,8 +94,8 @@ public class ActivityTable extends JPanel {
 		mainTable.repaint(); // TODO: This is probably overkill
 	}
 
-	public String getClassNameByRow(int selectedRow, int yPos) {
-		JTable table = githubEventTableList.get(selectedRow);
+	public String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
+		JTable table = githubEventTableList.get(modelRow);
 		int eventRow = getEventRow(selectedRow, yPos);
 
 		if (eventRow > -1) {
