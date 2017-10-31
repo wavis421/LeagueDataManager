@@ -40,7 +40,7 @@ import model.StudentNameModel;
 
 public class MainFrame {
 	/* Private constants */
-	private static final int PREF_FRAME_WIDTH = 975;
+	private static final int PREF_FRAME_WIDTH = 1100;
 	private static final int PREF_FRAME_HEIGHT = 700;
 
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;
@@ -88,16 +88,20 @@ public class MainFrame {
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
+		controller = new Controller(frame);
 
+		// Configure header
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
 		headerLabel.setFont(CustomFonts.TITLE_FONT);
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
-		controller = new Controller(frame);
-		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
-		headerLabel.setText(STUDENT_TITLE);
+		// Default to student table with all students
 		currentStudentTable = STUDENT_TABLE_ALL;
+		headerLabel.setText(STUDENT_TITLE);
+
+		// Configure panel and each tables
+		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());

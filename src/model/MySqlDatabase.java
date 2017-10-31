@@ -324,7 +324,12 @@ public class MySqlDatabase {
 				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), ""));
-
+			
+			if (importStudent.getGender() == GenderModel.getGenderUnknown())
+				logData.add(new LogDataModel(LogDataModel.MISSING_GENDER,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID(), ""));
+			
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
@@ -456,7 +461,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
-						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
+						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
@@ -466,6 +471,7 @@ public class MySqlDatabase {
 					updateStudentStmt.setString(col++, null);
 				else
 					updateStudentStmt.setString(col++, student.getGithubName());
+				updateStudentStmt.setInt(col++, student.getGender());
 				if (!student.getStartDate().equals(""))
 					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
 				else {

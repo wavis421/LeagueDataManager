@@ -2,6 +2,7 @@ package model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -9,6 +10,7 @@ import javax.swing.JOptionPane;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.NoSuchPageException;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
@@ -59,9 +61,7 @@ public class GitApiController {
 							continue;
 
 						// Update all user comments in this repo list
-						if (updateUserGithubComments(gitUser, startDate, eventList, repo) == -1)
-							// Rate limit exceeded, so abort
-							break;
+						updateUserGithubComments(gitUser, startDate, eventList, repo);
 					}
 				}
 
@@ -106,9 +106,7 @@ public class GitApiController {
 
 					if (repo.getName().endsWith("-" + gitUser)) {
 						// Update all user comments in this repo list
-						if (updateUserGithubComments(gitUser, startDate, eventList, repo) == -1)
-							// Rate limit exceeded, so abort
-							return;
+						updateUserGithubComments(gitUser, startDate, eventList, repo);
 					}
 				}
 			}
@@ -135,49 +133,50 @@ public class GitApiController {
 		return repoList;
 	}
 
-	private int updateUserGithubComments(String githubUser, String startDate, List<ActivityEventModel> eventList,
+	private void updateUserGithubComments(String githubUser, String startDate, List<ActivityEventModel> eventList,
 			Repository repo) {
+		// Get all the commits for this repo within date range
 		try {
-			// Get all the commits for this repo within date range
-			List<RepositoryCommit> commitList = commitService.getCommits(repo);
-			for (int j = 0; j < commitList.size(); j++) {
-				RepositoryCommit commit = commitList.get(j);
-				long commitDateLong = commit.getCommit().getCommitter().getDate().getTime();
-				String commitDate = new DateTime(commitDateLong).toString("yyyy-MM-dd");
+			for (Collection<RepositoryCommit> commitPage : commitService.pageCommits(repo, 500)) {
+				// Loop through each commit for this page
+				for (RepositoryCommit commit : commitPage) {
+					// Get commit date
+					long commitDateLong = commit.getCommit().getCommitter().getDate().getTime();
+					String commitDate = new DateTime(commitDateLong).toString("yyyy-MM-dd");
 
-				// Commits ordered by date, so once date is old then move on
-				if (commitDate.compareTo(startDate) < 0)
-					break;
+					// Commits ordered by date, so once date is old then move on
+					if (commitDate.compareTo(startDate) < 0)
+						return;
 
-				// Find gituser & date match in event list; append multiple comments
-				for (int k = 0; k < eventList.size(); k++) {
-					ActivityEventModel event = eventList.get(k);
-					if (commitDate.equals(event.getServiceDateString()) && githubUser.equals(event.getGithubName())) {
-						// Trim github message to get only summary data
-						String message = commit.getCommit().getMessage();
-						int idx = message.indexOf("\n");
-						if (idx > -1)
-							message = message.trim().substring(0, idx);
+					// Find gituser & date match in event list; append multiple comments
+					for (int k = 0; k < eventList.size(); k++) {
+						ActivityEventModel event = eventList.get(k);
+						if (commitDate.equals(event.getServiceDateString())
+								&& githubUser.equals(event.getGithubName())) {
+							// Trim github message to get only summary data
+							String message = trimMessage(commit.getCommit().getMessage());
 
-						// Update comments & repo name, continue to next commit
-						event.setGithubComments(message);
-						sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(), commitDate,
-								repo.getName(), event.getGithubComments());
+							// Update comments & repo name, continue to next commit
+							event.setGithubComments(message);
+							sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(), commitDate,
+									repo.getName(), event.getGithubComments());
+						}
 					}
 				}
 			}
-
-		} catch (IOException e) {
-			if (e.getMessage().startsWith("API rate limit exceeded")) {
-				// Rate limit exceeded, so abort
-				JOptionPane.showConfirmDialog(null,
-						"Aborting Github import: Github API rate limit exceeded.\nPlease wait 1 hour and try again.");
-				return -1;
-			}
-			// TODO: Figure out how to get more info for this error
-			sqlDb.getDbLogData().add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, null, 0,
-					" for user '" + githubUser + "': " + e.getMessage()));
+			
+		} catch (NoSuchPageException e) {
+			// Repo is empty, so just return
 		}
-		return 0;
+	}
+
+	private String trimMessage(String inputMsg) {
+		// Trim message up to first new-line character
+		inputMsg = inputMsg.trim();
+		int idx = inputMsg.indexOf("\n");
+		if (idx > -1)
+			return inputMsg.substring(0, idx);
+		else
+			return inputMsg;
 	}
 }

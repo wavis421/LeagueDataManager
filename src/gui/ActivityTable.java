@@ -26,14 +26,15 @@ public class ActivityTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
-	private static final int POPUP_WINDOW_WIDTH = 1100;
+	private static final int POPUP_WINDOW_WIDTH = 1200;
 	private static final int POPUP_WINDOW_HEIGHT = 300;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
 	private static final int EVENT_TABLE_CLASS_NAME_COLUMN = 1;
-	private static final int EVENT_TABLE_COMMENTS_COLUMN = 2;
-	private static final int EVENT_TABLE_NUM_COLUMNS = 3;
+	private static final int EVENT_TABLE_REPO_NAME_COLUMN = 2;
+	private static final int EVENT_TABLE_COMMENTS_COLUMN = 3;
+	private static final int EVENT_TABLE_NUM_COLUMNS = 4;
 
 	private JPanel parentTablePanel;
 	private JTable mainTable;
@@ -289,7 +290,12 @@ public class ActivityTable extends JPanel {
 				return activity.getServiceDate().toString();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
 				return activity.getEventName();
-			else
+			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {
+				if (activity.getRepoName() == null)
+					return "";
+				else
+					return activity.getRepoName();
+			} else
 				return activity.getGithubComments();
 		}
 	}
