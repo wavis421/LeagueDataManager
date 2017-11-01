@@ -8,12 +8,13 @@ import model.LogDataModel;
 import model.StudentNameModel;
 
 public class LogTableModel extends AbstractTableModel {
-	public static final int CLIENT_ID_COLUMN = 0;
-	public static final int STUDENT_NAME_COLUMN = 1;
-	public static final int STATUS_COLUMN = 2;
+	public static final int DATE_COLUMN = 0;
+	public static final int CLIENT_ID_COLUMN = 1;
+	public static final int STUDENT_NAME_COLUMN = 2;
+	public static final int STATUS_COLUMN = 3;
 
 	private ArrayList<LogDataModel> logList;
-	private final String[] colNames = { " Client ID ", " Student Name ", " Status Message " };
+	private final String[] colNames = { "  Date  ", " Client ID ", " Student Name ", " Status Message " };
 
 	public LogTableModel(ArrayList<LogDataModel> logData) {
 		this.logList = logData;
@@ -65,6 +66,8 @@ public class LogTableModel extends AbstractTableModel {
 		LogDataModel logData = logList.get(row);
 
 		switch (col) {
+		case DATE_COLUMN:
+			return logData.getDate();
 		case CLIENT_ID_COLUMN:
 			if (logData.getClientID() == 0)
 				return "";

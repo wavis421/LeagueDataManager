@@ -1,5 +1,7 @@
 package model;
 
+import org.joda.time.DateTime;
+
 public class LogDataModel {
 	public static final int MISSING_GITHUB_NAME = 0;
 	public static final int MISSING_GRAD_YEAR = 1;
@@ -34,12 +36,14 @@ public class LogDataModel {
 	private int logType, clientID;
 	private StudentNameModel studentName;
 	private String appendedString;
+	private DateTime date;
 
 	public LogDataModel(int logType, StudentNameModel name, int clientID, String appendedString) {
 		this.clientID = clientID;
 		this.logType = logType;
 		this.studentName = name;
 		this.appendedString = appendedString;
+		date = new DateTime();
 	}
 
 	public int getClientID() {
@@ -56,5 +60,9 @@ public class LogDataModel {
 
 	public String getLogString() {
 		return logTypeName[logType] + appendedString;
+	}
+	
+	public String getDate() {
+		return date.toString("yyyy-MM-dd HH:mm");
 	}
 }

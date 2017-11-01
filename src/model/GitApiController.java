@@ -76,7 +76,7 @@ public class GitApiController {
 
 				} else {
 					logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-							event.getClientID(), " for gitUser '" + gitUser + "'"));
+							event.getClientID(), " for gitUser '" + gitUser + "': " + e.getMessage()));
 				}
 			}
 		}
@@ -137,7 +137,7 @@ public class GitApiController {
 			Repository repo) {
 		// Get all the commits for this repo within date range
 		try {
-			for (Collection<RepositoryCommit> commitPage : commitService.pageCommits(repo, 500)) {
+			for (Collection<RepositoryCommit> commitPage : commitService.pageCommits(repo, 200)) {
 				// Loop through each commit for this page
 				for (RepositoryCommit commit : commitPage) {
 					// Get commit date
