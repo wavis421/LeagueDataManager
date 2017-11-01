@@ -17,13 +17,19 @@ public class LogDataModel {
 	public static final int INVALID_GRAD_YEAR = 13;
 	public static final int GITHUB_IMPORT_FAILURE = 14;
 	public static final int GITHUB_PARSING_ERROR = 15;
+	public static final int STUDENT_DB_ERROR = 16;
+	public static final int ATTENDANCE_DB_ERROR = 17;
+	public static final int PIKE13_IMPORT_ERROR = 18;
+	public static final int GITHUB_IMPORT_ERROR = 19;
+	public static final int GITHUB_MODULE_REPO_ERROR = 20;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
 			"Added new Student with no Github user name", "Updated Student Info", "Updated Student Attendance",
 			"Updated Github Comments", "Invalid Class Name", "Removed inactive student",
 			"Attendance data with no matching student", "Invalid Grad Year field", "Failure importing Github data",
-			"Failure parsing Github data" };
+			"Failure parsing Github data", "Student Database error", "Attendance Database error", "Pike13 Import error",
+			"Github Import error", "Failure getting Module Repo"};
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

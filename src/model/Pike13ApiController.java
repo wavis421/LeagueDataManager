@@ -65,6 +65,12 @@ public class Pike13ApiController {
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
 			+ "}}}";
+	
+	ArrayList<LogDataModel> logData;
+	
+	public Pike13ApiController(ArrayList<LogDataModel> logData) {
+		this.logData = logData;
+	}
 
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
@@ -112,7 +118,8 @@ public class Pike13ApiController {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			System.out.println("IO Exception getting Pike13 data: " + e1.getMessage());
+			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e1.getMessage()));
 		}
 
 		return studentList;
@@ -173,7 +180,8 @@ public class Pike13ApiController {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			System.out.println("IO Exception getting Pike13 data: " + e1.getMessage());
+			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e1.getMessage()));
 		}
 
 		return eventList;
@@ -195,7 +203,8 @@ public class Pike13ApiController {
 			return conn;
 
 		} catch (IOException e) {
-			System.out.println("IO Exception getting Pike13 data: " + e.getMessage());
+			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e.getMessage()));
 		}
 		return null;
 	}
@@ -208,7 +217,8 @@ public class Pike13ApiController {
 			outputStream.close();
 
 		} catch (IOException e) {
-			System.out.println("IO Exception sending Pike13 query: " + e.getMessage());
+			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e.getMessage()));
 		}
 	}
 
@@ -224,7 +234,7 @@ public class Pike13ApiController {
 			return object;
 
 		} catch (IOException e) {
-			System.out.println("Failure reading Pike13 Input Stream: " + e.getMessage());
+			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, e.getMessage()));
 		}
 		return null;
 	}

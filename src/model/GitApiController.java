@@ -22,9 +22,11 @@ public class GitApiController {
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
+	ArrayList<LogDataModel> logData;
 
-	public GitApiController(MySqlDatabase sqlDb) {
+	public GitApiController(MySqlDatabase sqlDb, ArrayList<LogDataModel> logData) {
 		this.sqlDb = sqlDb;
+		this.logData = logData;
 
 		// OAuth2 token authentication
 		GitHubClient client = new GitHubClient();
@@ -73,8 +75,8 @@ public class GitApiController {
 					break;
 
 				} else {
-					sqlDb.getDbLogData().add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE,
-							event.getStudentNameModel(), event.getClientID(), " for user '" + gitUser + "'"));
+					logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+							event.getClientID(), " for gitUser '" + gitUser + "'"));
 				}
 			}
 		}
@@ -123,11 +125,9 @@ public class GitApiController {
 			if (repoList.size() == 0)
 				return null;
 
-		} catch (RequestException e1) {
-			System.out.println("Failure getting Commit data for " + ownerName + ": " + e1.getMessage());
-
-		} catch (IOException e2) {
-			System.out.println("Failure getting Commit data for " + ownerName + ": " + e2.getMessage());
+		} catch (IOException e1) {
+			logData.add(new LogDataModel(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
+					" for " + ownerName + ": " + e1.getMessage()));
 		}
 
 		return repoList;
@@ -164,7 +164,7 @@ public class GitApiController {
 					}
 				}
 			}
-			
+
 		} catch (NoSuchPageException e) {
 			// Repo is empty, so just return
 		}

@@ -31,7 +31,6 @@ public class ActivityTableModel extends AbstractTableModel {
 			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
 			tableObjects[row][GITHUB_COMMENTS_COLUMN] = db.get(row).getActivityEventList().toArray();
 		}
-		System.out.println("Num Activities: " + db.size());
 	}
 
 	public void removeAll() {

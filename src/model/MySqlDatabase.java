@@ -20,10 +20,11 @@ public class MySqlDatabase {
 	private static final int COMMENT_WIDTH = 150;
 	private static Connection dbConnection = null;
 	private JFrame parent;
-	private ArrayList<LogDataModel> logData = new ArrayList<LogDataModel>();
+	private ArrayList<LogDataModel> logData;
 
-	public MySqlDatabase(JFrame parent) {
+	public MySqlDatabase(JFrame parent, ArrayList<LogDataModel> logData) {
 		this.parent = parent;
+		this.logData = logData;
 
 		// Make initial connection to database
 		connectDatabase();
@@ -70,17 +71,6 @@ public class MySqlDatabase {
 	}
 
 	/*
-	 * ------- Logging Activity -------
-	 */
-	public void clearDbLogData() {
-		logData.clear();
-	}
-
-	public ArrayList<LogDataModel> getDbLogData() {
-		return (ArrayList<LogDataModel>) logData.clone();
-	}
-
-	/*
 	 * ------- Student Database Queries -------
 	 */
 	public ArrayList<StudentModel> getAllStudents() {
@@ -105,15 +95,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -133,15 +121,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Remove Student database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage()));
 				break;
 			}
 		}
@@ -169,15 +155,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -206,15 +190,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -243,14 +225,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -280,14 +261,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage()));
 				break;
 			}
 		}
@@ -324,12 +304,12 @@ public class MySqlDatabase {
 				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), ""));
-			
+
 			if (importStudent.getGender() == GenderModel.getGenderUnknown())
 				logData.add(new LogDataModel(LogDataModel.MISSING_GENDER,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), ""));
-			
+
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
@@ -392,15 +372,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -444,14 +422,15 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Add student database failure: " + e2.getMessage());
+				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
+						student.getIsInMasterDb() == 1 ? true : false);
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -491,14 +470,15 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Update student database failure: " + e2.getMessage());
+				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
+						isInDb == 1 ? true : false);
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -524,15 +504,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -558,15 +536,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -592,15 +568,15 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				StudentNameModel studentModel = new StudentNameModel(studentName.getFirstName(), studentName.getLastName(),
+						studentName.getIsInMasterDb());
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -626,15 +602,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -664,15 +638,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -705,15 +677,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Attendance DB error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -752,8 +722,7 @@ public class MySqlDatabase {
 			}
 
 		} catch (SQLException e) {
-			System.out.println("Get Attendance DB error: " + e.getMessage());
-			e.printStackTrace();
+			logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e.getMessage()));
 			return;
 		}
 	}
@@ -775,15 +744,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Class Name database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -808,15 +775,13 @@ public class MySqlDatabase {
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database (" + i + "): " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				System.out.println("Get Student Name database error: " + e2.getMessage());
-				e2.printStackTrace();
+				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
 				break;
 			}
 		}
@@ -910,12 +875,11 @@ public class MySqlDatabase {
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, 
+				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
 						" for " + serviceDate));
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				System.out.println("Re-connecting to database: " + e1.getMessage());
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -926,8 +890,9 @@ public class MySqlDatabase {
 				break;
 
 			} catch (SQLException e3) {
-				System.out.println("Failed to add attendance data for ID=" + clientID + ", event=" + eventName + ": "
-						+ e3.getMessage());
+				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
+						nameModel.getIsInMasterDb());
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e3.getMessage()));
 				break;
 			}
 		}
@@ -958,7 +923,9 @@ public class MySqlDatabase {
 				return;
 
 			} catch (SQLException e) {
-				System.out.println("Update attendance DB failure for " + nameModel.toString() + ": " + e.getMessage());
+				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
+						nameModel.getIsInMasterDb());
+				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e.getMessage()));
 			}
 		}
 	}

@@ -17,13 +17,11 @@ public class LogTableModel extends AbstractTableModel {
 
 	public LogTableModel(ArrayList<LogDataModel> logData) {
 		this.logList = logData;
-		System.out.println("Log Data Size (0): " + logList.size());
 	}
 
 	public void setData(ArrayList<LogDataModel> db) {
 		logList.clear();
 		logList = db;
-		System.out.println("Log Data Size (1): " + logList.size());
 	}
 
 	public void removeAll() {
