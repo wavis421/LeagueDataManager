@@ -91,7 +91,7 @@ public class ActivityTable extends JPanel {
 
 	public void setSelectedEventRow(int selectedRow, int yPos) {
 		eventSelectedRow = getEventRow(selectedRow, yPos);
-		mainTable.repaint(); // TODO: This is probably overkill
+		mainTable.repaint();
 	}
 
 	public String getClassNameByRow(int selectedRow, int modelRow, int yPos) {

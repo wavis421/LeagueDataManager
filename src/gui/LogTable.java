@@ -83,7 +83,7 @@ public class LogTable extends JPanel {
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
 	}
 
-	// TODO: share this table renderer
+	// TODO: share/merge this table renderer
 	public class LogTableRenderer extends JLabel implements TableCellRenderer {
 		private LogTableRenderer() {
 			super();

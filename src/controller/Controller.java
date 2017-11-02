@@ -67,6 +67,7 @@ public class Controller {
 		return loggingDataTitle;
 	}
 
+	@SuppressWarnings("unchecked")
 	public ArrayList<LogDataModel> getDbLogData() {
 		return (ArrayList<LogDataModel>) logData.clone();
 	}

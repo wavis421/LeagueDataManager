@@ -23,9 +23,6 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 				this.gradYear = Integer.parseInt(gradYear);
 
 			} catch (NumberFormatException e) {
-				// TODO: Log this error
-				System.out.println("Invalid field '" + gradYear + "' in Grad Year for " + firstName + " " + lastName
-						+ " (" + clientID + ")");
 				this.gradYear = 0;
 			}
 		}
