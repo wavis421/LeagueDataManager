@@ -96,8 +96,9 @@ public class MainFrame {
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
-		// Default to student table with all students
+		// Default tables to display all data
 		currentStudentTable = STUDENT_TABLE_ALL;
+		currentActivityTable = ACTIVITY_TABLE_ALL;
 		headerLabel.setText(STUDENT_TITLE);
 
 		// Configure panel and each tables
@@ -359,9 +360,9 @@ public class MainFrame {
 						StudentTableModel.STUDENT_NAME_COLUMN);
 
 				// Display activity table for selected student
-				activityTable.showActivitiesByPerson(studentName.toString(),
-						controller.getActivitiesByClientID(clientID));
 				studentTable.getTable().clearSelection();
+				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
+						"  for  '" + studentName.toString() + "'");
 			}
 		});
 		studentTable.getTable().addMouseListener(new MouseAdapter() {

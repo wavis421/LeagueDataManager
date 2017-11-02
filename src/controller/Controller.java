@@ -38,6 +38,8 @@ public class Controller {
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
 	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 2;
 	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
+	
+	private static final String logUpdateMessage = "Please view Log Data to see updates and errors";
 
 	private MySqlDatabase sqlDb;
 	private GitApiController gitController;
@@ -181,7 +183,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
 	public void importStudentsFromPike13() {
@@ -205,7 +207,7 @@ public class Controller {
 		// Report if log data collected during import
 		System.out.println("Pike13 Students: " + studentList.size());
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data to see status updates and errors");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
 	public void importActivitiesFromFile(File file) {
@@ -263,7 +265,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 	
 	public void importActivitiesFromPike13(String startDate) {
@@ -286,7 +288,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
 	public void importGithubComments(String startDate) {
@@ -304,7 +306,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
 	public void importGithubCommentsByLevel(int level, String startDate) {
@@ -322,6 +324,6 @@ public class Controller {
 
 		// Report if log data collected during import
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 }
