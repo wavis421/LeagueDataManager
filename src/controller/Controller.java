@@ -172,8 +172,8 @@ public class Controller {
 				sqlDb.importStudents(studentList);
 
 		} catch (IOException e) {
-			System.out.println("Error line: " + line);
-			// e.printStackTrace();
+			logData.add(new LogDataModel(LogDataModel.FILE_IMPORT_ERROR, null, 0,
+					" for file '" + pathToFile + "': " + e.getMessage()));
 		}
 
 		// Set cursor back to default
@@ -205,7 +205,7 @@ public class Controller {
 		// Report if log data collected during import
 		System.out.println("Pike13 Students: " + studentList.size());
 		if (logData.size() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data -- some errors/warnings have occurred");
+			JOptionPane.showMessageDialog(parent, "Please view Log Data to see status updates and errors");
 	}
 
 	public void importActivitiesFromFile(File file) {
@@ -254,8 +254,8 @@ public class Controller {
 				sqlDb.importActivities(eventList);
 
 		} catch (IOException e) {
-			System.out.println("Error line: " + line);
-			// e.printStackTrace();
+			logData.add(new LogDataModel(LogDataModel.FILE_IMPORT_ERROR, null, 0,
+					" for file '" + pathToFile + "': " + e.getMessage()));
 		}
 
 		// Set cursor back to default

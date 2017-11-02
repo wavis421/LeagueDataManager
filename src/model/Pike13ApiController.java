@@ -85,7 +85,8 @@ public class Pike13ApiController {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				System.out.println("HTTP Connection error " + responseCode + ": " + conn.getResponseMessage());
+				logData.add(new LogDataModel(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage()));
 				return studentList;
 			}
 
@@ -148,7 +149,8 @@ public class Pike13ApiController {
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					System.out.println("HTTP Connection error " + responseCode + ": " + conn.getResponseMessage());
+					logData.add(new LogDataModel(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+							" " + responseCode + ": " + conn.getResponseMessage()));
 					return eventList;
 				}
 
