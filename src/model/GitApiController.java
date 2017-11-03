@@ -22,11 +22,9 @@ public class GitApiController {
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
-	ArrayList<LogDataModel> logData;
 
-	public GitApiController(MySqlDatabase sqlDb, ArrayList<LogDataModel> logData) {
+	public GitApiController(MySqlDatabase sqlDb) {
 		this.sqlDb = sqlDb;
-		this.logData = logData;
 
 		// OAuth2 token authentication
 		GitHubClient client = new GitHubClient();
@@ -75,8 +73,8 @@ public class GitApiController {
 					break;
 
 				} else {
-					logData.add(new LogDataModel(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
-							event.getClientID(), " for gitUser '" + gitUser + "': " + e.getMessage()));
+					sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+							event.getClientID(), " for gitUser '" + gitUser + "': " + e.getMessage());
 				}
 			}
 		}
@@ -126,8 +124,8 @@ public class GitApiController {
 				return null;
 
 		} catch (IOException e1) {
-			logData.add(new LogDataModel(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
-					" for " + ownerName + ": " + e1.getMessage()));
+			sqlDb.insertLogData(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
+					" for " + ownerName + ": " + e1.getMessage());
 		}
 
 		return repoList;

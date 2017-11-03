@@ -16,18 +16,32 @@ import gui.MainFrame;
 public class MySqlConnection {
 	// Constants
 	private static final int LOCAL_PORT = 8740; // any free port can be used
-	private static final String SSH_HOST = "www.ProgramPlanner.org";
-	private static final String SSH_USER = "wavis421";
-	// TODO: This should be on server??
-	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\wavisadmin-keypair-ncal.pem";
 	private static final String REMOTE_HOST = "127.0.0.1";
 	private static final int REMOTE_PORT = 3306;
+
+	private static final String SSH_HOST = "www.ProgramPlanner.org";
+	private static final String SSH_USER = "wavis421";
+	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\wavisadmin-keypair-ncal.pem";
+	private static final String SERVER = "localhost";
+	private static final String DATABASE = "LeagueData";
+	private static final int DB_PORT = LOCAL_PORT;
+	private static final String DB_USER = "tester421";
+
+	/*
+	private static final String SSH_HOST = "ec2-34-215-59-190.us-west-2.compute.amazonaws.com";
+	private static final String SSH_USER = "ec2-user";
+	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\league.pem";
+	private static final String SERVER = "cryfqyj7jcsy.us-west-2.rds.amazonaws.com";
+	private static final String DATABASE = "data-manager-db-test";
+	private static final int DB_PORT = 3306;
+	private static final String DB_USER = "admin";
+    */
 
 	// Save SSH Session and database connection
 	private static Session session = null;
 	private static Connection connection = null;
 
-	public static Connection connectToServer(JFrame parent, String dataBaseName, String user, String password)
+	public static Connection connectToServer(JFrame parent, String password)
 			throws SQLException {
 		// Save current cursor and set to "wait" cursor
 		Cursor cursor = parent.getCursor();
@@ -42,7 +56,7 @@ public class MySqlConnection {
 		// Create new SSH and database connections
 		if (session == null)
 			connectSSH();
-		connectToDataBase(dataBaseName, user, password);
+		connectToDataBase(DB_USER, password);
 
 		// Set cursor back to original setting
 		parent.setCursor(cursor);
@@ -64,38 +78,30 @@ public class MySqlConnection {
 			session.setConfig("TCPKeepAlive", "yes");
 
 			session.connect();
-			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+			if (DB_PORT != 3306)
+				session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
 
 		} catch (Exception e) {
-			// Ask if user wants to exit
-			if (JOptionPane.showOptionDialog(null,
-					"Failed to establish a secure SSH tunnel.\n(" + e.getMessage() + ")\n"
-							+ "Please make sure Program Planner is not already running.\n\nDo you want to continue?\n",
-					"Failed to create secure connection", 0, JOptionPane.PLAIN_MESSAGE, null,
-					new String[] { "Yes", "Exit Program" }, 0) != JOptionPane.YES_OPTION) {
-
-				MainFrame.shutdown();
-			}
+			// Failed maximum connection attempts, exit program
+			JOptionPane.showMessageDialog(null, "Failed to establish a secure SSH tunnel.\n(" + e.getMessage() + ")\n"
+					+ "Please make sure League Data Manager is not already running.\n");
+			MainFrame.shutdown();
 		}
 	}
 
-	private static void connectToDataBase(String dataBaseName, String user, String password) throws SQLException {
+	private static void connectToDataBase(String user, String password) throws SQLException {
+		if (session == null)
+			return;
+
 		try {
 			String driverName = "com.mysql.jdbc.Driver";
 			Class.forName(driverName).newInstance();
 			MysqlDataSource dataSource = new MysqlDataSource();
 
-			if (session == null) {
-				// Connecting directly to database using port 3306
-				dataSource.setServerName("www.ProgramPlanner.org");
-				dataSource.setPortNumber(REMOTE_PORT);
-			} else {
-				// Connecting through SSH tunnel
-				dataSource.setServerName("localhost");
-				dataSource.setPortNumber(LOCAL_PORT);
-			}
-
-			dataSource.setDatabaseName(dataBaseName);
+			// Connecting through SSH tunnel
+			dataSource.setServerName(SERVER);
+			dataSource.setPortNumber(DB_PORT);
+			dataSource.setDatabaseName(DATABASE);
 			dataSource.setUser(user);
 			dataSource.setPassword(password);
 			dataSource.setAutoReconnect(true);

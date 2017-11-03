@@ -45,14 +45,13 @@ public class Controller {
 	private GitApiController gitController;
 	private Pike13ApiController pike13Controller;
 	private JFrame parent;
-	private ArrayList<LogDataModel> logData = new ArrayList<LogDataModel>();
 	private String loggingDataTitle = "Logging Data";
 
 	public Controller(JFrame parent) {
 		this.parent = parent;
-		sqlDb = new MySqlDatabase(parent, logData);
-		gitController = new GitApiController(sqlDb, logData);
-		pike13Controller = new Pike13ApiController(logData);
+		sqlDb = new MySqlDatabase(parent);
+		gitController = new GitApiController(sqlDb);
+		pike13Controller = new Pike13ApiController(sqlDb);
 	}
 
 	/*
@@ -69,13 +68,12 @@ public class Controller {
 		return loggingDataTitle;
 	}
 
-	@SuppressWarnings("unchecked")
 	public ArrayList<LogDataModel> getDbLogData() {
-		return (ArrayList<LogDataModel>) logData.clone();
+		return sqlDb.getLogData();
 	}
 
 	public void clearDbLogData() {
-		logData.clear();
+		sqlDb.clearLogData();
 	}
 
 	/*
@@ -95,11 +93,11 @@ public class Controller {
 
 	public void removeInactiveStudents() {
 		loggingDataTitle = "Remove Inactive Students Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		sqlDb.removeInactiveStudents();
 
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, "Please view Log Data for list of students removed");
 	}
 
@@ -144,7 +142,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		// CSV file has the following columns:
 		// Home Location, First Visit Date, First Name, Last Name,
@@ -174,15 +172,15 @@ public class Controller {
 				sqlDb.importStudents(studentList);
 
 		} catch (IOException e) {
-			logData.add(new LogDataModel(LogDataModel.FILE_IMPORT_ERROR, null, 0,
-					" for file '" + pathToFile + "': " + e.getMessage()));
+			sqlDb.insertLogData(LogDataModel.FILE_IMPORT_ERROR, null, 0,
+					" for file '" + pathToFile + "': " + e.getMessage());
 		}
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
@@ -192,7 +190,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		// Get data from Pike13
 		ArrayList<StudentImportModel> studentList = pike13Controller.getClients();
@@ -206,7 +204,7 @@ public class Controller {
 
 		// Report if log data collected during import
 		System.out.println("Pike13 Students: " + studentList.size());
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
@@ -220,7 +218,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Attendance Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		// CSV file has the following columns:
 		// Student name, service date, event name, clientID, Schedule ID
@@ -256,15 +254,15 @@ public class Controller {
 				sqlDb.importActivities(eventList);
 
 		} catch (IOException e) {
-			logData.add(new LogDataModel(LogDataModel.FILE_IMPORT_ERROR, null, 0,
-					" for file '" + pathToFile + "': " + e.getMessage()));
+			sqlDb.insertLogData(LogDataModel.FILE_IMPORT_ERROR, null, 0,
+					" for file '" + pathToFile + "': " + e.getMessage());
 		}
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 	
@@ -274,7 +272,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		// Get data from Pike13
 		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment(startDate);
@@ -287,7 +285,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
@@ -297,7 +295,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Github Comments Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		gitController.importGithubComments(startDate);
 
@@ -305,7 +303,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
@@ -315,7 +313,7 @@ public class Controller {
 
 		// Clear log data
 		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
-		int origLogSize = logData.size();
+		int origLogSize = sqlDb.getLogDataSize();
 
 		gitController.importGithubCommentsByLevel(level, startDate);
 
@@ -323,7 +321,7 @@ public class Controller {
 		parent.setCursor(Cursor.getDefaultCursor());
 
 		// Report if log data collected during import
-		if (logData.size() > origLogSize)
+		if (sqlDb.getLogDataSize() > origLogSize)
 			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 }

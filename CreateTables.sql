@@ -44,6 +44,21 @@ BEGIN
 		UNIQUE KEY(ClientID, EventName, ServiceDate)
 				
 	) ENGINE=InnoDB;
+	
+	CREATE TABLE IF NOT EXISTS LogData (
+		LogDataID int(11) NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY (LogDataID),
+		
+		# Log data
+		ClientID int(11) DEFAULT NULL,
+		LogType int(11) NOT NULL,
+		StudentName varchar(50) DEFAULT NULL,
+		AppendedString varchar(50) DEFAULT NULL,
+		LogDate date DEFAULT NULL,
+
+		UNIQUE KEY(ClientID, LogType, StudentName, AppendedString)
+
+	) ENGINE=InnoDB;
 
 END$$
 DELIMITER ;

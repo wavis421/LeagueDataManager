@@ -66,10 +66,10 @@ public class Pike13ApiController {
 			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
 			+ "}}}";
 	
-	ArrayList<LogDataModel> logData;
+	MySqlDatabase mysqlDb;
 	
-	public Pike13ApiController(ArrayList<LogDataModel> logData) {
-		this.logData = logData;
+	public Pike13ApiController(MySqlDatabase mysqlDb) {
+		this.mysqlDb = mysqlDb;
 	}
 
 	public ArrayList<StudentImportModel> getClients() {
@@ -85,8 +85,8 @@ public class Pike13ApiController {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				logData.add(new LogDataModel(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
-						" " + responseCode + ": " + conn.getResponseMessage()));
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
 				return studentList;
 			}
 
@@ -119,8 +119,8 @@ public class Pike13ApiController {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e1.getMessage()));
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e1.getMessage());
 		}
 
 		return studentList;
@@ -149,8 +149,8 @@ public class Pike13ApiController {
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					logData.add(new LogDataModel(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
-							" " + responseCode + ": " + conn.getResponseMessage()));
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+							" " + responseCode + ": " + conn.getResponseMessage());
 					return eventList;
 				}
 
@@ -182,8 +182,8 @@ public class Pike13ApiController {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e1.getMessage()));
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e1.getMessage());
 		}
 
 		return eventList;
@@ -205,8 +205,8 @@ public class Pike13ApiController {
 			return conn;
 
 		} catch (IOException e) {
-			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e.getMessage()));
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e.getMessage());
 		}
 		return null;
 	}
@@ -219,8 +219,8 @@ public class Pike13ApiController {
 			outputStream.close();
 
 		} catch (IOException e) {
-			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e.getMessage()));
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
+					" (IO Exception): " + e.getMessage());
 		}
 	}
 
@@ -236,7 +236,7 @@ public class Pike13ApiController {
 			return object;
 
 		} catch (IOException e) {
-			logData.add(new LogDataModel(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, e.getMessage()));
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, e.getMessage());
 		}
 		return null;
 	}

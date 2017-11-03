@@ -11,6 +11,8 @@ import java.util.Collections;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import org.joda.time.DateTime;
+
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
@@ -20,11 +22,10 @@ public class MySqlDatabase {
 	private static final int COMMENT_WIDTH = 150;
 	private static Connection dbConnection = null;
 	private JFrame parent;
-	private ArrayList<LogDataModel> logData;
+	private String awsPassword;
 
-	public MySqlDatabase(JFrame parent, ArrayList<LogDataModel> logData) {
+	public MySqlDatabase(JFrame parent) {
 		this.parent = parent;
-		this.logData = logData;
 
 		// Make initial connection to database
 		connectDatabase();
@@ -40,7 +41,10 @@ public class MySqlDatabase {
 		while (true) {
 			connectAttempts++;
 			try {
-				dbConnection = MySqlConnection.connectToServer(parent, "LeagueData", "tester421", "Rwarwe310");
+				if (awsPassword == null)
+					awsPassword = JOptionPane.showInputDialog("AWS Password: ");
+				dbConnection = MySqlConnection.connectToServer(parent, awsPassword);
+
 			} catch (SQLException e) {
 				// Error handling performed in connectToServer
 			}
@@ -101,7 +105,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -127,7 +131,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage());
 				break;
 			}
 		}
@@ -161,7 +165,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -178,9 +182,9 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					logData.add(new LogDataModel(LogDataModel.REMOVE_INACTIVE_STUDENT,
+					insertLogData(LogDataModel.REMOVE_INACTIVE_STUDENT,
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), false),
-							result.getInt("ClientID"), ""));
+							result.getInt("ClientID"), "");
 
 					removeStudentByClientID(result.getInt("ClientID"));
 				}
@@ -196,7 +200,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -231,7 +235,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -267,7 +271,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage());
 				break;
 			}
 		}
@@ -285,30 +289,30 @@ public class MySqlDatabase {
 
 			// Log any missing data
 			if (importStudent.getGithubName().equals("")) {
-				logData.add(new LogDataModel(LogDataModel.MISSING_GITHUB_NAME,
+				insertLogData(LogDataModel.MISSING_GITHUB_NAME,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), ""));
+						importStudent.getClientID(), "");
 			}
 
 			if (importStudent.getGradYear() == 0)
-				logData.add(new LogDataModel(LogDataModel.MISSING_GRAD_YEAR,
+				insertLogData(LogDataModel.MISSING_GRAD_YEAR,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), ""));
+						importStudent.getClientID(), "");
 
 			if (importStudent.getStartDate().equals(""))
-				logData.add(new LogDataModel(LogDataModel.MISSING_FIRST_VISIT_DATE,
+				insertLogData(LogDataModel.MISSING_FIRST_VISIT_DATE,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), ""));
+						importStudent.getClientID(), "");
 
 			if (importStudent.getHomeLocation() == LocationModel.CLASS_LOCATION_UNKNOWN)
-				logData.add(new LogDataModel(LogDataModel.MISSING_HOME_LOCATION,
+				insertLogData(LogDataModel.MISSING_HOME_LOCATION,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), ""));
+						importStudent.getClientID(), "");
 
 			if (importStudent.getGender() == GenderModel.getGenderUnknown())
-				logData.add(new LogDataModel(LogDataModel.MISSING_GENDER,
+				insertLogData(LogDataModel.MISSING_GENDER,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), ""));
+						importStudent.getClientID(), "");
 
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
@@ -378,7 +382,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -412,13 +416,13 @@ public class MySqlDatabase {
 				addStudentStmt.close();
 
 				if (student.getGithubName() == null)
-					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT_NO_GITHUB,
+					insertLogData(LogDataModel.ADD_NEW_STUDENT_NO_GITHUB,
 							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-							student.getClientID(), ""));
+							student.getClientID(), "");
 				else
-					logData.add(new LogDataModel(LogDataModel.ADD_NEW_STUDENT,
+					insertLogData(LogDataModel.ADD_NEW_STUDENT,
 							new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-							student.getClientID(), ""));
+							student.getClientID(), "");
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
@@ -430,7 +434,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
 						student.getIsInMasterDb() == 1 ? true : false);
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -464,9 +468,9 @@ public class MySqlDatabase {
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_INFO,
+				insertLogData(LogDataModel.UPDATE_STUDENT_INFO,
 						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-						student.getClientID(), ""));
+						student.getClientID(), "");
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
@@ -478,7 +482,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
 						isInDb == 1 ? true : false);
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -510,7 +514,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -542,7 +546,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -574,9 +578,9 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				StudentNameModel studentModel = new StudentNameModel(studentName.getFirstName(), studentName.getLastName(),
-						studentName.getIsInMasterDb());
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, e2.getMessage()));
+				StudentNameModel studentModel = new StudentNameModel(studentName.getFirstName(),
+						studentName.getLastName(), studentName.getIsInMasterDb());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -608,7 +612,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -644,7 +648,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -683,7 +687,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -722,7 +726,7 @@ public class MySqlDatabase {
 			}
 
 		} catch (SQLException e) {
-			logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e.getMessage()));
+			insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e.getMessage());
 			return;
 		}
 	}
@@ -750,7 +754,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -781,7 +785,7 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				logData.add(new LogDataModel(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage()));
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
 				break;
 			}
 		}
@@ -827,10 +831,10 @@ public class MySqlDatabase {
 								importEvent.getEventName(), dbList.get(dbListIdx).getStudentNameModel());
 
 					} else
-						logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
+						insertLogData(LogDataModel.STUDENT_NOT_FOUND,
 								new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
 								importEvent.getClientID(),
-								": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+								": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString());
 				}
 
 			} else {
@@ -844,10 +848,10 @@ public class MySqlDatabase {
 
 				} else {
 					// Student not found
-					logData.add(new LogDataModel(LogDataModel.STUDENT_NOT_FOUND,
+					insertLogData(LogDataModel.STUDENT_NOT_FOUND,
 							new StudentNameModel(importEvent.getStudentNameModel().getFirstName(), "", false),
 							importEvent.getClientID(),
-							": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString()));
+							": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString());
 				}
 			}
 		}
@@ -875,8 +879,7 @@ public class MySqlDatabase {
 				addActivityStmt.executeUpdate();
 				addActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
-						" for " + serviceDate));
+				insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, " for " + serviceDate);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
@@ -892,7 +895,7 @@ public class MySqlDatabase {
 			} catch (SQLException e3) {
 				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
 						nameModel.getIsInMasterDb());
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e3.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e3.getMessage());
 				break;
 			}
 		}
@@ -918,14 +921,138 @@ public class MySqlDatabase {
 				updateActivityStmt.executeUpdate();
 				updateActivityStmt.close();
 
-				logData.add(new LogDataModel(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
-						" for repo " + repoName + " (" + serviceDate + ")"));
+				insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
+						" for repo " + repoName + " (" + serviceDate + ")");
 				return;
 
 			} catch (SQLException e) {
 				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
 						nameModel.getIsInMasterDb());
-				logData.add(new LogDataModel(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e.getMessage()));
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e.getMessage());
+			}
+		}
+	}
+
+	/*
+	 * ------- Logging Database Queries -------
+	 */
+	public void insertLogData(int logType, StudentNameModel studentNameModel, int clientID, String appendedMsg) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement addLogDataStmt = dbConnection.prepareStatement(
+						"INSERT INTO LogData (ClientID, LogType, StudentName, AppendedString, LogDate) "
+								+ "VALUES (?, ?, ?, ?, ?);");
+
+				int col = 1;
+				addLogDataStmt.setInt(col++, clientID);
+				addLogDataStmt.setInt(col++, logType);
+				if (studentNameModel == null)
+					addLogDataStmt.setString(col++, null);
+				else
+					addLogDataStmt.setString(col++, studentNameModel.toString());
+				addLogDataStmt.setString(col++, appendedMsg);
+				addLogDataStmt.setString(col++, new DateTime().toString("yyyy-MM-dd HH:mm"));
+
+				addLogDataStmt.executeUpdate();
+				addLogDataStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				if (!e2.getMessage().startsWith("Duplicate entry"))
+					// TODO: Can't log this error! What to do instead?
+					System.out.println("Unable to Log data: " + studentNameModel.getFirstName() + ", "
+							+ LogDataModel.getLogType(LogDataModel.LOG_DATA_DB_ERROR) + " " + appendedMsg + " "
+							+ e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public ArrayList<LogDataModel> getLogData() {
+		ArrayList<LogDataModel> logData = new ArrayList<LogDataModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM LogData ORDER BY LogDate;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					logData.add(new LogDataModel(result.getInt("LogType"), result.getString("LogDate").substring(0, 16),
+							new StudentNameModel(result.getString("StudentName"), "", true), result.getInt("ClientID"),
+							result.getString("AppendedString")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				break;
+			}
+		}
+		return logData;
+	}
+
+	public int getLogDataSize() {
+		int logDataSize = 0;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM LogData");
+				ResultSet result = selectStmt.executeQuery();
+
+				if (result.next()) {
+					logDataSize = result.getInt(1);
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, null, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+		return logDataSize;
+	}
+
+	public void clearLogData() {
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement selectStmt = dbConnection.prepareStatement("TRUNCATE LogData");
+				selectStmt.executeUpdate();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, null, 0, ": " + e2.getMessage());
+				break;
 			}
 		}
 	}
