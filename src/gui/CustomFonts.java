@@ -23,4 +23,5 @@ public class CustomFonts {
 	public static final Font TABLE_HEADER_FONT = JTFTools.decodeFont("Dialog-bold-15");
 	public static final Font TABLE_TEXT_FONT = JTFTools.decodeFont("Dialog-bold-12");
 	public static final Font TABLE_ITALIC_TEXT_FONT = JTFTools.decodeFont("Dialog-italic-12");
+	public static final Font NOTES_WINDOW_FONT = JTFTools.decodeFont("Serif-bold-15");
 }

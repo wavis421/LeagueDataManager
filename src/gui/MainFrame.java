@@ -143,10 +143,12 @@ public class MainFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu studentMenu = new JMenu("Students");
 		JMenu activitiesMenu = new JMenu("Attendance");
+		JMenu helpMenu = new JMenu("Help");
 
 		menuBar.add(fileMenu);
 		menuBar.add(studentMenu);
 		menuBar.add(activitiesMenu);
+		menuBar.add(helpMenu);
 
 		// Add file sub-menus
 		JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
@@ -184,12 +186,24 @@ public class MainFrame {
 		activitiesMenu.add(activitiesViewByClassMenu);
 		activitiesMenu.add(activitiesViewAllItem);
 
+		// Add Help sub-menus
+		JMenuItem menuDescriptionItem = new JMenuItem("Menu Description ");
+		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
+		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
+		JMenuItem aboutItem = new JMenuItem("About League Data Manager ");
+		helpMenu.add(menuDescriptionItem);
+		helpMenu.add(exampleUsageItem);
+		helpMenu.add(feedbackItem);
+		helpMenu.addSeparator();
+		helpMenu.add(aboutItem);
+
 		// Create listeners
 		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
 				importActivityLogPike13Item, importGithubItem, importGithubLevel0Item, viewLogDataItem,
 				clearLogDataItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
+		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
 
 		return menuBar;
 	}
@@ -322,6 +336,31 @@ public class MainFrame {
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+			}
+		});
+	}
+
+	private void createHelpMenuListeners(JMenuItem menuDescription, JMenuItem exampleUsage, JMenuItem feedback,
+			JMenuItem about) {
+		// Set up listeners for Help menu
+		menuDescription.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.MENU_DESCRIPTION);
+			}
+		});
+		exampleUsage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.EXAMPLES);
+			}
+		});
+		feedback.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.FEEDBACK);
+			}
+		});
+		about.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.ABOUT);
 			}
 		});
 	}
