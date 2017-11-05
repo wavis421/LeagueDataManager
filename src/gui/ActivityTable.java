@@ -117,6 +117,10 @@ public class ActivityTable extends JPanel {
 	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
 		this.parentTablePanel = tablePanel;
 
+		// Clear event row selections
+		eventTableSelectedRow = -1;
+		eventSelectedRow = -1;
+
 		// Set data for main table
 		activityTableModel.setData(activityList);
 

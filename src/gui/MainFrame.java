@@ -432,17 +432,18 @@ public class MainFrame {
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
+		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+		tablePopup.add(showStudentAttendanceItem);
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Add activity table and header for selected class
+				activityTable.getTable().clearSelection();
 				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(selectedClassName),
 						"  for  \"" + selectedClassName + "\"");
-				studentTable.getTable().clearSelection();
 			}
 		});
 		showStudentInfoItem.addActionListener(new ActionListener() {
@@ -452,8 +453,23 @@ public class MainFrame {
 				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
 				int clientID = Integer.parseInt((String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN));
 
+				activityTable.getTable().clearSelection();
 				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
-				studentTable.getTable().clearSelection();
+			}
+		});
+		showStudentAttendanceItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name & Client ID for selected row/column
+				int row = activityTable.getTable().convertRowIndexToModel(activityTable.getTable().getSelectedRow());
+				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
+				String clientID = (String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel studentName = (StudentNameModel) model.getValueAt(row,
+						ActivityTableModel.STUDENT_NAME_COLUMN);
+
+				// Display activity table for selected student
+				activityTable.getTable().clearSelection();
+				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
+						"  for  '" + studentName.toString() + "'");
 			}
 		});
 		activityTable.getTable().addMouseListener(new MouseAdapter() {
@@ -471,6 +487,14 @@ public class MainFrame {
 						// Show student's info
 						tablePopup.remove(showStudentClassItem);
 						tablePopup.add(showStudentInfoItem);
+						if (currentActivityTable == ACTIVITY_TABLE_BY_STUDENT) {
+							tablePopup.remove(showStudentAttendanceItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+						}
+						else {
+							tablePopup.add(showStudentAttendanceItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+						}
 						tablePopup.show(table, e.getX(), e.getY());
 
 					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
@@ -480,7 +504,9 @@ public class MainFrame {
 								e.getY());
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);
+							tablePopup.remove(showStudentAttendanceItem);
 							tablePopup.add(showStudentClassItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 							tablePopup.show(table, e.getX(), e.getY());
 						}
 					}
