@@ -16,36 +16,44 @@ import gui.MainFrame;
 public class MySqlConnection {
 	// Constants
 	private static final int LOCAL_PORT = 8740; // any free port can be used
-	private static final String REMOTE_HOST = "127.0.0.1";
 	private static final int REMOTE_PORT = 3306;
-
-	private static final String SSH_HOST = "www.ProgramPlanner.org";
-	private static final String SSH_USER = "wavis421";
-	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\wavisadmin-keypair-ncal.pem";
 	private static final String SERVER = "localhost";
-	private static final String DATABASE = "LeagueData";
-	private static final int DB_PORT = LOCAL_PORT;
-	private static final String DB_USER = "tester421";
 
-	/*
-	private static final String SSH_HOST = "ec2-34-215-59-190.us-west-2.compute.amazonaws.com";
-	private static final String SSH_USER = "ec2-user";
-	private static final String SSH_KEY_FILE_PATH = "C:\\Users\\wavis\\Documents\\AppDevelopment\\keystore\\league.pem";
-	private static final String SERVER = "cryfqyj7jcsy.us-west-2.rds.amazonaws.com";
-	private static final String DATABASE = "data-manager-db-test";
-	private static final int DB_PORT = 3306;
-	private static final String DB_USER = "admin";
-    */
+	// SSH/Database connect constants
+	// Once DB testing is complete, these will be final constants
+	private static String SSH_HOST;
+	private static String SSH_USER;
+	private static String SSH_KEY_FILE_PATH;
+	private static String DATABASE;
+	private static String DB_USER;
+	private static String REMOTE_HOST;
 
 	// Save SSH Session and database connection
 	private static Session session = null;
 	private static Connection connection = null;
 
-	public static Connection connectToServer(JFrame parent, String password)
-			throws SQLException {
+	public static Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
 		Cursor cursor = parent.getCursor();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// During development/test, need access to multiple databases
+		if (serverSelect == 0) { // Wendy's web host server
+			SSH_HOST = "www.ProgramPlanner.org";
+			SSH_USER = "wavis421";
+			SSH_KEY_FILE_PATH = "./wavisadmin-keypair-ncal.pem";
+			DATABASE = "LeagueData";
+			DB_USER = "tester421";
+			REMOTE_HOST = "127.0.0.1";
+
+		} else { // AWS server
+			SSH_HOST = "ec2-34-215-59-190.us-west-2.compute.amazonaws.com";
+			SSH_USER = "ec2-user";
+			SSH_KEY_FILE_PATH = "./league.pem";
+			DATABASE = "leagueData";
+			DB_USER = "LeagueTeachers";
+			REMOTE_HOST = "data-manager-db-test.cryfqyj7jcsy.us-west-2.rds.amazonaws.com";
+		}
 
 		// If re-connecting, close current database connection
 		closeDataBaseConnection();
@@ -78,8 +86,7 @@ public class MySqlConnection {
 			session.setConfig("TCPKeepAlive", "yes");
 
 			session.connect();
-			if (DB_PORT != 3306)
-				session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
 
 		} catch (Exception e) {
 			// Failed maximum connection attempts, exit program
@@ -100,7 +107,7 @@ public class MySqlConnection {
 
 			// Connecting through SSH tunnel
 			dataSource.setServerName(SERVER);
-			dataSource.setPortNumber(DB_PORT);
+			dataSource.setPortNumber(LOCAL_PORT);
 			dataSource.setDatabaseName(DATABASE);
 			dataSource.setUser(user);
 			dataSource.setPassword(password);
@@ -108,7 +115,7 @@ public class MySqlConnection {
 
 			connection = dataSource.getConnection();
 
-		} catch (Exception e) {
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
 	}

@@ -20,6 +20,7 @@ import gui.MainFrame;
 
 public class MySqlDatabase {
 	private static final int COMMENT_WIDTH = 150;
+	private static final int LOG_APPEND_WIDTH = 75;
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
@@ -43,15 +44,15 @@ public class MySqlDatabase {
 			try {
 				if (awsPassword == null)
 					awsPassword = JOptionPane.showInputDialog("AWS Password: ");
-				dbConnection = MySqlConnection.connectToServer(parent, awsPassword);
+				dbConnection = MySqlConnection.connectToServer(parent, 1, awsPassword);
 
 			} catch (SQLException e) {
 				// Error handling performed in connectToServer
 			}
 
 			if (dbConnection == null) {
-				int answer = JOptionPane.showConfirmDialog(null, "Do you want to retry?",
-						"Failure connecting to database", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+				int answer = JOptionPane.showConfirmDialog(null, "Do you want to retry?", "Failure connecting to DB",
+						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
 				if (answer == JOptionPane.NO_OPTION) {
 					// Exit program
 					MainFrame.shutdown();
@@ -950,6 +951,8 @@ public class MySqlDatabase {
 					addLogDataStmt.setString(col++, null);
 				else
 					addLogDataStmt.setString(col++, studentNameModel.toString());
+				if (appendedMsg.length() >= LOG_APPEND_WIDTH)
+					appendedMsg = appendedMsg.substring(0, LOG_APPEND_WIDTH);
 				addLogDataStmt.setString(col++, appendedMsg);
 				addLogDataStmt.setString(col++, new DateTime().toString("yyyy-MM-dd HH:mm"));
 
@@ -966,9 +969,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				if (!e2.getMessage().startsWith("Duplicate entry"))
 					// TODO: Can't log this error! What to do instead?
-					System.out.println("Unable to Log data: " + studentNameModel.getFirstName() + ", "
-							+ LogDataModel.getLogType(LogDataModel.LOG_DATA_DB_ERROR) + " " + appendedMsg + " "
-							+ e2.getMessage());
+					JOptionPane.showMessageDialog(parent, "Unable to Log data: " + e2.getMessage());
 				break;
 			}
 		}
