@@ -14,10 +14,8 @@ import javax.swing.JOptionPane;
 
 import model.ActivityEventModel;
 import model.ActivityModel;
-import model.GitApiController;
 import model.LogDataModel;
 import model.MySqlDatabase;
-import model.Pike13ApiController;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;

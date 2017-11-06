@@ -1,4 +1,4 @@
-package model;
+package controller;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +13,11 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.joda.time.DateTime;
+
+import model.ActivityEventModel;
+import model.LogDataModel;
+import model.MySqlDatabase;
+import model.StudentImportModel;
 
 public class Pike13ApiController {
 	private final String SECRET_TOKEN = "KxjMhMHLUrhrZ6IeJ4OsSsuFAJyM0hGfFi4NdI4D";

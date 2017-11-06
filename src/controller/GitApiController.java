@@ -1,4 +1,4 @@
-package model;
+package controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +15,10 @@ import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.joda.time.DateTime;
+
+import model.ActivityEventModel;
+import model.LogDataModel;
+import model.MySqlDatabase;
 
 public class GitApiController {
 	// TODO: Get this from a file or website
