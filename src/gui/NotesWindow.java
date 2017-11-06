@@ -18,56 +18,57 @@ public class NotesWindow {
 
 	private static final String[] notes = {
 			// Menu Description
-			"\n   File Menu:\r\n"
-					+ "      => The League Teachers will not typically need to use any functionality from the File Menu, since the imports \r\n"
-					+ "            of client, attendance and Github data are retrieved automatically on a daily basis. \r\n"
-					+ "      => The only interesting File menu item would be viewing the LOG file which shows the results of the daily imports.\r\n\r\n"
-					+ "   Student Menu:\r\n      => The Student menu shows basic information for each student. \r\n"
-					+ "      => Using the Right Mouse button, you can view the student's attendance data. From there you can use the \r\n"
-					+ "            Right Button on the student name to get back to the Student Data, or double click the Attendance Data to get \r\n"
-					+ "            more history on the data.\r\n\r\n   Attendance Menu:\r\n"
-					+ "      => The Attendance menu allows you to view ALL attendance data or to view attendance by class.\r\n"
-					+ "      => You can right-click on the user name to get the Student Info.\r\n"
-					+ "      => Double-click on the attendance column to get the complete attendance history for a student.\r\n"
-					+ "      => Right-click on any of the attendance rows to get attendance data by Class to determine what that class has been\r\n"
-					+ "            working on for the last 4 weeks. \r\n\r\n",
+			"\n   File Menu:\n"
+					+ "      => The League Teachers will not typically need to use any functionality from the File Menu, since the imports\n"
+					+ "            of client, attendance and Github data are retrieved automatically on a daily basis.\n"
+					+ "      => The only interesting File menu item would be viewing the LOG file which shows the results of the daily imports.\n\n"
+					+ "   Student Menu:\n      => The Student menu shows basic information for ALL students and for inactive students.\n"
+					+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
+					+ "      => Using the Right Mouse button, you can view the student's attendance data.\n"
+					+ "            Refer to the Attendance Menu description for more details.\n\n"
+					+ "   Attendance Menu:\n"
+					+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
+					+ "      => You can right-click on the user name to get the Student Info.\n"
+					+ "      => Double-click on the attendance column to get the complete attendance history for a student.\n"
+					+ "      => Right-click on any of the attendance rows to get attendance data by Class to determine what that class has been\n"
+					+ "            working on for the last 4 weeks. \n\n",
 
 			// Examples
-			"\n   YOU ARE A SUB FOR A CLASS:\r\n        Go to the Attendance menu and select by Class. \r\n"
-					+ "        This will show you what the class has been doing for the last 4 weeks. \r\n"
-					+ "        If more detail is needed, double click on one of the students to get more of a history.\r\n\r\n"
-					+ "   YOU ARE DOING A MAKE-UP SESSION:\r\n"
-					+ "        Go to the Student menu and find the student. \r\n"
-					+ "        Right-click to select their Attendance data. \r\n"
-					+ "        Then right-click in the Github column to view what their class has been doing.	\r\n",
+			"\n   YOU ARE A SUB FOR A CLASS:\n        Go to the Attendance menu and select by Class. \n"
+					+ "        This will show you what the class has been doing for the last 4 weeks. \n"
+					+ "        If more detail is needed, double click on one of the students to get more of a history.\n\n"
+					+ "   YOU ARE DOING A MAKE-UP SESSION:\n"
+					+ "        Go to the Student menu and find the student. \n"
+					+ "        Right-click to select their Attendance data. \n"
+					+ "        Then right-click in the Github column to view what their class has been doing.	\n",
 
 			// Feedback
-			"\n                This is a work in progress, and we're in Phase I. Currently this is a Java App \r\n"
-					+ "                                        running as a JAR file with a Swing GUI. \r\n\r\n"
-					+ "                 Once we've established proof-of-concept and have gotten positive feedback,  \r\n"
-					+ "       the GUI will be ported to the web and this will become a web-app downloadable to your device.\r\n\r\n"
-					+ "                                    !!! WE APPRECIATE YOUR FEEDBACK !!!\r\n\r\n"
-					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \r\n",
+			"\n                This is a work in progress, and we're in Phase I. Currently this is a Java App \n"
+					+ "                                        running as a JAR file on a local machine. \n\n"
+					+ "                 Once we've established proof-of-concept and have gotten positive feedback,  \n"
+					+ "       the GUI will be ported to the web and this will become a web-app downloadable to your device.\n\n"
+					+ "                                    !!! WE APPRECIATE YOUR FEEDBACK !!!\n\n"
+					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \n",
 
 			// About League Data Manager
-			"\n   VERSION 1.0\r\n\r\n   LEAGUE DATA MANAGER OVERVIEW:\r\n\r\n"
-					+ "      The League Data Manager gets data from:\r\n         => Pike13 client database\r\n"
-					+ "         => Pike13 enrollment database\r\n         => Github \r\n\r\n"
-					+ "      This data is then merged into a single database. \r\n"
-					+ "      This merged database is a slave to all 3 of the above databases, and does not create any new data on its own.\r\n"
-					+ "      Once every 24 hours, the application will search for all completed attendance for that day, which triggers a search \r\n"
-					+ "          in Github for the related student comments and updates the database accordingly. \r\n\r\n"
-					+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \r\n"
-					+ "          students that they need to write descriptive comments  when they sync to Github!!\r\n"
-					+ "      If it helps, show them this Application, and have them realize that their comments are viewable by the teachers!!\r\n"
-					+ "      Naming conventions are to write each recipe that the student worked on separated by commas, and followed by (IP) \r\n"
-					+ "          if the recipe is still In Progress. Add comments about written tests and worksheets (WS) also.\r\n" };
+			"\n   VERSION 1.0\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
+					+ "      The League Data Manager gets data from:\n         => Pike13 client database\n"
+					+ "         => Pike13 enrollment database\n         => Github \n\n"
+					+ "      This data is then merged into a single database. \n"
+					+ "      This merged database is a slave to all 3 of the above databases, and does not create any new data on its own.\n"
+					+ "      Once every 24 hours, the application will search for all completed attendance for that day, which triggers a search \n"
+					+ "          in Github for the related student comments and updates the database accordingly. \n\n"
+					+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \n"
+					+ "          students that they need to write descriptive comments  when they sync to Github!!\n"
+					+ "      If it helps, show them this Application, and have them realize that their comments are viewable by the teachers!!\n\n"
+					+ "      Naming conventions are to write each recipe that the student worked on separated by commas, and followed by (IP) \n"
+					+ "          if the recipe is still In Progress. Add comments about written tests and worksheets (WS) also.\n" };
 
 	private static final String[] titles = { "Menu Description ", "Examples ", "Provide Feedback ",
 			"About League Data Manager " };
 	
 	private static final Dimension[] sizes = { new Dimension(820, 425), new Dimension(630, 280),
-			new Dimension(720, 270), new Dimension(825, 470) };
+			new Dimension(720, 270), new Dimension(825, 490) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);

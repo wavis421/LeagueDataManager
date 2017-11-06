@@ -51,7 +51,7 @@ public class MainFrame {
 	private static final int POPUP_HEIGHT_2ROWS = 50;
 
 	private static final String STUDENT_TITLE = "League Student Info";
-	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "League Students not in Master DB";
+	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ACTIVITY_TITLE = "League Attendance";
 
 	private static final int STUDENT_TABLE_ALL = 0;
@@ -173,7 +173,7 @@ public class MainFrame {
 		fileMenu.add(exitItem);
 
 		// Add Students sub-menus
-		JMenuItem studentNotInMasterMenu = new JMenuItem("View students not in master DB ");
+		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
 		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
 		studentMenu.add(studentNotInMasterMenu);
