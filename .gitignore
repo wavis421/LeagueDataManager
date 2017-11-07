@@ -53,5 +53,6 @@ Temporary Items
 *.exe
 bin/gui/PPicon24.png
 *.csv
+*.pem
 
 /bin/

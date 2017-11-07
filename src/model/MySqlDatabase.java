@@ -25,8 +25,9 @@ public class MySqlDatabase {
 	private JFrame parent;
 	private String awsPassword;
 
-	public MySqlDatabase(JFrame parent) {
+	public MySqlDatabase(JFrame parent, String awsPassword) {
 		this.parent = parent;
+		this.awsPassword = awsPassword;
 
 		// Make initial connection to database
 		connectDatabase();
@@ -42,8 +43,6 @@ public class MySqlDatabase {
 		while (true) {
 			connectAttempts++;
 			try {
-				if (awsPassword == null)
-					awsPassword = JOptionPane.showInputDialog("AWS Password: ");
 				dbConnection = MySqlConnection.connectToServer(parent, 1, awsPassword);
 
 			} catch (SQLException e) {

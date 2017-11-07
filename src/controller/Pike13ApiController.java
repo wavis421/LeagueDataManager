@@ -20,7 +20,6 @@ import model.MySqlDatabase;
 import model.StudentImportModel;
 
 public class Pike13ApiController {
-	private final String SECRET_TOKEN = "KxjMhMHLUrhrZ6IeJ4OsSsuFAJyM0hGfFi4NdI4D";
 	private final String USER_AGENT = "Mozilla/5.0";
 
 	// Indices for client data
@@ -71,10 +70,12 @@ public class Pike13ApiController {
 			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
 			+ "}}}";
 	
-	MySqlDatabase mysqlDb;
+	private MySqlDatabase mysqlDb;
+	private String pike13Token;
 	
-	public Pike13ApiController(MySqlDatabase mysqlDb) {
+	public Pike13ApiController(MySqlDatabase mysqlDb, String pike13Token) {
 		this.mysqlDb = mysqlDb;
+		this.pike13Token = pike13Token;
 	}
 
 	public ArrayList<StudentImportModel> getClients() {
@@ -199,7 +200,7 @@ public class Pike13ApiController {
 			// Get URL connection with authorization
 			URL url = new URL(queryUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			String basicAuth = "Bearer " + SECRET_TOKEN;
+			String basicAuth = "Bearer " + pike13Token;
 			conn.setRequestProperty("Authorization", basicAuth);
 			conn.setRequestProperty("User-Agent", USER_AGENT);
 

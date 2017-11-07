@@ -45,11 +45,11 @@ public class Controller {
 	private JFrame parent;
 	private String loggingDataTitle = "Logging Data";
 
-	public Controller(JFrame parent) {
+	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
 		this.parent = parent;
-		sqlDb = new MySqlDatabase(parent);
-		gitController = new GitApiController(sqlDb);
-		pike13Controller = new Pike13ApiController(sqlDb);
+		sqlDb = new MySqlDatabase(parent, awsPassword);
+		gitController = new GitApiController(sqlDb, githubToken);
+		pike13Controller = new Pike13ApiController(sqlDb, pike13Token);
 	}
 
 	/*

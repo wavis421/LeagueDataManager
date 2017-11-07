@@ -11,7 +11,6 @@ import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.NoSuchPageException;
-import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.joda.time.DateTime;
@@ -21,18 +20,16 @@ import model.LogDataModel;
 import model.MySqlDatabase;
 
 public class GitApiController {
-	// TODO: Get this from a file or website
-	private static final String token = "223bcb4816e95309f88c1154377f721e3d77568a";
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
 
-	public GitApiController(MySqlDatabase sqlDb) {
+	public GitApiController(MySqlDatabase sqlDb, String githubToken) {
 		this.sqlDb = sqlDb;
 
 		// OAuth2 token authentication
 		GitHubClient client = new GitHubClient();
-		client.setOAuth2Token(token);
+		client.setOAuth2Token(githubToken);
 
 		// Get Repo and Commit services
 		repoService = new RepositoryService(client);
@@ -72,7 +69,7 @@ public class GitApiController {
 			} catch (IOException e) {
 				if (e.getMessage().startsWith("API rate limit exceeded")) {
 					// Rate limit exceeded, so abort
-					JOptionPane.showConfirmDialog(null,
+					JOptionPane.showMessageDialog(null,
 							"Aborting Github import: Github API rate limit exceeded.\nPlease wait 1 hour and try again.");
 					break;
 

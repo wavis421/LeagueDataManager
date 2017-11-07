@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -63,6 +64,7 @@ public class MainFrame {
 	private static final int ACTIVITY_TABLE_BY_STUDENT = 2;
 
 	/* Private instance variables */
+	private Preferences prefs = Preferences.userRoot();
 	private static Controller controller;
 	private JPanel mainPanel;
 	private JPanel tablePanel = new JPanel();
@@ -85,10 +87,14 @@ public class MainFrame {
 		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
 		frame.setIconImage(icon.getImage());
 
+		// Get database password
+		PasswordDialog pwDialog = new PasswordDialog();
+		String awsPassword = pwDialog.getDialogResponse();
+
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
-		controller = new Controller(frame);
+		controller = new Controller(frame, awsPassword, prefs.get("GithubToken", ""), prefs.get("Pike13Token", ""));
 
 		// Configure header
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -490,8 +496,7 @@ public class MainFrame {
 						if (currentActivityTable == ACTIVITY_TABLE_BY_STUDENT) {
 							tablePopup.remove(showStudentAttendanceItem);
 							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-						}
-						else {
+						} else {
 							tablePopup.add(showStudentAttendanceItem);
 							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 						}
