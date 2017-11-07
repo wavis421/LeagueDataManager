@@ -57,6 +57,10 @@ public class LogTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
+	public JTable getTable() {
+		return table;
+	}
+
 	public void setData(JPanel tablePanel, ArrayList<LogDataModel> logList) {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;

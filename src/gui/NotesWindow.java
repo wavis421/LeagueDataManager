@@ -19,7 +19,9 @@ public class NotesWindow {
 	private static final String[] notes = {
 			// Menu Description
 			"\n   File Menu:\n"
-					+ "      => The View Log Data shows the results of the daily imports of student attendance data.\n\n"
+					+ "      => Viewing the LOG Data shows the results of the daily imports of student attendance.\n"
+					+ "      => The Print Table menu option prints the currently displayed table. Note that the printing uses auto-fit width,\n"
+					+ "            so if you're printing attendance data then landscape will be your best option.\n\n"
 					+ "   Student Menu:\n      => The Student menu shows basic information for ALL students and for inactive students.\n"
 					+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
 					+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
@@ -64,7 +66,7 @@ public class NotesWindow {
 	private static final String[] titles = { "Menu Description ", "Examples ", "Provide Feedback ",
 			"About League Data Manager " };
 
-	private static final Dimension[] sizes = { new Dimension(820, 420), new Dimension(630, 280),
+	private static final Dimension[] sizes = { new Dimension(820, 430), new Dimension(630, 280),
 			new Dimension(720, 270), new Dimension(825, 490) };
 
 	public NotesWindow(int notesSelection) {

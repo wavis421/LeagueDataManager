@@ -8,6 +8,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -16,6 +17,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.print.PrinterException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
@@ -27,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
@@ -74,6 +78,8 @@ public class MainFrame {
 	private LogTable logTable;
 	private int currentStudentTable;
 	private int currentActivityTable;
+	private JTable activeTable;
+	private String activeTableHeader;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
 	private String selectedClassName;
@@ -111,12 +117,14 @@ public class MainFrame {
 		currentStudentTable = STUDENT_TABLE_ALL;
 		currentActivityTable = ACTIVITY_TABLE_ALL;
 		headerLabel.setText(STUDENT_TITLE);
+		activeTableHeader = STUDENT_TITLE;
 
 		// Configure panel and each tables
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
+		activeTable = studentTable.getTable();
 
 		createStudentTablePopups();
 		createActivityTablePopups();
@@ -189,10 +197,12 @@ public class MainFrame {
 
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
+		JMenuItem printTableItem = new JMenuItem("Print Table");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 
 		fileMenu.add(viewLogDataItem);
 		fileMenu.add(clearLogDataItem);
+		fileMenu.add(printTableItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -224,7 +234,7 @@ public class MainFrame {
 		// Create listeners
 		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
 				importActivityLogPike13Item, importGithubItem, importGithubLevel0Item, viewLogDataItem,
-				clearLogDataItem, exitItem);
+				clearLogDataItem, printTableItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
@@ -234,7 +244,8 @@ public class MainFrame {
 
 	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
 			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem exitItem) {
+			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
+			JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		if (importStudentFile != null) {
 			importStudentFile.addActionListener(new ActionListener() {
@@ -306,6 +317,25 @@ public class MainFrame {
 			public void actionPerformed(ActionEvent e) {
 				controller.clearDbLogData();
 				refreshLogTable();
+			}
+		});
+		printTable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Set cursor to "wait" cursor
+				frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+				try {
+					MessageFormat headerFormat = new MessageFormat(activeTableHeader);
+					MessageFormat footerFormat = new MessageFormat("- {0} -");
+					activeTable.print(JTable.PrintMode.FIT_WIDTH, headerFormat, footerFormat);
+
+				} catch (PrinterException e1) {
+					frame.setCursor(Cursor.getDefaultCursor());
+					JOptionPane.showMessageDialog(null, "Failed to print: " + e1.getMessage());
+				}
+
+				// Set cursor back to default
+				frame.setCursor(Cursor.getDefaultCursor());
 			}
 		});
 		exitItem.addActionListener(new ActionListener() {
@@ -575,6 +605,8 @@ public class MainFrame {
 
 		// Update current table type
 		currentStudentTable = tableType;
+		activeTable = studentTable.getTable();
+		activeTableHeader = headerLabel.getText();
 	}
 
 	private void refreshActivityTable(int tableType, ArrayList<ActivityModel> list, String titleExtension) {
@@ -586,6 +618,8 @@ public class MainFrame {
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 
 		currentActivityTable = tableType;
+		activeTable = activityTable.getTable();
+		activeTableHeader = headerLabel.getText();
 	}
 
 	private void refreshLogTable() {
@@ -595,6 +629,9 @@ public class MainFrame {
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(controller.getLogDataTitle());
+
+		activeTable = logTable.getTable();
+		activeTableHeader = headerLabel.getText();
 	}
 
 	private void removeDataFromTables() {
