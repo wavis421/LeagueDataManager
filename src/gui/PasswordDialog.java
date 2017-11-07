@@ -3,6 +3,7 @@ package gui;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -21,6 +22,10 @@ public class PasswordDialog extends JDialog implements KeyListener {
 
 		// Add panel to dialog
 		add(panel);
+
+		// Set icon
+		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
+		setIconImage(icon.getImage());
 
 		// Configure dialog window
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
