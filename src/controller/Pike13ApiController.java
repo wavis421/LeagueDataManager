@@ -69,10 +69,10 @@ public class Pike13ApiController {
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
 			+ "}}}";
-	
+
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
-	
+
 	public Pike13ApiController(MySqlDatabase mysqlDb, String pike13Token) {
 		this.mysqlDb = mysqlDb;
 		this.pike13Token = pike13Token;
@@ -125,8 +125,7 @@ public class Pike13ApiController {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e1.getMessage());
 		}
 
 		return studentList;
@@ -181,15 +180,15 @@ public class Pike13ApiController {
 
 				// Check to see if there are more pages
 				hasMore = jsonObj.getBoolean("has_more");
-				lastKey = jsonObj.getString("last_key");
+				if (hasMore)
+					lastKey = jsonObj.getString("last_key");
 
 				conn.disconnect();
 
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e1.getMessage());
 		}
 
 		return eventList;
@@ -211,8 +210,7 @@ public class Pike13ApiController {
 			return conn;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e.getMessage());
 		}
 		return null;
 	}
@@ -225,8 +223,7 @@ public class Pike13ApiController {
 			outputStream.close();
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0,
-					" (IO Exception): " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e.getMessage());
 		}
 	}
 
