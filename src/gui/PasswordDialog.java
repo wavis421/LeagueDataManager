@@ -26,6 +26,7 @@ public class PasswordDialog extends JDialog implements KeyListener {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Enter password");
 		setSize(300, 100);
+		setLocation(200, 200);
 		setVisible(true);
 	}
 

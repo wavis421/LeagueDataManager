@@ -19,14 +19,11 @@ public class NotesWindow {
 	private static final String[] notes = {
 			// Menu Description
 			"\n   File Menu:\n"
-					+ "      => The League Teachers will not typically need to use any functionality from the File Menu, since the imports\n"
-					+ "            of client, attendance and Github data are retrieved automatically on a daily basis.\n"
-					+ "      => The only interesting File menu item would be viewing the LOG file which shows the results of the daily imports.\n\n"
+					+ "      => The View Log Data shows the results of the daily imports of student attendance data.\n\n"
 					+ "   Student Menu:\n      => The Student menu shows basic information for ALL students and for inactive students.\n"
 					+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
-					+ "      => Using the Right Mouse button, you can view the student's attendance data.\n"
-					+ "            Refer to the Attendance Menu description for more details.\n\n"
-					+ "   Attendance Menu:\n"
+					+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
+					+ "            See below for more details.\n\n" + "   Attendance Menu:\n"
 					+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
 					+ "      => You can right-click on the user name to get the Student Info.\n"
 					+ "      => Double-click on the attendance column to get the complete attendance history for a student.\n"
@@ -43,11 +40,11 @@ public class NotesWindow {
 					+ "        Then right-click in the Github column to view what their class has been doing.	\n",
 
 			// Feedback
-			"\n                This is a work in progress, and we're in Phase I. Currently this is a Java App \n"
-					+ "                                        running as a JAR file on a local machine. \n\n"
+			"\n                                         This is a work in progress, and we're in Phase I.\n"
+					+ "                                        Currently this is a Java App running as a JAR file.\n\n"
 					+ "                 Once we've established proof-of-concept and have gotten positive feedback,  \n"
 					+ "       the GUI will be ported to the web and this will become a web-app downloadable to your device.\n\n"
-					+ "                                    !!! WE APPRECIATE YOUR FEEDBACK !!!\n\n"
+					+ "                                      !!! WE APPRECIATE YOUR FEEDBACK !!!\n\n"
 					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \n",
 
 			// About League Data Manager
@@ -62,12 +59,12 @@ public class NotesWindow {
 					+ "          students that they need to write descriptive comments  when they sync to Github!!\n"
 					+ "      If it helps, show them this Application, and have them realize that their comments are viewable by the teachers!!\n\n"
 					+ "      Naming conventions are to write each recipe that the student worked on separated by commas, and followed by (IP) \n"
-					+ "          if the recipe is still In Progress. Add comments about written tests and worksheets (WS) also.\n" };
+					+ "          if the recipe is still In Progress. Please also add comments about written tests and worksheets (WS).\n" };
 
 	private static final String[] titles = { "Menu Description ", "Examples ", "Provide Feedback ",
 			"About League Data Manager " };
-	
-	private static final Dimension[] sizes = { new Dimension(820, 425), new Dimension(630, 280),
+
+	private static final Dimension[] sizes = { new Dimension(820, 420), new Dimension(630, 280),
 			new Dimension(720, 270), new Dimension(825, 490) };
 
 	public NotesWindow(int notesSelection) {
