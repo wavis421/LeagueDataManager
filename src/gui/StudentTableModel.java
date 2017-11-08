@@ -19,8 +19,8 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int GRAD_YEAR_COLUMN = 6;
 
 	private ArrayList<StudentModel> studentList;
-	private final String colNames[] = { " Client ID ", " Student Name ", " G ", " Github ", " Home Loc ",
-			" Start Date ", " Grad Year " };
+	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ",
+			" Start Date ", " Grad Yr " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;

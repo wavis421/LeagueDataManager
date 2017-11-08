@@ -63,6 +63,8 @@ public class ActivityTable extends JPanel {
 			int panelHeight) {
 		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		table.setShowGrid(true);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column height and width
@@ -150,8 +152,7 @@ public class ActivityTable extends JPanel {
 
 			// Set table properties
 			eventTable.setFont(CustomFonts.TABLE_TEXT_FONT);
-			eventTable.setShowVerticalLines(false);
-			eventTable.setShowHorizontalLines(false);
+			eventTable.setShowGrid(false);
 			eventTable.setTableHeader(null);
 
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(90);

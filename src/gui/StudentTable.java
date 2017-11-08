@@ -38,6 +38,8 @@ public class StudentTable extends JPanel {
 	private void createTablePanel() {
 		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		table.setShowGrid(true);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);

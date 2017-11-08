@@ -38,6 +38,8 @@ public class LogTable extends JPanel {
 	private void createTablePanel() {
 		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
+		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		table.setShowGrid(true);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
@@ -80,8 +82,8 @@ public class LogTable extends JPanel {
 
 	private void configureColumnWidths() {
 		// Configure column widths
-		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setMaxWidth(120);
-		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setMaxWidth(140);
+		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setPreferredWidth(140);
 		table.getColumnModel().getColumn(LogTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);

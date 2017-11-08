@@ -14,7 +14,7 @@ public class LogTableModel extends AbstractTableModel {
 	public static final int STATUS_COLUMN = 3;
 
 	private ArrayList<LogDataModel> logList;
-	private final String[] colNames = { "  Date  ", " Client ID ", " Student Name ", " Status Message " };
+	private final String[] colNames = { "  Date  ", " ID ", " Student Name ", " Status Message " };
 
 	public LogTableModel(ArrayList<LogDataModel> logData) {
 		this.logList = logData;

@@ -13,7 +13,7 @@ public class ActivityTableModel extends AbstractTableModel {
 	private static final int TABLE_NUM_COLUMNS = 3;
 
 	private Object[][] tableObjects;
-	private final String[] colNames = { " Client ID ", " Student Name ", " Github Comments " };
+	private final String[] colNames = { " ID ", " Student Name ", " Class Date / Class Name / Repository Name / Github Comments " };
 
 	public ActivityTableModel(ArrayList<ActivityModel> activities) {
 		initializeTableData(activities);

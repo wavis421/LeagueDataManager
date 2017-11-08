@@ -15,6 +15,7 @@ public class CustomFonts {
 	public static final Color UNSELECTED_BACKGROUND_COLOR = Color.WHITE;
 	public static final Color EDIT_TEXT_COLOR = new Color(0x00994C);
 	public static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
+	public static final Color TABLE_GRID_COLOR = new Color(0xA0A0A0);
 
 	// Header and title fonts
 	public static final Font TITLE_FONT = JTFTools.decodeFont("Serif-italic-24");
