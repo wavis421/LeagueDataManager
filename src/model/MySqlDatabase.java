@@ -304,10 +304,16 @@ public class MySqlDatabase {
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), "");
 
-			if (importStudent.getHomeLocation() == LocationModel.CLASS_LOCATION_UNKNOWN)
-				insertLogData(LogDataModel.MISSING_HOME_LOCATION,
-						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), "");
+			if (importStudent.getHomeLocation() == LocationModel.CLASS_LOCATION_UNKNOWN) {
+				if (importStudent.getHomeLocAsString().equals(""))
+					insertLogData(LogDataModel.MISSING_HOME_LOCATION,
+							new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+							importStudent.getClientID(), "");
+				else
+					insertLogData(LogDataModel.UNKNOWN_HOME_LOCATION,
+							new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+							importStudent.getClientID(), " (" + importStudent.getHomeLocAsString() + ")");
+			}
 
 			if (importStudent.getGender() == GenderModel.getGenderUnknown())
 				insertLogData(LogDataModel.MISSING_GENDER,

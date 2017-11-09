@@ -8,6 +8,8 @@ public class LocationModel {
 	private static final int CLASS_LOCATION_MALCOLM_X = 3;
 	private static final int CLASS_LOCATION_GOMPERS = 4;
 	private static final int CLASS_LOCATION_WILSON_MIDDLE_SCHOOL = 5;
+	private static final int CLASS_LOCATION_SAN_MARCOS_MIDDLE = 6;
+	private static final int CLASS_LOCATION_SAN_ELIJO_MIDDLE = 7;
 
 	public static int convertStringToLocation(String classString) {
 		if (classString.startsWith("Carmel Valley Classroom"))
@@ -20,9 +22,12 @@ public class LocationModel {
 			return CLASS_LOCATION_GOMPERS;
 		else if (classString.startsWith("Wilson Middle School"))
 			return CLASS_LOCATION_WILSON_MIDDLE_SCHOOL;
-		else {
+		else if (classString.startsWith("San Marcos Middle"))
+			return CLASS_LOCATION_SAN_MARCOS_MIDDLE;
+		else if (classString.startsWith("San Elijo Middle"))
+			return CLASS_LOCATION_SAN_ELIJO_MIDDLE;
+		else
 			return CLASS_LOCATION_UNKNOWN;
-		}
 	}
 
 	public static String convertLocationToString(int location) {
@@ -37,6 +42,10 @@ public class LocationModel {
 			return "Gompers";
 		case CLASS_LOCATION_WILSON_MIDDLE_SCHOOL:
 			return "Wilson Middle";
+		case CLASS_LOCATION_SAN_MARCOS_MIDDLE:
+			return "San Marcos Middle";
+		case CLASS_LOCATION_SAN_ELIJO_MIDDLE:
+			return "San Elijo Middle";
 		default:
 			return "";
 		}

@@ -27,6 +27,7 @@ public class LogDataModel {
 	public static final int GITHUB_IMPORT_ERROR = 21;
 	public static final int GITHUB_MODULE_REPO_ERROR = 22;
 	public static final int FILE_IMPORT_ERROR = 23;
+	public static final int UNKNOWN_HOME_LOCATION = 24;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -35,7 +36,7 @@ public class LogDataModel {
 			"Attendance data with no matching student", "Invalid Grad Year field", "Failure importing Github data",
 			"Failure parsing Github data", "Student Database error", "Attendance Database error",
 			"Logging Database error", "Pike13 Connection error", "Pike13 Import error", "Github Import error",
-			"Failure getting Module Repo", "Error importing from file" };
+			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

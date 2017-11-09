@@ -239,7 +239,7 @@ public class Pike13ApiController {
 			return object;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
 		}
 		return null;
 	}

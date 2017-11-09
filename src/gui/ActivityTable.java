@@ -152,7 +152,8 @@ public class ActivityTable extends JPanel {
 
 			// Set table properties
 			eventTable.setFont(CustomFonts.TABLE_TEXT_FONT);
-			eventTable.setShowGrid(false);
+			eventTable.setGridColor(Color.white);
+			eventTable.setShowGrid(true);
 			eventTable.setTableHeader(null);
 
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(90);

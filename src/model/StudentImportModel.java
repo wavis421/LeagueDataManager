@@ -2,7 +2,7 @@ package model;
 
 public class StudentImportModel implements Comparable<StudentImportModel> {
 	private int clientID;
-	private String lastName, firstName, githubName, startDate;
+	private String lastName, firstName, githubName, startDate, homeLocString;
 	private int homeLocation, gender, gradYear, isInMasterDb;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
@@ -15,6 +15,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.githubName = parseGithubName(githubName);
 		this.gender = GenderModel.convertStringToGender(gender);
 		this.startDate = startDate;
+		this.homeLocString = homeLocation;
 		this.homeLocation = LocationModel.convertStringToLocation(homeLocation);
 		if (gradYear.equals("") || gradYear.equals("\"\""))
 			this.gradYear = 0;
@@ -83,6 +84,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public String getStartDate() {
 		return startDate;
+	}
+
+	public String getHomeLocAsString() {
+		return homeLocString;
 	}
 
 	public int getHomeLocation() {
