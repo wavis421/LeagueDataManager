@@ -337,13 +337,13 @@ public class MySqlDatabase {
 				while (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() < importStudent.getClientID()) {
 					// Mark student as not in master DB
 					if (dbList.get(dbListIdx).getIsInMasterDb() == 1)
-						updateStudent(dbList.get(dbListIdx), 0);
+						updateStudent(dbList.get(dbListIdx), importStudent, 0);
 					dbListIdx++;
 				}
 				if (dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
 					// Now that clientID's match, compare and update again
 					if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
-						updateStudent(importStudent, 1);
+						updateStudent(importStudent, dbList.get(dbListIdx), 1);
 					}
 					dbListIdx++;
 				}
@@ -354,7 +354,7 @@ public class MySqlDatabase {
 
 			} else {
 				// ClientID matches but data has changed
-				updateStudent(importStudent, 1);
+				updateStudent(importStudent, dbList.get(dbListIdx), 1);
 				dbListIdx++;
 			}
 		}
@@ -446,8 +446,11 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void updateStudent(StudentImportModel student, int isInDb) {
+	private void updateStudent(StudentImportModel student, StudentImportModel compareStudent, int isInDb) {
 		for (int i = 0; i < 2; i++) {
+			// Before updating database, determine what fields have changed
+			String changedFields = getStudentChangedFields(student, compareStudent);
+			
 			try {
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
@@ -476,7 +479,7 @@ public class MySqlDatabase {
 
 				insertLogData(LogDataModel.UPDATE_STUDENT_INFO,
 						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-						student.getClientID(), "");
+						student.getClientID(), changedFields);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
@@ -492,6 +495,58 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+	}
+	
+	private String getStudentChangedFields(StudentImportModel dbStudent, StudentImportModel compareStudent) {
+		String changes = "";
+		
+		if (!dbStudent.getFirstName().equals(compareStudent.getFirstName())) {
+			if (changes.equals(""))
+				changes += " (first name";
+			else
+				changes += ", first name";
+		}
+		if (!dbStudent.getLastName().equals(compareStudent.getLastName())) {
+			if (changes.equals(""))
+				changes += " (last name";
+			else
+				changes += ", last name";
+		}
+		if (dbStudent.getGender() != compareStudent.getGender()) {
+			if (changes.equals(""))
+				changes += " (gender";
+			else
+				changes += ", gender";
+		}
+		if (!dbStudent.getGithubName().equals(compareStudent.getGithubName())) {
+			if (changes.equals(""))
+				changes += " (Github user";
+			else
+				changes += ", Github user";
+		}
+		if (dbStudent.getGradYear() != compareStudent.getGradYear()) {
+			if (changes.equals(""))
+				changes += " (Grad year";
+			else
+				changes += ", Grad year";
+		}
+		if (!dbStudent.getHomeLocAsString().equals(compareStudent.getHomeLocAsString())) {
+			if (changes.equals(""))
+				changes += " (Home Location";
+			else
+				changes += ", Home Location";
+		}
+		if (!dbStudent.getStartDate().equals(compareStudent.getStartDate())) {
+			if (changes.equals(""))
+				changes += " (Start Date";
+			else
+				changes += ", Start Date";
+		}
+		
+		if (!changes.equals(""))
+			changes += ")";
+		
+		return changes;
 	}
 
 	/*
