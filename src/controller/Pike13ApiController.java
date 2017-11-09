@@ -67,8 +67,7 @@ public class Pike13ApiController {
 			// Filter on State completed and since date
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "           [\"or\",[[\"starts\",\"service_category\",\"Classes\"],[\"starts\",\"service_category\",\"Open Labs\"]]]]]"
-			+ "}}}";
+			+ "           [\"starts\",\"service_category\",\"Class\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
