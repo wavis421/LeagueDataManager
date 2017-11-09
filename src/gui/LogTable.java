@@ -82,8 +82,8 @@ public class LogTable extends JPanel {
 
 	private void configureColumnWidths() {
 		// Configure column widths
-		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setMaxWidth(140);
-		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setPreferredWidth(140);
+		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setMaxWidth(150);
+		table.getColumnModel().getColumn(LogTableModel.DATE_COLUMN).setPreferredWidth(150);
 		table.getColumnModel().getColumn(LogTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);

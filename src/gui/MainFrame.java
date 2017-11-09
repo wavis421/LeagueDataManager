@@ -163,7 +163,7 @@ public class MainFrame {
 		JMenuItem importActivityLogFileItem = null;
 		JMenuItem importActivityLogPike13Item = null;
 		JMenuItem importGithubItem = null;
-		JMenuItem importGithubLevel0Item = null;
+		JMenuItem importAllDatabasesItem = null;
 
 		// Set up top level menus and add to menu bar
 		JMenu fileMenu = new JMenu("File");
@@ -183,14 +183,14 @@ public class MainFrame {
 			importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
 			importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
 			importGithubItem = new JMenuItem("Import Github comments...  ");
-			importGithubLevel0Item = new JMenuItem("Import Github comments for Level 0...  ");
+			importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
 
 			fileMenu.add(importStudentFileItem);
 			fileMenu.add(importStudentPike13Item);
 			fileMenu.add(importActivityLogFileItem);
 			fileMenu.add(importActivityLogPike13Item);
 			fileMenu.add(importGithubItem);
-			fileMenu.add(importGithubLevel0Item);
+			fileMenu.add(importAllDatabasesItem);
 
 			fileMenu.addSeparator();
 		}
@@ -233,8 +233,8 @@ public class MainFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
-				importActivityLogPike13Item, importGithubItem, importGithubLevel0Item, viewLogDataItem,
-				clearLogDataItem, printTableItem, exitItem);
+				importActivityLogPike13Item, importGithubItem, importAllDatabasesItem,
+				viewLogDataItem, clearLogDataItem, printTableItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
@@ -244,10 +244,10 @@ public class MainFrame {
 
 	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
 			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importGithubLevel0, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
-			JMenuItem exitItem) {
+			JMenuItem importAllDatabases, JMenuItem viewLogData, JMenuItem clearLogData,
+			JMenuItem printTable, JMenuItem exitItem) {
 		// Set up listeners for FILE menu
-		if (importStudentFile != null) {
+		if (!pike13Token.equals("") && !githubToken.equals("")) {
 			importStudentFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
@@ -262,8 +262,6 @@ public class MainFrame {
 					refreshStudentTable(STUDENT_TABLE_ALL, 0);
 				}
 			});
-		}
-		if (importActivitiesFile != null) {
 			importActivitiesFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
@@ -283,8 +281,6 @@ public class MainFrame {
 					}
 				}
 			});
-		}
-		if (importGithub != null) {
 			importGithub.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					// Get start date for import
@@ -296,14 +292,14 @@ public class MainFrame {
 					}
 				}
 			});
-			importGithubLevel0.addActionListener(new ActionListener() {
+			importAllDatabases.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					// Get start date for import
 					DatePickerUtility datePicker = new DatePickerUtility();
 					String startDate = datePicker.getDialogResponse();
 					if (startDate != null) {
-						controller.importGithubCommentsByLevel(0, startDate);
-						refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+						controller.importAllDatabases(startDate);
+						refreshLogTable();
 					}
 				}
 			});
@@ -628,7 +624,7 @@ public class MainFrame {
 
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
-		headerLabel.setText(controller.getLogDataTitle());
+		headerLabel.setText("Logging Data");
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();

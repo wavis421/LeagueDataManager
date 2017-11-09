@@ -36,14 +36,11 @@ public class Controller {
 	private static final int CSV_ACTIVITY_SERVICE_DATE_IDX = 1;
 	private static final int CSV_ACTIVITY_EVENT_NAME_IDX = 2;
 	private static final int CSV_ACTIVITY_CLIENTID_IDX = 3;
-	
-	private static final String logUpdateMessage = "Please view Log Data to see updates and errors";
 
 	private MySqlDatabase sqlDb;
 	private GitApiController gitController;
 	private Pike13ApiController pike13Controller;
 	private JFrame parent;
-	private String loggingDataTitle = "Logging Data";
 
 	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
 		this.parent = parent;
@@ -62,10 +59,6 @@ public class Controller {
 	/*
 	 * ------- Logging Activity -------
 	 */
-	public String getLogDataTitle() {
-		return loggingDataTitle;
-	}
-
 	public ArrayList<LogDataModel> getDbLogData() {
 		return sqlDb.getLogData();
 	}
@@ -90,7 +83,6 @@ public class Controller {
 	}
 
 	public void removeInactiveStudents() {
-		loggingDataTitle = "Remove Inactive Students Log Data";
 		int origLogSize = sqlDb.getLogDataSize();
 
 		sqlDb.removeInactiveStudents();
@@ -138,10 +130,6 @@ public class Controller {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		// Clear log data
-		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
-
 		// CSV file has the following columns:
 		// Home Location, First Visit Date, First Name, Last Name,
 		// Client ID, gender, high school grad year, Github user name
@@ -176,19 +164,13 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
 
 	public void importStudentsFromPike13() {
+		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, "");
+
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Clear log data
-		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
 
 		// Get data from Pike13
 		ArrayList<StudentImportModel> studentList = pike13Controller.getClients();
@@ -199,11 +181,7 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		System.out.println("Pike13 Students: " + studentList.size());
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
+		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, "");
 	}
 
 	public void importActivitiesFromFile(File file) {
@@ -213,10 +191,6 @@ public class Controller {
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Clear log data
-		loggingDataTitle = "Import Attendance Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
 
 		// CSV file has the following columns:
 		// Student name, service date, event name, clientID, Schedule ID
@@ -258,19 +232,14 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
 	}
-	
+
 	public void importActivitiesFromPike13(String startDate) {
+		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
+				" since " + startDate.substring(0, 10) + " ***");
+
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Clear log data
-		loggingDataTitle = "Import Students Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
 
 		// Get data from Pike13
 		ArrayList<ActivityEventModel> eventList = pike13Controller.getEnrollment(startDate);
@@ -281,45 +250,27 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
+		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, "");
 	}
 
 	public void importGithubComments(String startDate) {
+		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
+				" since " + startDate.substring(0, 10) + " ***");
+
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Clear log data
-		loggingDataTitle = "Import Github Comments Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
 
 		gitController.importGithubComments(startDate);
+		gitController.importGithubCommentsByLevel(0, startDate);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
+		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, "");
 	}
 
-	public void importGithubCommentsByLevel(int level, String startDate) {
-		// Set cursor to "wait" cursor
-		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Clear log data
-		loggingDataTitle = "Import Level" + level + " Github Comments Log Data";
-		int origLogSize = sqlDb.getLogDataSize();
-
-		gitController.importGithubCommentsByLevel(level, startDate);
-
-		// Set cursor back to default
-		parent.setCursor(Cursor.getDefaultCursor());
-
-		// Report if log data collected during import
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, logUpdateMessage);
+	public void importAllDatabases(String startDate) {
+		importStudentsFromPike13();
+		importActivitiesFromPike13(startDate);
+		importGithubComments(startDate);
 	}
 }

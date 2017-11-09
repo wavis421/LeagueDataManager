@@ -1,7 +1,5 @@
 package model;
 
-import org.joda.time.DateTime;
-
 public class LogDataModel {
 	public static final int MISSING_GITHUB_NAME = 0;
 	public static final int MISSING_GRAD_YEAR = 1;
@@ -28,6 +26,12 @@ public class LogDataModel {
 	public static final int GITHUB_MODULE_REPO_ERROR = 22;
 	public static final int FILE_IMPORT_ERROR = 23;
 	public static final int UNKNOWN_HOME_LOCATION = 24;
+	public static final int STARTING_STUDENT_IMPORT = 25;
+	public static final int STUDENT_IMPORT_COMPLETE = 26;
+	public static final int STARTING_ATTENDANCE_IMPORT = 27;
+	public static final int ATTENDANCE_IMPORT_COMPLETE = 28;
+	public static final int STARTING_GITHUB_IMPORT = 29;
+	public static final int GITHUB_IMPORT_COMPLETE = 30;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -36,7 +40,9 @@ public class LogDataModel {
 			"Attendance data with no matching student", "Invalid Grad Year field", "Failure importing Github data",
 			"Failure parsing Github data", "Student Database error", "Attendance Database error",
 			"Logging Database error", "Pike13 Connection error", "Pike13 Import error", "Github Import error",
-			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location" };
+			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location",
+			"*** STARTING STUDENT IMPORT ***", "*** STUDENT IMPORT COMPLETE ***", "*** STARTING ATTENDANCE IMPORT",
+			"*** ATTENDANCE IMPORT COMPLETE ***", "*** STARTING GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE ***" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

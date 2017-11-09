@@ -450,7 +450,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			// Before updating database, determine what fields have changed
 			String changedFields = getStudentChangedFields(student, compareStudent);
-			
+
 			try {
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
@@ -496,10 +496,10 @@ public class MySqlDatabase {
 			}
 		}
 	}
-	
+
 	private String getStudentChangedFields(StudentImportModel dbStudent, StudentImportModel compareStudent) {
 		String changes = "";
-		
+
 		if (!dbStudent.getFirstName().equals(compareStudent.getFirstName())) {
 			if (changes.equals(""))
 				changes += " (first name";
@@ -542,10 +542,10 @@ public class MySqlDatabase {
 			else
 				changes += ", Start Date";
 		}
-		
+
 		if (!changes.equals(""))
 			changes += ")";
-		
+
 		return changes;
 	}
 
@@ -1014,7 +1014,7 @@ public class MySqlDatabase {
 				if (appendedMsg.length() >= LOG_APPEND_WIDTH)
 					appendedMsg = appendedMsg.substring(0, LOG_APPEND_WIDTH);
 				addLogDataStmt.setString(col++, appendedMsg);
-				addLogDataStmt.setString(col++, new DateTime().toString("yyyy-MM-dd HH:mm"));
+				addLogDataStmt.setString(col++, new DateTime().toString("yyyy-MM-dd HH:mm:ss"));
 
 				addLogDataStmt.executeUpdate();
 				addLogDataStmt.close();
@@ -1040,11 +1040,11 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM LogData ORDER BY LogDate;");
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM LogData;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					logData.add(new LogDataModel(result.getInt("LogType"), result.getString("LogDate").substring(0, 16),
+					logData.add(new LogDataModel(result.getInt("LogType"), result.getString("LogDate").substring(0, 19),
 							new StudentNameModel(result.getString("StudentName"), "", true), result.getInt("ClientID"),
 							result.getString("AppendedString")));
 				}
