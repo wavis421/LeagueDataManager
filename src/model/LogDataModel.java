@@ -32,6 +32,7 @@ public class LogDataModel {
 	public static final int ATTENDANCE_IMPORT_COMPLETE = 28;
 	public static final int STARTING_GITHUB_IMPORT = 29;
 	public static final int GITHUB_IMPORT_COMPLETE = 30;
+	public static final int GITHUB_IMPORT_ABORTED = 31;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -42,7 +43,8 @@ public class LogDataModel {
 			"Logging Database error", "Pike13 Connection error", "Pike13 Import error", "Github Import error",
 			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location",
 			"*** STARTING STUDENT IMPORT ***", "*** STUDENT IMPORT COMPLETE ***", "*** STARTING ATTENDANCE IMPORT",
-			"*** ATTENDANCE IMPORT COMPLETE ***", "*** STARTING GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE ***" };
+			"*** ATTENDANCE IMPORT COMPLETE ***", "*** STARTING GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE ***",
+			"*** GITHUB IMPORT ABORTED" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

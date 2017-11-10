@@ -8,6 +8,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -24,10 +25,12 @@ public class MySqlDatabase {
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
+	private ImageIcon icon;
 
-	public MySqlDatabase(JFrame parent, String awsPassword) {
+	public MySqlDatabase(JFrame parent, String awsPassword, ImageIcon icon) {
 		this.parent = parent;
 		this.awsPassword = awsPassword;
+		this.icon = icon;
 
 		// Make initial connection to database
 		connectDatabase();
@@ -50,15 +53,16 @@ public class MySqlDatabase {
 			}
 
 			if (dbConnection == null) {
-				int answer = JOptionPane.showConfirmDialog(null, "Do you want to retry?", "Failure connecting to DB",
-						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+				int answer = JOptionPane.showConfirmDialog(parent, "Do you want to retry?", "Failure connecting to DB",
+						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
 				if (answer == JOptionPane.NO_OPTION) {
 					// Exit program
 					MainFrame.shutdown();
 
 				} else if (connectAttempts >= MAX_CONNECTION_ATTEMPTS) {
-					JOptionPane.showMessageDialog(null,
-							"Exceeded maximum connection attempts.\nPlease try again later.");
+					JOptionPane.showMessageDialog(parent,
+							"Exceeded maximum connection attempts.\nPlease try again later.",
+							"Failure connecting to DB", JOptionPane.ERROR_MESSAGE, icon);
 					// Exit program
 					MainFrame.shutdown();
 				}
@@ -1029,7 +1033,8 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				if (!e2.getMessage().startsWith("Duplicate entry"))
 					// TODO: Can't log this error! What to do instead?
-					JOptionPane.showMessageDialog(parent, "Unable to Log data: " + e2.getMessage());
+					JOptionPane.showMessageDialog(parent, e2.getMessage(), "Unable to Log data",
+							JOptionPane.WARNING_MESSAGE, icon);
 				break;
 			}
 		}
@@ -1065,36 +1070,6 @@ public class MySqlDatabase {
 			}
 		}
 		return logData;
-	}
-
-	public int getLogDataSize() {
-		int logDataSize = 0;
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT COUNT(*) FROM LogData");
-				ResultSet result = selectStmt.executeQuery();
-
-				if (result.next()) {
-					logDataSize = result.getInt(1);
-				}
-
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				}
-
-			} catch (SQLException e2) {
-				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, null, 0, ": " + e2.getMessage());
-				break;
-			}
-		}
-		return logDataSize;
 	}
 
 	public void clearLogData() {

@@ -4,6 +4,7 @@ import java.awt.Cursor;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -31,6 +32,11 @@ public class MySqlConnection {
 	// Save SSH Session and database connection
 	private static Session session = null;
 	private static Connection connection = null;
+	private static ImageIcon myIcon;
+
+	public static void setIcon(ImageIcon icon) {
+		myIcon = icon;
+	}
 
 	public static Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
@@ -90,8 +96,10 @@ public class MySqlConnection {
 
 		} catch (Exception e) {
 			// Failed maximum connection attempts, exit program
-			JOptionPane.showMessageDialog(null, "Failed to establish a secure SSH tunnel.\n(" + e.getMessage() + ")\n"
-					+ "Please make sure League Data Manager is not already running.\n");
+			JOptionPane.showMessageDialog(null,
+					e.getMessage() + "\nVerify that the password you entered is correct and"
+							+ "\nmake sure League Data Manager is not already running.\n",
+					"Failed to establish secure SSH tunnel", JOptionPane.ERROR_MESSAGE, myIcon);
 			MainFrame.shutdown();
 		}
 	}
@@ -116,7 +124,8 @@ public class MySqlConnection {
 			connection = dataSource.getConnection();
 
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Database Connection Failed", JOptionPane.ERROR_MESSAGE,
+					myIcon);
 		}
 	}
 
@@ -131,7 +140,7 @@ public class MySqlConnection {
 				connection.close();
 			}
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null, "Error closing database connection: " + e.getMessage());
+			// Exiting program, not much to be done
 		}
 		connection = null;
 	}

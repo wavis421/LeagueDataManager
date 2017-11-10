@@ -9,12 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import model.ActivityEventModel;
 import model.ActivityModel;
 import model.LogDataModel;
+import model.MySqlConnection;
 import model.MySqlDatabase;
 import model.StudentImportModel;
 import model.StudentModel;
@@ -42,9 +43,10 @@ public class Controller {
 	private Pike13ApiController pike13Controller;
 	private JFrame parent;
 
-	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
+	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token, ImageIcon icon) {
 		this.parent = parent;
-		sqlDb = new MySqlDatabase(parent, awsPassword);
+		sqlDb = new MySqlDatabase(parent, awsPassword, icon);
+		MySqlConnection.setIcon(icon);
 		gitController = new GitApiController(sqlDb, githubToken);
 		pike13Controller = new Pike13ApiController(sqlDb, pike13Token);
 	}
@@ -83,12 +85,7 @@ public class Controller {
 	}
 
 	public void removeInactiveStudents() {
-		int origLogSize = sqlDb.getLogDataSize();
-
 		sqlDb.removeInactiveStudents();
-
-		if (sqlDb.getLogDataSize() > origLogSize)
-			JOptionPane.showMessageDialog(parent, "Please view Log Data for list of students removed");
 	}
 
 	public void removeStudentByClientID(int clientID) {
@@ -254,18 +251,25 @@ public class Controller {
 	}
 
 	public void importGithubComments(String startDate) {
+		boolean result;
+
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" since " + startDate.substring(0, 10) + " ***");
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		gitController.importGithubComments(startDate);
-		gitController.importGithubCommentsByLevel(0, startDate);
+		result = gitController.importGithubComments(startDate);
+		if (result)
+			gitController.importGithubCommentsByLevel(0, startDate);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, "");
+		if (result)
+			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, "");
+		else
+			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+					": Github API rate limit exceeded ***");
 	}
 
 	public void importAllDatabases(String startDate) {

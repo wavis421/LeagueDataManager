@@ -29,10 +29,6 @@ public class LogTableModel extends AbstractTableModel {
 		logList.clear();
 	}
 
-	public int getLogDataSize() {
-		return logList.size();
-	}
-
 	@Override
 	public int getColumnCount() {
 		return colNames.length;

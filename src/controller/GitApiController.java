@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -18,6 +16,7 @@ import org.joda.time.DateTime;
 import model.ActivityEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.StudentNameModel;
 
 public class GitApiController {
 	private MySqlDatabase sqlDb;
@@ -36,7 +35,7 @@ public class GitApiController {
 		commitService = new CommitService(client);
 	}
 
-	public void importGithubComments(String startDate) {
+	public boolean importGithubComments(String startDate) {
 		// Get all activities since 'startDate' w/ github user name and no comments
 		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
 		String lastGithubUser = "";
@@ -69,9 +68,9 @@ public class GitApiController {
 			} catch (IOException e) {
 				if (e.getMessage().startsWith("API rate limit exceeded")) {
 					// Rate limit exceeded, so abort
-					JOptionPane.showMessageDialog(null,
-							"Aborting Github import: Github API rate limit exceeded.\nPlease wait 1 hour and try again.");
-					break;
+					sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+							": Github API rate limit exceeded ***");
+					return false;
 
 				} else {
 					sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
@@ -79,6 +78,7 @@ public class GitApiController {
 				}
 			}
 		}
+		return true;
 	}
 
 	public void importGithubCommentsByLevel(int level, String startDate) {
@@ -125,8 +125,12 @@ public class GitApiController {
 				return null;
 
 		} catch (IOException e1) {
-			sqlDb.insertLogData(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
-					" for " + ownerName + ": " + e1.getMessage());
+			if (e1.getMessage().startsWith("API rate limit exceeded"))
+				sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+						": Github API rate limit exceeded ***");
+			else
+				sqlDb.insertLogData(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
+						" for " + ownerName + ": " + e1.getMessage());
 		}
 
 		return repoList;

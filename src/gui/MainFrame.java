@@ -84,6 +84,7 @@ public class MainFrame {
 	private FileFilterCsv fileFilter;
 	private String selectedClassName;
 	private String githubToken, pike13Token;
+	ImageIcon icon;
 	private static JFrame frame = new JFrame();
 
 	public MainFrame() {
@@ -91,7 +92,7 @@ public class MainFrame {
 		frame.setLayout(new BorderLayout());
 		frame.setBackground(Color.WHITE);
 
-		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
+		icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
 		frame.setIconImage(icon.getImage());
 
 		// Get database password
@@ -105,7 +106,7 @@ public class MainFrame {
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
-		controller = new Controller(frame, awsPassword, githubToken, pike13Token);
+		controller = new Controller(frame, awsPassword, githubToken, pike13Token, icon);
 
 		// Configure header
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -233,8 +234,8 @@ public class MainFrame {
 
 		// Create listeners
 		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
-				importActivityLogPike13Item, importGithubItem, importAllDatabasesItem,
-				viewLogDataItem, clearLogDataItem, printTableItem, exitItem);
+				importActivityLogPike13Item, importGithubItem, importAllDatabasesItem, viewLogDataItem,
+				clearLogDataItem, printTableItem, exitItem);
 		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
 		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
@@ -244,8 +245,8 @@ public class MainFrame {
 
 	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
 			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importAllDatabases, JMenuItem viewLogData, JMenuItem clearLogData,
-			JMenuItem printTable, JMenuItem exitItem) {
+			JMenuItem importAllDatabases, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
+			JMenuItem exitItem) {
 		// Set up listeners for FILE menu
 		if (!pike13Token.equals("") && !githubToken.equals("")) {
 			importStudentFile.addActionListener(new ActionListener() {
@@ -327,7 +328,8 @@ public class MainFrame {
 
 				} catch (PrinterException e1) {
 					frame.setCursor(Cursor.getDefaultCursor());
-					JOptionPane.showMessageDialog(null, "Failed to print: " + e1.getMessage());
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Printer Failure", JOptionPane.ERROR_MESSAGE,
+							icon);
 				}
 
 				// Set cursor back to default
