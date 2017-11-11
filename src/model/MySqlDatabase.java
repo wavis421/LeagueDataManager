@@ -28,9 +28,18 @@ public class MySqlDatabase {
 	private ImageIcon icon;
 
 	public MySqlDatabase(JFrame parent, String awsPassword, ImageIcon icon) {
+		// This constructor is used by LeagueDataManager GUI
 		this.parent = parent;
 		this.awsPassword = awsPassword;
 		this.icon = icon;
+
+		// Make initial connection to database
+		connectDatabase();
+	}
+	
+	public MySqlDatabase(String awsPassword) {
+		// This constructor is used by the Student Tracking app (no GUI)
+		this.awsPassword = awsPassword;
 
 		// Make initial connection to database
 		connectDatabase();

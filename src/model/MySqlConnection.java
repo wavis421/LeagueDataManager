@@ -40,8 +40,11 @@ public class MySqlConnection {
 
 	public static Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
-		Cursor cursor = parent.getCursor();
-		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		Cursor cursor = null;
+		if (parent != null) {
+			cursor = parent.getCursor();
+			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
 
 		// During development/test, need access to multiple databases
 		if (serverSelect == 0) { // Wendy's web host server
@@ -73,7 +76,8 @@ public class MySqlConnection {
 		connectToDataBase(DB_USER, password);
 
 		// Set cursor back to original setting
-		parent.setCursor(cursor);
+		if (parent != null)
+			parent.setCursor(cursor);
 		return connection;
 	}
 
