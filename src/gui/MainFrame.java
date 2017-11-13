@@ -106,7 +106,16 @@ public class MainFrame {
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
-		controller = new Controller(frame, awsPassword, githubToken, pike13Token, icon);
+		controller = new Controller(frame, awsPassword, githubToken, pike13Token);
+
+		// Connect to database
+		if (!controller.connectDatabase()) {
+			JOptionPane.showMessageDialog(null,
+					"Verify that the password you entered is correct and\n"
+							+ "that the League Data Manager is not already running.\n",
+					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
+			shutdown();
+		}
 
 		// Configure header
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);

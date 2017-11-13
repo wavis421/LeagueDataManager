@@ -4,19 +4,14 @@ import java.awt.Cursor;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
-import gui.MainFrame;
-
 public class MySqlConnection {
 	// Constants
-	private static final int LOCAL_PORT = 8740; // any free port can be used
 	private static final int REMOTE_PORT = 3306;
 	private static final String SERVER = "localhost";
 
@@ -30,15 +25,15 @@ public class MySqlConnection {
 	private static String REMOTE_HOST;
 
 	// Save SSH Session and database connection
-	private static Session session = null;
-	private static Connection connection = null;
-	private static ImageIcon myIcon;
+	private int localSshPort;
+	private Session session = null;
+	private Connection connection = null;
 
-	public static void setIcon(ImageIcon icon) {
-		myIcon = icon;
+	public MySqlConnection(int localPort) {
+		localSshPort = localPort;
 	}
 
-	public static Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
+	public Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
 		Cursor cursor = null;
 		if (parent != null) {
@@ -81,7 +76,7 @@ public class MySqlConnection {
 		return connection;
 	}
 
-	private static void connectSSH() {
+	private void connectSSH() {
 		try {
 			java.util.Properties config = new java.util.Properties();
 			JSch jsch = new JSch();
@@ -96,19 +91,16 @@ public class MySqlConnection {
 			session.setConfig("TCPKeepAlive", "yes");
 
 			session.connect();
-			session.setPortForwardingL(LOCAL_PORT, REMOTE_HOST, REMOTE_PORT);
+			session.setPortForwardingL(localSshPort, REMOTE_HOST, REMOTE_PORT);
 
 		} catch (Exception e) {
-			// Failed maximum connection attempts, exit program
-			JOptionPane.showMessageDialog(null,
-					e.getMessage() + "\nVerify that the password you entered is correct and"
-							+ "\nmake sure League Data Manager is not already running.\n",
-					"Failed to establish secure SSH tunnel", JOptionPane.ERROR_MESSAGE, myIcon);
-			MainFrame.shutdown();
+			// Failed maximum connection attempts: disconnect session
+			closeSSHConnection();
+			return;
 		}
 	}
 
-	private static void connectToDataBase(String user, String password) throws SQLException {
+	private void connectToDataBase(String user, String password) throws SQLException {
 		if (session == null)
 			return;
 
@@ -119,7 +111,7 @@ public class MySqlConnection {
 
 			// Connecting through SSH tunnel
 			dataSource.setServerName(SERVER);
-			dataSource.setPortNumber(LOCAL_PORT);
+			dataSource.setPortNumber(localSshPort);
 			dataSource.setDatabaseName(DATABASE);
 			dataSource.setUser(user);
 			dataSource.setPassword(password);
@@ -128,17 +120,16 @@ public class MySqlConnection {
 			connection = dataSource.getConnection();
 
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Database Connection Failed", JOptionPane.ERROR_MESSAGE,
-					myIcon);
+			// TODO: How to handle this exception?
 		}
 	}
 
-	public static void closeConnections() {
+	public void closeConnections() {
 		closeDataBaseConnection();
 		closeSSHConnection();
 	}
 
-	private static void closeDataBaseConnection() {
+	private void closeDataBaseConnection() {
 		try {
 			if (connection != null) {
 				connection.close();
@@ -149,7 +140,7 @@ public class MySqlConnection {
 		connection = null;
 	}
 
-	private static void closeSSHConnection() {
+	private void closeSSHConnection() {
 		if (session != null) {
 			session.disconnect();
 			session = null;

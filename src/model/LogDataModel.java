@@ -42,8 +42,8 @@ public class LogDataModel {
 			"Failure parsing Github data", "Student Database error", "Attendance Database error",
 			"Logging Database error", "Pike13 Connection error", "Pike13 Import error", "Github Import error",
 			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location",
-			"*** STARTING STUDENT IMPORT ***", "*** STUDENT IMPORT COMPLETE ***", "*** STARTING ATTENDANCE IMPORT",
-			"*** ATTENDANCE IMPORT COMPLETE ***", "*** STARTING GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE ***",
+			"*** BEGIN STUDENT IMPORT", "*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT",
+			"*** ATTENDANCE IMPORT COMPLETE", "*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE",
 			"*** GITHUB IMPORT ABORTED" };
 
 	private int logType, clientID;
@@ -67,19 +67,11 @@ public class LogDataModel {
 		return studentName;
 	}
 
-	public int getLogType() {
-		return logType;
-	}
-
 	public String getLogString() {
 		return logTypeName[logType] + appendedString;
 	}
 
 	public String getDate() {
 		return logDate;
-	}
-
-	public static String getLogType(int logType) {
-		return logTypeName[logType];
 	}
 }

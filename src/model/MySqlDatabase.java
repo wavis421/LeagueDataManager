@@ -10,79 +10,56 @@ import java.util.Collections;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import org.joda.time.DateTime;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
-import gui.MainFrame;
-
 public class MySqlDatabase {
+	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int LOG_APPEND_WIDTH = 75;
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
-	private ImageIcon icon;
+	private MySqlConnection mySqlConnection;
 
-	public MySqlDatabase(JFrame parent, String awsPassword, ImageIcon icon) {
+	public MySqlDatabase(JFrame parent, String awsPassword, int localPort) {
 		// This constructor is used by LeagueDataManager GUI
 		this.parent = parent;
 		this.awsPassword = awsPassword;
-		this.icon = icon;
 
-		// Make initial connection to database
-		connectDatabase();
+		mySqlConnection = new MySqlConnection(localPort);
 	}
-	
-	public MySqlDatabase(String awsPassword) {
+
+	public MySqlDatabase(String awsPassword, int localPort) {
 		// This constructor is used by the Student Tracking app (no GUI)
 		this.awsPassword = awsPassword;
-
-		// Make initial connection to database
-		connectDatabase();
+		mySqlConnection = new MySqlConnection(localPort);
 	}
 
 	/*
 	 * ------- Database Connections -------
 	 */
-	private static final int MAX_CONNECTION_ATTEMPTS = 3;
-
-	private void connectDatabase() {
-		int connectAttempts = 0;
-		while (true) {
-			connectAttempts++;
+	public boolean connectDatabase() {
+		for (int i = 0; i < MAX_CONNECTION_ATTEMPTS; i++) {
 			try {
-				dbConnection = MySqlConnection.connectToServer(parent, 1, awsPassword);
+				dbConnection = mySqlConnection.connectToServer(parent, 1, awsPassword);
 
 			} catch (SQLException e) {
-				// Error handling performed in connectToServer
+				// TODO: How to handle this exception?
 			}
 
-			if (dbConnection == null) {
-				int answer = JOptionPane.showConfirmDialog(parent, "Do you want to retry?", "Failure connecting to DB",
-						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
-				if (answer == JOptionPane.NO_OPTION) {
-					// Exit program
-					MainFrame.shutdown();
-
-				} else if (connectAttempts >= MAX_CONNECTION_ATTEMPTS) {
-					JOptionPane.showMessageDialog(parent,
-							"Exceeded maximum connection attempts.\nPlease try again later.",
-							"Failure connecting to DB", JOptionPane.ERROR_MESSAGE, icon);
-					// Exit program
-					MainFrame.shutdown();
-				}
-			} else
-				break;
+			if (dbConnection != null)
+				return true;
 		}
+		return false;
 	}
 
 	public void disconnectDatabase() {
 		if (dbConnection != null) {
-			MySqlConnection.closeConnections();
+			mySqlConnection.closeConnections();
 			dbConnection = null;
 		}
 	}
@@ -1040,10 +1017,9 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				if (!e2.getMessage().startsWith("Duplicate entry"))
+				if (!e2.getMessage().startsWith("Duplicate entry")) {
 					// TODO: Can't log this error! What to do instead?
-					JOptionPane.showMessageDialog(parent, e2.getMessage(), "Unable to Log data",
-							JOptionPane.WARNING_MESSAGE, icon);
+				}
 				break;
 			}
 		}
