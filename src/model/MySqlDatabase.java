@@ -8,7 +8,6 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import org.joda.time.DateTime;
@@ -72,6 +71,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
@@ -88,14 +88,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -105,6 +105,7 @@ public class MySqlDatabase {
 	public void removeStudentByClientID(int clientID) {
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement deleteStudentStmt = dbConnection
 						.prepareStatement("DELETE FROM Students WHERE ClientID=?;");
 
@@ -114,14 +115,14 @@ public class MySqlDatabase {
 				deleteStudentStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -132,6 +133,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Students WHERE NOT isInMasterDb ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
@@ -148,14 +150,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -166,6 +168,7 @@ public class MySqlDatabase {
 		// Remove any student not in master DB who have no activity data
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb AND "
 								+ "(SELECT COUNT(*) FROM Activities WHERE Activities.ClientID = Students.ClientID) = 0;");
@@ -183,14 +186,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -201,6 +204,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE GithubName=?;");
 				selectStmt.setString(1, githubName);
@@ -218,14 +222,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -237,6 +241,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE ClientID=?;");
 				selectStmt.setInt(1, clientID);
@@ -254,14 +259,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -356,6 +361,7 @@ public class MySqlDatabase {
 		// Convert student data to import data format
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students ORDER BY ClientID;");
 				ResultSet result = selectStmt.executeQuery();
@@ -371,14 +377,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -388,6 +394,7 @@ public class MySqlDatabase {
 	private void insertStudent(StudentImportModel student) {
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
 						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, Gender, StartDate, Location, GradYear, isInMasterDb) "
 								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1);");
@@ -421,7 +428,7 @@ public class MySqlDatabase {
 							student.getClientID(), "");
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -430,7 +437,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
 						student.getIsInMasterDb() == 1 ? true : false);
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -442,6 +449,7 @@ public class MySqlDatabase {
 			String changedFields = getStudentChangedFields(student, compareStudent);
 
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
 								+ "WHERE ClientID=?;");
@@ -472,7 +480,7 @@ public class MySqlDatabase {
 						student.getClientID(), changedFields);
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -481,7 +489,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
 						isInDb == 1 ? true : false);
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -547,6 +555,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID "
 								+ "ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
@@ -558,14 +567,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -577,6 +586,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "EventName=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
@@ -590,14 +600,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -609,6 +619,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
@@ -622,7 +633,7 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -631,7 +642,7 @@ public class MySqlDatabase {
 			} catch (SQLException e2) {
 				StudentNameModel studentModel = new StudentNameModel(studentName.getFirstName(),
 						studentName.getLastName(), studentName.getIsInMasterDb());
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -643,6 +654,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
 								+ "Activities.ClientID=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
@@ -656,14 +668,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -692,14 +704,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -731,14 +743,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -777,7 +789,7 @@ public class MySqlDatabase {
 			}
 
 		} catch (SQLException e) {
-			insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e.getMessage());
+			insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e.getMessage());
 			return;
 		}
 	}
@@ -787,6 +799,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT EventName "
 						+ "FROM Activities WHERE EventName != '' GROUP BY EventName ORDER BY EventName;");
 
@@ -798,14 +811,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -817,6 +830,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT LastName, FirstName, isInMasterDb FROM Students ORDER BY FirstName, LastName;");
 
@@ -829,14 +843,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -919,6 +933,7 @@ public class MySqlDatabase {
 	public void addActivity(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addActivityStmt = dbConnection.prepareStatement(
 						"INSERT INTO Activities " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
 
@@ -933,7 +948,7 @@ public class MySqlDatabase {
 				insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, " for " + serviceDate);
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -946,7 +961,7 @@ public class MySqlDatabase {
 			} catch (SQLException e3) {
 				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
 						nameModel.getIsInMasterDb());
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e3.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, ": " + e3.getMessage());
 				break;
 			}
 		}
@@ -976,10 +991,16 @@ public class MySqlDatabase {
 						" for repo " + repoName + " (" + serviceDate + ")");
 				return;
 
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
 			} catch (SQLException e) {
 				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
 						nameModel.getIsInMasterDb());
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, e.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, ": " + e.getMessage());
 			}
 		}
 	}
@@ -990,6 +1011,7 @@ public class MySqlDatabase {
 	public void insertLogData(int logType, StudentNameModel studentNameModel, int clientID, String appendedMsg) {
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addLogDataStmt = dbConnection.prepareStatement(
 						"INSERT INTO LogData (ClientID, LogType, StudentName, AppendedString, LogDate) "
 								+ "VALUES (?, ?, ?, ?, ?);");
@@ -1010,7 +1032,7 @@ public class MySqlDatabase {
 				addLogDataStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
@@ -1030,6 +1052,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM LogData;");
 				ResultSet result = selectStmt.executeQuery();
 
@@ -1043,14 +1066,14 @@ public class MySqlDatabase {
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -1060,12 +1083,13 @@ public class MySqlDatabase {
 	public void clearLogData() {
 		for (int i = 0; i < 2; i++) {
 			try {
+				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement("TRUNCATE LogData");
 				selectStmt.executeUpdate();
 				selectStmt.close();
 				break;
 
-			} catch (CommunicationsException | MySQLNonTransientConnectionException e1) {
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();

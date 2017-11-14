@@ -12,7 +12,7 @@ BEGIN
 		# Student data
 		FirstName varchar(20) DEFAULT NULL,
 		LastName varchar(25) DEFAULT NULL,
-		GithubName varchar(50) DEFAULT NULL,
+		GithubName varchar(50) COLLATE latin1_bin DEFAULT NULL,
 		Gender int(11) DEFAULT 0,
 		GradYear int(11) DEFAULT NULL,
 		
