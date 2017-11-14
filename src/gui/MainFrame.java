@@ -138,6 +138,7 @@ public class MainFrame {
 
 		createStudentTablePopups();
 		createActivityTablePopups();
+		createLogTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
@@ -589,6 +590,54 @@ public class MainFrame {
 								table.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN).toString(),
 								controller.getActivitiesByClientID(clientID));
 					}
+				}
+			}
+		});
+	}
+
+	private void createLogTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
+		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
+		tablePopup.add(showStudentInfoItem);
+		tablePopup.add(showStudentActivityItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+
+		// POP UP action listeners
+		showStudentInfoItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Client ID for selected row/column
+				int row = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
+				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
+				int clientID = Integer.parseInt((String) model.getValueAt(row, LogTableModel.CLIENT_ID_COLUMN));
+
+				logTable.getTable().clearSelection();
+				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
+			}
+		});
+		showStudentActivityItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name for selected row/column
+				int modelRow = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
+				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
+				String clientID = (String) model.getValueAt(modelRow, LogTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
+						LogTableModel.STUDENT_NAME_COLUMN);
+
+				// Display activity table for selected student
+				logTable.getTable().clearSelection();
+				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
+						"  for  '" + studentName.toString() + "'");
+			}
+		});
+		logTable.getTable().addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				JTable table = logTable.getTable();
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					// Show the popup menu
+					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
 		});
