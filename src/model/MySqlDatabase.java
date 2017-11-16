@@ -335,7 +335,7 @@ public class MySqlDatabase {
 						updateStudent(dbList.get(dbListIdx), importStudent, 0);
 					dbListIdx++;
 				}
-				if (dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
+				if (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
 					// Now that clientID's match, compare and update again
 					if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
 						updateStudent(importStudent, dbList.get(dbListIdx), 1);
@@ -367,10 +367,16 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
+					String startDateString;
+					if (result.getDate("StartDate") == null)
+						startDateString = "";
+					else
+						startDateString = result.getDate("StartDate").toString();
+
 					nameList.add(new StudentImportModel(result.getInt("ClientID"), result.getString("LastName"),
 							result.getString("FirstName"), result.getString("GithubName"), result.getInt("Gender"),
-							result.getDate("StartDate").toString(), result.getInt("Location"),
-							result.getInt("GradYear"), result.getInt("isInMasterDb")));
+							startDateString, result.getInt("Location"), result.getInt("GradYear"),
+							result.getInt("isInMasterDb")));
 				}
 
 				result.close();
