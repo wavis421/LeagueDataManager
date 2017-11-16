@@ -169,42 +169,10 @@ public class MainFrame {
 
 	private JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
-		JMenuItem importStudentFileItem = null;
-		JMenuItem importStudentPike13Item = null;
-		JMenuItem importActivityLogFileItem = null;
-		JMenuItem importActivityLogPike13Item = null;
-		JMenuItem importGithubItem = null;
-		JMenuItem importAllDatabasesItem = null;
 
-		// Set up top level menus and add to menu bar
+		// Add file menu to menu bar
 		JMenu fileMenu = new JMenu("File");
-		JMenu studentMenu = new JMenu("Students");
-		JMenu activitiesMenu = new JMenu("Attendance");
-		JMenu helpMenu = new JMenu("Help");
-
 		menuBar.add(fileMenu);
-		menuBar.add(studentMenu);
-		menuBar.add(activitiesMenu);
-		menuBar.add(helpMenu);
-
-		// Add file sub-menus; do not show import menus if user is not authorized
-		if (!pike13Token.equals("") && !githubToken.equals("")) {
-			importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
-			importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
-			importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
-			importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
-			importGithubItem = new JMenuItem("Import Github comments...  ");
-			importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
-
-			fileMenu.add(importStudentFileItem);
-			fileMenu.add(importStudentPike13Item);
-			fileMenu.add(importActivityLogFileItem);
-			fileMenu.add(importActivityLogPike13Item);
-			fileMenu.add(importGithubItem);
-			fileMenu.add(importAllDatabasesItem);
-
-			fileMenu.addSeparator();
-		}
 
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
@@ -217,104 +185,87 @@ public class MainFrame {
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
-		// Add Students sub-menus
+		createFileMenuListeners(viewLogDataItem, clearLogDataItem, printTableItem, exitItem);
+
+		// Add import menu to menu bar
+		if (!pike13Token.equals("") && !githubToken.equals("")) {
+			// Only show imports if user is authorized
+			JMenu importMenu = new JMenu("Import");
+			menuBar.add(importMenu);
+
+			JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
+			JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
+			JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
+			JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
+			JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
+			JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
+
+			importMenu.add(importStudentFileItem);
+			importMenu.add(importStudentPike13Item);
+			importMenu.add(importActivityLogFileItem);
+			importMenu.add(importActivityLogPike13Item);
+			importMenu.add(importGithubItem);
+			importMenu.add(importAllDatabasesItem);
+
+			createImportMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
+					importActivityLogPike13Item, importGithubItem, importAllDatabasesItem);
+		}
+
+		// Add student menu to menu bar
+		JMenu studentMenu = new JMenu("Students");
+		menuBar.add(studentMenu);
+
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
 		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
+
 		studentMenu.add(studentNotInMasterMenu);
 		studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentViewAllMenu);
 
-		// Add activities sub-menus
+		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
+
+		// Add attendance menu to menu bar
+		JMenu activitiesMenu = new JMenu("Attendance");
+		menuBar.add(activitiesMenu);
+
 		JMenu activitiesViewByClassMenu = new JMenu("View by Class ");
 		JMenuItem activitiesViewAllItem = new JMenuItem("View all ");
 		activitiesMenu.add(activitiesViewByClassMenu);
 		activitiesMenu.add(activitiesViewAllItem);
 
-		// Add Help sub-menus
+		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
+
+		// Add schedule menu to menu bar
+		JMenu scheduleMenu = new JMenu("Schedule");
+		menuBar.add(scheduleMenu);
+		JMenuItem scheduleViewMenu = new JMenuItem("View Class Schedule ");
+		scheduleMenu.add(scheduleViewMenu);
+
+		createScheduleMenuListeners(scheduleViewMenu);
+
+		// Add help menu to menu bar
+		JMenu helpMenu = new JMenu("Help");
+		menuBar.add(helpMenu);
+
 		JMenuItem menuDescriptionItem = new JMenuItem("Menu Description ");
 		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
 		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
 		JMenuItem aboutItem = new JMenuItem("About League Data Manager ");
+
 		helpMenu.add(menuDescriptionItem);
 		helpMenu.add(exampleUsageItem);
 		helpMenu.add(feedbackItem);
 		helpMenu.addSeparator();
 		helpMenu.add(aboutItem);
-
-		// Create listeners
-		createFileMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
-				importActivityLogPike13Item, importGithubItem, importAllDatabasesItem, viewLogDataItem,
-				clearLogDataItem, printTableItem, exitItem);
-		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
-		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
 		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
-			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importAllDatabases, JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
+	private void createFileMenuListeners(JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
 			JMenuItem exitItem) {
 		// Set up listeners for FILE menu
-		if (!pike13Token.equals("") && !githubToken.equals("")) {
-			importStudentFile.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
-						controller.importStudentsFromFile(fileChooser.getSelectedFile());
-						refreshStudentTable(STUDENT_TABLE_ALL, 0);
-					}
-				}
-			});
-			importStudentsPike13.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					controller.importStudentsFromPike13();
-					refreshStudentTable(STUDENT_TABLE_ALL, 0);
-				}
-			});
-			importActivitiesFile.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
-						controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-						refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
-					}
-				}
-			});
-			importActivitiesPike13.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Get start date for import
-					DatePickerUtility datePicker = new DatePickerUtility();
-					String startDate = datePicker.getDialogResponse();
-					if (startDate != null) {
-						controller.importActivitiesFromPike13(startDate);
-						refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
-					}
-				}
-			});
-			importGithub.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Get start date for import
-					DatePickerUtility datePicker = new DatePickerUtility();
-					String startDate = datePicker.getDialogResponse();
-					if (startDate != null) {
-						controller.importGithubComments(startDate);
-						refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
-					}
-				}
-			});
-			importAllDatabases.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Get start date for import
-					DatePickerUtility datePicker = new DatePickerUtility();
-					String startDate = datePicker.getDialogResponse();
-					if (startDate != null) {
-						controller.importAllDatabases(startDate);
-						refreshLogTable();
-					}
-				}
-			});
-		}
 		viewLogData.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshLogTable();
@@ -349,6 +300,67 @@ public class MainFrame {
 		exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				shutdown();
+			}
+		});
+	}
+
+	private void createImportMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
+			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
+			JMenuItem importAllDatabases) {
+		// Set up listeners for IMPORT menu
+		importStudentFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+					controller.importStudentsFromFile(fileChooser.getSelectedFile());
+					refreshStudentTable(STUDENT_TABLE_ALL, 0);
+				}
+			}
+		});
+		importStudentsPike13.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controller.importStudentsFromPike13();
+				refreshStudentTable(STUDENT_TABLE_ALL, 0);
+			}
+		});
+		importActivitiesFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
+			}
+		});
+		importActivitiesPike13.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importActivitiesFromPike13(startDate);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
+			}
+		});
+		importGithub.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importGithubComments(startDate);
+					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				}
+			}
+		});
+		importAllDatabases.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Get start date for import
+				DatePickerUtility datePicker = new DatePickerUtility();
+				String startDate = datePicker.getDialogResponse();
+				if (startDate != null) {
+					controller.importAllDatabases(startDate);
+					refreshLogTable();
+				}
 			}
 		});
 	}
@@ -404,6 +416,15 @@ public class MainFrame {
 		activitiesViewAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+			}
+		});
+	}
+
+	private void createScheduleMenuListeners(JMenuItem viewSchedule) {
+		// Set up listeners for Schedule menu
+		viewSchedule.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO: Still needs to be implemented
 			}
 		});
 	}
