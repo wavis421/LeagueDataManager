@@ -160,9 +160,11 @@ public class GitApiController {
 							String message = trimMessage(commit.getCommit().getMessage());
 
 							// Update comments & repo name, continue to next commit
-							event.setGithubComments(message);
-							sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(), commitDate,
-									repo.getName(), event.getGithubComments());
+							if (!message.equals("")) {
+								event.setGithubComments(message);
+								sqlDb.updateActivity(event.getClientID(), event.getStudentNameModel(), commitDate,
+										repo.getName(), event.getGithubComments());
+							}
 						}
 					}
 				}
