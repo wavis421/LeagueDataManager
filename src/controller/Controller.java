@@ -15,6 +15,7 @@ import model.ActivityEventModel;
 import model.ActivityModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
@@ -252,6 +253,25 @@ public class Controller {
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
 		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+	}
+
+	public void importScheduleFromPike13() {
+		// TODO: Add a log entry once this is fully integrated
+
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Get data from Pike13
+		ArrayList<ScheduleModel> eventList = pike13Controller.getSchedule();
+
+		// Update changes in database
+		if (eventList.size() > 0)
+			sqlDb.importSchedule(eventList);
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+		
+		// TODO: Add a log entry once this is fully integrated
 	}
 
 	public void importGithubComments(String startDate) {

@@ -34,6 +34,9 @@ public class LogDataModel {
 	public static final int GITHUB_IMPORT_COMPLETE = 30;
 	public static final int GITHUB_IMPORT_ABORTED = 31;
 
+	// This should always be last
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 32;
+
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
 			"Added new Student with no Github user name", "Updated Student Info", "Updated Student Attendance",
@@ -68,7 +71,10 @@ public class LogDataModel {
 	}
 
 	public String getLogString() {
-		return logTypeName[logType] + appendedString;
+		if (logType >= LOG_TYPE_OUT_OF_BOUNDS)
+			return "Unexpected Log type " + logType + ": software update required";
+		else
+			return logTypeName[logType] + appendedString;
 	}
 
 	public String getDate() {

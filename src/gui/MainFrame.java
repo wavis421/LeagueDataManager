@@ -198,6 +198,7 @@ public class MainFrame {
 			JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
 			JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
 			JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
+			JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
 			JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
 
 			importMenu.add(importStudentFileItem);
@@ -205,10 +206,11 @@ public class MainFrame {
 			importMenu.add(importActivityLogFileItem);
 			importMenu.add(importActivityLogPike13Item);
 			importMenu.add(importGithubItem);
+			importMenu.add(importScheduleItem);
 			importMenu.add(importAllDatabasesItem);
 
 			createImportMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
-					importActivityLogPike13Item, importGithubItem, importAllDatabasesItem);
+					importActivityLogPike13Item, importGithubItem, importScheduleItem, importAllDatabasesItem);
 		}
 
 		// Add student menu to menu bar
@@ -306,7 +308,7 @@ public class MainFrame {
 
 	private void createImportMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
 			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importAllDatabases) {
+			JMenuItem importSchedule, JMenuItem importAllDatabases) {
 		// Set up listeners for IMPORT menu
 		importStudentFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -350,6 +352,12 @@ public class MainFrame {
 					controller.importGithubComments(startDate);
 					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 				}
+			}
+		});
+		importSchedule.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO: Implement Schedule table
+				controller.importScheduleFromPike13();
 			}
 		});
 		importAllDatabases.addActionListener(new ActionListener() {

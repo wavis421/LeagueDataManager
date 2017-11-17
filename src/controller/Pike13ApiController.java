@@ -13,10 +13,12 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.joda.time.DateTime;
+import org.joda.time.MutableDateTime;
 
 import model.ActivityEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.ScheduleModel;
 import model.StudentImportModel;
 
 public class Pike13ApiController {
@@ -41,6 +43,12 @@ public class Pike13ApiController {
 	private final int FULL_NAME_IDX = 1;
 	private final int SERVICE_DATE_IDX = 2;
 	private final int EVENT_NAME_IDX = 3;
+
+	// Indices for schedule data
+	private final int SERVICE_DAY_IDX = 0;
+	private final int SERVICE_TIME_IDX = 1;
+	private final int DURATION_MINS_IDX = 2;
+	private final int WKLY_EVENT_NAME_IDX = 3;
 
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
@@ -68,6 +76,18 @@ public class Pike13ApiController {
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"starts\",\"service_category\",\"Class\"]]]}}}";
+
+	// Get schedule data
+	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"service_day\",\"service_time\",\"duration_in_minutes\",\"event_name\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":200},"
+			// Filter on 'this week' and 'starts with Class' and event name not null
+			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],[\"starts\",\"service_category\",\"Class\"],"
+			+ "           [\"nemp\",\"event_name\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
@@ -124,7 +144,7 @@ public class Pike13ApiController {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Client DB: " + e1.getMessage());
 		}
 
 		return studentList;
@@ -187,10 +207,70 @@ public class Pike13ApiController {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Enrollment DB: " + e1.getMessage());
 		}
 
 		return eventList;
+	}
+
+	public ArrayList<ScheduleModel> getSchedule() {
+		ArrayList<ScheduleModel> scheduleList = new ArrayList<ScheduleModel>();
+
+		// Insert start date and end date into schedule command string
+		DateTime today = new DateTime();
+		String scheduleString = getScheduleData.replaceFirst("0000-00-00", today.minusDays(6).toString("yyyy-MM-dd"));
+		scheduleString = scheduleString.replaceFirst("1111-11-11", today.toString("yyyy-MM-dd"));
+
+		try {
+			// Get URL connection with authorization
+			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/event_occurrences/queries");
+
+			// Send the query
+			sendQueryToUrl(conn, scheduleString);
+
+			// Check result
+			int responseCode = conn.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
+				return scheduleList;
+			}
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null)
+				return scheduleList;
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each event in the schedule
+				JsonArray scheduleArray = (JsonArray) jsonArray.get(i);
+
+				// Get event name, day-of-week and duration
+				String eventName = stripQuotes(scheduleArray.get(WKLY_EVENT_NAME_IDX).toString());
+				String serviceDayString = stripQuotes(scheduleArray.get(SERVICE_DAY_IDX).toString());
+				int serviceDay = Integer.parseInt(serviceDayString);
+				int duration = scheduleArray.getInt(DURATION_MINS_IDX);
+
+				// Get start time, then compute end time by adding duration field
+				String startTime = stripQuotes(scheduleArray.get(SERVICE_TIME_IDX).toString());
+				DateTime endDateTime = new DateTime();
+				MutableDateTime mdt = endDateTime.toMutableDateTime();
+				mdt.setHourOfDay(Integer.parseInt(startTime.substring(0, 2)));
+				mdt.setMinuteOfHour(Integer.parseInt(startTime.substring(3, 5)));
+				String endTime = ((mdt.toDateTime()).plusMinutes(duration)).toString("HH:mm");
+
+				// Add event to list
+				scheduleList.add(new ScheduleModel(0, serviceDay, startTime, endTime, eventName));
+			}
+
+			conn.disconnect();
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Schedule DB: " + e1.getMessage());
+		}
+
+		return scheduleList;
 	}
 
 	private HttpURLConnection connectUrl(String queryUrl) {
@@ -209,7 +289,7 @@ public class Pike13ApiController {
 			return conn;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
 		}
 		return null;
 	}
@@ -222,7 +302,7 @@ public class Pike13ApiController {
 			outputStream.close();
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " (IO Exception): " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
 		}
 	}
 

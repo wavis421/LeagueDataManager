@@ -1011,6 +1011,167 @@ public class MySqlDatabase {
 		}
 	}
 
+	public void importSchedule(ArrayList<ScheduleModel> importList) {
+		ArrayList<ScheduleModel> dbList = getClassSchedule();
+		int dbListIdx = 0;
+		int dbListSize = dbList.size();
+
+		ScheduleModel dbEvent;
+		Collections.sort(importList);
+
+		for (int i = 0; i < importList.size(); i++) {
+			ScheduleModel importEvent = importList.get(i);
+
+			// If at end of DB list, then default operation is insert (1)
+			int compare = 1;
+			if (dbListIdx < dbListSize)
+				compare = dbList.get(dbListIdx).compareTo(importEvent);
+
+			if (compare == 0) {
+				// All data matches
+				dbListIdx++;
+
+			} else if (compare > 0) {
+				// Insert new event into DB
+				addClassToSchedule(importEvent);
+
+			} else {
+				// Extra event(s) in database, so delete them
+				while (compare < 0) {
+					removeClassFromSchedule(dbList.get(dbListIdx));
+					dbListIdx++;
+
+					if (dbListIdx < dbListSize)
+						// Continue to compare until dbList catches up
+						compare = dbList.get(dbListIdx).compareTo(importEvent);
+					else
+						// End of database list, insert remaining imports
+						compare = 1;
+				}
+				// One final check to get in sync with importEvent
+				if (compare == 0) {
+					// Match, so continue incrementing through list
+					dbListIdx++;
+				} else {
+					// Insert new event into DB
+					addClassToSchedule(importEvent);
+				}
+			}
+		}
+
+		// Delete extra entries at end of dbList
+		while (dbListIdx < dbListSize) {
+			removeClassFromSchedule(dbList.get(dbListIdx));
+			dbListIdx++;
+		}
+	}
+
+	private ArrayList<ScheduleModel> getClassSchedule() {
+		ArrayList<ScheduleModel> eventList = new ArrayList<ScheduleModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get attendance data from the DB for all students that have a github user name
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Schedule ORDER BY DayOfWeek, StartTime, ClassName, EndTime;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					eventList.add(new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
+							result.getString("StartTime"), result.getString("EndTime"), result.getString("ClassName")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				// TODO: Insert log entry when implementation completed
+				System.out.println("SQL Exception for Schedule DB: " + e2.getMessage());
+				break;
+			}
+		}
+		return eventList;
+	}
+
+	public void addClassToSchedule(ScheduleModel importEvent) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement addScheduleStmt = dbConnection.prepareStatement(
+						"INSERT INTO Schedule (DayOfWeek, StartTime, EndTime, ClassName) VALUES (?, ?, ?, ?);");
+
+				int col = 1;
+				addScheduleStmt.setInt(col++, importEvent.getDayOfWeek());
+				addScheduleStmt.setString(col++, importEvent.getStartTime());
+				addScheduleStmt.setString(col++, importEvent.getEndTime());
+				addScheduleStmt.setString(col, importEvent.getClassName());
+
+				addScheduleStmt.executeUpdate();
+				addScheduleStmt.close();
+
+				// TODO: Add log entry once implementation is complete
+				System.out.println(
+						"Add class to schedule: " + importEvent.getDayOfWeek() + ", " + importEvent.getStartTime()
+								+ " to " + importEvent.getEndTime() + ", " + importEvent.getClassName());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLIntegrityConstraintViolationException e2) {
+				// Schedule data already exists, do nothing
+				break;
+
+			} catch (SQLException e3) {
+				// TODO: Add log entry once implementation is complete
+				System.out.println("SQL Exception adding to Schedule DB: " + e3.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void removeClassFromSchedule(ScheduleModel model) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement deleteClassStmt = dbConnection
+						.prepareStatement("DELETE FROM Schedule WHERE ScheduleID=?;");
+
+				// Delete class from schedule
+				deleteClassStmt.setInt(1, model.getScheduleID());
+				deleteClassStmt.executeUpdate();
+				deleteClassStmt.close();
+
+				// TODO: Add log entry once implementation is complete
+				System.out.println("Deleted " + model.getClassName() + " on " + model.getDayOfWeek() + " from "
+						+ model.getStartTime() + " to " + model.getEndTime());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				// TODO: Add log entry once implementation is complete
+				System.out.println("SQL Exception deleting class from schedule: " + model.getClassName() + ", "
+						+ model.getScheduleID());
+				break;
+			}
+		}
+	}
+
 	/*
 	 * ------- Logging Database Queries -------
 	 */
