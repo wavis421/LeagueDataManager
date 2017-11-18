@@ -15,8 +15,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.githubName = parseGithubName(githubName);
 		this.gender = GenderModel.convertStringToGender(gender);
 		this.startDate = startDate;
-		this.homeLocString = homeLocation;
+
 		this.homeLocation = LocationModel.convertStringToLocation(homeLocation);
+		this.homeLocString = LocationModel.convertLocationToString(this.homeLocation);
+		
 		if (gradYear.equals("") || gradYear.equals("\"\""))
 			this.gradYear = 0;
 		else {

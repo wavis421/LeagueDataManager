@@ -534,7 +534,7 @@ public class MySqlDatabase {
 			else
 				changes += ", Grad year";
 		}
-		if (!dbStudent.getHomeLocAsString().equals(compareStudent.getHomeLocAsString())) {
+		if (dbStudent.getHomeLocation() != compareStudent.getHomeLocation()) {
 			if (changes.equals(""))
 				changes += " (Home Location";
 			else
