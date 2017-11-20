@@ -1066,19 +1066,19 @@ public class MySqlDatabase {
 		}
 	}
 
-	private ArrayList<ScheduleModel> getClassSchedule() {
+	public ArrayList<ScheduleModel> getClassSchedule() {
 		ArrayList<ScheduleModel> eventList = new ArrayList<ScheduleModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get attendance data from the DB for all students that have a github user name
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Schedule ORDER BY DayOfWeek, StartTime, ClassName, EndTime;");
+						.prepareStatement("SELECT * FROM Schedule ORDER BY DayOfWeek, StartTime, ClassName, Duration;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
 					eventList.add(new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
-							result.getString("StartTime"), result.getString("EndTime"), result.getString("ClassName")));
+							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName")));
 				}
 
 				result.close();
@@ -1105,12 +1105,12 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addScheduleStmt = dbConnection.prepareStatement(
-						"INSERT INTO Schedule (DayOfWeek, StartTime, EndTime, ClassName) VALUES (?, ?, ?, ?);");
+						"INSERT INTO Schedule (DayOfWeek, StartTime, Duration, ClassName) VALUES (?, ?, ?, ?);");
 
 				int col = 1;
 				addScheduleStmt.setInt(col++, importEvent.getDayOfWeek());
 				addScheduleStmt.setString(col++, importEvent.getStartTime());
-				addScheduleStmt.setString(col++, importEvent.getEndTime());
+				addScheduleStmt.setInt(col++, importEvent.getDuration());
 				addScheduleStmt.setString(col, importEvent.getClassName());
 
 				addScheduleStmt.executeUpdate();
@@ -1118,8 +1118,8 @@ public class MySqlDatabase {
 
 				// TODO: Add log entry once implementation is complete
 				System.out.println(
-						"Add class to schedule: " + importEvent.getDayOfWeek() + ", " + importEvent.getStartTime()
-								+ " to " + importEvent.getEndTime() + ", " + importEvent.getClassName());
+						"Add class to schedule: DOW " + importEvent.getDayOfWeek() + ", start " + importEvent.getStartTime()
+								+ ", duration " + importEvent.getDuration() + ", " + importEvent.getClassName());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1153,8 +1153,8 @@ public class MySqlDatabase {
 				deleteClassStmt.close();
 
 				// TODO: Add log entry once implementation is complete
-				System.out.println("Deleted " + model.getClassName() + " on " + model.getDayOfWeek() + " from "
-						+ model.getStartTime() + " to " + model.getEndTime());
+				System.out.println("Deleted " + model.getClassName() + " on " + model.getDayOfWeek() + " at "
+						+ model.getStartTime() + ", duration " + model.getDuration());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

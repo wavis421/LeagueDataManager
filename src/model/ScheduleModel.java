@@ -1,15 +1,24 @@
 package model;
 
-public class ScheduleModel implements Comparable<ScheduleModel> {
-	private int scheduleID, dayOfWeek;
-	private String startTime, endTime, className;
+import org.joda.time.DateTime;
+import org.joda.time.MutableDateTime;
 
-	public ScheduleModel(int scheduleID, int dayOfWeek, String startTime, String endTime, String className) {
+public class ScheduleModel implements Comparable<ScheduleModel> {
+	private int scheduleID, dayOfWeek, duration;
+	private String startTime, startTimeFormatted, className;
+
+	public ScheduleModel(int scheduleID, int dayOfWeek, String startTime, int duration, String className) {
 		this.scheduleID = scheduleID;
 		this.dayOfWeek = dayOfWeek;
 		this.startTime = startTime;
-		this.endTime = endTime;
+		this.duration = duration;
 		this.className = className;
+
+		// Need original startTime for sorting; create formatted start time as 12 hour
+		MutableDateTime mdt = (new DateTime()).toMutableDateTime();
+		mdt.setHourOfDay(Integer.parseInt(startTime.substring(0, 2)));
+		mdt.setMinuteOfHour(Integer.parseInt(startTime.substring(3, 5)));
+		this.startTimeFormatted = mdt.toDateTime().toString("h:mm a");
 	}
 
 	public int getScheduleID() {
@@ -24,8 +33,12 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 		return startTime;
 	}
 
-	public String getEndTime() {
-		return endTime;
+	public String getStartTimeFormatted() {
+		return startTimeFormatted;
+	}
+
+	public int getDuration() {
+		return duration;
 	}
 
 	public String getClassName() {
@@ -34,32 +47,33 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 
 	@Override
 	public int compareTo(ScheduleModel other) {
-		// Compare order is: DayOfWeek, StartTime, ClassName, EndTime
-		if (this.getClassName().equals(other.getClassName()) && this.getDayOfWeek() == other.getDayOfWeek()
-				&& this.getStartTime().equals(other.getStartTime()) && this.getEndTime().equals(other.getEndTime()))
+		// Compare order is: DayOfWeek, StartTime, ClassName, duration
+		if (this.className.equals(other.className) && this.dayOfWeek == other.dayOfWeek
+				&& this.startTime.equals(other.startTime) && this.duration == other.duration)
 			// All fields match
 			return 0;
 
-		else if (this.getDayOfWeek() < other.getDayOfWeek())
+		else if (this.dayOfWeek < other.dayOfWeek)
 			return -1;
 
-		else if (this.getDayOfWeek() > other.getDayOfWeek())
+		else if (this.dayOfWeek > other.dayOfWeek)
 			return 1;
 
 		else {
 			// Day of week matches, so now compare start time
-			int compare = this.getStartTime().compareTo(other.getStartTime());
+			int compare = this.startTime.compareTo(other.startTime);
 			if (compare == 0) {
-				// DOW and start time both match, so next check class name
-				compare = this.getClassName().compareTo(other.getClassName());
-				if (compare == 0)
-					// DOW, start time and class name match, end time has changed
-					return this.getEndTime().compareTo(other.getEndTime());
-				else
-					return compare;
-			} else
-				// Start time does not match
-				return compare;
+				// DOW and start time both match, so check class name
+				compare = this.className.compareTo(other.className);
+				if (compare == 0) {
+					// DOW, start time and class name all match; check duration
+					if (this.duration < other.duration)
+						return -1;
+					else
+						return 1;
+				}
+			}
+			return compare;
 		}
 	}
 }

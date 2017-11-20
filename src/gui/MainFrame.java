@@ -41,6 +41,7 @@ import javax.swing.event.ChangeListener;
 import controller.Controller;
 import model.ActivityModel;
 import model.LogDataModel;
+import model.ScheduleModel;
 import model.StudentNameModel;
 
 public class MainFrame {
@@ -76,6 +77,7 @@ public class MainFrame {
 	private StudentTable studentTable;
 	private ActivityTable activityTable;
 	private LogTable logTable;
+	private ScheduleTable scheduleTable;
 	private int currentStudentTable;
 	private int currentActivityTable;
 	private JTable activeTable;
@@ -133,12 +135,14 @@ public class MainFrame {
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
+		scheduleTable = new ScheduleTable(tablePanel, new ArrayList<ScheduleModel>());
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
 		activeTable = studentTable.getTable();
 
 		createStudentTablePopups();
 		createActivityTablePopups();
 		createLogTablePopups();
+		createScheduleTablePopups();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
@@ -432,7 +436,7 @@ public class MainFrame {
 		// Set up listeners for Schedule menu
 		viewSchedule.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Still needs to be implemented
+				refreshScheduleTable();
 			}
 		});
 	}
@@ -672,6 +676,40 @@ public class MainFrame {
 		});
 	}
 
+	private void createScheduleTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem scheduleViewByClass = new JMenuItem("View by Class ");
+		tablePopup.add(scheduleViewByClass);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+
+		// POP UP action listeners
+		scheduleViewByClass.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Retrieve class name from selected row
+				int row = scheduleTable.getTable().convertRowIndexToModel(scheduleTable.getTable().getSelectedRow());
+				ScheduleTableModel model = (ScheduleTableModel) scheduleTable.getTable().getModel();
+				String className = (String) model.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
+
+				// Display activity table for selected class
+				scheduleTable.getTable().clearSelection();
+				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(className),
+						"  for  '" + className + "'");
+			}
+		});
+
+		scheduleTable.getTable().addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				JTable table = scheduleTable.getTable();
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					// Show the popup menu
+					tablePopup.show(table, e.getX(), e.getY());
+				}
+			}
+		});
+	}
+
 	private void refreshStudentTable(int tableType, int clientID) {
 		// Remove data being displayed
 		removeDataFromTables();
@@ -718,12 +756,25 @@ public class MainFrame {
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}
+	
+	private void refreshScheduleTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add log data table and header
+		scheduleTable.setData(tablePanel, controller.getClassSchedule());
+		headerLabel.setText("Class Schedule Data");
+
+		activeTable = scheduleTable.getTable();
+		activeTableHeader = headerLabel.getText();
+	}
 
 	private void removeDataFromTables() {
 		// Remove data from Student table and Activities table
 		studentTable.removeData();
 		activityTable.removeData();
 		logTable.removeData();
+		scheduleTable.removeData();
 	}
 
 	public static void shutdown() {

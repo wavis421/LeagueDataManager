@@ -250,18 +250,11 @@ public class Pike13ApiController {
 				String eventName = stripQuotes(scheduleArray.get(WKLY_EVENT_NAME_IDX).toString());
 				String serviceDayString = stripQuotes(scheduleArray.get(SERVICE_DAY_IDX).toString());
 				int serviceDay = Integer.parseInt(serviceDayString);
+				String startTime = stripQuotes(scheduleArray.get(SERVICE_TIME_IDX).toString());
 				int duration = scheduleArray.getInt(DURATION_MINS_IDX);
 
-				// Get start time, then compute end time by adding duration field
-				String startTime = stripQuotes(scheduleArray.get(SERVICE_TIME_IDX).toString());
-				DateTime endDateTime = new DateTime();
-				MutableDateTime mdt = endDateTime.toMutableDateTime();
-				mdt.setHourOfDay(Integer.parseInt(startTime.substring(0, 2)));
-				mdt.setMinuteOfHour(Integer.parseInt(startTime.substring(3, 5)));
-				String endTime = ((mdt.toDateTime()).plusMinutes(duration)).toString("HH:mm");
-
 				// Add event to list
-				scheduleList.add(new ScheduleModel(0, serviceDay, startTime, endTime, eventName));
+				scheduleList.add(new ScheduleModel(0, serviceDay, startTime, duration, eventName));
 			}
 
 			conn.disconnect();

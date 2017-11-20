@@ -120,6 +120,10 @@ public class Controller {
 	public ArrayList<String> getAllClassNames() {
 		return sqlDb.getAllClassNames();
 	}
+	
+	public ArrayList<ScheduleModel> getClassSchedule() {
+		return sqlDb.getClassSchedule();
+	}
 
 	/*
 	 * ------- File & data import/export -------
