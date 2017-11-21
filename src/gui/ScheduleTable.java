@@ -4,11 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
@@ -19,11 +25,14 @@ import javax.swing.table.TableCellRenderer;
 import model.ScheduleModel;
 
 public class ScheduleTable extends JPanel {
+	private static final int POPUP_WIDTH = 240;
+	private static final int POPUP_HEIGHT = 30;
 	private static final int DAYS_IN_WEEK = 7;
 	private static final int ROW_GAP = 5;
-	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
+	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	private JPanel parentTablePanel;
+	private ScheduleTableListener scheduleListener;
 
 	// Panel variables: 2 row panels, 1 panel for each day
 	private JPanel mainPanel = new JPanel();
@@ -51,8 +60,10 @@ public class ScheduleTable extends JPanel {
 			dowPanelList.add(new JPanel());
 			dowPanelList.get(i).add(dowScrollList.get(i));
 
+			createScheduleTablePopups(dowTableList.get(i));
+
 			dowPanelList.get(i).setBorder(BorderFactory.createTitledBorder(border, dayOfWeek[i], TitledBorder.CENTER,
-					TitledBorder.DEFAULT_POSITION, CustomFonts.TITLE_FONT, CustomFonts.TITLE_COLOR));
+					TitledBorder.DEFAULT_POSITION, CustomFonts.PANEL_HEADER_FONT, CustomFonts.TITLE_COLOR));
 		}
 
 		// Add first 4 days in week to row1, the rest in row 2
@@ -101,7 +112,7 @@ public class ScheduleTable extends JPanel {
 	}
 
 	public JTable getTable() {
-		// TODO: Get selected table
+		// TODO: Return last selected table
 		return dowTableList.get(0);
 	}
 
@@ -133,6 +144,43 @@ public class ScheduleTable extends JPanel {
 			}
 		}
 		mainPanel.setVisible(false);
+	}
+
+	public void setViewByClassListener(ScheduleTableListener listener) {
+		this.scheduleListener = listener;
+	}
+
+	private void createScheduleTablePopups(JTable table) {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem scheduleViewByClass = new JMenuItem("View by Class ");
+		tablePopup.add(scheduleViewByClass);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
+
+		// POP UP action listeners
+		scheduleViewByClass.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Retrieve class name from selected row
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
+				ScheduleTableModel model = (ScheduleTableModel) table.getModel();
+				String className = (String) model.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
+
+				// Display activity table for selected class
+				table.clearSelection();
+				if (scheduleListener != null)
+					scheduleListener.viewByClass(className);
+			}
+		});
+
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					// Show the popup menu
+					tablePopup.show(table, e.getX(), e.getY());
+				}
+			}
+		});
 	}
 
 	public class ScheduleTableRenderer extends JLabel implements TableCellRenderer {

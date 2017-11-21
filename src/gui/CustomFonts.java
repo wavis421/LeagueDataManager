@@ -19,10 +19,11 @@ public class CustomFonts {
 
 	// Header and title fonts
 	public static final Font TITLE_FONT = JTFTools.decodeFont("Serif-italic-24");
+	public static final Font PANEL_HEADER_FONT = JTFTools.decodeFont("Serif-italic-20");
+	public static final Font NOTES_WINDOW_FONT = JTFTools.decodeFont("Serif-bold-15");
 
 	// Table fonts
 	public static final Font TABLE_HEADER_FONT = JTFTools.decodeFont("Dialog-bold-15");
 	public static final Font TABLE_TEXT_FONT = JTFTools.decodeFont("Dialog-bold-12");
 	public static final Font TABLE_ITALIC_TEXT_FONT = JTFTools.decodeFont("Dialog-italic-12");
-	public static final Font NOTES_WINDOW_FONT = JTFTools.decodeFont("Serif-bold-15");
 }
