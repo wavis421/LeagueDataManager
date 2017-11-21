@@ -7,23 +7,18 @@ import javax.swing.table.AbstractTableModel;
 import model.ScheduleModel;
 
 public class ScheduleTableModel extends AbstractTableModel {
-	public static final int DAY_OF_WEEK_COLUMN = 0;
-	public static final int START_TIME_COLUMN = 1;
-	public static final int CLASS_NAME_COLUMN = 2;
+	public static final int START_TIME_COLUMN = 0;
+	public static final int CLASS_NAME_COLUMN = 1;
 
 	private ArrayList<ScheduleModel> scheduleList;
-	private final String[] colNames = { " Day of Week ", " Start ", " Class Name " };
-	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+	private final String[] colNames = { " Start ", " Class Name " };
 
 	public ScheduleTableModel(ArrayList<ScheduleModel> scheduleList) {
 		this.scheduleList = scheduleList;
-		System.out.println("Num Classes: " + scheduleList.size());
 	}
 
 	public void setData(ArrayList<ScheduleModel> db) {
-		scheduleList.clear();
 		scheduleList = db;
-		System.out.println("Num Classes: " + scheduleList.size());
 	}
 
 	public void removeAll() {
@@ -60,8 +55,6 @@ public class ScheduleTableModel extends AbstractTableModel {
 		ScheduleModel scheduleData = scheduleList.get(row);
 
 		switch (col) {
-		case DAY_OF_WEEK_COLUMN:
-			return dayOfWeek[scheduleData.getDayOfWeek()];
 		case START_TIME_COLUMN:
 			return scheduleData.getStartTimeFormatted();
 		case CLASS_NAME_COLUMN:

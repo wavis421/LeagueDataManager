@@ -12,80 +12,129 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 
 import model.ScheduleModel;
 
 public class ScheduleTable extends JPanel {
+	private static final int DAYS_IN_WEEK = 7;
 	private static final int ROW_GAP = 5;
+	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
-	private JPanel tablePanel;
-	private JTable table;
-	private ScheduleTableModel scheduleTableModel;
-	private JScrollPane scrollPane;
+	private JPanel parentTablePanel;
 
-	public ScheduleTable(JPanel tablePanel, ArrayList<ScheduleModel> arrayList) {
-		this.tablePanel = tablePanel;
+	// Panel variables: 2 row panels, 1 panel for each day
+	private JPanel mainPanel = new JPanel();
+	private JPanel row1Panel = new JPanel(), row2Panel = new JPanel();
+	private ArrayList<JPanel> dowPanelList = new ArrayList<JPanel>();
 
-		scheduleTableModel = new ScheduleTableModel(arrayList);
-		table = new JTable(scheduleTableModel);
+	// Scroll pane with table
+	private ArrayList<JScrollPane> dowScrollList = new ArrayList<JScrollPane>();
+	private ArrayList<JTable> dowTableList = new ArrayList<JTable>();
 
-		createTablePanel();
+	// Schedule data, breaks down into table model by day
+	private ArrayList<ScheduleTableModel> dowScheduleTableModel = new ArrayList<ScheduleTableModel>();
+	private ArrayList<ArrayList<ScheduleModel>> dowScheduleModelList = new ArrayList<ArrayList<ScheduleModel>>();
+
+	public ScheduleTable(JPanel tablePanel) {
+		this.parentTablePanel = tablePanel;
+
+		Border border = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
+
+		for (int i = 0; i < DAYS_IN_WEEK; i++) {
+			dowScheduleModelList.add(new ArrayList<ScheduleModel>());
+			dowScheduleTableModel.add(new ScheduleTableModel(dowScheduleModelList.get(i)));
+			dowTableList.add(new JTable(dowScheduleTableModel.get(i)));
+			dowScrollList.add(createTablePanel(dowTableList.get(i), dowScheduleTableModel.get(i)));
+			dowPanelList.add(new JPanel());
+			dowPanelList.get(i).add(dowScrollList.get(i));
+
+			dowPanelList.get(i).setBorder(BorderFactory.createTitledBorder(border, dayOfWeek[i], TitledBorder.CENTER,
+					TitledBorder.DEFAULT_POSITION, CustomFonts.TITLE_FONT, CustomFonts.TITLE_COLOR));
+		}
+
+		// Add first 4 days in week to row1, the rest in row 2
+		row1Panel.add(dowPanelList.get(0));
+		row1Panel.add(dowPanelList.get(1));
+		row1Panel.add(dowPanelList.get(2));
+		row1Panel.add(dowPanelList.get(3));
+
+		row2Panel.add(dowPanelList.get(4));
+		row2Panel.add(dowPanelList.get(5));
+		row2Panel.add(dowPanelList.get(6));
+
+		// Add 2 rows to main panel and make visible
+		mainPanel.add(row1Panel, BorderLayout.NORTH);
+		mainPanel.add(row2Panel, BorderLayout.CENTER);
+		mainPanel.setVisible(true);
+
+		parentTablePanel.add(mainPanel);
 	}
 
-	private void createTablePanel() {
+	private JScrollPane createTablePanel(JTable dowTable, ScheduleTableModel sourceList) {
 		// Set up table parameters
-		table.setFont(CustomFonts.TABLE_TEXT_FONT);
-		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
-		table.setShowGrid(true);
-		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
-		int origRowHeight = table.getRowHeight();
-		table.setRowHeight(origRowHeight + ROW_GAP);
-
-		configureColumnWidths();
+		dowTable.setFont(CustomFonts.TABLE_TEXT_FONT);
+		dowTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		dowTable.setShowGrid(true);
+		dowTable.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		int origRowHeight = dowTable.getRowHeight();
+		dowTable.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Set table properties
-		table.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
-		table.setAutoCreateRowSorter(false);
+		dowTable.getColumnModel().getColumn(ScheduleTableModel.START_TIME_COLUMN).setMaxWidth(75);
+		dowTable.getColumnModel().getColumn(ScheduleTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
 
-		tablePanel.setLayout(new BorderLayout());
-		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+		dowTable.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
+		dowTable.setAutoCreateRowSorter(false);
+
+		JScrollPane dowScrollPane = new JScrollPane(dowTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setPreferredSize(
-				new Dimension(tablePanel.getPreferredSize().width, tablePanel.getPreferredSize().height - 70));
-		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		dowScrollPane.setPreferredSize(new Dimension(280, (parentTablePanel.getPreferredSize().height - 200) / 2));
+
+		Border innerBorder = BorderFactory.createLineBorder(Color.GRAY, 1, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+		dowScrollPane.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+
+		return dowScrollPane;
 	}
 
 	public JTable getTable() {
-		return table;
+		// TODO: Get selected table
+		return dowTableList.get(0);
 	}
 
 	public void setData(JPanel tablePanel, ArrayList<ScheduleModel> scheduleList) {
-		scrollPane.setVisible(true);
-		this.tablePanel = tablePanel;
-		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		this.parentTablePanel = tablePanel;
 
-		scheduleTableModel.setData(scheduleList);
-		scheduleTableModel.fireTableDataChanged();
+		// Split schedule list by day of week
+		for (int i = 0; i < scheduleList.size(); i++) {
+			int dowIdx = scheduleList.get(i).getDayOfWeek();
+			dowScheduleModelList.get(dowIdx).add(scheduleList.get(i));
+		}
+
+		// Add daily schedule data to table model
+		for (int i = 0; i < 7; i++) {
+			dowScheduleTableModel.get(i).setData(dowScheduleModelList.get(i));
+			dowScheduleTableModel.get(i).fireTableDataChanged();
+		}
+
+		// Add main panel to parent and make visible
+		parentTablePanel.add(mainPanel);
+		mainPanel.setVisible(true);
 	}
 
 	public void removeData() {
-		if (scheduleTableModel.getRowCount() > 0) {
-			scheduleTableModel.removeAll();
+		for (int i = 0; i < 7; i++) {
+			// Empty each day of week list
+			if (dowScheduleModelList.get(i).size() > 0) {
+				dowScheduleModelList.get(i).clear();
+			}
 		}
-
-		scrollPane.setVisible(false);
+		mainPanel.setVisible(false);
 	}
 
-	private void configureColumnWidths() {
-		// Configure column widths
-		table.getColumnModel().getColumn(ScheduleTableModel.DAY_OF_WEEK_COLUMN).setMaxWidth(100);
-		table.getColumnModel().getColumn(ScheduleTableModel.START_TIME_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(ScheduleTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
-	}
-
-	// TODO: share/merge this table renderer
 	public class ScheduleTableRenderer extends JLabel implements TableCellRenderer {
 		private ScheduleTableRenderer() {
 			super();

@@ -46,7 +46,7 @@ import model.StudentNameModel;
 
 public class MainFrame {
 	/* Private constants */
-	private static final int PREF_FRAME_WIDTH = 1100;
+	private static final int PREF_FRAME_WIDTH = 1300;
 	private static final int PREF_FRAME_HEIGHT = 700;
 
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;
@@ -135,7 +135,7 @@ public class MainFrame {
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
-		scheduleTable = new ScheduleTable(tablePanel, new ArrayList<ScheduleModel>());
+		scheduleTable = new ScheduleTable(tablePanel);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
 		activeTable = studentTable.getTable();
 
