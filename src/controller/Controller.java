@@ -120,7 +120,11 @@ public class Controller {
 	public ArrayList<String> getAllClassNames() {
 		return sqlDb.getAllClassNames();
 	}
-	
+
+	public ArrayList<String> getClassNamesByLevel(int level) {
+		return sqlDb.getClassNamesByLevel(level);
+	}
+
 	public ArrayList<ScheduleModel> getClassSchedule() {
 		return sqlDb.getClassSchedule();
 	}
@@ -274,7 +278,7 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		
+
 		// TODO: Add a log entry once this is fully integrated
 	}
 

@@ -400,28 +400,83 @@ public class MainFrame {
 
 	private void createActivityMenuListeners(JMenu activitiesViewByClass, JMenuItem activitiesViewAll) {
 		// Set up listeners for Activities menu
-		activitiesViewByClass.addChangeListener(new ChangeListener() {
+		JMenu level0SubMenu = new JMenu("Level 0 ");
+		JMenu level1SubMenu = new JMenu("Level 1 ");
+		JMenu level2SubMenu = new JMenu("Level 2 ");
+		JMenu level3SubMenu = new JMenu("Level 3 ");
+		JMenu level4SubMenu = new JMenu("Level 4 ");
+		JMenu level5SubMenu = new JMenu("Level 5 ");
+		JMenu level6SubMenu = new JMenu("Level 6 ");
+		JMenu level7SubMenu = new JMenu("Level 7 ");
+		JMenu level8SubMenu = new JMenu("Level 8 ");
+		JMenu labsSubMenu = new JMenu("Labs ");
+		JMenu allSubMenu = new JMenu("All ");
+
+		activitiesViewByClass.add(level0SubMenu);
+		activitiesViewByClass.add(level1SubMenu);
+		activitiesViewByClass.add(level2SubMenu);
+		activitiesViewByClass.add(level3SubMenu);
+		activitiesViewByClass.add(level4SubMenu);
+		activitiesViewByClass.add(level5SubMenu);
+		activitiesViewByClass.add(level6SubMenu);
+		activitiesViewByClass.add(level7SubMenu);
+		activitiesViewByClass.add(level8SubMenu);
+		activitiesViewByClass.add(labsSubMenu);
+		activitiesViewByClass.add(allSubMenu);
+
+		level0SubMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				activitiesViewByClass.removeAll();
-				activitiesViewByClass.getPopupMenu().setLayout(new GridLayout(20, 1));
-				ArrayList<String> classList = controller.getAllClassNames();
-
-				for (int i = 0; i < classList.size(); i++) {
-					JMenuItem classItem = new JMenuItem(classList.get(i).toString());
-					activitiesViewByClass.add(classItem);
-
-					classItem.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent ev) {
-							classList.clear();
-							activitiesViewByClass.removeAll();
-
-							// Add activity table and header
-							refreshActivityTable(ACTIVITY_TABLE_BY_CLASS,
-									controller.getActivitiesByClassName(classItem.getText()),
-									"  for  '" + classItem.getText() + "'");
-						}
-					});
-				}
+				viewClassMenuListener(level0SubMenu, 0);
+			}
+		});
+		level1SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level1SubMenu, 1);
+			}
+		});
+		level2SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level2SubMenu, 2);
+			}
+		});
+		level3SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level3SubMenu, 3);
+			}
+		});
+		level4SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level4SubMenu, 4);
+			}
+		});
+		level5SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level5SubMenu, 5);
+			}
+		});
+		level6SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level6SubMenu, 6);
+			}
+		});
+		level7SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level7SubMenu, 7);
+			}
+		});
+		level8SubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(level8SubMenu, 8);
+			}
+		});
+		labsSubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(labsSubMenu, 9);
+			}
+		});
+		allSubMenu.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				viewClassMenuListener(allSubMenu, -1);
 			}
 		});
 		activitiesViewAll.addActionListener(new ActionListener() {
@@ -429,6 +484,35 @@ public class MainFrame {
 				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
 			}
 		});
+	}
+
+	private void viewClassMenuListener(JMenu menu, int filter) {
+		// filter: 0 - 8 for levels 0-8, 9 for labs, -1 for ALL
+		menu.removeAll();
+		menu.getPopupMenu().setLayout(new GridLayout(20, 1));
+
+		ArrayList<String> classList;
+		if (filter == -1)
+			classList = controller.getAllClassNames();
+		else
+			classList = controller.getClassNamesByLevel(filter);
+
+		for (int i = 0; i < classList.size(); i++) {
+			JMenuItem classItem = new JMenuItem(classList.get(i).toString());
+			menu.add(classItem);
+
+			classItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ev) {
+					classList.clear();
+					menu.removeAll();
+
+					// Add activity table and header
+					refreshActivityTable(ACTIVITY_TABLE_BY_CLASS,
+							controller.getActivitiesByClassName(classItem.getText()),
+							"  for  '" + classItem.getText() + "'");
+				}
+			});
+		}
 	}
 
 	private void createScheduleMenuListeners(JMenuItem viewSchedule) {

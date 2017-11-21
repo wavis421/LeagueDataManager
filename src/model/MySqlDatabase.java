@@ -19,6 +19,8 @@ public class MySqlDatabase {
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int LOG_APPEND_WIDTH = 75;
+	private static final int NUM_CLASS_LEVELS = 9;
+	
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
@@ -831,6 +833,49 @@ public class MySqlDatabase {
 		return classList;
 	}
 
+	public ArrayList<String> getClassNamesByLevel(int filter) {
+		ArrayList<String> classList = new ArrayList<String>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt;
+				if (filter < NUM_CLASS_LEVELS) {
+					selectStmt = dbConnection.prepareStatement(
+							"SELECT EventName FROM Activities WHERE EventName != '' AND LEFT(EventName,2) = ? "
+									+ "GROUP BY EventName ORDER BY EventName;");
+					selectStmt.setString(1, String.valueOf(filter) + "@");
+				} else {
+					selectStmt = dbConnection.prepareStatement("SELECT EventName "
+							+ "FROM Activities WHERE EventName != '' AND "
+							+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
+							+ "GROUP BY EventName ORDER BY EventName;");
+					selectStmt.setString(1, "L@");
+					selectStmt.setString(2, "E@");
+				}
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					classList.add(result.getString("EventName"));
+				}
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+		return classList;
+	}
+
 	public ArrayList<StudentNameModel> getAllStudentNames() {
 		ArrayList<StudentNameModel> studentList = new ArrayList<StudentNameModel>();
 
@@ -1117,9 +1162,9 @@ public class MySqlDatabase {
 				addScheduleStmt.close();
 
 				// TODO: Add log entry once implementation is complete
-				System.out.println(
-						"Add class to schedule: DOW " + importEvent.getDayOfWeek() + ", start " + importEvent.getStartTime()
-								+ ", duration " + importEvent.getDuration() + ", " + importEvent.getClassName());
+				System.out.println("Add class to schedule: DOW " + importEvent.getDayOfWeek() + ", start "
+						+ importEvent.getStartTime() + ", duration " + importEvent.getDuration() + ", "
+						+ importEvent.getClassName());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
