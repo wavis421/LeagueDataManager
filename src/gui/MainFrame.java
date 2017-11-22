@@ -489,7 +489,6 @@ public class MainFrame {
 	private void viewClassMenuListener(JMenu menu, int filter) {
 		// filter: 0 - 8 for levels 0-8, 9 for labs, -1 for ALL
 		menu.removeAll();
-		menu.getPopupMenu().setLayout(new GridLayout(20, 1));
 
 		ArrayList<String> classList;
 		if (filter == -1)
@@ -512,6 +511,11 @@ public class MainFrame {
 							"  for  '" + classItem.getText() + "'");
 				}
 			});
+		}
+		if (classList.size() < 20)
+			menu.getPopupMenu().setLayout(new GridLayout(classList.size(), 1));
+		else {
+			menu.getPopupMenu().setLayout(new GridLayout(20, 1));
 		}
 	}
 
