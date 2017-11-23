@@ -20,7 +20,9 @@ public class MySqlDatabase {
 	private static final int COMMENT_WIDTH = 150;
 	private static final int LOG_APPEND_WIDTH = 75;
 	private static final int NUM_CLASS_LEVELS = 9;
-	
+	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+			"Saturday" };
+
 	private static Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
@@ -97,7 +99,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -124,7 +127,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), clientID,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -159,7 +163,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -195,7 +200,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -231,7 +237,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -268,7 +275,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, clientID, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), clientID,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -392,7 +400,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -582,7 +591,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -615,7 +625,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -683,7 +694,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -719,7 +731,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -758,7 +771,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -797,7 +811,8 @@ public class MySqlDatabase {
 			}
 
 		} catch (SQLException e) {
-			insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e.getMessage());
+			insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+					": " + e.getMessage());
 			return;
 		}
 	}
@@ -826,7 +841,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -846,10 +862,10 @@ public class MySqlDatabase {
 									+ "GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, String.valueOf(filter) + "@");
 				} else {
-					selectStmt = dbConnection.prepareStatement("SELECT EventName "
-							+ "FROM Activities WHERE EventName != '' AND "
-							+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
-							+ "GROUP BY EventName ORDER BY EventName;");
+					selectStmt = dbConnection
+							.prepareStatement("SELECT EventName FROM Activities WHERE EventName != '' AND "
+									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
+									+ "GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, "L@");
 					selectStmt.setString(2, "E@");
 				}
@@ -869,7 +885,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -901,7 +918,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -1137,8 +1155,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				// TODO: Insert log entry when implementation completed
-				System.out.println("SQL Exception for Schedule DB: " + e2.getMessage());
+				insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -1161,10 +1179,9 @@ public class MySqlDatabase {
 				addScheduleStmt.executeUpdate();
 				addScheduleStmt.close();
 
-				// TODO: Add log entry once implementation is complete
-				System.out.println("Add class to schedule: DOW " + importEvent.getDayOfWeek() + ", start "
-						+ importEvent.getStartTime() + ", duration " + importEvent.getDuration() + ", "
-						+ importEvent.getClassName());
+				insertLogData(LogDataModel.ADD_CLASS_TO_SCHEDULE, new StudentNameModel("", "", false), 0,
+						": " + importEvent.getClassName() + " on " + dayOfWeek[importEvent.getDayOfWeek()] + " at "
+								+ importEvent.getStartTimeFormatted());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1178,8 +1195,8 @@ public class MySqlDatabase {
 				break;
 
 			} catch (SQLException e3) {
-				// TODO: Add log entry once implementation is complete
-				System.out.println("SQL Exception adding to Schedule DB: " + e3.getMessage());
+				insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e3.getMessage());
 				break;
 			}
 		}
@@ -1198,8 +1215,9 @@ public class MySqlDatabase {
 				deleteClassStmt.close();
 
 				// TODO: Add log entry once implementation is complete
-				System.out.println("Deleted " + model.getClassName() + " on " + model.getDayOfWeek() + " at "
-						+ model.getStartTime() + ", duration " + model.getDuration());
+				insertLogData(LogDataModel.REMOVE_CLASS_FROM_SCHEDULE, new StudentNameModel("", "", false), 0,
+						": " + model.getClassName() + " on " + dayOfWeek[model.getDayOfWeek()] + " at "
+								+ model.getStartTimeFormatted());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1210,8 +1228,7 @@ public class MySqlDatabase {
 
 			} catch (SQLException e2) {
 				// TODO: Add log entry once implementation is complete
-				System.out.println("SQL Exception deleting class from schedule: " + model.getClassName() + ", "
-						+ model.getScheduleID());
+				insertLogData(LogDataModel.SCHEDULE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}
@@ -1285,7 +1302,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.STUDENT_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -1308,7 +1326,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, null, 0, ": " + e2.getMessage());
+				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}

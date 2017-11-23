@@ -33,9 +33,12 @@ public class LogDataModel {
 	public static final int STARTING_GITHUB_IMPORT = 29;
 	public static final int GITHUB_IMPORT_COMPLETE = 30;
 	public static final int GITHUB_IMPORT_ABORTED = 31;
+	public static final int SCHEDULE_DB_ERROR = 32;
+	public static final int ADD_CLASS_TO_SCHEDULE = 33;
+	public static final int REMOVE_CLASS_FROM_SCHEDULE = 34;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 32;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 35;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -47,7 +50,8 @@ public class LogDataModel {
 			"Failure getting Module Repo", "Error importing from file", "Unrecognized Home Location",
 			"*** BEGIN STUDENT IMPORT", "*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT",
 			"*** ATTENDANCE IMPORT COMPLETE", "*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE",
-			"*** GITHUB IMPORT ABORTED" };
+			"*** GITHUB IMPORT ABORTED", "Schedule Database error", "Added class to schedule",
+			"Removed class from schedule" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
