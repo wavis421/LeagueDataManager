@@ -84,7 +84,7 @@ public class Pike13ApiController {
 			// Select fields
 			+ "\"fields\":[\"service_day\",\"service_time\",\"duration_in_minutes\",\"event_name\"],"
 			// Page limit max is 500
-			+ "\"page\":{\"limit\":200},"
+			+ "\"page\":{\"limit\":500},"
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],[\"starts\",\"service_category\",\"Class\"],"
 			+ "           [\"nemp\",\"event_name\"]]]}}}";
@@ -218,7 +218,7 @@ public class Pike13ApiController {
 
 		// Insert start date and end date into schedule command string
 		DateTime today = new DateTime();
-		String scheduleString = getScheduleData.replaceFirst("0000-00-00", today.minusDays(6).toString("yyyy-MM-dd"));
+		String scheduleString = getScheduleData.replaceFirst("0000-00-00", today.minusDays(7).toString("yyyy-MM-dd"));
 		scheduleString = scheduleString.replaceFirst("1111-11-11", today.toString("yyyy-MM-dd"));
 
 		try {
