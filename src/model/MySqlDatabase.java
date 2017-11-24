@@ -633,41 +633,6 @@ public class MySqlDatabase {
 		return activityList;
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
-		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
-								+ "FirstName='" + studentName.getFirstName() + "' AND " + "LastName='"
-								+ studentName.getLastName()
-								+ "' ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
-				ResultSet result = selectStmt.executeQuery();
-				getActivitiesList(activityList, result);
-				Collections.sort(activityList);
-
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				}
-
-			} catch (SQLException e2) {
-				StudentNameModel studentModel = new StudentNameModel(studentName.getFirstName(),
-						studentName.getLastName(), studentName.getIsInMasterDb());
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
-				break;
-			}
-		}
-		return activityList;
-	}
-
 	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
 		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
 

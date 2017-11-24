@@ -33,6 +33,7 @@ public class ScheduleTable extends JPanel {
 	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	private JPanel parentTablePanel;
 	private ScheduleTableListener scheduleListener;
+	private JTable lastSelectedTable;
 
 	// Panel variables: 2 row panels, 1 panel for each day
 	private JPanel mainPanel = new JPanel();
@@ -61,6 +62,7 @@ public class ScheduleTable extends JPanel {
 			dowPanelList.get(i).add(dowScrollList.get(i));
 
 			createScheduleTablePopups(dowTableList.get(i));
+			dowTableList.get(i).setName(dayOfWeek[i]);
 
 			dowPanelList.get(i).setBorder(BorderFactory.createTitledBorder(border, dayOfWeek[i], TitledBorder.CENTER,
 					TitledBorder.DEFAULT_POSITION, CustomFonts.PANEL_HEADER_FONT, CustomFonts.TITLE_COLOR));
@@ -82,6 +84,7 @@ public class ScheduleTable extends JPanel {
 		mainPanel.setVisible(true);
 
 		parentTablePanel.add(mainPanel);
+		lastSelectedTable = dowTableList.get(0);
 	}
 
 	private JScrollPane createTablePanel(JTable dowTable, ScheduleTableModel sourceList) {
@@ -112,8 +115,7 @@ public class ScheduleTable extends JPanel {
 	}
 
 	public JTable getTable() {
-		// TODO: Return last selected table
-		return dowTableList.get(0);
+		return lastSelectedTable;
 	}
 
 	public void setData(JPanel tablePanel, ArrayList<ScheduleModel> scheduleList) {
@@ -183,6 +185,16 @@ public class ScheduleTable extends JPanel {
 		});
 	}
 
+	private void clearTableSelections(JTable selectedTable) {
+		JTable table;
+		for (int i = 0; i < dowTableList.size(); i++) {
+			// Clear all table selections except for the current selection
+			table = dowTableList.get(i);
+			if (table != selectedTable)
+				dowTableList.get(i).clearSelection();
+		}
+	}
+
 	public class ScheduleTableRenderer extends JLabel implements TableCellRenderer {
 		private ScheduleTableRenderer() {
 			super();
@@ -192,6 +204,10 @@ public class ScheduleTable extends JPanel {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			if (isSelected) {
+				clearTableSelections(table);
+				lastSelectedTable = table;
+			}
 			if (value instanceof Integer)
 				setText(String.valueOf(value));
 			else

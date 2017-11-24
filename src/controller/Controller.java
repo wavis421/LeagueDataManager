@@ -105,10 +105,6 @@ public class Controller {
 		return sqlDb.getActivitiesByClassName(className);
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByStudentName(StudentNameModel studentName) {
-		return sqlDb.getActivitiesByStudentName(studentName);
-	}
-
 	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
 		return sqlDb.getActivitiesByClientID(clientID);
 	}

@@ -58,6 +58,8 @@ public class MainFrame {
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ACTIVITY_TITLE = "League Attendance";
+	private static final String SCHEDULE_TITLE = "Class Schedule";
+	private static final String LOGGING_TITLE = "Logging Data";
 
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
@@ -286,9 +288,14 @@ public class MainFrame {
 			public void actionPerformed(ActionEvent e) {
 				// Set cursor to "wait" cursor
 				frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				String header = activeTableHeader;
+				if (header.startsWith(SCHEDULE_TITLE)) {
+					activeTable = scheduleTable.getTable();
+					header += " for " + activeTable.getName();
+				}
 
 				try {
-					MessageFormat headerFormat = new MessageFormat(activeTableHeader);
+					MessageFormat headerFormat = new MessageFormat(header);
 					MessageFormat footerFormat = new MessageFormat("- {0} -");
 					activeTable.print(JTable.PrintMode.FIT_WIDTH, headerFormat, footerFormat);
 
@@ -730,10 +737,13 @@ public class MainFrame {
 				// Get Client ID for selected row/column
 				int row = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
 				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
-				int clientID = Integer.parseInt((String) model.getValueAt(row, LogTableModel.CLIENT_ID_COLUMN));
+				String clientIdAsString = (String) model.getValueAt(row, LogTableModel.CLIENT_ID_COLUMN);
 
 				logTable.getTable().clearSelection();
-				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
+				if (!clientIdAsString.equals("")) {
+					int clientID = Integer.parseInt(clientIdAsString);
+					refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
+				}
 			}
 		});
 		showStudentActivityItem.addActionListener(new ActionListener() {
@@ -742,13 +752,16 @@ public class MainFrame {
 				int modelRow = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
 				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
 				String clientID = (String) model.getValueAt(modelRow, LogTableModel.CLIENT_ID_COLUMN);
-				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-						LogTableModel.STUDENT_NAME_COLUMN);
 
-				// Display activity table for selected student
 				logTable.getTable().clearSelection();
-				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
-						"  for  '" + studentName.toString() + "'");
+				if (!clientID.equals("")) {
+					StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
+							LogTableModel.STUDENT_NAME_COLUMN);
+
+					// Display activity table for selected student
+					refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
+							"  for  '" + studentName.toString() + "'");
+				}
 			}
 		});
 		logTable.getTable().addMouseListener(new MouseAdapter() {
@@ -814,7 +827,7 @@ public class MainFrame {
 
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
-		headerLabel.setText("Logging Data");
+		headerLabel.setText(LOGGING_TITLE);
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -826,7 +839,7 @@ public class MainFrame {
 
 		// Add log data table and header
 		scheduleTable.setData(tablePanel, controller.getClassSchedule());
-		headerLabel.setText("Class Schedule");
+		headerLabel.setText(SCHEDULE_TITLE);
 
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
