@@ -782,38 +782,6 @@ public class MySqlDatabase {
 		}
 	}
 
-	public ArrayList<String> getAllClassNames() {
-		ArrayList<String> classList = new ArrayList<String>();
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT EventName "
-						+ "FROM Activities WHERE EventName != '' GROUP BY EventName ORDER BY EventName;");
-
-				ResultSet result = selectStmt.executeQuery();
-				while (result.next()) {
-					classList.add(result.getString("EventName"));
-				}
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				}
-
-			} catch (SQLException e2) {
-				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
-						": " + e2.getMessage());
-				break;
-			}
-		}
-		return classList;
-	}
-
 	public ArrayList<String> getClassNamesByLevel(int filter) {
 		ArrayList<String> classList = new ArrayList<String>();
 

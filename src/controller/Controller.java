@@ -113,10 +113,6 @@ public class Controller {
 		return sqlDb.getAllStudentNames();
 	}
 
-	public ArrayList<String> getAllClassNames() {
-		return sqlDb.getAllClassNames();
-	}
-
 	public ArrayList<String> getClassNamesByLevel(int level) {
 		return sqlDb.getClassNamesByLevel(level);
 	}
