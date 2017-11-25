@@ -178,113 +178,66 @@ public class MainFrame {
 		// Add file menu to menu bar
 		JMenu fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
-
-		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
-		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
-		JMenuItem printTableItem = new JMenuItem("Print Table");
-		JMenuItem exitItem = new JMenuItem("Exit ");
-
-		fileMenu.add(viewLogDataItem);
-		fileMenu.add(clearLogDataItem);
-		fileMenu.add(printTableItem);
-		fileMenu.addSeparator();
-		fileMenu.add(exitItem);
-
-		createFileMenuListeners(viewLogDataItem, clearLogDataItem, printTableItem, exitItem);
+		createFileMenu(fileMenu);
 
 		// Add import menu to menu bar
 		if (!pike13Token.equals("") && !githubToken.equals("")) {
 			// Only show imports if user is authorized
 			JMenu importMenu = new JMenu("Import");
 			menuBar.add(importMenu);
-
-			JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
-			JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
-			JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
-			JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
-			JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
-			JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
-			JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
-
-			importMenu.add(importStudentFileItem);
-			importMenu.add(importStudentPike13Item);
-			importMenu.add(importActivityLogFileItem);
-			importMenu.add(importActivityLogPike13Item);
-			importMenu.add(importGithubItem);
-			importMenu.add(importScheduleItem);
-			importMenu.add(importAllDatabasesItem);
-
-			createImportMenuListeners(importStudentFileItem, importStudentPike13Item, importActivityLogFileItem,
-					importActivityLogPike13Item, importGithubItem, importScheduleItem, importAllDatabasesItem);
+			createImportMenu(importMenu);
 		}
 
 		// Add student menu to menu bar
 		JMenu studentMenu = new JMenu("Students");
 		menuBar.add(studentMenu);
-
-		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
-		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
-		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
-
-		studentMenu.add(studentNotInMasterMenu);
-		studentMenu.add(studentRemoveInactiveMenu);
-		studentMenu.add(studentViewAllMenu);
-
-		createStudentMenuListeners(studentNotInMasterMenu, studentRemoveInactiveMenu, studentViewAllMenu);
+		createStudentMenu(studentMenu);
 
 		// Add attendance menu to menu bar
 		JMenu activitiesMenu = new JMenu("Attendance");
 		menuBar.add(activitiesMenu);
-
-		JMenu activitiesViewByClassMenu = new JMenu("View by Class ");
-		JMenuItem activitiesViewAllItem = new JMenuItem("View all ");
-		activitiesMenu.add(activitiesViewByClassMenu);
-		activitiesMenu.add(activitiesViewAllItem);
-
-		createActivityMenuListeners(activitiesViewByClassMenu, activitiesViewAllItem);
+		createActivityMenu(activitiesMenu);
 
 		// Add schedule menu to menu bar
 		JMenu scheduleMenu = new JMenu("Schedule");
 		menuBar.add(scheduleMenu);
-		JMenuItem scheduleViewMenu = new JMenuItem("View Class Schedule ");
-		scheduleMenu.add(scheduleViewMenu);
-
-		createScheduleMenuListeners(scheduleViewMenu);
+		createScheduleMenu(scheduleMenu);
 
 		// Add help menu to menu bar
 		JMenu helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
-
-		JMenuItem menuDescriptionItem = new JMenuItem("Menu Description ");
-		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
-		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
-		JMenuItem aboutItem = new JMenuItem("About League Data Manager ");
-
-		helpMenu.add(menuDescriptionItem);
-		helpMenu.add(exampleUsageItem);
-		helpMenu.add(feedbackItem);
-		helpMenu.addSeparator();
-		helpMenu.add(aboutItem);
-		createHelpMenuListeners(menuDescriptionItem, exampleUsageItem, feedbackItem, aboutItem);
+		createHelpMenu(helpMenu);
 
 		return menuBar;
 	}
 
-	private void createFileMenuListeners(JMenuItem viewLogData, JMenuItem clearLogData, JMenuItem printTable,
-			JMenuItem exitItem) {
-		// Set up listeners for FILE menu
-		viewLogData.addActionListener(new ActionListener() {
+	private void createFileMenu(JMenu fileMenu) {
+		// Create file sub-menus
+		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
+		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
+		JMenuItem printTableItem = new JMenuItem("Print Table");
+		JMenuItem exitItem = new JMenuItem("Exit ");
+
+		// Add these sub-menus to File menu
+		fileMenu.add(viewLogDataItem);
+		fileMenu.add(clearLogDataItem);
+		fileMenu.add(printTableItem);
+		fileMenu.addSeparator();
+		fileMenu.add(exitItem);
+
+		// Set up listeners for File menu
+		viewLogDataItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshLogTable();
 			}
 		});
-		clearLogData.addActionListener(new ActionListener() {
+		clearLogDataItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.clearDbLogData();
 				refreshLogTable();
 			}
 		});
-		printTable.addActionListener(new ActionListener() {
+		printTableItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Set cursor to "wait" cursor
 				frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -316,11 +269,27 @@ public class MainFrame {
 		});
 	}
 
-	private void createImportMenuListeners(JMenuItem importStudentFile, JMenuItem importStudentsPike13,
-			JMenuItem importActivitiesFile, JMenuItem importActivitiesPike13, JMenuItem importGithub,
-			JMenuItem importSchedule, JMenuItem importAllDatabases) {
-		// Set up listeners for IMPORT menu
-		importStudentFile.addActionListener(new ActionListener() {
+	private void createImportMenu(JMenu importMenu) {
+		// Add Import sub-menus
+		JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
+		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
+		JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
+		JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
+		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
+		JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
+		JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
+
+		// Add these sub-menus to the Import menu
+		importMenu.add(importStudentFileItem);
+		importMenu.add(importStudentPike13Item);
+		importMenu.add(importActivityLogFileItem);
+		importMenu.add(importActivityLogPike13Item);
+		importMenu.add(importGithubItem);
+		importMenu.add(importScheduleItem);
+		importMenu.add(importAllDatabasesItem);
+
+		// Set up listeners for the Import menu
+		importStudentFileItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importStudentsFromFile(fileChooser.getSelectedFile());
@@ -328,13 +297,13 @@ public class MainFrame {
 				}
 			}
 		});
-		importStudentsPike13.addActionListener(new ActionListener() {
+		importStudentPike13Item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.importStudentsFromPike13();
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
-		importActivitiesFile.addActionListener(new ActionListener() {
+		importActivityLogFileItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
@@ -342,7 +311,7 @@ public class MainFrame {
 				}
 			}
 		});
-		importActivitiesPike13.addActionListener(new ActionListener() {
+		importActivityLogPike13Item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Get start date for import
 				DatePickerUtility datePicker = new DatePickerUtility();
@@ -353,7 +322,7 @@ public class MainFrame {
 				}
 			}
 		});
-		importGithub.addActionListener(new ActionListener() {
+		importGithubItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Get start date for import
 				DatePickerUtility datePicker = new DatePickerUtility();
@@ -364,13 +333,13 @@ public class MainFrame {
 				}
 			}
 		});
-		importSchedule.addActionListener(new ActionListener() {
+		importScheduleItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Implement Schedule table
 				controller.importScheduleFromPike13();
+				refreshScheduleTable();
 			}
 		});
-		importAllDatabases.addActionListener(new ActionListener() {
+		importAllDatabasesItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Get start date for import
 				DatePickerUtility datePicker = new DatePickerUtility();
@@ -383,29 +352,44 @@ public class MainFrame {
 		});
 	}
 
-	private void createStudentMenuListeners(JMenuItem studentNotInMaster, JMenuItem studentRemoveInvactive,
-			JMenuItem studentViewAll) {
-		// Set up listeners for STUDENT menu
-		studentNotInMaster.addActionListener(new ActionListener() {
+	private void createStudentMenu(JMenu studentMenu) {
+		// Create sub-menus for the Students menu
+		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
+		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
+		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
+
+		// Add these sub-menus to the Student menu
+		studentMenu.add(studentNotInMasterMenu);
+		studentMenu.add(studentRemoveInactiveMenu);
+		studentMenu.add(studentViewAllMenu);
+
+		// Set up listeners for the Student menu
+		studentNotInMasterMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Show all students not in master database
 				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
-		studentRemoveInvactive.addActionListener(new ActionListener() {
+		studentRemoveInactiveMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.removeInactiveStudents();
 				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
-		studentViewAll.addActionListener(new ActionListener() {
+		studentViewAllMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
 	}
 
-	private void createActivityMenuListeners(JMenu activitiesViewByClass, JMenuItem activitiesViewAll) {
+	private void createActivityMenu(JMenu activitiesMenu) {
+		// Create sub-menus for the Activity menu
+		JMenu activitiesViewByClassMenu = new JMenu("View by Class ");
+		JMenuItem activitiesViewAllItem = new JMenuItem("View all ");
+		activitiesMenu.add(activitiesViewByClassMenu);
+		activitiesMenu.add(activitiesViewAllItem);
+
 		// Set up listeners for Activities menu
 		JMenu level0SubMenu = new JMenu("Level 0 ");
 		JMenu level1SubMenu = new JMenu("Level 1 ");
@@ -417,19 +401,19 @@ public class MainFrame {
 		JMenu level7SubMenu = new JMenu("Level 7 ");
 		JMenu level8SubMenu = new JMenu("Level 8 ");
 		JMenu labsSubMenu = new JMenu("Labs ");
-		JMenu allSubMenu = new JMenu("All ");
+		JMenu allClassesSubMenu = new JMenu("All ");
 
-		activitiesViewByClass.add(level0SubMenu);
-		activitiesViewByClass.add(level1SubMenu);
-		activitiesViewByClass.add(level2SubMenu);
-		activitiesViewByClass.add(level3SubMenu);
-		activitiesViewByClass.add(level4SubMenu);
-		activitiesViewByClass.add(level5SubMenu);
-		activitiesViewByClass.add(level6SubMenu);
-		activitiesViewByClass.add(level7SubMenu);
-		activitiesViewByClass.add(level8SubMenu);
-		activitiesViewByClass.add(labsSubMenu);
-		activitiesViewByClass.add(allSubMenu);
+		activitiesViewByClassMenu.add(level0SubMenu);
+		activitiesViewByClassMenu.add(level1SubMenu);
+		activitiesViewByClassMenu.add(level2SubMenu);
+		activitiesViewByClassMenu.add(level3SubMenu);
+		activitiesViewByClassMenu.add(level4SubMenu);
+		activitiesViewByClassMenu.add(level5SubMenu);
+		activitiesViewByClassMenu.add(level6SubMenu);
+		activitiesViewByClassMenu.add(level7SubMenu);
+		activitiesViewByClassMenu.add(level8SubMenu);
+		activitiesViewByClassMenu.add(labsSubMenu);
+		activitiesViewByClassMenu.add(allClassesSubMenu);
 
 		level0SubMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -481,14 +465,64 @@ public class MainFrame {
 				viewClassMenuListener(labsSubMenu, 9);
 			}
 		});
-		allSubMenu.addChangeListener(new ChangeListener() {
+		allClassesSubMenu.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				viewClassMenuListener(allSubMenu, -1);
+				viewClassMenuListener(allClassesSubMenu, -1);
 			}
 		});
-		activitiesViewAll.addActionListener(new ActionListener() {
+		activitiesViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+			}
+		});
+	}
+
+	private void createScheduleMenu(JMenu scheduleMenu) {
+		// Create sub-menu for the Schedule menu
+		JMenuItem scheduleViewMenu = new JMenuItem("View Class Schedule ");
+		scheduleMenu.add(scheduleViewMenu);
+		
+		// Set up listeners for Schedule menu
+		scheduleViewMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshScheduleTable();
+			}
+		});
+	}
+
+	private void createHelpMenu(JMenu helpMenu) {
+		// Create sub-menus for the Help menu
+		JMenuItem menuDescriptionItem = new JMenuItem("Menu Description ");
+		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
+		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
+		JMenuItem aboutItem = new JMenuItem("About League Data Manager ");
+
+		// Add these sub-menus to the Help menu
+		helpMenu.add(menuDescriptionItem);
+		helpMenu.add(exampleUsageItem);
+		helpMenu.add(feedbackItem);
+		helpMenu.addSeparator();
+		helpMenu.add(aboutItem);
+
+		// Set up listeners for each of the sub-menus
+		menuDescriptionItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.MENU_DESCRIPTION);
+			}
+		});
+		exampleUsageItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.EXAMPLES);
+			}
+		});
+		feedbackItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.FEEDBACK);
+			}
+		});
+		aboutItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.ABOUT);
 			}
 		});
 	}
@@ -524,40 +558,6 @@ public class MainFrame {
 		else {
 			menu.getPopupMenu().setLayout(new GridLayout(20, 1));
 		}
-	}
-
-	private void createScheduleMenuListeners(JMenuItem viewSchedule) {
-		// Set up listeners for Schedule menu
-		viewSchedule.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				refreshScheduleTable();
-			}
-		});
-	}
-
-	private void createHelpMenuListeners(JMenuItem menuDescription, JMenuItem exampleUsage, JMenuItem feedback,
-			JMenuItem about) {
-		// Set up listeners for Help menu
-		menuDescription.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.MENU_DESCRIPTION);
-			}
-		});
-		exampleUsage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.EXAMPLES);
-			}
-		});
-		feedback.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.FEEDBACK);
-			}
-		});
-		about.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.ABOUT);
-			}
-		});
 	}
 
 	private void createStudentTablePopups() {
