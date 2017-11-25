@@ -4,12 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Date;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
@@ -20,11 +26,14 @@ import model.StudentNameModel;
 
 public class LogTable extends JPanel {
 	private static final int ROW_GAP = 5;
+	private static final int POPUP_WIDTH = 240;
+	private static final int POPUP_HEIGHT_2ROWS = 50;
 
 	private JPanel tablePanel;
 	private JTable table;
 	private LogTableModel logTableModel;
 	private JScrollPane scrollPane;
+	private TableListeners tableListener;
 
 	public LogTable(JPanel tablePanel, ArrayList<LogDataModel> logList) {
 		this.tablePanel = tablePanel;
@@ -33,6 +42,32 @@ public class LogTable extends JPanel {
 		table = new JTable(logTableModel);
 
 		createTablePanel();
+		createLogTablePopups();
+	}
+
+	public void setTableListener(TableListeners listener) {
+		this.tableListener = listener;
+	}
+
+	public JTable getTable() {
+		return table;
+	}
+
+	public void setData(JPanel tablePanel, ArrayList<LogDataModel> logList) {
+		scrollPane.setVisible(true);
+		this.tablePanel = tablePanel;
+		tablePanel.add(scrollPane, BorderLayout.NORTH);
+
+		logTableModel.setData(logList);
+		logTableModel.fireTableDataChanged();
+	}
+
+	public void removeData() {
+		if (logTableModel.getRowCount() > 0) {
+			logTableModel.removeAll();
+		}
+
+		scrollPane.setVisible(false);
 	}
 
 	private void createTablePanel() {
@@ -59,25 +94,56 @@ public class LogTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
-	public JTable getTable() {
-		return table;
-	}
+	private void createLogTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
+		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
+		tablePopup.add(showStudentInfoItem);
+		tablePopup.add(showStudentActivityItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 
-	public void setData(JPanel tablePanel, ArrayList<LogDataModel> logList) {
-		scrollPane.setVisible(true);
-		this.tablePanel = tablePanel;
-		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		// POP UP action listeners
+		showStudentInfoItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Client ID for selected row/column
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
+				LogTableModel model = (LogTableModel) table.getModel();
+				String clientIdAsString = (String) model.getValueAt(row, LogTableModel.CLIENT_ID_COLUMN);
 
-		logTableModel.setData(logList);
-		logTableModel.fireTableDataChanged();
-	}
+				table.clearSelection();
+				if (!clientIdAsString.equals("")) {
+					int clientID = Integer.parseInt(clientIdAsString);
+					tableListener.viewStudentTableByStudent(clientID);
+				}
+			}
+		});
+		showStudentActivityItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name for selected row/column
+				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
+				LogTableModel model = (LogTableModel) table.getModel();
+				String clientID = (String) model.getValueAt(modelRow, LogTableModel.CLIENT_ID_COLUMN);
 
-	public void removeData() {
-		if (logTableModel.getRowCount() > 0) {
-			logTableModel.removeAll();
-		}
+				table.clearSelection();
+				if (!clientID.equals("")) {
+					StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
+							LogTableModel.STUDENT_NAME_COLUMN);
 
-		scrollPane.setVisible(false);
+					// Display activity table for selected student
+					tableListener.viewAttendanceByStudent(clientID, studentName.toString());
+				}
+			}
+		});
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					// Show the popup menu
+					tablePopup.show(table, e.getX(), e.getY());
+				}
+			}
+		});
 	}
 
 	private void configureColumnWidths() {

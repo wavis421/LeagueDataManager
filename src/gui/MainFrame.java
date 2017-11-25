@@ -51,10 +51,6 @@ public class MainFrame {
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;
 	private static final int PREF_TABLE_PANEL_HEIGHT = PREF_FRAME_HEIGHT - 58;
 
-	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_1ROW = 30;
-	private static final int POPUP_HEIGHT_2ROWS = 50;
-
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ACTIVITY_TITLE = "League Attendance";
@@ -64,10 +60,6 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
-
-	private static final int ACTIVITY_TABLE_ALL = 0;
-	private static final int ACTIVITY_TABLE_BY_CLASS = 1;
-	private static final int ACTIVITY_TABLE_BY_STUDENT = 2;
 
 	/* Private instance variables */
 	private Preferences prefs = Preferences.userRoot();
@@ -80,12 +72,10 @@ public class MainFrame {
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
 	private int currentStudentTable;
-	private int currentActivityTable;
 	private JTable activeTable;
 	private String activeTableHeader;
 	private JFileChooser fileChooser;
 	private FileFilterCsv fileFilter;
-	private String selectedClassName;
 	private String githubToken, pike13Token;
 	ImageIcon icon;
 	private static JFrame frame = new JFrame();
@@ -128,11 +118,10 @@ public class MainFrame {
 
 		// Default tables to display all data
 		currentStudentTable = STUDENT_TABLE_ALL;
-		currentActivityTable = ACTIVITY_TABLE_ALL;
 		headerLabel.setText(STUDENT_TITLE);
 		activeTableHeader = STUDENT_TITLE;
 
-		// Configure panel and each tables
+		// Configure panel and each table
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
@@ -140,10 +129,7 @@ public class MainFrame {
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
 		activeTable = studentTable.getTable();
 
-		createStudentTablePopups();
-		createActivityTablePopups();
-		createLogTablePopups();
-		createScheduleTableListener();
+		createTableListeners();
 
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
@@ -307,7 +293,7 @@ public class MainFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
 					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+					refreshActivityTable(controller.getAllActivities(), "");
 				}
 			}
 		});
@@ -318,7 +304,7 @@ public class MainFrame {
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
 					controller.importActivitiesFromPike13(startDate);
-					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+					refreshActivityTable(controller.getAllActivities(), "");
 				}
 			}
 		});
@@ -329,7 +315,7 @@ public class MainFrame {
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
 					controller.importGithubComments(startDate);
-					refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+					refreshActivityTable(controller.getAllActivities(), "");
 				}
 			}
 		});
@@ -472,7 +458,7 @@ public class MainFrame {
 		});
 		activitiesViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable(ACTIVITY_TABLE_ALL, controller.getAllActivities(), "");
+				refreshActivityTable(controller.getAllActivities(), "");
 			}
 		});
 	}
@@ -481,7 +467,7 @@ public class MainFrame {
 		// Create sub-menu for the Schedule menu
 		JMenuItem scheduleViewMenu = new JMenuItem("View Class Schedule ");
 		scheduleMenu.add(scheduleViewMenu);
-		
+
 		// Set up listeners for Schedule menu
 		scheduleViewMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -547,9 +533,8 @@ public class MainFrame {
 					menu.removeAll();
 
 					// Add activity table and header
-					refreshActivityTable(ACTIVITY_TABLE_BY_CLASS,
-							controller.getActivitiesByClassName(classItem.getText()),
-							"  for  '" + classItem.getText() + "'");
+					refreshActivityTable(controller.getActivitiesByClassName(classItem.getText()),
+							" for '" + classItem.getText() + "'");
 				}
 			});
 		}
@@ -560,230 +545,35 @@ public class MainFrame {
 		}
 	}
 
-	private void createStudentTablePopups() {
-		// Table panel POP UP menu
-		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
-		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
-		tablePopup.add(showStudentActivityItem);
-		tablePopup.add(removeStudentItem);
-
-		// POP UP action listeners
-		removeStudentItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get row, model, and clientID for the row
-				int row = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
-				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
-				int clientID = Integer.parseInt((String) model.getValueAt(row, StudentTableModel.CLIENT_ID_COLUMN));
-
-				// Remove student from database
-				controller.removeStudentByClientID(clientID);
-				studentTable.getTable().clearSelection();
-
-				// Refresh current table
-				refreshStudentTable(currentStudentTable, 0);
-			}
-		});
-		showStudentActivityItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get student name for selected row/column
-				int modelRow = studentTable.getTable().convertRowIndexToModel(studentTable.getTable().getSelectedRow());
-				StudentTableModel model = (StudentTableModel) studentTable.getTable().getModel();
-				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
-				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-						StudentTableModel.STUDENT_NAME_COLUMN);
-
-				// Display activity table for selected student
-				studentTable.getTable().clearSelection();
-				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
-						"  for  '" + studentName.toString() + "'");
-			}
-		});
-		studentTable.getTable().addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				JTable table = studentTable.getTable();
-				int row = table.getSelectedRow();
-				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
-					row = table.convertRowIndexToModel(row);
-					StudentTableModel model = (StudentTableModel) table.getModel();
-
-					// Either add or remove the "remove student" item
-					if (((StudentNameModel) model.getValueAt(row, StudentTableModel.STUDENT_NAME_COLUMN))
-							.getIsInMasterDb()) {
-						tablePopup.remove(removeStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-					} else {
-						tablePopup.add(removeStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-					}
-					tablePopup.show(table, e.getX(), e.getY());
-				}
-			}
-		});
-	}
-
-	private void createActivityTablePopups() {
-		// Table panel POP UP menu
-		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
-		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
-		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
-		tablePopup.add(showStudentInfoItem);
-		tablePopup.add(showStudentClassItem);
-		tablePopup.add(showStudentAttendanceItem);
-
-		// POP UP action listeners
-		showStudentClassItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Add activity table and header for selected class
-				activityTable.getTable().clearSelection();
-				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(selectedClassName),
-						"  for  '" + selectedClassName + "'");
-			}
-		});
-		showStudentInfoItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get Client ID for selected row/column
-				int row = activityTable.getTable().convertRowIndexToModel(activityTable.getTable().getSelectedRow());
-				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
-				int clientID = Integer.parseInt((String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN));
-
-				activityTable.getTable().clearSelection();
+	private void createTableListeners() {
+		TableListeners listener = new TableListeners() {
+			@Override
+			public void viewStudentTableByStudent(int clientID) {
 				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
 			}
-		});
-		showStudentAttendanceItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get student name & Client ID for selected row/column
-				int row = activityTable.getTable().convertRowIndexToModel(activityTable.getTable().getSelectedRow());
-				ActivityTableModel model = (ActivityTableModel) activityTable.getTable().getModel();
-				String clientID = (String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
-				StudentNameModel studentName = (StudentNameModel) model.getValueAt(row,
-						ActivityTableModel.STUDENT_NAME_COLUMN);
 
-				// Display activity table for selected student
-				activityTable.getTable().clearSelection();
-				refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
-						"  for  '" + studentName.toString() + "'");
-			}
-		});
-		activityTable.getTable().addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				JTable table = activityTable.getTable();
-				int row = table.getSelectedRow();
-
-				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
-						&& table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
-					// Highlight selected row in github event table
-					activityTable.setSelectedEventRow(row, e.getY());
-
-				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
-					if (table.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
-						// Show student's info
-						tablePopup.remove(showStudentClassItem);
-						tablePopup.add(showStudentInfoItem);
-						if (currentActivityTable == ACTIVITY_TABLE_BY_STUDENT) {
-							tablePopup.remove(showStudentAttendanceItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-						} else {
-							tablePopup.add(showStudentAttendanceItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-						}
-						tablePopup.show(table, e.getX(), e.getY());
-
-					} else if (table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN
-							&& currentActivityTable != ACTIVITY_TABLE_BY_CLASS) {
-						// Show students by class name
-						selectedClassName = activityTable.getClassNameByRow(row, table.convertRowIndexToModel(row),
-								e.getY());
-						if (selectedClassName != null) {
-							tablePopup.remove(showStudentInfoItem);
-							tablePopup.remove(showStudentAttendanceItem);
-							tablePopup.add(showStudentClassItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-							tablePopup.show(table, e.getX(), e.getY());
-						}
-					}
-				}
+			@Override
+			public void viewAttendanceByStudent(String clientID, String studentName) {
+				activityTable.showActivitiesByPerson(studentName, controller.getActivitiesByClientID(clientID));
 			}
 
-			public void mouseClicked(MouseEvent e) {
-				JTable table = activityTable.getTable();
-				if (e.getClickCount() == 2 && table.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
-					int row = table.getSelectedRow();
-					if (row > -1) {
-						String clientID = (String) table.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
-						activityTable.showActivitiesByPerson(
-								table.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN).toString(),
-								controller.getActivitiesByClientID(clientID));
-					}
-				}
+			@Override
+			public void viewAttendanceByClass(String className) {
+				// Display class by class name
+				refreshActivityTable(controller.getActivitiesByClassName(className), " for '" + className + "'");
 			}
-		});
-	}
-
-	private void createLogTablePopups() {
-		// Table panel POP UP menu
-		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
-		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
-		tablePopup.add(showStudentInfoItem);
-		tablePopup.add(showStudentActivityItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-
-		// POP UP action listeners
-		showStudentInfoItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get Client ID for selected row/column
-				int row = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
-				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
-				String clientIdAsString = (String) model.getValueAt(row, LogTableModel.CLIENT_ID_COLUMN);
-
-				logTable.getTable().clearSelection();
-				if (!clientIdAsString.equals("")) {
-					int clientID = Integer.parseInt(clientIdAsString);
-					refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
-				}
+			@Override
+			public void removeStudent(int clientID) {
+				controller.removeStudentByClientID(clientID);
+				refreshStudentTable(currentStudentTable, 0);
 			}
-		});
-		showStudentActivityItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get student name for selected row/column
-				int modelRow = logTable.getTable().convertRowIndexToModel(logTable.getTable().getSelectedRow());
-				LogTableModel model = (LogTableModel) logTable.getTable().getModel();
-				String clientID = (String) model.getValueAt(modelRow, LogTableModel.CLIENT_ID_COLUMN);
+		};
 
-				logTable.getTable().clearSelection();
-				if (!clientID.equals("")) {
-					StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-							LogTableModel.STUDENT_NAME_COLUMN);
-
-					// Display activity table for selected student
-					refreshActivityTable(ACTIVITY_TABLE_BY_STUDENT, controller.getActivitiesByClientID(clientID),
-							"  for  '" + studentName.toString() + "'");
-				}
-			}
-		});
-		logTable.getTable().addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				JTable table = logTable.getTable();
-				int row = table.getSelectedRow();
-				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
-					// Show the popup menu
-					tablePopup.show(table, e.getX(), e.getY());
-				}
-			}
-		});
-	}
-
-	private void createScheduleTableListener() {
-		// Create update month listener
-		scheduleTable.setViewByClassListener(new ScheduleTableListener() {
-			public void viewByClass(String className) {
-				refreshActivityTable(ACTIVITY_TABLE_BY_CLASS, controller.getActivitiesByClassName(className),
-						" for '" + className + "'");
-			}
-		});
+		// Now provide this listener to each table
+		scheduleTable.setTableListener(listener);
+		activityTable.setTableListener(listener);
+		studentTable.setTableListener(listener);
+		logTable.setTableListener(listener);
 	}
 
 	private void refreshStudentTable(int tableType, int clientID) {
@@ -808,7 +598,7 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
-	private void refreshActivityTable(int tableType, ArrayList<ActivityModel> list, String titleExtension) {
+	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension) {
 		// Remove data being displayed
 		removeDataFromTables();
 
@@ -816,7 +606,6 @@ public class MainFrame {
 		activityTable.setData(tablePanel, list);
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 
-		currentActivityTable = tableType;
 		activeTable = activityTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}

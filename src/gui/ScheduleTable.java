@@ -32,7 +32,7 @@ public class ScheduleTable extends JPanel {
 
 	private final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	private JPanel parentTablePanel;
-	private ScheduleTableListener scheduleListener;
+	private TableListeners scheduleListener;
 	private JTable lastSelectedTable;
 
 	// Panel variables: 2 row panels, 1 panel for each day
@@ -87,31 +87,8 @@ public class ScheduleTable extends JPanel {
 		lastSelectedTable = dowTableList.get(0);
 	}
 
-	private JScrollPane createTablePanel(JTable dowTable, ScheduleTableModel sourceList) {
-		// Set up table parameters
-		dowTable.setFont(CustomFonts.TABLE_TEXT_FONT);
-		dowTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
-		dowTable.setShowGrid(true);
-		dowTable.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
-		int origRowHeight = dowTable.getRowHeight();
-		dowTable.setRowHeight(origRowHeight + ROW_GAP);
-
-		// Set table properties
-		dowTable.getColumnModel().getColumn(ScheduleTableModel.START_TIME_COLUMN).setMaxWidth(75);
-		dowTable.getColumnModel().getColumn(ScheduleTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
-
-		dowTable.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
-		dowTable.setAutoCreateRowSorter(false);
-
-		JScrollPane dowScrollPane = new JScrollPane(dowTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		dowScrollPane.setPreferredSize(new Dimension(280, (parentTablePanel.getPreferredSize().height - 200) / 2));
-
-		Border innerBorder = BorderFactory.createLineBorder(Color.GRAY, 1, true);
-		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
-		dowScrollPane.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-
-		return dowScrollPane;
+	public void setTableListener(TableListeners listener) {
+		this.scheduleListener = listener;
 	}
 
 	public JTable getTable() {
@@ -148,8 +125,31 @@ public class ScheduleTable extends JPanel {
 		mainPanel.setVisible(false);
 	}
 
-	public void setViewByClassListener(ScheduleTableListener listener) {
-		this.scheduleListener = listener;
+	private JScrollPane createTablePanel(JTable dowTable, ScheduleTableModel sourceList) {
+		// Set up table parameters
+		dowTable.setFont(CustomFonts.TABLE_TEXT_FONT);
+		dowTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		dowTable.setShowGrid(true);
+		dowTable.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		int origRowHeight = dowTable.getRowHeight();
+		dowTable.setRowHeight(origRowHeight + ROW_GAP);
+
+		// Set table properties
+		dowTable.getColumnModel().getColumn(ScheduleTableModel.START_TIME_COLUMN).setMaxWidth(75);
+		dowTable.getColumnModel().getColumn(ScheduleTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
+
+		dowTable.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
+		dowTable.setAutoCreateRowSorter(false);
+
+		JScrollPane dowScrollPane = new JScrollPane(dowTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		dowScrollPane.setPreferredSize(new Dimension(280, (parentTablePanel.getPreferredSize().height - 200) / 2));
+
+		Border innerBorder = BorderFactory.createLineBorder(Color.GRAY, 1, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+		dowScrollPane.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+
+		return dowScrollPane;
 	}
 
 	private void createScheduleTablePopups(JTable table) {
@@ -169,8 +169,7 @@ public class ScheduleTable extends JPanel {
 
 				// Display activity table for selected class
 				table.clearSelection();
-				if (scheduleListener != null)
-					scheduleListener.viewByClass(className);
+				scheduleListener.viewAttendanceByClass(className);
 			}
 		});
 

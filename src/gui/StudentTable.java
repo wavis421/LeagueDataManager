@@ -4,12 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Date;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
@@ -21,9 +27,14 @@ import model.StudentNameModel;
 public class StudentTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
+	private static final int POPUP_WIDTH = 240;
+	private static final int POPUP_HEIGHT_1ROW = 30;
+	private static final int POPUP_HEIGHT_2ROWS = 50;
+
 	private JPanel tablePanel;
 	private JTable table;
 	private StudentTableModel studentTableModel;
+	private TableListeners studentListener;
 	private JScrollPane scrollPane;
 
 	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
@@ -33,6 +44,32 @@ public class StudentTable extends JPanel {
 		table = new JTable(studentTableModel);
 
 		createTablePanel();
+		createStudentTablePopups();
+	}
+
+	public void setTableListener(TableListeners listener) {
+		this.studentListener = listener;
+	}
+
+	public JTable getTable() {
+		return table;
+	}
+
+	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList) {
+		scrollPane.setVisible(true);
+		this.tablePanel = tablePanel;
+		tablePanel.add(scrollPane, BorderLayout.NORTH);
+
+		studentTableModel.setData(studentList);
+		studentTableModel.fireTableDataChanged();
+	}
+
+	public void removeData() {
+		if (studentTableModel.getRowCount() > 0) {
+			studentTableModel.removeAll();
+		}
+
+		scrollPane.setVisible(false);
 	}
 
 	private void createTablePanel() {
@@ -66,25 +103,61 @@ public class StudentTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 	}
 
-	public JTable getTable() {
-		return table;
-	}
+	private void createStudentTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
+		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
+		tablePopup.add(showStudentActivityItem);
+		tablePopup.add(removeStudentItem);
 
-	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList) {
-		scrollPane.setVisible(true);
-		this.tablePanel = tablePanel;
-		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		// POP UP action listeners
+		removeStudentItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get row, model, and clientID for the row
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
+				StudentTableModel model = (StudentTableModel) table.getModel();
+				int clientID = Integer.parseInt((String) model.getValueAt(row, StudentTableModel.CLIENT_ID_COLUMN));
 
-		studentTableModel.setData(studentList);
-		studentTableModel.fireTableDataChanged();
-	}
+				// Remove student from database
+				studentListener.removeStudent(clientID);
+				table.clearSelection();
+			}
+		});
+		showStudentActivityItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name for selected row/column
+				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
+				StudentTableModel model = (StudentTableModel) table.getModel();
+				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
+						StudentTableModel.STUDENT_NAME_COLUMN);
 
-	public void removeData() {
-		if (studentTableModel.getRowCount() > 0) {
-			studentTableModel.removeAll();
-		}
+				// Display activity table for selected student
+				table.clearSelection();
+				studentListener.viewAttendanceByStudent(clientID, studentName.toString());
+			}
+		});
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = table.getSelectedRow();
+				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
+					row = table.convertRowIndexToModel(row);
+					StudentTableModel model = (StudentTableModel) table.getModel();
 
-		scrollPane.setVisible(false);
+					// Either add or remove the "remove student" item
+					if (((StudentNameModel) model.getValueAt(row, StudentTableModel.STUDENT_NAME_COLUMN))
+							.getIsInMasterDb()) {
+						tablePopup.remove(removeStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+					} else {
+						tablePopup.add(removeStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+					}
+					tablePopup.show(table, e.getX(), e.getY());
+				}
+			}
+		});
 	}
 
 	public class StudentTableRenderer extends JLabel implements TableCellRenderer {

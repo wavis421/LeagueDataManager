@@ -4,13 +4,19 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
@@ -29,6 +35,10 @@ public class ActivityTable extends JPanel {
 	private static final int POPUP_WINDOW_WIDTH = 1200;
 	private static final int POPUP_WINDOW_HEIGHT = 600;
 
+	private static final int POPUP_MENU_WIDTH = 240;
+	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
+	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
+
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
 	private static final int EVENT_TABLE_CLASS_NAME_COLUMN = 1;
@@ -41,8 +51,10 @@ public class ActivityTable extends JPanel {
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
 	private ActivityTableModel activityTableModel;
 	private JScrollPane tableScrollPane;
+	private TableListeners activityListener;
 	private int eventTableSelectedRow = -1; // table row
 	private int eventSelectedRow = -1; // row within table row
+	private String selectedClassName;
 
 	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
 		this.parentTablePanel = tablePanel;
@@ -54,9 +66,71 @@ public class ActivityTable extends JPanel {
 		// Create event sub-table with github comments by date
 		createEventTable(activitiesList, githubEventTableList);
 
-		// Configure table panel
+		// Configure table panel and pop-ups
 		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList, ROW_HEIGHT,
 				parentTablePanel.getPreferredSize().height - 70);
+		createActivityTablePopups();
+	}
+
+	public void setTableListener(TableListeners listener) {
+		this.activityListener = listener;
+	}
+
+	public JTable getTable() {
+		return mainTable;
+	}
+
+	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
+		this.parentTablePanel = tablePanel;
+
+		// Clear event row selections
+		eventTableSelectedRow = -1;
+		eventSelectedRow = -1;
+
+		// Set data for main table
+		activityTableModel.setData(activityList);
+
+		// Create github sub-table
+		createEventTable(activityList, githubEventTableList);
+
+		// Update table
+		activityTableModel.fireTableDataChanged();
+		tableScrollPane.setVisible(true);
+		tablePanel.add(tableScrollPane, BorderLayout.NORTH);
+	}
+
+	public void removeData() {
+		// Remove data from tables and lists
+		if (activityTableModel.getRowCount() > 0) {
+			activityTableModel.removeAll();
+			githubEventTableList.clear();
+		}
+		tableScrollPane.setVisible(false);
+	}
+
+	public void setSelectedEventRow(int selectedRow, int yPos) {
+		eventSelectedRow = getEventRow(selectedRow, yPos);
+		mainTable.repaint();
+	}
+
+	public String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
+		JTable table = githubEventTableList.get(modelRow);
+		int eventRow = getEventRow(selectedRow, yPos);
+
+		if (eventRow > -1) {
+			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_CLASS_NAME_COLUMN);
+		} else
+			return null;
+	}
+
+	private int getEventRow(int selectedRow, int yPos) {
+		// Compute row based on Y-position in event table
+		JTable table = githubEventTableList.get(selectedRow);
+		int row = (yPos - (selectedRow * ROW_HEIGHT)) / TEXT_HEIGHT;
+		if (row < table.getModel().getRowCount())
+			return row;
+		else
+			return -1;
 	}
 
 	private JScrollPane createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList, int rowHeight,
@@ -87,61 +161,94 @@ public class ActivityTable extends JPanel {
 		return scrollPane;
 	}
 
-	public JTable getTable() {
-		return mainTable;
-	}
+	private void createActivityTablePopups() {
+		// Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
+		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
+		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
+		tablePopup.add(showStudentInfoItem);
+		tablePopup.add(showStudentClassItem);
+		tablePopup.add(showStudentAttendanceItem);
 
-	public void setSelectedEventRow(int selectedRow, int yPos) {
-		eventSelectedRow = getEventRow(selectedRow, yPos);
-		mainTable.repaint();
-	}
+		// POP UP action listeners
+		showStudentClassItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Add activity table and header for selected class
+				mainTable.clearSelection();
+				activityListener.viewAttendanceByClass(selectedClassName);
+			}
+		});
+		showStudentInfoItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Client ID for selected row/column
+				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
+				ActivityTableModel model = (ActivityTableModel) mainTable.getModel();
+				int clientID = Integer.parseInt((String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN));
 
-	public String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
-		JTable table = githubEventTableList.get(modelRow);
-		int eventRow = getEventRow(selectedRow, yPos);
+				mainTable.clearSelection();
+				activityListener.viewStudentTableByStudent(clientID);
+			}
+		});
+		showStudentAttendanceItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name & Client ID for selected row/column
+				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
+				ActivityTableModel model = (ActivityTableModel) mainTable.getModel();
+				String clientID = (String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel studentName = (StudentNameModel) model.getValueAt(row,
+						ActivityTableModel.STUDENT_NAME_COLUMN);
 
-		if (eventRow > -1) {
-			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_CLASS_NAME_COLUMN);
-		} else
-			return null;
-	}
+				// Display activity table for selected student
+				mainTable.clearSelection();
+				activityListener.viewAttendanceByStudent(clientID, studentName.toString());
+			}
+		});
+		mainTable.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = mainTable.getSelectedRow();
 
-	private int getEventRow(int selectedRow, int yPos) {
-		// Compute row based on Y-position in event table
-		JTable table = githubEventTableList.get(selectedRow);
-		int row = (yPos - (selectedRow * ROW_HEIGHT)) / TEXT_HEIGHT;
-		if (row < table.getModel().getRowCount())
-			return row;
-		else
-			return -1;
-	}
+				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
+						&& mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+					// Highlight selected row in github event table
+					setSelectedEventRow(row, e.getY());
 
-	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
-		this.parentTablePanel = tablePanel;
+				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
+					if (mainTable.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
+						// Show student's info
+						tablePopup.remove(showStudentClassItem);
+						tablePopup.add(showStudentInfoItem);
+						tablePopup.add(showStudentAttendanceItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
+						tablePopup.show(mainTable, e.getX(), e.getY());
 
-		// Clear event row selections
-		eventTableSelectedRow = -1;
-		eventSelectedRow = -1;
+					} else if (mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+						// Show students by class name
+						selectedClassName = getClassNameByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
+						if (selectedClassName != null) {
+							tablePopup.remove(showStudentInfoItem);
+							tablePopup.remove(showStudentAttendanceItem);
+							tablePopup.add(showStudentClassItem);
+							tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+							tablePopup.show(mainTable, e.getX(), e.getY());
+						}
+					}
+				}
+			}
 
-		// Set data for main table
-		activityTableModel.setData(activityList);
-
-		// Create github sub-table
-		createEventTable(activityList, githubEventTableList);
-
-		// Update table
-		activityTableModel.fireTableDataChanged();
-		tableScrollPane.setVisible(true);
-		tablePanel.add(tableScrollPane, BorderLayout.NORTH);
-	}
-
-	public void removeData() {
-		// Remove data from tables and lists
-		if (activityTableModel.getRowCount() > 0) {
-			activityTableModel.removeAll();
-			githubEventTableList.clear();
-		}
-		tableScrollPane.setVisible(false);
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2
+						&& mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+					int row = mainTable.getSelectedRow();
+					if (row > -1) {
+						String clientID = (String) mainTable.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
+						String studentName = mainTable.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN)
+								.toString();
+						activityListener.viewAttendanceByStudent(clientID, studentName);
+					}
+				}
+			}
+		});
 	}
 
 	private void createEventTable(ArrayList<ActivityModel> tableData, ArrayList<JTable> eventList) {
