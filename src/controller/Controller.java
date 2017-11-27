@@ -141,7 +141,7 @@ public class Controller {
 	}
 
 	public void importScheduleFromPike13() {
-		// TODO: Add a log entry once this is fully integrated
+		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, " ***");
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -155,8 +155,7 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-
-		// TODO: Add a log entry once this is fully integrated
+		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
 	public void importGithubComments(String startDate) {

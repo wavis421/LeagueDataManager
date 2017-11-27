@@ -1223,7 +1223,6 @@ public class MySqlDatabase {
 				deleteClassStmt.executeUpdate();
 				deleteClassStmt.close();
 
-				// TODO: Add log entry once implementation is complete
 				insertLogData(LogDataModel.REMOVE_CLASS_FROM_SCHEDULE, new StudentNameModel("", "", false), 0,
 						": " + model.getClassName() + " on " + dayOfWeek[model.getDayOfWeek()] + " at "
 								+ model.getStartTimeFormatted());
@@ -1236,7 +1235,6 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				// TODO: Add log entry once implementation is complete
 				insertLogData(LogDataModel.SCHEDULE_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
