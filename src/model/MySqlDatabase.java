@@ -18,7 +18,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 public class MySqlDatabase {
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
-	private static final int LOG_APPEND_WIDTH = 75;
+	private static final int LOG_APPEND_WIDTH = 100;
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
@@ -283,6 +283,43 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
+	public ArrayList<StudentModel> getStudentsWithNewGithub() {
+		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE NewGithub = 1;");
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					studentList.add(new StudentModel(result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("Location"), result.getInt("GradYear")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return studentList;
+	}
+
 	public void importStudents(ArrayList<StudentImportModel> importList) {
 		ArrayList<StudentImportModel> dbList = getAllStudentsAsImportData();
 		int dbListIdx = 0;
@@ -413,17 +450,20 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
-						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, Gender, StartDate, Location, GradYear, isInMasterDb) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1);");
+						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, Gender, StartDate, Location, GradYear, isInMasterDb) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
 				addStudentStmt.setString(col++, student.getLastName());
 				addStudentStmt.setString(col++, student.getFirstName());
-				if (student.getGithubName().equals(""))
+				if (student.getGithubName().equals("")) {
 					addStudentStmt.setString(col++, null);
-				else
+					addStudentStmt.setInt(col++, 0);
+				} else {
 					addStudentStmt.setString(col++, student.getGithubName());
+					addStudentStmt.setInt(col++, 1);
+				}
 				addStudentStmt.setInt(col++, student.getGender());
 				if (!student.getStartDate().equals(""))
 					addStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
@@ -464,11 +504,14 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			// Before updating database, determine what fields have changed
 			String changedFields = getStudentChangedFields(student, compareStudent);
+			boolean githubChanged = false;
+			if (changedFields.contains("Github"))
+				githubChanged = true;
 
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
-						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
+						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
@@ -478,6 +521,7 @@ public class MySqlDatabase {
 					updateStudentStmt.setString(col++, null);
 				else
 					updateStudentStmt.setString(col++, student.getGithubName());
+				updateStudentStmt.setInt(col++, githubChanged ? 1 : 0);
 				updateStudentStmt.setInt(col++, student.getGender());
 				if (!student.getStartDate().equals(""))
 					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
@@ -507,6 +551,34 @@ public class MySqlDatabase {
 				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
 						isInDb == 1 ? true : false);
 				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void updateStudentGithubFlag(StudentModel student, int newGithubFlag) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateStudentStmt = dbConnection
+						.prepareStatement("UPDATE Students SET NewGithub=? WHERE ClientID=?;");
+
+				updateStudentStmt.setInt(1, newGithubFlag);
+				updateStudentStmt.setInt(2, student.getClientID());
+
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, student.getNameModel(), student.getClientID(),
+						": " + e2.getMessage());
 				break;
 			}
 		}
@@ -704,8 +776,12 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	public ArrayList<ActivityEventModel> getEventsWithNoComments(String startDate) {
+	public ArrayList<ActivityEventModel> getEventsWithNoComments(String startDate, int clientID) {
 		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+
+		String clientIdFilter = "";
+		if (clientID != 0) // Specific github user
+			clientIdFilter = "Students.ClientID = " + clientID + " AND ";
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -713,7 +789,7 @@ public class MySqlDatabase {
 				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
-								+ "Comments IS NULL AND GithubName IS NOT NULL AND "
+								+ "Comments IS NULL AND GithubName IS NOT NULL AND " + clientIdFilter
 								+ "ServiceDate >= ? ORDER BY GithubName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();

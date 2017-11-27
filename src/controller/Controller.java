@@ -277,15 +277,18 @@ public class Controller {
 	public void importGithubComments(String startDate) {
 		boolean result;
 
+		// Import github from start date, update missing github data for new users
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate.substring(0, 10) + " ***");
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		result = gitController.importGithubComments(startDate);
-		if (result)
-			gitController.importGithubCommentsByLevel(0, startDate);
+		result = gitController.importGithubComments(startDate, 0);
+		if (result) {
+			gitController.importGithubCommentsByLevel(0, startDate, 0);
+			gitController.updateMissingGithubComments();
+		}
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
@@ -297,8 +300,10 @@ public class Controller {
 	}
 
 	public void importAllDatabases(String startDate) {
+		// Import students, attendance, schedule and github data
 		importStudentsFromPike13();
 		importActivitiesFromPike13(startDate);
+		importScheduleFromPike13();
 		importGithubComments(startDate);
 	}
 }

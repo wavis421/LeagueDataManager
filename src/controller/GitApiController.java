@@ -16,9 +16,12 @@ import org.joda.time.DateTime;
 import model.ActivityEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.StudentModel;
 import model.StudentNameModel;
 
 public class GitApiController {
+	private static final String DATABASE_START_DATE = "2017-09-01";
+
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
@@ -35,9 +38,10 @@ public class GitApiController {
 		commitService = new CommitService(client);
 	}
 
-	public boolean importGithubComments(String startDate) {
-		// Get all activities since 'startDate' w/ github user name and no comments
-		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
+	public boolean importGithubComments(String startDate, int clientID) {
+		// Get all activities since 'startDate' w/ github user name (use null for ALL
+		// users) and no comments.
+		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, clientID);
 		String lastGithubUser = "";
 		List<Repository> repoList = null;
 
@@ -81,14 +85,15 @@ public class GitApiController {
 		return true;
 	}
 
-	public void importGithubCommentsByLevel(int level, String startDate) {
+	public void importGithubCommentsByLevel(int level, String startDate, int clientID) {
 		// Get all repositories by league level
 		List<Repository> repoList = getRepoListByLevel(level);
 		if (repoList == null)
 			return;
 
-		// Get all activities since start date w/ github user name and no comments
-		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate);
+		// Get all activities since start date w/ github user name (use null for ALL
+		// users) and no comments
+		ArrayList<ActivityEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, clientID);
 		String lastGithubUser = "";
 
 		for (int i = 0; i < eventList.size(); i++) {
@@ -110,6 +115,26 @@ public class GitApiController {
 						updateUserGithubComments(gitUser, startDate, eventList, repo);
 					}
 				}
+			}
+		}
+	}
+
+	public void updateMissingGithubComments() {
+		// Import github comments from start date for new github user names
+		ArrayList<StudentModel> newGithubList = sqlDb.getStudentsWithNewGithub();
+		
+		for (int i = 0; i < newGithubList.size(); i++) {
+			StudentModel student = newGithubList.get(i);
+			if (student.getStartDate() != null) {
+				String catchupStartDate = student.getStartDate().toString();
+				if (catchupStartDate.compareTo(DATABASE_START_DATE) < 0)
+					catchupStartDate = DATABASE_START_DATE;
+
+				importGithubComments(catchupStartDate, student.getClientID());
+				importGithubCommentsByLevel(0, catchupStartDate, student.getClientID());
+				
+				// Set student 'new github' flag back to false
+				sqlDb.updateStudentGithubFlag(student, 0);
 			}
 		}
 	}
