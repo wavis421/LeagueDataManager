@@ -70,8 +70,6 @@ public class MainFrame {
 	private int currentStudentTable;
 	private JTable activeTable;
 	private String activeTableHeader;
-	private JFileChooser fileChooser;
-	private FileFilterCsv fileFilter;
 	private String githubToken, pike13Token;
 	ImageIcon icon;
 	private static JFrame frame = new JFrame();
@@ -136,12 +134,7 @@ public class MainFrame {
 		tablePanel.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		mainPanel.add(tablePanel, BorderLayout.CENTER);
 
-		fileChooser = new JFileChooser();
-		fileFilter = new FileFilterCsv();
-
 		frame.setJMenuBar(createMenuBar());
-		fileChooser.addChoosableFileFilter(fileFilter);
-		fileChooser.setFileFilter(fileFilter);
 
 		// Make form visible
 		frame.pack();
@@ -257,44 +250,24 @@ public class MainFrame {
 
 	private void createImportMenu(JMenu importMenu) {
 		// Add Import sub-menus
-		JMenuItem importStudentFileItem = new JMenuItem("Import Students from CSV File...  ");
 		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
-		JMenuItem importActivityLogFileItem = new JMenuItem("Import Attendance Log from CSV File...  ");
 		JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
 		JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
 		JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
 
 		// Add these sub-menus to the Import menu
-		importMenu.add(importStudentFileItem);
 		importMenu.add(importStudentPike13Item);
-		importMenu.add(importActivityLogFileItem);
 		importMenu.add(importActivityLogPike13Item);
 		importMenu.add(importGithubItem);
 		importMenu.add(importScheduleItem);
 		importMenu.add(importAllDatabasesItem);
 
 		// Set up listeners for the Import menu
-		importStudentFileItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
-					controller.importStudentsFromFile(fileChooser.getSelectedFile());
-					refreshStudentTable(STUDENT_TABLE_ALL, 0);
-				}
-			}
-		});
 		importStudentPike13Item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.importStudentsFromPike13();
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
-			}
-		});
-		importActivityLogFileItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
-					controller.importActivitiesFromFile(fileChooser.getSelectedFile());
-					refreshActivityTable(controller.getAllActivities(), "");
-				}
 			}
 		});
 		importActivityLogPike13Item.addActionListener(new ActionListener() {

@@ -19,14 +19,14 @@ import model.MySqlDatabase;
 import model.StudentModel;
 import model.StudentNameModel;
 
-public class GitApiController {
+public class GithubApi {
 	private static final String DATABASE_START_DATE = "2017-09-01";
 
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
 
-	public GitApiController(MySqlDatabase sqlDb, String githubToken) {
+	public GithubApi(MySqlDatabase sqlDb, String githubToken) {
 		this.sqlDb = sqlDb;
 
 		// OAuth2 token authentication

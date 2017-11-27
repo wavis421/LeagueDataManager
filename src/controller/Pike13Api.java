@@ -21,7 +21,7 @@ import model.MySqlDatabase;
 import model.ScheduleModel;
 import model.StudentImportModel;
 
-public class Pike13ApiController {
+public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
 
 	// Indices for client data
@@ -92,7 +92,7 @@ public class Pike13ApiController {
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
 
-	public Pike13ApiController(MySqlDatabase mysqlDb, String pike13Token) {
+	public Pike13Api(MySqlDatabase mysqlDb, String pike13Token) {
 		this.mysqlDb = mysqlDb;
 		this.pike13Token = pike13Token;
 	}
