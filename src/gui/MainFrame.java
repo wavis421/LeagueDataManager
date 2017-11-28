@@ -22,7 +22,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -277,7 +276,7 @@ public class MainFrame {
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
 					controller.importActivitiesFromPike13(startDate);
-					refreshActivityTable(controller.getAllActivities(), "");
+					refreshActivityTable(controller.getAllActivities(), "", false);
 				}
 			}
 		});
@@ -288,7 +287,7 @@ public class MainFrame {
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
 					controller.importGithubComments(startDate);
-					refreshActivityTable(controller.getAllActivities(), "");
+					refreshActivityTable(controller.getAllActivities(), "", false);
 				}
 			}
 		});
@@ -365,7 +364,7 @@ public class MainFrame {
 
 		activitiesViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable(controller.getAllActivities(), "");
+				refreshActivityTable(controller.getAllActivities(), "", false);
 			}
 		});
 	}
@@ -438,7 +437,7 @@ public class MainFrame {
 
 					// Add activity table and header
 					refreshActivityTable(controller.getActivitiesByClassName(classItem.getText()),
-							" for '" + classItem.getText() + "'");
+							" for '" + classItem.getText() + "'", false);
 				}
 			});
 		}
@@ -458,13 +457,13 @@ public class MainFrame {
 
 			@Override
 			public void viewAttendanceByStudent(String clientID, String studentName) {
-				activityTable.showActivitiesByPerson(studentName, controller.getActivitiesByClientID(clientID));
+				refreshActivityTable(controller.getActivitiesByClientID(clientID), " for " + studentName, true);
 			}
 
 			@Override
 			public void viewAttendanceByClass(String className) {
 				// Display class by class name
-				refreshActivityTable(controller.getActivitiesByClassName(className), " for '" + className + "'");
+				refreshActivityTable(controller.getActivitiesByClassName(className), " for '" + className + "'", false);
 			}
 
 			@Override
@@ -503,12 +502,13 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
-	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension) {
+	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension,
+			boolean attendanceByStudent) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add activity table and header
-		activityTable.setData(tablePanel, list);
+		activityTable.setData(tablePanel, list, attendanceByStudent);
 		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
 
 		activeTable = activityTable.getTable();

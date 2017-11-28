@@ -11,8 +11,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -20,7 +18,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -31,9 +28,6 @@ import model.StudentNameModel;
 public class ActivityTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
-
-	private static final int POPUP_WINDOW_WIDTH = 1200;
-	private static final int POPUP_WINDOW_HEIGHT = 600;
 
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
@@ -67,7 +61,7 @@ public class ActivityTable extends JPanel {
 		createEventTable(activitiesList, githubEventTableList);
 
 		// Configure table panel and pop-ups
-		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList, ROW_HEIGHT,
+		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList,
 				parentTablePanel.getPreferredSize().height - 70);
 		createActivityTablePopups();
 	}
@@ -80,7 +74,7 @@ public class ActivityTable extends JPanel {
 		return mainTable;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList) {
+	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList, boolean attendanceByStudent) {
 		this.parentTablePanel = tablePanel;
 
 		// Clear event row selections
@@ -89,6 +83,12 @@ public class ActivityTable extends JPanel {
 
 		// Set data for main table
 		activityTableModel.setData(activityList);
+
+		// Go full row height if attendance for single student
+		if (attendanceByStudent)
+			mainTable.setRowHeight(parentTablePanel.getHeight() - 45);
+		else
+			mainTable.setRowHeight(ROW_HEIGHT);
 
 		// Create github sub-table
 		createEventTable(activityList, githubEventTableList);
@@ -133,8 +133,7 @@ public class ActivityTable extends JPanel {
 			return -1;
 	}
 
-	private JScrollPane createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList, int rowHeight,
-			int panelHeight) {
+	private JScrollPane createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList, int panelHeight) {
 		// Set up table parameters
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
@@ -142,7 +141,7 @@ public class ActivityTable extends JPanel {
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column height and width
-		table.setRowHeight(rowHeight);
+		table.setRowHeight(ROW_HEIGHT);
 		table.getColumnModel().getColumn(ActivityTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
 		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
@@ -276,42 +275,6 @@ public class ActivityTable extends JPanel {
 			// Add table to event panel and array list
 			eventList.add(eventTable);
 		}
-	}
-
-	public void showActivitiesByPerson(String studentName, ArrayList<ActivityModel> arrayList) {
-		JFrame frame = new JFrame("Attendance for " + studentName);
-		ActivityTableModel model = new ActivityTableModel(arrayList);
-		JTable table = new JTable(model);
-		JPanel tablePanel = new JPanel();
-		ArrayList<JTable> eventList = new ArrayList<JTable>();
-
-		// Create table header
-		JLabel headerLabel = new JLabel("Attendance for " + studentName);
-		headerLabel.setHorizontalAlignment(JLabel.CENTER);
-		headerLabel.setFont(CustomFonts.TITLE_FONT);
-		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
-		frame.add(headerLabel, BorderLayout.NORTH);
-
-		// Set table panel size and borders, and disable selections
-		tablePanel.setPreferredSize(new Dimension(POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT));
-		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
-		Border outerBorder = BorderFactory.createEmptyBorder(5, 1, 1, 1);
-		tablePanel.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-		table.setCellSelectionEnabled(false);
-		table.clearSelection();
-
-		// Add data to a scroll pane inside the tablePanel
-		createEventTable(arrayList, eventList);
-		createTablePanel(table, tablePanel, eventList, POPUP_WINDOW_HEIGHT - 48, POPUP_WINDOW_HEIGHT - 18);
-		frame.add(tablePanel, BorderLayout.CENTER);
-
-		// Configure and show frame
-		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
-		frame.setIconImage(icon.getImage());
-		frame.setLocation(parentTablePanel.getLocation().x + 50, parentTablePanel.getLocation().y + 50);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.pack();
-		frame.setVisible(true);
 	}
 
 	// ===== NESTED Class: Renderer for main table ===== //
