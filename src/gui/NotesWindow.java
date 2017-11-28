@@ -27,7 +27,7 @@ public class NotesWindow {
 					+ "   Student Menu:\n      => The Student menu shows basic information for ALL students and for inactive students.\n"
 					+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
 					+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
-					+ "            See below for more details.\n\n"
+					+ "            See below for more details regarding attendance.\n\n"
 					// Attendance Menu
 					+ "   Attendance Menu:\n"
 					+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
@@ -39,11 +39,11 @@ public class NotesWindow {
 					+ "   Schedule Menu:\n"
 					+ "      => The Schedule menu shows the class schedule by day. You can then select a class and right click\n"
 					+ "            to view the data for that class.",
-					
+
 			// Examples
 			"\n   YOU ARE A SUB FOR A CLASS:\n        There are two ways to select a class that you want to view:\n"
-					+ "        1) From the Attendance menu, select 'View by Class', then select the class\n"
-					+ "            you're interested in.\n"
+					+ "        1) From the Attendance menu, select 'View by Class', then select the level\n"
+					+ "            and the class you're interested in.\n"
 					+ "        2) If you do not know the class name, go to the Schedule menu and select the\n"
 					+ "            class by day-of-week and time.\n\n"
 					+ "        This will show you what the class has been doing for the last 4 weeks. \n"
@@ -54,7 +54,7 @@ public class NotesWindow {
 					+ "        Select and right-click in the Github column to view what their class has been doing.\n\n"
 					+ "        Alternatively, if you know the day-of-week and time of the student's regular class,\n"
 					+ "        then you can access the class data from the Schedule menu.",
-					
+
 			// Feedback
 			"\n                                         This is a work in progress, and we're in Phase I.\n"
 					+ "                                        Currently this is a Java App running as a JAR file.\n\n"
@@ -64,11 +64,11 @@ public class NotesWindow {
 					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \n",
 
 			// About League Data Manager
-			"\n   VERSION 1.2\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
+			"\n   VERSION 1.3\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
 					+ "      The League Data Manager gets data from:\n         => Pike13 client database\n"
-					+ "         => Pike13 enrollment database\n         => Github \n\n"
+					+ "         => Pike13 enrollment database\n         => Pike13 schedule database\n         => Github \n\n"
 					+ "      This data is then merged into a single database. \n"
-					+ "      This merged database is a slave to all 3 of the above databases, and does not create any new data on its own.\n"
+					+ "      This merged database is a slave to all 4 of the above databases, and does not create any new data on its own.\n"
 					+ "      Once every 24 hours, the application will search for all completed attendance for that day, which triggers a search \n"
 					+ "          in Github for the related student comments and updates the database accordingly. \n\n"
 					+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \n"
@@ -81,7 +81,7 @@ public class NotesWindow {
 			"About League Data Manager " };
 
 	private static final Dimension[] sizes = { new Dimension(820, 550), new Dimension(630, 420),
-			new Dimension(720, 270), new Dimension(825, 490) };
+			new Dimension(720, 270), new Dimension(825, 500) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);
