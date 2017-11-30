@@ -18,7 +18,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 		this.homeLocation = LocationModel.convertStringToLocation(homeLocation);
 		this.homeLocString = LocationModel.convertLocationToString(this.homeLocation);
-		
+
 		if (gradYear.equals("") || gradYear.equals("\"\""))
 			this.gradYear = 0;
 		else {
@@ -123,5 +123,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 			// Client ID matches but data does not
 			return -2;
 		}
+	}
+
+	public String displayAll() {
+		return (clientID + ": " + firstName + " " + lastName + " (" + gender + "), github: " + githubName + ", home: "
+				+ homeLocString + ", start: " + startDate + ", grad: " + gradYear + ", " + isInMasterDb);
 	}
 }

@@ -382,12 +382,17 @@ public class MySqlDatabase {
 						updateIsInMasterDb(dbList.get(dbListIdx), 0);
 					dbListIdx++;
 				}
-				if (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
-					// Now that clientID's match, compare and update again
-					if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
-						updateStudent(importStudent, dbList.get(dbListIdx));
+				if (dbListIdx < dbListSize) {
+					if (dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
+						// Now that clientID's match, compare and update again
+						if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
+							updateStudent(importStudent, dbList.get(dbListIdx));
+						}
+						dbListIdx++;
+					} else {
+						// Import student is new, insert into DB
+						insertStudent(importStudent);
 					}
-					dbListIdx++;
 				}
 
 			} else if (compare == 1) {
@@ -523,7 +528,7 @@ public class MySqlDatabase {
 					updateStudentStmt.setString(col++, importStudent.getGithubName());
 				updateStudentStmt.setInt(col++, githubChanged ? 1 : 0);
 				updateStudentStmt.setInt(col++, importStudent.getGender());
-				if (!importStudent.getStartDate().equals(""))
+				if (importStudent.getStartDate() != null && !importStudent.getStartDate().equals(""))
 					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(importStudent.getStartDate()));
 				else {
 					updateStudentStmt.setDate(col++, null);
@@ -548,8 +553,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				StudentNameModel studentModel = new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(),
-						true);
+				StudentNameModel studentModel = new StudentNameModel(importStudent.getFirstName(),
+						importStudent.getLastName(), true);
 				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
@@ -583,7 +588,7 @@ public class MySqlDatabase {
 			}
 		}
 	}
-	
+
 	public void updateIsInMasterDb(StudentImportModel student, int isInMasterDb) {
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -605,9 +610,9 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				StudentNameModel model = new StudentNameModel(student.getFirstName(), student.getLastName(), (isInMasterDb == 1) ? true : false);
-				insertLogData(LogDataModel.STUDENT_DB_ERROR,  model, student.getClientID(),
-						": " + e2.getMessage());
+				StudentNameModel model = new StudentNameModel(student.getFirstName(), student.getLastName(),
+						(isInMasterDb == 1) ? true : false);
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, model, student.getClientID(), ": " + e2.getMessage());
 				break;
 			}
 		}

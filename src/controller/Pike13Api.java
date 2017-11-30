@@ -54,8 +54,8 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_NAME + "\",\"" + GRAD_YEAR_NAME
-			+ "            \",\"" + GENDER_NAME + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\","
+			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_NAME + "\",\"" + GRAD_YEAR_NAME + "\"," 
+			+ "            \"" + GENDER_NAME + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\"," 
 			+ "            \"completed_visits\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
