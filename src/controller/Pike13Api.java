@@ -13,7 +13,6 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.joda.time.DateTime;
-import org.joda.time.MutableDateTime;
 
 import model.ActivityEventModel;
 import model.LogDataModel;
@@ -56,11 +55,14 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_NAME + "\",\"" + GRAD_YEAR_NAME
-			+ "\",\"" + GENDER_NAME + "\",\"home_location_name\",\"first_visit_date\"],"
+			+ "            \",\"" + GENDER_NAME + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\","
+			+ "            \"completed_visits\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
-			// Filter on Dependents NULL and has membership
-			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\",\"\"],[\"eq\",\"has_membership\",\"t\"]]]}}}";
+			// Filter on Dependents NULL and future/completed visits both > 0
+			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\"],"
+			+ "                     [\"gt\",\"future_visits\",0],"
+			+ "                     [\"gt\",\"completed_visits\",0]]]}}}";
 
 	// Getting enrollment data is in 2 parts since page info gets inserted in middle
 	private final String getEnrollmentData1 = "{\"data\":{\"type\":\"queries\","

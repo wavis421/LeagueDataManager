@@ -379,13 +379,13 @@ public class MySqlDatabase {
 				while (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() < importStudent.getClientID()) {
 					// Mark student as not in master DB
 					if (dbList.get(dbListIdx).getIsInMasterDb() == 1)
-						updateStudent(dbList.get(dbListIdx), importStudent, 0);
+						updateIsInMasterDb(dbList.get(dbListIdx), 0);
 					dbListIdx++;
 				}
 				if (dbListIdx < dbListSize && dbList.get(dbListIdx).getClientID() == importStudent.getClientID()) {
 					// Now that clientID's match, compare and update again
 					if (dbList.get(dbListIdx).compareTo(importStudent) != 0) {
-						updateStudent(importStudent, dbList.get(dbListIdx), 1);
+						updateStudent(importStudent, dbList.get(dbListIdx));
 					}
 					dbListIdx++;
 				}
@@ -396,7 +396,7 @@ public class MySqlDatabase {
 
 			} else {
 				// ClientID matches but data has changed
-				updateStudent(importStudent, dbList.get(dbListIdx), 1);
+				updateStudent(importStudent, dbList.get(dbListIdx));
 				dbListIdx++;
 			}
 		}
@@ -500,10 +500,10 @@ public class MySqlDatabase {
 		}
 	}
 
-	private void updateStudent(StudentImportModel student, StudentImportModel compareStudent, int isInDb) {
+	private void updateStudent(StudentImportModel importStudent, StudentImportModel dbStudent) {
 		for (int i = 0; i < 2; i++) {
 			// Before updating database, determine what fields have changed
-			String changedFields = getStudentChangedFields(student, compareStudent);
+			String changedFields = getStudentChangedFields(importStudent, dbStudent);
 			boolean githubChanged = false;
 			if (changedFields.contains("Github"))
 				githubChanged = true;
@@ -515,30 +515,30 @@ public class MySqlDatabase {
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
-				updateStudentStmt.setString(col++, student.getLastName());
-				updateStudentStmt.setString(col++, student.getFirstName());
-				if (student.getGithubName().equals(""))
+				updateStudentStmt.setString(col++, importStudent.getLastName());
+				updateStudentStmt.setString(col++, importStudent.getFirstName());
+				if (importStudent.getGithubName().equals(""))
 					updateStudentStmt.setString(col++, null);
 				else
-					updateStudentStmt.setString(col++, student.getGithubName());
+					updateStudentStmt.setString(col++, importStudent.getGithubName());
 				updateStudentStmt.setInt(col++, githubChanged ? 1 : 0);
-				updateStudentStmt.setInt(col++, student.getGender());
-				if (!student.getStartDate().equals(""))
-					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
+				updateStudentStmt.setInt(col++, importStudent.getGender());
+				if (!importStudent.getStartDate().equals(""))
+					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(importStudent.getStartDate()));
 				else {
 					updateStudentStmt.setDate(col++, null);
 				}
-				updateStudentStmt.setInt(col++, student.getHomeLocation());
-				updateStudentStmt.setInt(col++, student.getGradYear());
-				updateStudentStmt.setInt(col++, isInDb);
-				updateStudentStmt.setInt(col, student.getClientID());
+				updateStudentStmt.setInt(col++, importStudent.getHomeLocation());
+				updateStudentStmt.setInt(col++, importStudent.getGradYear());
+				updateStudentStmt.setInt(col++, 1); // is in master DB
+				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
 
 				insertLogData(LogDataModel.UPDATE_STUDENT_INFO,
-						new StudentNameModel(student.getFirstName(), student.getLastName(), true),
-						student.getClientID(), changedFields);
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID(), changedFields);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -548,8 +548,8 @@ public class MySqlDatabase {
 				}
 
 			} catch (SQLException e2) {
-				StudentNameModel studentModel = new StudentNameModel(student.getFirstName(), student.getLastName(),
-						isInDb == 1 ? true : false);
+				StudentNameModel studentModel = new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(),
+						true);
 				insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
@@ -583,51 +583,86 @@ public class MySqlDatabase {
 			}
 		}
 	}
+	
+	public void updateIsInMasterDb(StudentImportModel student, int isInMasterDb) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateStudentStmt = dbConnection
+						.prepareStatement("UPDATE Students SET isInMasterDb=? WHERE ClientID=?;");
 
-	private String getStudentChangedFields(StudentImportModel dbStudent, StudentImportModel compareStudent) {
+				updateStudentStmt.setInt(1, isInMasterDb);
+				updateStudentStmt.setInt(2, student.getClientID());
+
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				StudentNameModel model = new StudentNameModel(student.getFirstName(), student.getLastName(), (isInMasterDb == 1) ? true : false);
+				insertLogData(LogDataModel.STUDENT_DB_ERROR,  model, student.getClientID(),
+						": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	private String getStudentChangedFields(StudentImportModel importStudent, StudentImportModel dbStudent) {
 		String changes = "";
 
-		if (!dbStudent.getFirstName().equals(compareStudent.getFirstName())) {
+		if (!importStudent.getFirstName().equals(dbStudent.getFirstName())) {
 			if (changes.equals(""))
 				changes += " (first name";
 			else
 				changes += ", first name";
 		}
-		if (!dbStudent.getLastName().equals(compareStudent.getLastName())) {
+		if (!importStudent.getLastName().equals(dbStudent.getLastName())) {
 			if (changes.equals(""))
 				changes += " (last name";
 			else
 				changes += ", last name";
 		}
-		if (dbStudent.getGender() != compareStudent.getGender()) {
+		if (importStudent.getGender() != dbStudent.getGender()) {
 			if (changes.equals(""))
 				changes += " (gender";
 			else
 				changes += ", gender";
 		}
-		if (!dbStudent.getGithubName().equals(compareStudent.getGithubName())) {
+		if (!importStudent.getGithubName().equals(dbStudent.getGithubName())) {
 			if (changes.equals(""))
 				changes += " (Github user";
 			else
 				changes += ", Github user";
 		}
-		if (dbStudent.getGradYear() != compareStudent.getGradYear()) {
+		if (importStudent.getGradYear() != dbStudent.getGradYear()) {
 			if (changes.equals(""))
 				changes += " (Grad year";
 			else
 				changes += ", Grad year";
 		}
-		if (dbStudent.getHomeLocation() != compareStudent.getHomeLocation()) {
+		if (importStudent.getHomeLocation() != dbStudent.getHomeLocation()) {
 			if (changes.equals(""))
 				changes += " (Home Location";
 			else
 				changes += ", Home Location";
 		}
-		if (!dbStudent.getStartDate().equals(compareStudent.getStartDate())) {
+		if (!importStudent.getStartDate().equals(dbStudent.getStartDate())) {
 			if (changes.equals(""))
 				changes += " (Start Date";
 			else
 				changes += ", Start Date";
+		}
+		if (importStudent.getIsInMasterDb() != dbStudent.getIsInMasterDb()) {
+			if (changes.equals(""))
+				changes += " (Added back to Master DB";
+			else
+				changes += ", Added back to Master DB";
 		}
 
 		if (!changes.equals(""))
