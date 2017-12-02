@@ -167,7 +167,7 @@ public class ScheduleTable extends JPanel {
 				ScheduleTableModel model = (ScheduleTableModel) table.getModel();
 				String className = (String) model.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
 
-				// Display activity table for selected class
+				// Display attendance table for selected class
 				table.clearSelection();
 				scheduleListener.viewAttendanceByClass(className);
 			}

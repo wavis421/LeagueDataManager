@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
-import model.ActivityModel;
+import model.AttendanceModel;
 
-public class ActivityTableModel extends AbstractTableModel {
+public class AttendanceTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
 	public static final int GITHUB_COMMENTS_COLUMN = 2;
@@ -15,21 +15,21 @@ public class ActivityTableModel extends AbstractTableModel {
 	private Object[][] tableObjects;
 	private final String[] colNames = { " ID ", " Student Name ", " Class Date / Class Name / Repository Name / Github Comments " };
 
-	public ActivityTableModel(ArrayList<ActivityModel> activities) {
-		initializeTableData(activities);
+	public AttendanceTableModel(ArrayList<AttendanceModel> attendance) {
+		initializeTableData(attendance);
 	}
 
-	public void setData(ArrayList<ActivityModel> db) {
+	public void setData(ArrayList<AttendanceModel> db) {
 		initializeTableData(db);
 	}
 
-	private void initializeTableData(ArrayList<ActivityModel> db) {
+	private void initializeTableData(ArrayList<AttendanceModel> db) {
 		tableObjects = new Object[db.size()][TABLE_NUM_COLUMNS];
 
 		for (int row = 0; row < db.size(); row++) {
 			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
 			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
-			tableObjects[row][GITHUB_COMMENTS_COLUMN] = db.get(row).getActivityEventList().toArray();
+			tableObjects[row][GITHUB_COMMENTS_COLUMN] = db.get(row).getAttendanceEventList().toArray();
 		}
 	}
 

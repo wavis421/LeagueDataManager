@@ -35,7 +35,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import controller.Controller;
-import model.ActivityModel;
+import model.AttendanceModel;
 import model.LogDataModel;
 
 public class MainFrame {
@@ -48,7 +48,7 @@ public class MainFrame {
 
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
-	private static final String ACTIVITY_TITLE = "League Attendance";
+	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Class Schedule";
 	private static final String LOGGING_TITLE = "Logging Data";
 
@@ -63,7 +63,7 @@ public class MainFrame {
 	private JPanel tablePanel = new JPanel();
 	private JLabel headerLabel = new JLabel();
 	private StudentTable studentTable;
-	private ActivityTable activityTable;
+	private AttendanceTable attendanceTable;
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
 	private int currentStudentTable;
@@ -120,7 +120,7 @@ public class MainFrame {
 
 		// Configure panel and each table
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
-		activityTable = new ActivityTable(tablePanel, new ArrayList<ActivityModel>());
+		attendanceTable = new AttendanceTable(tablePanel, new ArrayList<AttendanceModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
@@ -172,9 +172,9 @@ public class MainFrame {
 		createStudentMenu(studentMenu);
 
 		// Add attendance menu to menu bar
-		JMenu activitiesMenu = new JMenu("Attendance");
-		menuBar.add(activitiesMenu);
-		createActivityMenu(activitiesMenu);
+		JMenu attendanceMenu = new JMenu("Attendance");
+		menuBar.add(attendanceMenu);
+		createAttendanceMenu(attendanceMenu);
 
 		// Add schedule menu to menu bar
 		JMenu scheduleMenu = new JMenu("Schedule");
@@ -250,14 +250,14 @@ public class MainFrame {
 	private void createImportMenu(JMenu importMenu) {
 		// Add Import sub-menus
 		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
-		JMenuItem importActivityLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
+		JMenuItem importAttendanceLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
 		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
 		JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
 		JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
 
 		// Add these sub-menus to the Import menu
 		importMenu.add(importStudentPike13Item);
-		importMenu.add(importActivityLogPike13Item);
+		importMenu.add(importAttendanceLogPike13Item);
 		importMenu.add(importGithubItem);
 		importMenu.add(importScheduleItem);
 		importMenu.add(importAllDatabasesItem);
@@ -269,14 +269,14 @@ public class MainFrame {
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
 			}
 		});
-		importActivityLogPike13Item.addActionListener(new ActionListener() {
+		importAttendanceLogPike13Item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Get start date for import
 				DatePickerUtility datePicker = new DatePickerUtility();
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
-					controller.importActivitiesFromPike13(startDate);
-					refreshActivityTable(controller.getAllActivities(), "", false);
+					controller.importAttendanceFromPike13(startDate);
+					refreshAttendanceTable(controller.getAllAttendance(), "", false);
 				}
 			}
 		});
@@ -287,7 +287,7 @@ public class MainFrame {
 				String startDate = datePicker.getDialogResponse();
 				if (startDate != null) {
 					controller.importGithubComments(startDate);
-					refreshActivityTable(controller.getAllActivities(), "", false);
+					refreshAttendanceTable(controller.getAllAttendance(), "", false);
 				}
 			}
 		});
@@ -341,18 +341,18 @@ public class MainFrame {
 		});
 	}
 
-	private void createActivityMenu(JMenu activitiesMenu) {
-		// Create sub-menus for the Activity menu
-		JMenu activitiesViewByClassMenu = new JMenu("View by Class ");
-		JMenuItem activitiesViewAllItem = new JMenuItem("View all ");
-		activitiesMenu.add(activitiesViewByClassMenu);
-		activitiesMenu.add(activitiesViewAllItem);
+	private void createAttendanceMenu(JMenu attendanceMenu) {
+		// Create sub-menus for the Attendance menu
+		JMenu attendanceViewByClassMenu = new JMenu("View by Class ");
+		JMenuItem attendanceViewAllItem = new JMenuItem("View all ");
+		attendanceMenu.add(attendanceViewByClassMenu);
+		attendanceMenu.add(attendanceViewAllItem);
 
-		// Set up listeners for Activities menu
+		// Set up listeners for Attendance menu
 		for (int i = 0; i < classMenuNames.length; i++) {
 			int classFilter = i;
 			JMenu subMenu = new JMenu(classMenuNames[i]);
-			activitiesViewByClassMenu.add(subMenu);
+			attendanceViewByClassMenu.add(subMenu);
 
 			subMenu.addChangeListener(new ChangeListener() {
 				@Override
@@ -362,9 +362,9 @@ public class MainFrame {
 			});
 		}
 
-		activitiesViewAllItem.addActionListener(new ActionListener() {
+		attendanceViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshActivityTable(controller.getAllActivities(), "", false);
+				refreshAttendanceTable(controller.getAllAttendance(), "", false);
 			}
 		});
 	}
@@ -435,8 +435,8 @@ public class MainFrame {
 					classList.clear();
 					menu.removeAll();
 
-					// Add activity table and header
-					refreshActivityTable(controller.getActivitiesByClassName(classItem.getText()),
+					// Add attendance table and header
+					refreshAttendanceTable(controller.getAttendanceByClassName(classItem.getText()),
 							" for '" + classItem.getText() + "'", false);
 				}
 			});
@@ -457,13 +457,14 @@ public class MainFrame {
 
 			@Override
 			public void viewAttendanceByStudent(String clientID, String studentName) {
-				refreshActivityTable(controller.getActivitiesByClientID(clientID), " for " + studentName, true);
+				refreshAttendanceTable(controller.getAttendanceByClientID(clientID), " for " + studentName, true);
 			}
 
 			@Override
 			public void viewAttendanceByClass(String className) {
 				// Display class by class name
-				refreshActivityTable(controller.getActivitiesByClassName(className), " for '" + className + "'", false);
+				refreshAttendanceTable(controller.getAttendanceByClassName(className), " for '" + className + "'",
+						false);
 			}
 
 			@Override
@@ -475,7 +476,7 @@ public class MainFrame {
 
 		// Now provide this listener to each table
 		scheduleTable.setTableListener(listener);
-		activityTable.setTableListener(listener);
+		attendanceTable.setTableListener(listener);
 		studentTable.setTableListener(listener);
 		logTable.setTableListener(listener);
 	}
@@ -502,16 +503,16 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
-	private void refreshActivityTable(ArrayList<ActivityModel> list, String titleExtension,
+	private void refreshAttendanceTable(ArrayList<AttendanceModel> list, String titleExtension,
 			boolean attendanceByStudent) {
 		// Remove data being displayed
 		removeDataFromTables();
 
-		// Add activity table and header
-		activityTable.setData(tablePanel, list, attendanceByStudent);
-		headerLabel.setText(ACTIVITY_TITLE + titleExtension);
+		// Add attendance table and header
+		attendanceTable.setData(tablePanel, list, attendanceByStudent);
+		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
 
-		activeTable = activityTable.getTable();
+		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}
 
@@ -540,9 +541,9 @@ public class MainFrame {
 	}
 
 	private void removeDataFromTables() {
-		// Remove data from Student table and Activities table
+		// Remove data from Student table and Attendance table
 		studentTable.removeData();
-		activityTable.removeData();
+		attendanceTable.removeData();
 		logTable.removeData();
 		scheduleTable.removeData();
 	}

@@ -2,21 +2,21 @@ package model;
 
 import java.util.ArrayList;
 
-public class ActivityModel implements Comparable<ActivityModel> {
+public class AttendanceModel implements Comparable<AttendanceModel> {
 	private int clientID;
 	private StudentNameModel studentName;
 	private String githubName;
-	private ArrayList<ActivityEventModel> activityEventList = new ArrayList<ActivityEventModel>();
+	private ArrayList<AttendanceEventModel> attendanceEventList = new ArrayList<AttendanceEventModel>();
 
-	public ActivityModel(int clientID, StudentNameModel studentName, String githubName, ActivityEventModel event) {
+	public AttendanceModel(int clientID, StudentNameModel studentName, String githubName, AttendanceEventModel event) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.githubName = githubName;
-		this.activityEventList.add(event);
+		this.attendanceEventList.add(event);
 	}
 
-	public void addActivityData(ActivityEventModel event) {
-		activityEventList.add(event);
+	public void addAttendanceData(AttendanceEventModel event) {
+		attendanceEventList.add(event);
 	}
 
 	public String toString() {
@@ -35,12 +35,12 @@ public class ActivityModel implements Comparable<ActivityModel> {
 		return githubName;
 	}
 
-	public ArrayList<ActivityEventModel> getActivityEventList() {
-		return activityEventList;
+	public ArrayList<AttendanceEventModel> getAttendanceEventList() {
+		return attendanceEventList;
 	}
 
 	@Override
-	public int compareTo(ActivityModel otherPerson) {
+	public int compareTo(AttendanceModel otherPerson) {
 		return this.getStudentName().compareTo(otherPerson.getStudentName());
 	}
 }

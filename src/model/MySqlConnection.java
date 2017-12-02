@@ -17,12 +17,12 @@ public class MySqlConnection {
 
 	// SSH/Database connect constants
 	// Once DB testing is complete, these will be final constants
-	private static String SSH_HOST;
-	private static String SSH_USER;
-	private static String SSH_KEY_FILE_PATH;
-	private static String DATABASE;
-	private static String DB_USER;
-	private static String REMOTE_HOST;
+	private static final String SSH_HOST = "ec2-54-67-22-241.us-west-1.compute.amazonaws.com";
+	private static final String SSH_USER = "ec2-user";
+	private static final String SSH_KEY_FILE_PATH = "./student_tracker_key.pem";
+	private static final String DATABASE = "StudentTracker";
+	private static final String DB_USER = "awsleague";
+	private static final String REMOTE_HOST = "student-tracker-db.curyeogxssy9.us-west-1.rds.amazonaws.com";
 
 	// Save SSH Session and database connection
 	private int localSshPort;
@@ -33,30 +33,12 @@ public class MySqlConnection {
 		localSshPort = localPort;
 	}
 
-	public Connection connectToServer(JFrame parent, int serverSelect, String password) throws SQLException {
+	public Connection connectToServer(JFrame parent, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
 		Cursor cursor = null;
 		if (parent != null) {
 			cursor = parent.getCursor();
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		}
-
-		// During development/test, need access to multiple databases
-		if (serverSelect == 0) { // Wendy's web host server
-			SSH_HOST = "www.ProgramPlanner.org";
-			SSH_USER = "wavis421";
-			SSH_KEY_FILE_PATH = "./wavisadmin-keypair-ncal.pem";
-			DATABASE = "LeagueData";
-			DB_USER = "tester421";
-			REMOTE_HOST = "127.0.0.1";
-
-		} else { // AWS server
-			SSH_HOST = "ec2-34-215-59-190.us-west-2.compute.amazonaws.com";
-			SSH_USER = "ec2-user";
-			SSH_KEY_FILE_PATH = "./league.pem";
-			DATABASE = "leagueData";
-			DB_USER = "LeagueTeachers";
-			REMOTE_HOST = "data-manager-db-test.cryfqyj7jcsy.us-west-2.rds.amazonaws.com";
 		}
 
 		// If re-connecting, close current database connection

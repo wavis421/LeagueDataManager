@@ -21,11 +21,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import model.ActivityEventModel;
-import model.ActivityModel;
+import model.AttendanceEventModel;
+import model.AttendanceModel;
 import model.StudentNameModel;
 
-public class ActivityTable extends JPanel {
+public class AttendanceTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
@@ -43,38 +43,38 @@ public class ActivityTable extends JPanel {
 	private JPanel parentTablePanel;
 	private JTable mainTable;
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
-	private ActivityTableModel activityTableModel;
+	private AttendanceTableModel attendanceTableModel;
 	private JScrollPane tableScrollPane;
-	private TableListeners activityListener;
+	private TableListeners attendanceListener;
 	private int eventTableSelectedRow = -1; // table row
 	private int eventSelectedRow = -1; // row within table row
 	private String selectedClassName;
 
-	public ActivityTable(JPanel tablePanel, ArrayList<ActivityModel> activitiesList) {
+	public AttendanceTable(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		this.parentTablePanel = tablePanel;
 
 		// Create main table-model and table
-		activityTableModel = new ActivityTableModel(activitiesList);
-		mainTable = new JTable(activityTableModel);
+		attendanceTableModel = new AttendanceTableModel(attendanceList);
+		mainTable = new JTable(attendanceTableModel);
 
 		// Create event sub-table with github comments by date
-		createEventTable(activitiesList, githubEventTableList);
+		createEventTable(attendanceList, githubEventTableList);
 
 		// Configure table panel and pop-ups
 		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList,
 				parentTablePanel.getPreferredSize().height - 70);
-		createActivityTablePopups();
+		createAttendanceTablePopups();
 	}
 
 	public void setTableListener(TableListeners listener) {
-		this.activityListener = listener;
+		this.attendanceListener = listener;
 	}
 
 	public JTable getTable() {
 		return mainTable;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<ActivityModel> activityList, boolean attendanceByStudent) {
+	public void setData(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList, boolean attendanceByStudent) {
 		this.parentTablePanel = tablePanel;
 
 		// Clear event row selections
@@ -82,7 +82,7 @@ public class ActivityTable extends JPanel {
 		eventSelectedRow = -1;
 
 		// Set data for main table
-		activityTableModel.setData(activityList);
+		attendanceTableModel.setData(attendanceList);
 
 		// Go full row height if attendance for single student
 		if (attendanceByStudent)
@@ -91,18 +91,18 @@ public class ActivityTable extends JPanel {
 			mainTable.setRowHeight(ROW_HEIGHT);
 
 		// Create github sub-table
-		createEventTable(activityList, githubEventTableList);
+		createEventTable(attendanceList, githubEventTableList);
 
 		// Update table
-		activityTableModel.fireTableDataChanged();
+		attendanceTableModel.fireTableDataChanged();
 		tableScrollPane.setVisible(true);
 		tablePanel.add(tableScrollPane, BorderLayout.NORTH);
 	}
 
 	public void removeData() {
 		// Remove data from tables and lists
-		if (activityTableModel.getRowCount() > 0) {
-			activityTableModel.removeAll();
+		if (attendanceTableModel.getRowCount() > 0) {
+			attendanceTableModel.removeAll();
 			githubEventTableList.clear();
 		}
 		tableScrollPane.setVisible(false);
@@ -142,12 +142,12 @@ public class ActivityTable extends JPanel {
 
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
-		table.getColumnModel().getColumn(ActivityTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
-		table.getColumnModel().getColumn(ActivityTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
+		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
 
 		// Set table properties
-		table.setDefaultRenderer(Object.class, new ActivityTableRenderer(eventList));
+		table.setDefaultRenderer(Object.class, new AttendanceTableRenderer(eventList));
 		table.setAutoCreateRowSorter(true);
 
 		panel.setLayout(new BorderLayout());
@@ -160,7 +160,7 @@ public class ActivityTable extends JPanel {
 		return scrollPane;
 	}
 
-	private void createActivityTablePopups() {
+	private void createAttendanceTablePopups() {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
@@ -173,34 +173,34 @@ public class ActivityTable extends JPanel {
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				// Add activity table and header for selected class
+				// Add attendance table and header for selected class
 				mainTable.clearSelection();
-				activityListener.viewAttendanceByClass(selectedClassName);
+				attendanceListener.viewAttendanceByClass(selectedClassName);
 			}
 		});
 		showStudentInfoItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get Client ID for selected row/column
 				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
-				ActivityTableModel model = (ActivityTableModel) mainTable.getModel();
-				int clientID = Integer.parseInt((String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN));
+				AttendanceTableModel model = (AttendanceTableModel) mainTable.getModel();
+				int clientID = Integer.parseInt((String) model.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN));
 
 				mainTable.clearSelection();
-				activityListener.viewStudentTableByStudent(clientID);
+				attendanceListener.viewStudentTableByStudent(clientID);
 			}
 		});
 		showStudentAttendanceItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get student name & Client ID for selected row/column
 				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
-				ActivityTableModel model = (ActivityTableModel) mainTable.getModel();
-				String clientID = (String) model.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
+				AttendanceTableModel model = (AttendanceTableModel) mainTable.getModel();
+				String clientID = (String) model.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(row,
-						ActivityTableModel.STUDENT_NAME_COLUMN);
+						AttendanceTableModel.STUDENT_NAME_COLUMN);
 
-				// Display activity table for selected student
+				// Display attendance table for selected student
 				mainTable.clearSelection();
-				activityListener.viewAttendanceByStudent(clientID, studentName.toString());
+				attendanceListener.viewAttendanceByStudent(clientID, studentName.toString());
 			}
 		});
 		mainTable.addMouseListener(new MouseAdapter() {
@@ -208,12 +208,12 @@ public class ActivityTable extends JPanel {
 				int row = mainTable.getSelectedRow();
 
 				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
-						&& mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+						&& mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 					// Highlight selected row in github event table
 					setSelectedEventRow(row, e.getY());
 
 				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
-					if (mainTable.getSelectedColumn() == ActivityTableModel.STUDENT_NAME_COLUMN) {
+					if (mainTable.getSelectedColumn() == AttendanceTableModel.STUDENT_NAME_COLUMN) {
 						// Show student's info
 						tablePopup.remove(showStudentClassItem);
 						tablePopup.add(showStudentInfoItem);
@@ -221,7 +221,7 @@ public class ActivityTable extends JPanel {
 						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
-					} else if (mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 						// Show students by class name
 						selectedClassName = getClassNameByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
 						if (selectedClassName != null) {
@@ -237,23 +237,23 @@ public class ActivityTable extends JPanel {
 
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2
-						&& mainTable.getSelectedColumn() == ActivityTableModel.GITHUB_COMMENTS_COLUMN) {
+						&& mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 					int row = mainTable.getSelectedRow();
 					if (row > -1) {
-						String clientID = (String) mainTable.getValueAt(row, ActivityTableModel.CLIENT_ID_COLUMN);
-						String studentName = mainTable.getValueAt(row, ActivityTableModel.STUDENT_NAME_COLUMN)
+						String clientID = (String) mainTable.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
+						String studentName = mainTable.getValueAt(row, AttendanceTableModel.STUDENT_NAME_COLUMN)
 								.toString();
-						activityListener.viewAttendanceByStudent(clientID, studentName);
+						attendanceListener.viewAttendanceByStudent(clientID, studentName);
 					}
 				}
 			}
 		});
 	}
 
-	private void createEventTable(ArrayList<ActivityModel> tableData, ArrayList<JTable> eventList) {
+	private void createEventTable(ArrayList<AttendanceModel> tableData, ArrayList<JTable> eventList) {
 		for (int i = 0; i < tableData.size(); i++) {
 			// Create github sub-table
-			ArrayList<ActivityEventModel> eventData = tableData.get(i).getActivityEventList();
+			ArrayList<AttendanceEventModel> eventData = tableData.get(i).getAttendanceEventList();
 			JTable eventTable = new JTable(new EventTableModel(eventData));
 
 			// Set table properties
@@ -270,7 +270,7 @@ public class ActivityTable extends JPanel {
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(275);
 
 			// Add renderer
-			eventTable.setDefaultRenderer(Object.class, new ActivityTableRenderer(null));
+			eventTable.setDefaultRenderer(Object.class, new AttendanceTableRenderer(null));
 
 			// Add table to event panel and array list
 			eventList.add(eventTable);
@@ -278,11 +278,11 @@ public class ActivityTable extends JPanel {
 	}
 
 	// ===== NESTED Class: Renderer for main table ===== //
-	public class ActivityTableRenderer extends JLabel implements TableCellRenderer {
+	public class AttendanceTableRenderer extends JLabel implements TableCellRenderer {
 
 		ArrayList<JTable> eventTable;
 
-		private ActivityTableRenderer(ArrayList<JTable> eventTable) {
+		private AttendanceTableRenderer(ArrayList<JTable> eventTable) {
 			super();
 			super.setOpaque(true);
 			this.eventTable = eventTable;
@@ -345,9 +345,9 @@ public class ActivityTable extends JPanel {
 
 	// ===== NESTED Class: Model for Github sub-table ===== //
 	public class EventTableModel extends AbstractTableModel {
-		ArrayList<ActivityEventModel> inputData;
+		ArrayList<AttendanceEventModel> inputData;
 
-		public EventTableModel(ArrayList<ActivityEventModel> tableData) {
+		public EventTableModel(ArrayList<AttendanceEventModel> tableData) {
 			inputData = tableData;
 		}
 
@@ -363,19 +363,19 @@ public class ActivityTable extends JPanel {
 
 		@Override
 		public Object getValueAt(int row, int col) {
-			ActivityEventModel activity = (ActivityEventModel) inputData.get(row);
+			AttendanceEventModel attendance = (AttendanceEventModel) inputData.get(row);
 
 			if (col == EVENT_TABLE_DATE_COLUMN)
-				return activity.getServiceDate().toString();
+				return attendance.getServiceDate().toString();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
-				return activity.getEventName();
+				return attendance.getEventName();
 			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {
-				if (activity.getRepoName() == null)
+				if (attendance.getRepoName() == null)
 					return "";
 				else
-					return activity.getRepoName();
+					return attendance.getRepoName();
 			} else
-				return activity.getGithubComments();
+				return attendance.getGithubComments();
 		}
 	}
 }

@@ -48,7 +48,7 @@ public class MySqlDatabase {
 	public boolean connectDatabase() {
 		for (int i = 0; i < MAX_CONNECTION_ATTEMPTS; i++) {
 			try {
-				dbConnection = mySqlConnection.connectToServer(parent, 1, awsPassword);
+				dbConnection = mySqlConnection.connectToServer(parent, awsPassword);
 
 			} catch (SQLException e) {
 				// TODO: How to handle this exception?
@@ -172,13 +172,13 @@ public class MySqlDatabase {
 	}
 
 	public void removeInactiveStudents() {
-		// Remove any student not in master DB who have no activity data
+		// Remove any student not in master DB who have no attendance data
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb AND "
-								+ "(SELECT COUNT(*) FROM Activities WHERE Activities.ClientID = Students.ClientID) = 0;");
+								+ "(SELECT COUNT(*) FROM Attendance WHERE Attendance.ClientID = Students.ClientID) = 0;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -677,20 +677,20 @@ public class MySqlDatabase {
 	}
 
 	/*
-	 * ------- Activity Database Queries -------
+	 * ------- Attendance Database Queries -------
 	 */
-	public ArrayList<ActivityModel> getAllActivities() {
-		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+	public ArrayList<AttendanceModel> getAllAttendance() {
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID "
-								+ "ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
+								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
-				getActivitiesList(activityList, result);
-				Collections.sort(activityList);
+				getAttendanceList(attendanceList, result);
+				Collections.sort(attendanceList);
 
 				result.close();
 				selectStmt.close();
@@ -708,23 +708,23 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return activityList;
+		return attendanceList;
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
-		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
-								+ "EventName=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
+								+ "EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
-				getActivitiesList(activityList, result);
-				Collections.sort(activityList);
+				getAttendanceList(attendanceList, result);
+				Collections.sort(attendanceList);
 
 				result.close();
 				selectStmt.close();
@@ -742,23 +742,23 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return activityList;
+		return attendanceList;
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
-		ArrayList<ActivityModel> activityList = new ArrayList<ActivityModel>();
+	public ArrayList<AttendanceModel> getAttendanceByClientID(String clientID) {
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
-								+ "Activities.ClientID=? ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
+								+ "Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();
-				getActivitiesList(activityList, result);
-				Collections.sort(activityList);
+				getAttendanceList(attendanceList, result);
+				Collections.sort(attendanceList);
 
 				result.close();
 				selectStmt.close();
@@ -776,22 +776,22 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return activityList;
+		return attendanceList;
 	}
 
-	private ArrayList<ActivityEventModel> getAllEvents() {
-		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+	private ArrayList<AttendanceEventModel> getAllEvents() {
+		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get attendance data from the DB for all students that have a github user name
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID "
-								+ "ORDER BY Activities.ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
+								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					eventList.add(new ActivityEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
+					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
 							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
 							result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
@@ -816,8 +816,8 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	public ArrayList<ActivityEventModel> getEventsWithNoComments(String startDate, int clientID) {
-		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+	public ArrayList<AttendanceEventModel> getEventsWithNoComments(String startDate, int clientID) {
+		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
 		String clientIdFilter = "";
 		if (clientID != 0) // Specific github user
@@ -828,14 +828,14 @@ public class MySqlDatabase {
 				// Get attendance data from the DB for all students that have a github user name
 				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Activities, Students WHERE Activities.ClientID = Students.ClientID AND "
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
 								+ "Comments IS NULL AND GithubName IS NOT NULL AND " + clientIdFilter
 								+ "ServiceDate >= ? ORDER BY GithubName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					eventList.add(new ActivityEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
+					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
 							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
 							result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
@@ -860,33 +860,33 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	private void getActivitiesList(ArrayList<ActivityModel> activityList, ResultSet result) {
+	private void getAttendanceList(ArrayList<AttendanceModel> attendanceList, ResultSet result) {
 		int lastClientID = -1;
-		ActivityModel lastActivityModel = null;
+		AttendanceModel lastAttendanceModel = null;
 
-		// Process DB query result containing activities by grouping the activities by
-		// student and then adding the resulting Activity Model to the the activityList.
+		// Process DB query result containing attendance by grouping the attendance by
+		// student and then adding the resulting Attendance Model to the the attendanceList.
 		try {
 			while (result.next()) {
 				int thisClientID = result.getInt("Students.ClientID");
 				if (lastClientID == thisClientID) {
 					// Add more data to existing client
-					lastActivityModel.addActivityData(new ActivityEventModel(result.getInt("ClientID"),
+					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(result.getInt("ClientID"),
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 
 				} else {
 					// Create student model for new client
-					lastActivityModel = new ActivityModel(thisClientID,
+					lastAttendanceModel = new AttendanceModel(thisClientID,
 							new StudentNameModel(result.getString("Students.FirstName"),
 									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"),
-							new ActivityEventModel(result.getInt("CLientID"), result.getDate("ServiceDate"),
+							new AttendanceEventModel(result.getInt("CLientID"), result.getDate("ServiceDate"),
 									result.getString("EventName"), result.getString("GithubName"),
 									result.getString("RepoName"), result.getString("Comments"), new StudentNameModel(
 											result.getString("FirstName"), result.getString("LastName"), true)));
-					activityList.add(lastActivityModel);
+					attendanceList.add(lastAttendanceModel);
 					lastClientID = thisClientID;
 				}
 			}
@@ -907,12 +907,12 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt;
 				if (filter < NUM_CLASS_LEVELS) {
 					selectStmt = dbConnection.prepareStatement(
-							"SELECT EventName FROM Activities WHERE EventName != '' AND LEFT(EventName,2) = ? "
+							"SELECT EventName FROM Attendance WHERE EventName != '' AND LEFT(EventName,2) = ? "
 									+ "GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, String.valueOf(filter) + "@");
 				} else {
 					selectStmt = dbConnection
-							.prepareStatement("SELECT EventName FROM Activities WHERE EventName != '' AND "
+							.prepareStatement("SELECT EventName FROM Attendance WHERE EventName != '' AND "
 									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
 									+ "GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, "L@");
@@ -975,22 +975,22 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
-	public void importActivities(ArrayList<ActivityEventModel> importList) {
-		ArrayList<ActivityEventModel> dbList = getAllEvents();
+	public void importAtttendance(ArrayList<AttendanceEventModel> importList) {
+		ArrayList<AttendanceEventModel> dbList = getAllEvents();
 		ArrayList<StudentModel> studentList = getAllStudents();
 		int dbListIdx = 0;
 		int dbListSize = dbList.size();
 		Collections.sort(importList);
 
-		ActivityEventModel dbActivity;
+		AttendanceEventModel dbAttendance;
 		for (int i = 0; i < importList.size(); i++) {
-			ActivityEventModel importEvent = importList.get(i);
+			AttendanceEventModel importEvent = importList.get(i);
 
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
-				dbActivity = dbList.get(dbListIdx);
-				compare = dbActivity.compareTo(importEvent);
+				dbAttendance = dbList.get(dbListIdx);
+				compare = dbAttendance.compareTo(importEvent);
 			}
 
 			if (compare == 0) {
@@ -1010,7 +1010,7 @@ public class MySqlDatabase {
 						dbListIdx++;
 
 					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
-						addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
+						addAttendance(importEvent.getClientID(), importEvent.getServiceDateString(),
 								importEvent.getEventName(), dbList.get(dbListIdx).getStudentNameModel());
 
 					} else
@@ -1025,8 +1025,8 @@ public class MySqlDatabase {
 				int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
 
 				if (idx >= 0) {
-					// Student exists in DB, so add activity data for this student
-					addActivity(importEvent.getClientID(), importEvent.getServiceDateString(),
+					// Student exists in DB, so add attendance data for this student
+					addAttendance(importEvent.getClientID(), importEvent.getServiceDateString(),
 							importEvent.getEventName(), studentList.get(idx).getNameModel());
 
 				} else {
@@ -1048,20 +1048,20 @@ public class MySqlDatabase {
 		return -1;
 	}
 
-	public void addActivity(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
+	public void addAttendance(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement addActivityStmt = dbConnection.prepareStatement(
-						"INSERT INTO Activities " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
+				PreparedStatement addAttendanceStmt = dbConnection.prepareStatement(
+						"INSERT INTO Attendance " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
 
 				int col = 1;
-				addActivityStmt.setInt(col++, clientID);
-				addActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-				addActivityStmt.setString(col++, eventName);
+				addAttendanceStmt.setInt(col++, clientID);
+				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				addAttendanceStmt.setString(col++, eventName);
 
-				addActivityStmt.executeUpdate();
-				addActivityStmt.close();
+				addAttendanceStmt.executeUpdate();
+				addAttendanceStmt.close();
 
 				insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, " for " + serviceDate);
 				break;
@@ -1085,25 +1085,25 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateActivity(int clientID, StudentNameModel nameModel, String serviceDate, String repoName,
+	public void updateAttendance(int clientID, StudentNameModel nameModel, String serviceDate, String repoName,
 			String comments) {
-		PreparedStatement updateActivityStmt;
+		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
 				// The only fields that should be updated are the comments and repo name
-				updateActivityStmt = dbConnection.prepareStatement(
-						"UPDATE Activities SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
+				updateAttendanceStmt = dbConnection.prepareStatement(
+						"UPDATE Attendance SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
 
 				int col = 1;
 				if (comments.length() >= COMMENT_WIDTH)
 					comments = comments.substring(0, COMMENT_WIDTH);
-				updateActivityStmt.setString(col++, comments);
-				updateActivityStmt.setString(col++, repoName);
-				updateActivityStmt.setInt(col++, clientID);
-				updateActivityStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				updateAttendanceStmt.setString(col++, comments);
+				updateAttendanceStmt.setString(col++, repoName);
+				updateAttendanceStmt.setInt(col++, clientID);
+				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 
-				updateActivityStmt.executeUpdate();
-				updateActivityStmt.close();
+				updateAttendanceStmt.executeUpdate();
+				updateAttendanceStmt.close();
 
 				insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
 						" for repo " + repoName + " (" + serviceDate + ")");

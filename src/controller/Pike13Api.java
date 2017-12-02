@@ -14,7 +14,7 @@ import javax.json.JsonReader;
 
 import org.joda.time.DateTime;
 
-import model.ActivityEventModel;
+import model.AttendanceEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
@@ -152,8 +152,8 @@ public class Pike13Api {
 		return studentList;
 	}
 
-	public ArrayList<ActivityEventModel> getEnrollment(String startDate) {
-		ArrayList<ActivityEventModel> eventList = new ArrayList<ActivityEventModel>();
+	public ArrayList<AttendanceEventModel> getEnrollment(String startDate) {
+		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 		boolean hasMore = false;
 		String lastKey = "";
 
@@ -194,7 +194,7 @@ public class Pike13Api {
 
 					// Add event to list
 					if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
-						eventList.add(new ActivityEventModel(eventArray.getInt(CLIENT_ID_IDX),
+						eventList.add(new AttendanceEventModel(eventArray.getInt(CLIENT_ID_IDX),
 								stripQuotes(eventArray.get(FULL_NAME_IDX).toString()), serviceDate, eventName));
 					}
 				}

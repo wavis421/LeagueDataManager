@@ -26,17 +26,17 @@ BEGIN
 		UNIQUE KEY (GithubName)
 	) ENGINE=InnoDB;
 	
-	CREATE TABLE IF NOT EXISTS Activities (
-		ActivityID int(11) NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY (ActivityID),
+	CREATE TABLE IF NOT EXISTS Attendance (
+		AttendanceID int(11) NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY (AttendanceID),
 		ClientID int(11),
 		
-		CONSTRAINT fk_activity_student_id
+		CONSTRAINT fk_attendance_student_id
 			FOREIGN KEY (ClientID) 
 			REFERENCES Students(ClientID) 
 			ON DELETE CASCADE,
 		
-		# Activity data
+		# Attendance data
 		ServiceDate date DEFAULT NULL,
 		EventName varchar(50) DEFAULT NULL,
 		RepoName varchar(50) DEFAULT NULL,

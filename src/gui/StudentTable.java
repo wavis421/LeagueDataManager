@@ -107,8 +107,8 @@ public class StudentTable extends JPanel {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
-		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
-		tablePopup.add(showStudentActivityItem);
+		JMenuItem showStudentAttendanceItem = new JMenuItem("Show attendance ");
+		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(removeStudentItem);
 
 		// POP UP action listeners
@@ -124,7 +124,7 @@ public class StudentTable extends JPanel {
 				table.clearSelection();
 			}
 		});
-		showStudentActivityItem.addActionListener(new ActionListener() {
+		showStudentAttendanceItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get student name for selected row/column
 				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
@@ -133,7 +133,7 @@ public class StudentTable extends JPanel {
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 						StudentTableModel.STUDENT_NAME_COLUMN);
 
-				// Display activity table for selected student
+				// Display attendance table for selected student
 				table.clearSelection();
 				studentListener.viewAttendanceByStudent(clientID, studentName.toString());
 			}

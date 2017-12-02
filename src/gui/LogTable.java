@@ -98,9 +98,9 @@ public class LogTable extends JPanel {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
-		JMenuItem showStudentActivityItem = new JMenuItem("Show attendance ");
+		JMenuItem showStudentAttendanceItem = new JMenuItem("Show attendance ");
 		tablePopup.add(showStudentInfoItem);
-		tablePopup.add(showStudentActivityItem);
+		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 
 		// POP UP action listeners
@@ -118,7 +118,7 @@ public class LogTable extends JPanel {
 				}
 			}
 		});
-		showStudentActivityItem.addActionListener(new ActionListener() {
+		showStudentAttendanceItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get student name for selected row/column
 				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
@@ -130,7 +130,7 @@ public class LogTable extends JPanel {
 					StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 							LogTableModel.STUDENT_NAME_COLUMN);
 
-					// Display activity table for selected student
+					// Display attendance table for selected student
 					tableListener.viewAttendanceByStudent(clientID, studentName.toString());
 				}
 			}

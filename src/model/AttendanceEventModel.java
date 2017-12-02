@@ -2,7 +2,7 @@ package model;
 
 import java.sql.Date;
 
-public class ActivityEventModel implements Comparable<ActivityEventModel> {
+public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private int clientID;
 	private String eventName;
 	private Date serviceDate;
@@ -10,7 +10,7 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 
-	public ActivityEventModel(int clientID, Date serviceDate, String eventName, String githubName, String repoName,
+	public AttendanceEventModel(int clientID, Date serviceDate, String eventName, String githubName, String repoName,
 			String githubComments, StudentNameModel nameModel) {
 		this.clientID = clientID;
 		this.serviceDate = serviceDate;
@@ -26,7 +26,7 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
-	public ActivityEventModel(int clientID, String studentName, String serviceDate, String eventName) {
+	public AttendanceEventModel(int clientID, String studentName, String serviceDate, String eventName) {
 		this.clientID = clientID;
 		this.nameModel = new StudentNameModel(studentName, "", false);
 		this.serviceDateString = serviceDate;
@@ -77,7 +77,7 @@ public class ActivityEventModel implements Comparable<ActivityEventModel> {
 	}
 
 	@Override
-	public int compareTo(ActivityEventModel other) {
+	public int compareTo(AttendanceEventModel other) {
 		if (clientID < other.getClientID())
 			return -1;
 

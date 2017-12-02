@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import model.ActivityEventModel;
-import model.ActivityModel;
+import model.AttendanceEventModel;
+import model.AttendanceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
@@ -75,16 +75,16 @@ public class Controller {
 		sqlDb.removeStudentByClientID(clientID);
 	}
 
-	public ArrayList<ActivityModel> getAllActivities() {
-		return sqlDb.getAllActivities();
+	public ArrayList<AttendanceModel> getAllAttendance() {
+		return sqlDb.getAllAttendance();
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByClassName(String className) {
-		return sqlDb.getActivitiesByClassName(className);
+	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
+		return sqlDb.getAttendanceByClassName(className);
 	}
 
-	public ArrayList<ActivityModel> getActivitiesByClientID(String clientID) {
-		return sqlDb.getActivitiesByClientID(clientID);
+	public ArrayList<AttendanceModel> getAttendanceByClientID(String clientID) {
+		return sqlDb.getAttendanceByClientID(clientID);
 	}
 
 	public ArrayList<StudentNameModel> getAllStudentNames() {
@@ -121,7 +121,7 @@ public class Controller {
 		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
 	}
 
-	public void importActivitiesFromPike13(String startDate) {
+	public void importAttendanceFromPike13(String startDate) {
 		sqlDb.insertLogData(LogDataModel.STARTING_ATTENDANCE_IMPORT, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate.substring(0, 10) + " ***");
 
@@ -129,11 +129,11 @@ public class Controller {
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Get data from Pike13
-		ArrayList<ActivityEventModel> eventList = pike13Api.getEnrollment(startDate);
+		ArrayList<AttendanceEventModel> eventList = pike13Api.getEnrollment(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
-			sqlDb.importActivities(eventList);
+			sqlDb.importAtttendance(eventList);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
@@ -186,7 +186,7 @@ public class Controller {
 	public void importAllDatabases(String startDate) {
 		// Import students, attendance, schedule and github data
 		importStudentsFromPike13();
-		importActivitiesFromPike13(startDate);
+		importAttendanceFromPike13(startDate);
 		importScheduleFromPike13();
 		importGithubComments(startDate);
 	}
