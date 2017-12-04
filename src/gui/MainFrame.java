@@ -101,8 +101,9 @@ public class MainFrame {
 		// Connect to database
 		if (!controller.connectDatabase()) {
 			JOptionPane.showMessageDialog(null,
-					"Verify that the password you entered is correct and\n"
-							+ "that the League Data Manager is not already running.\n",
+					"Verify that the password you entered is correct,\n"
+							+ "that the League Data Manager is not already running\n"
+							+ "and your key file is in the executable directory.\n",
 					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
 			shutdown();
 		}
