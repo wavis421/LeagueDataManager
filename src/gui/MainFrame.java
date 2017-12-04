@@ -78,7 +78,7 @@ public class MainFrame {
 			"Level 6 ", "Level 7 ", "Level 8 ", "Labs " };
 
 	public MainFrame() {
-		frame.setTitle("League Data Manager");
+		frame.setTitle("League Student Tracker");
 		frame.setLayout(new BorderLayout());
 		frame.setBackground(Color.WHITE);
 
