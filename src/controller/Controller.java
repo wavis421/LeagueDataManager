@@ -13,6 +13,7 @@ import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
+import model.InvoiceModel;
 
 public class Controller {
 	// Different port than League Student Tracker to allow simultaneous connects
@@ -102,6 +103,18 @@ public class Controller {
 	/*
 	 * ------- File & data import/export -------
 	 */
+
+	public ArrayList<InvoiceModel> getInvoices() {
+		// Set cursor to "wait" cursor
+		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		// Get invoice data from Pike13
+		ArrayList<InvoiceModel> invoiceList = pike13Api.getInvoices();
+
+		// Set cursor back to default
+		parent.setCursor(Cursor.getDefaultCursor());
+		return invoiceList;
+	}
 
 	public void importStudentsFromPike13() {
 		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, " ***");

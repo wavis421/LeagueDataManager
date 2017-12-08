@@ -15,6 +15,7 @@ import javax.json.JsonReader;
 import org.joda.time.DateTime;
 
 import model.AttendanceEventModel;
+import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
@@ -49,6 +50,20 @@ public class Pike13Api {
 	private final int DURATION_MINS_IDX = 2;
 	private final int WKLY_EVENT_NAME_IDX = 3;
 
+	// Indices for invoice data
+	private final int INVOICE_DATE_IDX = 0;
+	private final int INVOICE_AMOUNT_IDX = 1;
+	private final int PAYMENT_METHOD_IDX = 2;
+	private final int TRANSACTION_ID_IDX = 3;
+	private final int PRODUCT_NAME_IDX = 4;
+	private final int PLAN_ID_IDX = 5;
+	
+	// Indices for Person Plans data
+	private final int PLAN_FULL_NAME_IDX = 0;
+	private final int PLAN_CLIENT_ID_IDX = 1;
+	private final int PLAN_START_DATE_IDX = 2;
+	private final int PLAN_END_DATE_IDX = 3;
+	
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -90,6 +105,29 @@ public class Pike13Api {
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],[\"starts\",\"service_category\",\"Class\"],"
 			+ "           [\"nemp\",\"event_name\"]]]}}}";
+	
+	// Get invoice data
+	private final String getInvoiceData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"transaction_date\",\"transaction_amount\",\"payment_method\","
+			+ "            \"processor_transaction_id\",\"product_name\",\"plan_id\"],"
+			// Page limit max is 100
+			+ "\"page\":{\"limit\":100},"
+			// Filter on hard-coded month for now
+			+ "\"filter\":[\"btw\",\"transaction_date\",[\"2017-11-01\",\"2017-11-30\"]]}}}";
+	
+	// Get person plan data
+	private final String getPersonPlanData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"full_name\",\"person_id\",\"start_date\",\"end_date\"],"
+			// Page limit max is 5
+			+ "\"page\":{\"limit\":5},"
+			// Filter on plan_id which is filled in at run-time
+			+ "\"filter\":[\"eq\",\"plan_id\",0]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
@@ -114,13 +152,16 @@ public class Pike13Api {
 			if (responseCode != HttpURLConnection.HTTP_OK) {
 				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
 				return studentList;
 			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null)
+			if (jsonObj == null) {
+				conn.disconnect();
 				return studentList;
+			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
@@ -177,13 +218,16 @@ public class Pike13Api {
 				if (responseCode != HttpURLConnection.HTTP_OK) {
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
+					conn.disconnect();
 					return eventList;
 				}
 
 				// Get input stream and read data
 				JsonObject jsonObj = readInputStream(conn);
-				if (jsonObj == null)
+				if (jsonObj == null) {
+					conn.disconnect();
 					return eventList;
+				}
 				JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 				for (int i = 0; i < jsonArray.size(); i++) {
@@ -236,13 +280,16 @@ public class Pike13Api {
 			if (responseCode != HttpURLConnection.HTTP_OK) {
 				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
 				return scheduleList;
 			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null)
+			if (jsonObj == null) {
+				conn.disconnect();
 				return scheduleList;
+			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
@@ -269,6 +316,103 @@ public class Pike13Api {
 		return scheduleList;
 	}
 
+	public ArrayList<InvoiceModel> getInvoices() {
+		ArrayList<InvoiceModel> invoiceList = new ArrayList<InvoiceModel>();
+
+		try {
+			// Get URL connection with authorization
+			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/invoice_item_transactions/queries");
+			
+			// Send the query
+			sendQueryToUrl(conn, getInvoiceData);
+
+			// Check result
+			int responseCode = conn.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
+				return invoiceList;
+			}
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return invoiceList;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each invoice in the list
+				JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
+				
+				// Get invoice date/amount, payment method/id, product name
+				InvoiceModel model = new InvoiceModel(invoiceArray.getString(TRANSACTION_ID_IDX).toString(),
+						stripQuotes(invoiceArray.get(INVOICE_DATE_IDX).toString()),
+						invoiceArray.getString(PRODUCT_NAME_IDX).toString(),
+						"", "", "", 0, stripQuotes(invoiceArray.get(PAYMENT_METHOD_IDX).toString()),
+						invoiceArray.getInt(INVOICE_AMOUNT_IDX));
+				
+				// Fill in person plan data
+				int planID = invoiceArray.getInt(PLAN_ID_IDX);
+				getPersonPlans(model, planID);
+
+				// Add invoice to list
+				invoiceList.add(model);
+			}
+			conn.disconnect();
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
+		}
+
+		return invoiceList;
+	}
+
+	public void getPersonPlans(InvoiceModel invoice, Integer planID) {
+		try {
+			// Get URL connection with authorization
+			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/person_plans/queries");
+			
+			// Fill in plan_id field and send the query
+			String planString = getPersonPlanData.replace("\"plan_id\",0", "\"plan_id\"," + planID.toString());
+			sendQueryToUrl(conn, planString);
+
+			// Check result
+			int responseCode = conn.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
+				return;
+			}
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each plan in the list
+				JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
+
+				// Add person plans fields to invoice model
+				invoice.setStudentName(stripQuotes(invoiceArray.get(PLAN_FULL_NAME_IDX).toString()));
+				invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
+				invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
+				invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
+			}
+			conn.disconnect();
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
+		}
+	}
+	
 	private HttpURLConnection connectUrl(String queryUrl) {
 		try {
 			// Get URL connection with authorization

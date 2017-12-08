@@ -37,6 +37,7 @@ import javax.swing.event.ChangeListener;
 import controller.Controller;
 import model.AttendanceModel;
 import model.LogDataModel;
+import model.InvoiceModel;
 
 public class MainFrame {
 	/* Private constants */
@@ -50,6 +51,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Class Schedule";
+	private static final String INVOICE_TITLE = "Invoices";
 	private static final String LOGGING_TITLE = "Logging Data";
 
 	private static final int STUDENT_TABLE_ALL = 0;
@@ -66,6 +68,7 @@ public class MainFrame {
 	private AttendanceTable attendanceTable;
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
+	private InvoiceTable invoiceTable;
 	private int currentStudentTable;
 	private JTable activeTable;
 	private String activeTableHeader;
@@ -124,6 +127,7 @@ public class MainFrame {
 		attendanceTable = new AttendanceTable(tablePanel, new ArrayList<AttendanceModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
+		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
 		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
 		activeTable = studentTable.getTable();
 
@@ -182,6 +186,11 @@ public class MainFrame {
 		menuBar.add(scheduleMenu);
 		createScheduleMenu(scheduleMenu);
 
+		// Add Reports menu to menu bar
+		JMenu reportsMenu = new JMenu("Reports");
+		menuBar.add(reportsMenu);
+		createReportsMenu(reportsMenu);
+		
 		// Add help menu to menu bar
 		JMenu helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
@@ -382,6 +391,19 @@ public class MainFrame {
 			}
 		});
 	}
+	
+	private void createReportsMenu(JMenu reportsMenu) {
+		// Create sub-menu for the Reports menu
+		JMenuItem invoiceMenu = new JMenuItem("Invoices by Month ");
+		reportsMenu.add(invoiceMenu);
+
+		// Set up listeners for Schedule menu
+		invoiceMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshInvoiceTable();
+			}
+		});
+	}
 
 	private void createHelpMenu(JMenu helpMenu) {
 		// Create sub-menus for the Help menu
@@ -541,12 +563,25 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
+	private void refreshInvoiceTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add invoice data table and header
+		invoiceTable.setData(tablePanel, controller.getInvoices());
+		headerLabel.setText(INVOICE_TITLE + " for November 2017");
+
+		activeTable = invoiceTable.getTable();
+		activeTableHeader = headerLabel.getText();
+	}
+	
 	private void removeDataFromTables() {
 		// Remove data from Student table and Attendance table
 		studentTable.removeData();
 		attendanceTable.removeData();
 		logTable.removeData();
 		scheduleTable.removeData();
+		invoiceTable.removeData();
 	}
 
 	public static void shutdown() {
