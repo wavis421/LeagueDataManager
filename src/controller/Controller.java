@@ -7,13 +7,13 @@ import javax.swing.JFrame;
 
 import model.AttendanceEventModel;
 import model.AttendanceModel;
+import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
-import model.InvoiceModel;
 
 public class Controller {
 	// Different port than League Student Tracker to allow simultaneous connects

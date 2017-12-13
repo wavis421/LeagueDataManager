@@ -18,6 +18,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 public class MySqlDatabase {
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
+	private static final int REPO_NAME_WIDTH = 50;
 	private static final int LOG_APPEND_WIDTH = 100;
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
@@ -1098,6 +1099,8 @@ public class MySqlDatabase {
 				if (comments.length() >= COMMENT_WIDTH)
 					comments = comments.substring(0, COMMENT_WIDTH);
 				updateAttendanceStmt.setString(col++, comments);
+				if (repoName.length() >= REPO_NAME_WIDTH)
+					repoName = repoName.substring(0, REPO_NAME_WIDTH);
 				updateAttendanceStmt.setString(col++, repoName);
 				updateAttendanceStmt.setInt(col++, clientID);
 				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));

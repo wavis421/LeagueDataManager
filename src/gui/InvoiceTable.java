@@ -80,20 +80,23 @@ public class InvoiceTable extends JPanel {
 
 	private void configureColumnWidths() {
 		// Configure column widths
-		table.getColumnModel().getColumn(InvoiceTableModel.INVOICE_DATE_COLUMN).setMaxWidth(95);
-		table.getColumnModel().getColumn(InvoiceTableModel.INVOICE_DATE_COLUMN).setPreferredWidth(95);
-		table.getColumnModel().getColumn(InvoiceTableModel.START_DATE_COLUMN).setMaxWidth(95);
-		table.getColumnModel().getColumn(InvoiceTableModel.START_DATE_COLUMN).setPreferredWidth(95);
-		table.getColumnModel().getColumn(InvoiceTableModel.END_DATE_COLUMN).setMaxWidth(95);
-		table.getColumnModel().getColumn(InvoiceTableModel.END_DATE_COLUMN).setPreferredWidth(95);
+		table.getColumnModel().getColumn(InvoiceTableModel.INVOICE_DATE_COLUMN).setMaxWidth(94);
+		table.getColumnModel().getColumn(InvoiceTableModel.INVOICE_DATE_COLUMN).setPreferredWidth(94);
+		table.getColumnModel().getColumn(InvoiceTableModel.START_DATE_COLUMN).setMaxWidth(94);
+		table.getColumnModel().getColumn(InvoiceTableModel.START_DATE_COLUMN).setPreferredWidth(94);
+		table.getColumnModel().getColumn(InvoiceTableModel.END_DATE_COLUMN).setMaxWidth(94);
+		table.getColumnModel().getColumn(InvoiceTableModel.END_DATE_COLUMN).setPreferredWidth(94);
 		table.getColumnModel().getColumn(InvoiceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(250);
 		table.getColumnModel().getColumn(InvoiceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(200);
-		table.getColumnModel().getColumn(InvoiceTableModel.PAYMENT_METHOD_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(InvoiceTableModel.PAYER_NAME_COLUMN).setMaxWidth(250);
+		table.getColumnModel().getColumn(InvoiceTableModel.PAYER_NAME_COLUMN).setPreferredWidth(200);
+		table.getColumnModel().getColumn(InvoiceTableModel.PAYMENT_METHOD_COLUMN).setMaxWidth(200);
 		table.getColumnModel().getColumn(InvoiceTableModel.PAYMENT_METHOD_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(InvoiceTableModel.AMOUNT_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(InvoiceTableModel.INVOICE_NUMBER_COLUMN).setMinWidth(200);
+		table.getColumnModel().getColumn(InvoiceTableModel.TRANSACTION_ID_COLUMN).setMinWidth(200);
 		table.getColumnModel().getColumn(InvoiceTableModel.ITEM_NAME_COLUMN).setMinWidth(250);
-		table.getColumnModel().getColumn(InvoiceTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+		table.getColumnModel().getColumn(InvoiceTableModel.CLIENT_ID_COLUMN).setMinWidth(76);
+		table.getColumnModel().getColumn(InvoiceTableModel.CLIENT_ID_COLUMN).setMaxWidth(80);
 	}
 
 	public class InvoiceTableRenderer extends JLabel implements TableCellRenderer {

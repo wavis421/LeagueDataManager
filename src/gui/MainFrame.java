@@ -36,8 +36,8 @@ import javax.swing.event.ChangeListener;
 
 import controller.Controller;
 import model.AttendanceModel;
-import model.LogDataModel;
 import model.InvoiceModel;
+import model.LogDataModel;
 
 public class MainFrame {
 	/* Private constants */
@@ -190,7 +190,7 @@ public class MainFrame {
 		JMenu reportsMenu = new JMenu("Reports");
 		menuBar.add(reportsMenu);
 		createReportsMenu(reportsMenu);
-		
+
 		// Add help menu to menu bar
 		JMenu helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
@@ -391,7 +391,7 @@ public class MainFrame {
 			}
 		});
 	}
-	
+
 	private void createReportsMenu(JMenu reportsMenu) {
 		// Create sub-menu for the Reports menu
 		JMenuItem invoiceMenu = new JMenuItem("Invoices by Month ");
@@ -574,7 +574,7 @@ public class MainFrame {
 		activeTable = invoiceTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}
-	
+
 	private void removeDataFromTables() {
 		// Remove data from Student table and Attendance table
 		studentTable.removeData();
