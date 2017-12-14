@@ -11,6 +11,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 import org.joda.time.DateTime;
 
@@ -51,8 +52,9 @@ public class Pike13Api {
 	private final int WKLY_EVENT_NAME_IDX = 3;
 
 	// Indices for transaction data
-	private final int PAYMENT_METHOD_IDX = 0;
-	private final int TRANSACTION_ID_IDX = 1;
+	private final int PLAN_ID_IDX = 0;
+	private final int PAYMENT_METHOD_IDX = 1;
+	private final int TRANSACTION_ID_IDX = 2;
 
 	// Indices for invoice data
 	private final int INVOICE_ISSUED_DATE_IDX = 0;
@@ -117,8 +119,8 @@ public class Pike13Api {
 			// Select fields
 			+ "\"fields\":[\"issued_date\",\"gross_amount\",\"product_name\",\"plan_id\",\"coupon_code\","
 			+ "            \"recipient_names\",\"invoice_payer_name\"],"
-			// Page limit max is 100
-			+ "\"page\":{\"limit\":100},"
+			// Page limit max is 150
+			+ "\"page\":{\"limit\":150},"
 			// Filter on hard-coded month for now
 			+ "\"filter\":[\"and\",[[\"gt\",\"issued_date\",\"2017-11-01\"],"
 			+ "                     [\"eq\",\"revenue_category\",\"Courses\"]]]}}}";
@@ -128,11 +130,11 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"payment_method\",\"processor_transaction_id\"],"
-			// Page limit max is 10
-			+ "\"page\":{\"limit\":10},"
+			+ "\"fields\":[\"plan_id\",\"payment_method\",\"processor_transaction_id\"],"
+			// Page limit max is 150
+			+ "\"page\":{\"limit\":150},"
 			// Filter on hard-coded month for now
-			+ "\"filter\":[\"eq\",\"plan_id\",0]}}}";
+			+ "\"filter\":[\"gt\",\"transaction_date\",\"2017-11-01\"]}}}";
 
 	// Get person plan data
 	private final String getPersonPlanData = "{\"data\":{\"type\":\"queries\","
@@ -364,23 +366,27 @@ public class Pike13Api {
 				JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
 
 				// Get invoice date/amount, student name, product name
+				int planID = invoiceArray.getInt(INVOICE_PLAN_ID_IDX);
 				InvoiceModel model = new InvoiceModel(stripQuotes(invoiceArray.get(INVOICE_ISSUED_DATE_IDX).toString()),
 						invoiceArray.getString(INVOICE_PRODUCT_NAME_IDX).toString(), "", "", 0,
 						invoiceArray.getString(INVOICE_RECIPIENT_NAME_IDX),
-						invoiceArray.getString(INVOICE_PAYER_NAME_IDX), "", "",
+						invoiceArray.getString(INVOICE_PAYER_NAME_IDX), planID, "", "",
 						invoiceArray.getInt(INVOICE_GROSS_AMOUNT_IDX));
 
-				// Fill in remaining person plan data: payment method/id, start/end date
-				int planID = invoiceArray.getInt(INVOICE_PLAN_ID_IDX);
-				getPaymentInfo(model, planID);
+				JsonValue couponCode = invoiceArray.get(INVOICE_COUPON_CODE_IDX);
+				if (couponCode != null)
+					model.setPayMethod(stripQuotes(couponCode.toString()));
+
+				// Fill in remaining person plan data: client ID, start/end date
 				getPersonPlans(model, planID);
-				if (model.getPayMethod().equals(""))
-					model.setPayMethod(invoiceArray.getString(INVOICE_COUPON_CODE_IDX));
 
 				// Add invoice to list
 				invoiceList.add(model);
 			}
 			conn.disconnect();
+
+			// Fill in payment method and transaction ID
+			getPaymentInfo(invoiceList);
 
 			// Now clear out all start/end date fields except the final one
 			for (int i = invoiceList.size() - 1; i >= 0; i--) {
@@ -404,17 +410,14 @@ public class Pike13Api {
 		return invoiceList;
 	}
 
-	private ArrayList<InvoiceModel> getPaymentInfo(InvoiceModel model, Integer planID) {
-		ArrayList<InvoiceModel> transactionList = new ArrayList<InvoiceModel>();
-
+	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList) {
 		try {
 			// Get URL connection with authorization
 			HttpURLConnection conn = connectUrl(
 					"https://jtl.pike13.com/desk/api/v3/reports/invoice_item_transactions/queries");
 
 			// Send the query
-			String transString = getTransactionData.replace("\"plan_id\",0", "\"plan_id\"," + planID.toString());
-			sendQueryToUrl(conn, transString);
+			sendQueryToUrl(conn, getTransactionData);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
@@ -422,30 +425,36 @@ public class Pike13Api {
 				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
-				return transactionList;
+				return;
 			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
 			if (jsonObj == null) {
 				conn.disconnect();
-				return transactionList;
+				return;
 			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
 				// Get fields for each invoice in the list
 				JsonArray transactionArray = (JsonArray) jsonArray.get(i);
-				model.setPayMethod(stripQuotes(transactionArray.get(PAYMENT_METHOD_IDX).toString()));
-				model.setTransactionID(transactionArray.getString(TRANSACTION_ID_IDX).toString());
+
+				for (int j = 0; j < invoiceList.size(); j++) {
+					InvoiceModel invoice = invoiceList.get(j);
+					if (transactionArray.getInt(PLAN_ID_IDX) == invoice.getPlanID()) {
+						// Plan ID match, update transaction ID and payment method
+						invoice.setPayMethod(stripQuotes(transactionArray.get(PAYMENT_METHOD_IDX).toString()));
+						invoice.setTransactionID(transactionArray.getString(TRANSACTION_ID_IDX).toString());
+						break;
+					}
+				}
 			}
 			conn.disconnect();
 
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Transaction DB: " + e1.getMessage());
 		}
-
-		return transactionList;
 	}
 
 	private void getPersonPlans(InvoiceModel invoice, Integer planID) {

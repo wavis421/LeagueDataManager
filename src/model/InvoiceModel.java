@@ -4,10 +4,10 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 
 	private String transactionID, invoiceDate, itemName, itemStartDate, itemEndDate, payMethod;
 	String studentName, payerName;
-	private Integer amount, clientID;
+	private Integer amount, clientID, planID;
 
 	public InvoiceModel(String invoiceDate, String itemName, String itemStartDate, String itemEndDate, int clientID,
-			String studentName, String payerName, String payMethod, String transactionID, int amount) {
+			String studentName, String payerName, int planID, String payMethod, String transactionID, int amount) {
 		this.invoiceDate = invoiceDate;
 		this.itemName = itemName;
 		this.itemStartDate = itemStartDate;
@@ -17,6 +17,7 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 		this.studentName = studentName;
 		this.payerName = payerName;
 
+		this.planID = planID;
 		this.payMethod = payMethod;
 		this.transactionID = transactionID;
 		this.amount = amount;
@@ -67,6 +68,10 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 			return "";
 		else
 			return payerName;
+	}
+
+	public int getPlanID() {
+		return planID;
 	}
 
 	public String getPayMethod() {

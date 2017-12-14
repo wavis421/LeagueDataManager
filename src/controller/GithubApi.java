@@ -55,14 +55,10 @@ public class GithubApi {
 					// New github user, need to get new repo array
 					lastGithubUser = gitUser;
 					repoList = repoService.getRepositories(gitUser);
-					if (repoList.size() == 0)
-						continue;
 
 					// Loop through all repos to check for updates
 					for (int j = 0; j < repoList.size(); j++) {
 						Repository repo = repoList.get(j);
-						if (repo.getSize() == 0)
-							continue;
 
 						// Update all user comments in this repo list
 						updateUserGithubComments(gitUser, startDate, eventList, repo);
@@ -107,8 +103,6 @@ public class GithubApi {
 
 				for (int j = 0; j < repoList.size(); j++) {
 					Repository repo = repoList.get(j);
-					if (repo.getSize() == 0)
-						continue;
 
 					if (repo.getName().endsWith("-" + gitUser)) {
 						// Update all user comments in this repo list
@@ -165,7 +159,7 @@ public class GithubApi {
 			Repository repo) {
 		// Get all the commits for this repo within date range
 		try {
-			for (Collection<RepositoryCommit> commitPage : commitService.pageCommits(repo, 200)) {
+			for (Collection<RepositoryCommit> commitPage : commitService.pageCommits(repo, 20)) {
 				// Loop through each commit for this page
 				for (RepositoryCommit commit : commitPage) {
 					// Get commit date

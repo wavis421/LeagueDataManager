@@ -93,7 +93,7 @@ public class InvoiceTable extends JPanel {
 		table.getColumnModel().getColumn(InvoiceTableModel.PAYMENT_METHOD_COLUMN).setMaxWidth(200);
 		table.getColumnModel().getColumn(InvoiceTableModel.PAYMENT_METHOD_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(InvoiceTableModel.AMOUNT_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(InvoiceTableModel.TRANSACTION_ID_COLUMN).setMinWidth(200);
+		table.getColumnModel().getColumn(InvoiceTableModel.TRANSACTION_ID_COLUMN).setMinWidth(190);
 		table.getColumnModel().getColumn(InvoiceTableModel.ITEM_NAME_COLUMN).setMinWidth(250);
 		table.getColumnModel().getColumn(InvoiceTableModel.CLIENT_ID_COLUMN).setMinWidth(76);
 		table.getColumnModel().getColumn(InvoiceTableModel.CLIENT_ID_COLUMN).setMaxWidth(80);
