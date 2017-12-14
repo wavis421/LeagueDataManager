@@ -146,7 +146,7 @@ public class Controller {
 
 		// Update changes in database
 		if (eventList.size() > 0)
-			sqlDb.importAtttendance(eventList);
+			sqlDb.importAttendance(eventList);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());

@@ -976,7 +976,7 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
-	public void importAtttendance(ArrayList<AttendanceEventModel> importList) {
+	public void importAttendance(ArrayList<AttendanceEventModel> importList) {
 		ArrayList<AttendanceEventModel> dbList = getAllEvents();
 		ArrayList<StudentModel> studentList = getAllStudents();
 		int dbListIdx = 0;
