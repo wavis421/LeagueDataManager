@@ -171,6 +171,8 @@ public class LogTable extends JPanel {
 				setText(((Date) value).toString());
 			else if (value instanceof StudentNameModel)
 				setText(((StudentNameModel) value).toString());
+			else if (value == null)
+				setText("");
 			else
 				setText((String) value);
 

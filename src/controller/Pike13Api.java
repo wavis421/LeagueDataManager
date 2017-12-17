@@ -16,6 +16,7 @@ import javax.json.JsonValue;
 import org.joda.time.DateTime;
 
 import model.AttendanceEventModel;
+import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
@@ -122,7 +123,7 @@ public class Pike13Api {
 			// Page limit max is 150
 			+ "\"page\":{\"limit\":150},"
 			// Filter on hard-coded month for now
-			+ "\"filter\":[\"and\",[[\"gt\",\"issued_date\",\"2017-11-01\"],"
+			+ "\"filter\":[\"and\",[[\"btw\",\"issued_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"eq\",\"revenue_category\",\"Courses\"]]]}}}";
 
 	// Get transaction data
@@ -134,7 +135,7 @@ public class Pike13Api {
 			// Page limit max is 150
 			+ "\"page\":{\"limit\":150},"
 			// Filter on hard-coded month for now
-			+ "\"filter\":[\"gt\",\"transaction_date\",\"2017-11-01\"]}}}";
+			+ "\"filter\":[\"btw\",\"transaction_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
 
 	// Get person plan data
 	private final String getPersonPlanData = "{\"data\":{\"type\":\"queries\","
@@ -334,7 +335,7 @@ public class Pike13Api {
 		return scheduleList;
 	}
 
-	public ArrayList<InvoiceModel> getInvoices() {
+	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
 		ArrayList<InvoiceModel> invoiceList = new ArrayList<InvoiceModel>();
 
 		try {
@@ -342,7 +343,10 @@ public class Pike13Api {
 			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/invoice_items/queries");
 
 			// Send the query
-			sendQueryToUrl(conn, getInvoiceData);
+			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00",
+					dateRange.getStartDate().toString("yyyy-MM-dd"));
+			invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
+			sendQueryToUrl(conn, invoiceCmd);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
@@ -386,7 +390,7 @@ public class Pike13Api {
 			conn.disconnect();
 
 			// Fill in payment method and transaction ID
-			getPaymentInfo(invoiceList);
+			getPaymentInfo(invoiceList, dateRange);
 
 			// Now clear out all start/end date fields except the final one
 			for (int i = invoiceList.size() - 1; i >= 0; i--) {
@@ -410,14 +414,17 @@ public class Pike13Api {
 		return invoiceList;
 	}
 
-	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList) {
+	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList, DateRangeEvent dateRange) {
 		try {
 			// Get URL connection with authorization
 			HttpURLConnection conn = connectUrl(
 					"https://jtl.pike13.com/desk/api/v3/reports/invoice_item_transactions/queries");
 
 			// Send the query
-			sendQueryToUrl(conn, getTransactionData);
+			String transCmd = getTransactionData.replaceFirst("0000-00-00",
+					dateRange.getStartDate().toString("yyyy-MM-dd"));
+			transCmd = transCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
+			sendQueryToUrl(conn, transCmd);
 
 			// Check result
 			int responseCode = conn.getResponseCode();

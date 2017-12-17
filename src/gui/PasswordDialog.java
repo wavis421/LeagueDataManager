@@ -3,10 +3,12 @@ package gui;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.border.Border;
 
 public class PasswordDialog extends JDialog implements KeyListener {
 	String password;
@@ -20,6 +22,11 @@ public class PasswordDialog extends JDialog implements KeyListener {
 		pwField.addKeyListener(this);
 		panel.add(pwField);
 
+		// Add borders
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+		pwField.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+		
 		// Add panel to dialog
 		add(panel);
 

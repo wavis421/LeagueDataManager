@@ -36,6 +36,7 @@ import javax.swing.event.ChangeListener;
 
 import controller.Controller;
 import model.AttendanceModel;
+import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
 
@@ -51,7 +52,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Class Schedule";
-	private static final String INVOICE_TITLE = "Invoices";
+	private static final String INVOICE_TITLE = "Course Invoices for ";
 	private static final String LOGGING_TITLE = "Logging Data";
 
 	private static final int STUDENT_TABLE_ALL = 0;
@@ -397,10 +398,14 @@ public class MainFrame {
 		JMenuItem invoiceMenu = new JMenuItem("Invoices by Month ");
 		reportsMenu.add(invoiceMenu);
 
-		// Set up listeners for Schedule menu
+		// Set up listeners for Reports menu
 		invoiceMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshInvoiceTable();
+				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog();
+				DateRangeEvent dateRange = dateSelector.getDialogResponse();
+				if (dateRange != null) {
+					refreshInvoiceTable(dateRange);
+				}
 			}
 		});
 	}
@@ -563,13 +568,13 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
-	private void refreshInvoiceTable() {
+	private void refreshInvoiceTable(DateRangeEvent dateRange) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add invoice data table and header
-		invoiceTable.setData(tablePanel, controller.getInvoices());
-		headerLabel.setText(INVOICE_TITLE + " for November 2017");
+		invoiceTable.setData(tablePanel, controller.getInvoices(dateRange));
+		headerLabel.setText(INVOICE_TITLE + dateRange.toString());
 
 		activeTable = invoiceTable.getTable();
 		activeTableHeader = headerLabel.getText();

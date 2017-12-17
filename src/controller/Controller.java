@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 
 import model.AttendanceEventModel;
 import model.AttendanceModel;
+import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
@@ -104,12 +105,12 @@ public class Controller {
 	 * ------- File & data import/export -------
 	 */
 
-	public ArrayList<InvoiceModel> getInvoices() {
+	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Get invoice data from Pike13
-		ArrayList<InvoiceModel> invoiceList = pike13Api.getInvoices();
+		ArrayList<InvoiceModel> invoiceList = pike13Api.getInvoices(dateRange);
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
