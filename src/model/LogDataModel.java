@@ -78,7 +78,7 @@ public class LogDataModel {
 
 	public StudentNameModel getStudentName() {
 		if (studentName == null)
-			return new StudentNameModel("","",false);
+			return new StudentNameModel("", "", false);
 		else
 			return studentName;
 	}

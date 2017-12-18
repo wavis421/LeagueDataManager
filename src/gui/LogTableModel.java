@@ -57,10 +57,7 @@ public class LogTableModel extends AbstractTableModel {
 		return false;
 	}
 
-	@Override
-	public Object getValueAt(int row, int col) {
-		LogDataModel logData = logList.get(row);
-
+	private Object getValueByColumn(LogDataModel logData, int col) {
 		switch (col) {
 		case DATE_COLUMN:
 			return logData.getDate();
@@ -75,5 +72,38 @@ public class LogTableModel extends AbstractTableModel {
 			return "  " + logData.getLogString();
 		}
 		return null;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		LogDataModel logData = logList.get(row);
+		return getValueByColumn(logData, col);
+	}
+
+	// CSV file export support
+	public String getCsvFileHeader() {
+		String header = "";
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				header += ",";
+			header += colNames[i];
+		}
+		return header;
+	}
+
+	public ArrayList<LogDataModel> getCsvDataList() {
+		return logList;
+	}
+
+	public String convertItemToCsv(Object item) {
+		String csvString = "";
+		LogDataModel logData = (LogDataModel) item;
+
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				csvString += ",";
+			csvString += getValueByColumn(logData, i);
+		}
+		return csvString;
 	}
 }

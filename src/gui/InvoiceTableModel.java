@@ -60,10 +60,7 @@ public class InvoiceTableModel extends AbstractTableModel {
 		return false;
 	}
 
-	@Override
-	public Object getValueAt(int row, int col) {
-		InvoiceModel invoiceData = invoiceList.get(row);
-
+	private Object getValueByColumn(InvoiceModel invoiceData, int col) {
 		switch (col) {
 		case INVOICE_DATE_COLUMN:
 			return invoiceData.getInvoiceDate();
@@ -78,14 +75,53 @@ public class InvoiceTableModel extends AbstractTableModel {
 		case CLIENT_ID_COLUMN:
 			return invoiceData.getClientID().toString();
 		case START_DATE_COLUMN:
-			return invoiceData.getItemStartDate();
+			if (invoiceData.getItemStartDate() == null)
+				return "";
+			else
+				return invoiceData.getItemStartDate();
 		case END_DATE_COLUMN:
-			return invoiceData.getItemEndDate();
+			if (invoiceData.getItemEndDate() == null)
+				return "";
+			else
+				return invoiceData.getItemEndDate();
 		case PAYMENT_METHOD_COLUMN:
 			return invoiceData.getPayMethod();
 		case TRANSACTION_ID_COLUMN:
 			return invoiceData.getTransactionID();
 		}
 		return null;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		InvoiceModel invoiceData = invoiceList.get(row);
+		return getValueByColumn(invoiceData, col);
+	}
+
+	// CSV file export support
+	public String getCsvFileHeader() {
+		String header = "";
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				header += ",";
+			header += colNames[i];
+		}
+		return header;
+	}
+
+	public ArrayList<InvoiceModel> getCsvDataList() {
+		return invoiceList;
+	}
+
+	public String convertItemToCsv(Object item) {
+		String csvString = "";
+		InvoiceModel invoice = (InvoiceModel) item;
+
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				csvString += ",";
+			csvString += getValueByColumn(invoice, i);
+		}
+		return csvString;
 	}
 }

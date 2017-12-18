@@ -19,8 +19,8 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int GRAD_YEAR_COLUMN = 6;
 
 	private ArrayList<StudentModel> studentList;
-	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ",
-			" Start Date ", " Grad Yr " };
+	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
+			" Grad Yr " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;
@@ -69,10 +69,7 @@ public class StudentTableModel extends AbstractTableModel {
 		return false;
 	}
 
-	@Override
-	public Object getValueAt(int row, int col) {
-		StudentModel student = studentList.get(row);
-
+	public Object getValueByColumn(StudentModel student, int col) {
 		switch (col) {
 		case CLIENT_ID_COLUMN:
 			return String.valueOf(student.getClientID());
@@ -96,5 +93,42 @@ public class StudentTableModel extends AbstractTableModel {
 				return String.valueOf(student.getGradYear());
 		}
 		return null;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		StudentModel student = studentList.get(row);
+		return getValueByColumn(student, col);
+	}
+
+	// CSV file export support
+	public String getCsvFileHeader() {
+		String header = "";
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				header += ",";
+			header += colNames[i];
+		}
+		return header;
+	}
+
+	public ArrayList<StudentModel> getCsvDataList() {
+		return studentList;
+	}
+
+	public String convertItemToCsv(Object item) {
+		String csvString = "";
+		StudentModel student = (StudentModel) item;
+
+		for (int i = 0; i < colNames.length; i++) {
+			if (i > 0)
+				csvString += ",";
+
+			if (i == STUDENT_NAME_COLUMN)
+				csvString += getValueByColumn(student, i).toString();
+			else
+				csvString += getValueByColumn(student, i);
+		}
+		return csvString;
 	}
 }

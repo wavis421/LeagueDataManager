@@ -13,7 +13,8 @@ public class AttendanceTableModel extends AbstractTableModel {
 	private static final int TABLE_NUM_COLUMNS = 3;
 
 	private Object[][] tableObjects;
-	private final String[] colNames = { " ID ", " Student Name ", " Class Date / Class Name / Repository Name / Github Comments " };
+	private final String[] colNames = { " ID ", " Student Name ",
+			" Class Date / Class Name / Repository Name / Github Comments " };
 
 	public AttendanceTableModel(ArrayList<AttendanceModel> attendance) {
 		initializeTableData(attendance);

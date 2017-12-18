@@ -205,12 +205,14 @@ public class MainFrame {
 		JMenuItem viewLogDataItem = new JMenuItem("View Log Data ");
 		JMenuItem clearLogDataItem = new JMenuItem("Clear Log Data ");
 		JMenuItem printTableItem = new JMenuItem("Print Table");
+		JMenuItem exportTableItem = new JMenuItem("Export Table to CSV File");
 		JMenuItem exitItem = new JMenuItem("Exit ");
 
 		// Add these sub-menus to File menu
 		fileMenu.add(viewLogDataItem);
 		fileMenu.add(clearLogDataItem);
 		fileMenu.add(printTableItem);
+		fileMenu.add(exportTableItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
@@ -249,6 +251,14 @@ public class MainFrame {
 
 				// Set cursor back to default
 				frame.setCursor(Cursor.getDefaultCursor());
+			}
+		});
+		exportTableItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (activeTableHeader.startsWith(SCHEDULE_TITLE)) {
+					activeTable = scheduleTable.getTable();
+				}
+				CsvFileWriter.writeTableToCsvFile(frame, activeTable.getModel());
 			}
 		});
 		exitItem.addActionListener(new ActionListener() {
