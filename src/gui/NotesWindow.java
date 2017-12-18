@@ -16,29 +16,37 @@ public class NotesWindow {
 	public static final int FEEDBACK = 2;
 	public static final int ABOUT = 3;
 
-	private static final String[] notes = {
+	private static final String[] notes = { "\n"
 			// Menu Description
-			"\n   File Menu:\n"
-					+ "      => Viewing the LOG Data shows the results of the daily imports of student attendance.\n"
-					+ "            You can select and right click to view a student's information or attendance data.\n"
-					+ "      => The Print Table menu option prints the currently displayed table. Note that the printing uses auto-fit width,\n"
-					+ "            so if you're printing attendance data then landscape will be your best option.\n\n"
-					// Student Menu
-					+ "   Student Menu:\n      => The Student menu shows basic information for ALL students and for inactive students.\n"
-					+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
-					+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
-					+ "            See below for more details regarding attendance.\n\n"
-					// Attendance Menu
-					+ "   Attendance Menu:\n"
-					+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
-					+ "      => You can right-click on the user name to get the Student Info or Student Attendance.\n"
-					+ "      => Double-click on the attendance column to get the complete attendance history for a student.\n"
-					+ "      => Right-click on any of the attendance rows to get attendance data by Class to determine what that class has been\n"
-					+ "            working on for the last 4 weeks. \n\n"
-					// Schedule Menu
-					+ "   Schedule Menu:\n"
-					+ "      => The Schedule menu shows the class schedule by day. You can then select a class and right click\n"
-					+ "            to view the data for that class.",
+			+ "   File Menu:\n"
+			+ "      => Viewing the LOG Data shows the results of the daily imports of student attendance.\n"
+			+ "            You can select and right click to view a student's information or attendance data.\n"
+			+ "      => The Print Table menu option prints the currently displayed table. Note that the printing uses auto-fit width,\n"
+			+ "            so if you're printing attendance data then landscape will be your best option.\n"
+			+ "      => The Export Data to CSV file option allows you to export the currently displayed table to\n"
+			+ "            a CSV file, which can than be imported to an Excel spreadsheet. The tables than can\n"
+			+ "             be exported include the Log Data table, Student table and Report tables.\n\n"
+			// Student Menu
+			+ "   Student Menu:\n"
+			+ "      => The Student menu shows basic information for ALL students and for inactive students.\n"
+			+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
+			+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
+			+ "            See below for more details regarding attendance.\n\n"
+			// Attendance Menu
+			+ "   Attendance Menu:\n"
+			+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
+			+ "      => You can right-click on the user name to get the Student Info or Student Attendance.\n"
+			+ "      => Double-click on the attendance column to get the complete attendance history for a student.\n"
+			+ "      => Right-click on any of the attendance rows to get attendance data by Class to determine what that class has been\n"
+			+ "            working on for the last 4 weeks. \n\n"
+			// Schedule Menu
+			+ "   Schedule Menu:\n"
+			+ "      => The Schedule menu shows the class schedule by day. You can then select a class and right click\n"
+			+ "            to view the data for that class.\n\n"
+			// Reports Menu
+			+ "   Reports Menu:\n"
+			+ "      => There is currently only one active report in the report menu, which provides Course Invoices for\n"
+			+ "             a specified date interval. This report provides payer information and detaied transaction data.\n\n",
 
 			// Examples
 			"\n   YOU ARE A SUB FOR A CLASS:\n        There are two ways to select a class that you want to view:\n"
@@ -64,12 +72,16 @@ public class NotesWindow {
 					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \n",
 
 			// About League Data Manager
-			"\n   VERSION 2.0\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
-					+ "      The League Data Manager gets data from:\n         => Pike13 client database\n"
-					+ "         => Pike13 enrollment database\n         => Pike13 schedule database\n         => Github \n\n"
+			"\n   VERSION 2.1\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
+					+ "      The League Data Manager gets data from:\n"
+					+ "         => Pike13 client database\n"
+					+ "         => Pike13 enrollment database\n"
+					+ "         => Pike13 schedule database\n"
+					+ "         => Pike13 invoice database\n"
+					+ "         => Github \n\n"
 					+ "      This data is then merged into a single database. \n"
-					+ "      This merged database is a slave to all 4 of the above databases, and does not create any new data on its own.\n"
-					+ "      Once every 24 hours, the application will search for all completed attendance for that day, which triggers a search \n"
+					+ "      This merged database is a slave to all of the above databases, and does not create any new data on its own.\n"
+					+ "      Once every 24 hours, the application searches for all completed attendance for that day, which triggers a search \n"
 					+ "          in Github for the related student comments and updates the database accordingly. \n\n"
 					+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \n"
 					+ "          students that they need to write descriptive comments  when they sync to Github!!\n"
@@ -80,8 +92,8 @@ public class NotesWindow {
 	private static final String[] titles = { "Menu Description ", "Examples ", "Provide Feedback ",
 			"About League Data Manager " };
 
-	private static final Dimension[] sizes = { new Dimension(820, 550), new Dimension(630, 420),
-			new Dimension(720, 270), new Dimension(825, 500) };
+	private static final Dimension[] sizes = { new Dimension(820, 700), new Dimension(630, 420),
+			new Dimension(720, 270), new Dimension(825, 520) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);
