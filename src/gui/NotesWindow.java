@@ -46,7 +46,7 @@ public class NotesWindow {
 			// Reports Menu
 			+ "   Reports Menu:\n"
 			+ "      => There is currently only one active report in the report menu, which provides Course Invoices for\n"
-			+ "             a specified date interval. This report provides payer information and detaied transaction data.\n\n",
+			+ "             a specified date interval. This report provides payer information and detailed transaction data.\n\n",
 
 			// Examples
 			"\n   YOU ARE A SUB FOR A CLASS:\n        There are two ways to select a class that you want to view:\n"
