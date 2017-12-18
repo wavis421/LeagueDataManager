@@ -405,7 +405,7 @@ public class MainFrame {
 
 	private void createReportsMenu(JMenu reportsMenu) {
 		// Create sub-menu for the Reports menu
-		JMenuItem invoiceMenu = new JMenuItem("Invoices by Month ");
+		JMenuItem invoiceMenu = new JMenuItem("Course Invoices ");
 		reportsMenu.add(invoiceMenu);
 
 		// Set up listeners for Reports menu
