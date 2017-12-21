@@ -22,9 +22,11 @@ import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
 import model.StudentImportModel;
+import model.StudentModel;
 
 public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
+	private final String DATABASE_START_DATE = "2017-09-01";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -100,6 +102,13 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"starts\",\"service_category\",\"Class\"]]]}}}";
+
+	private final String getEnrollmentData2WithName = "},"
+			// Filter on State completed, since date and student name
+			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
+			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "           [\"starts\",\"service_category\",\"Class\"],"
+			+ "           [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
 
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
@@ -212,14 +221,19 @@ public class Pike13Api {
 		return studentList;
 	}
 
-	public ArrayList<AttendanceEventModel> getEnrollment(String startDate) {
-		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
-		boolean hasMore = false;
-		String lastKey = "";
-
+	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {
 		// Insert start date and end date into enrollment command string
 		String enroll2 = getEnrollmentData2.replaceFirst("0000-00-00", startDate);
 		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
+
+		// Get attendance for all students
+		return getEnrollmentByCmdString(enroll2);
+	}
+
+	private ArrayList<AttendanceEventModel> getEnrollmentByCmdString(String cmdString) {
+		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
+		boolean hasMore = false;
+		String lastKey = "";
 
 		try {
 			do {
@@ -228,9 +242,9 @@ public class Pike13Api {
 
 				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn, getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
+					sendQueryToUrl(conn, getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + cmdString);
 				else
-					sendQueryToUrl(conn, getEnrollmentData1 + enroll2);
+					sendQueryToUrl(conn, getEnrollmentData1 + cmdString);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
@@ -273,6 +287,37 @@ public class Pike13Api {
 
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Enrollment DB: " + e1.getMessage());
+		}
+
+		return eventList;
+	}
+
+	public ArrayList<AttendanceEventModel> getMissingAttendance(String endDate, ArrayList<StudentModel> studentList) {
+		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
+
+		// Insert end date into enrollment command string
+		String enroll2 = getEnrollmentData2WithName.replaceFirst("1111-11-11", endDate);
+
+		for (int i = 0; i < studentList.size(); i++) {
+			StudentModel student = studentList.get(i);
+			if (student.getStartDate() != null) {
+				// Get student start date and ignore if date is beyond end date
+				String catchupStartDate = student.getStartDate().toString();
+				if (catchupStartDate.compareTo(endDate) >= 0)
+					continue;
+
+				// Catch up only as far back as database start
+				if (catchupStartDate.compareTo(DATABASE_START_DATE) < 0)
+					catchupStartDate = DATABASE_START_DATE;
+
+				// Get attendance for this student
+				String enrollTemp = enroll2.replaceFirst("0000-00-00", catchupStartDate);
+				enrollTemp = enrollTemp.replaceFirst("NNNNNN", student.getFirstName() + " " + student.getLastName());
+				eventList.addAll(getEnrollmentByCmdString(enrollTemp));
+
+				// Set student 'NewStudent' flag back to false
+				mysqlDb.updateStudentFlags(student, "NewStudent", 0);
+			}
 		}
 
 		return eventList;

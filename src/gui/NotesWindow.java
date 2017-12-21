@@ -75,7 +75,7 @@ public class NotesWindow {
 			"\n   VERSION 2.1\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
 					+ "      The League Data Manager gets data from:\n"
 					+ "         => Pike13 client database\n"
-					+ "         => Pike13 enrollment database\n"
+					+ "         => Pike13 attendance database\n"
 					+ "         => Pike13 schedule database\n"
 					+ "         => Pike13 invoice database\n"
 					+ "         => Github \n\n"

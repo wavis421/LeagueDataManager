@@ -284,14 +284,14 @@ public class MySqlDatabase {
 		return studentList;
 	}
 
-	public ArrayList<StudentModel> getStudentsWithNewGithub() {
+	public ArrayList<StudentModel> getStudentsUsingFlag(String flagName) {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Students WHERE NewGithub = 1;");
+						.prepareStatement("SELECT * FROM Students WHERE " + flagName + " = 1;");
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
@@ -456,7 +456,8 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
-						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, Gender, StartDate, Location, GradYear, isInMasterDb) "
+						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent,"
+								+ "Gender, StartDate, Location, GradYear, isInMasterDb) "
 								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);");
 
 				int col = 1;
@@ -470,6 +471,7 @@ public class MySqlDatabase {
 					addStudentStmt.setString(col++, student.getGithubName());
 					addStudentStmt.setInt(col++, 1);
 				}
+				addStudentStmt.setInt(col++, 1);
 				addStudentStmt.setInt(col++, student.getGender());
 				if (!student.getStartDate().equals(""))
 					addStudentStmt.setDate(col++, java.sql.Date.valueOf(student.getStartDate()));
@@ -511,13 +513,20 @@ public class MySqlDatabase {
 			// Before updating database, determine what fields have changed
 			String changedFields = getStudentChangedFields(importStudent, dbStudent);
 			boolean githubChanged = false;
-			if (changedFields.contains("Github"))
+			boolean newStudent = false;
+
+			// If student added back to DB, mark as new
+			if (changedFields.contains("Added back"))
+				newStudent = true;
+			// If github user has changed or new student, force github updates
+			if (changedFields.contains("Github") || (newStudent && !importStudent.getGithubName().equals("")))
 				githubChanged = true;
 
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = dbConnection.prepareStatement(
-						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
+						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
+								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
@@ -528,6 +537,7 @@ public class MySqlDatabase {
 				else
 					updateStudentStmt.setString(col++, importStudent.getGithubName());
 				updateStudentStmt.setInt(col++, githubChanged ? 1 : 0);
+				updateStudentStmt.setInt(col++, newStudent ? 1 : 0);
 				updateStudentStmt.setInt(col++, importStudent.getGender());
 				if (importStudent.getStartDate() != null && !importStudent.getStartDate().equals(""))
 					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(importStudent.getStartDate()));
@@ -562,14 +572,14 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateStudentGithubFlag(StudentModel student, int newGithubFlag) {
+	public void updateStudentFlags(StudentModel student, String flagName, int newFlagState) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = dbConnection
-						.prepareStatement("UPDATE Students SET NewGithub=? WHERE ClientID=?;");
+						.prepareStatement("UPDATE Students SET " + flagName + "=? WHERE ClientID=?;");
 
-				updateStudentStmt.setInt(1, newGithubFlag);
+				updateStudentStmt.setInt(1, newFlagState);
 				updateStudentStmt.setInt(2, student.getClientID());
 
 				updateStudentStmt.executeUpdate();
@@ -866,7 +876,7 @@ public class MySqlDatabase {
 		AttendanceModel lastAttendanceModel = null;
 
 		// Process DB query result containing attendance by grouping the attendance by
-		// student and then adding the resulting Attendance Model to the the attendanceList.
+		// student and then adding the resulting Attendance Model to the attendanceList.
 		try {
 			while (result.next()) {
 				int thisClientID = result.getInt("Students.ClientID");

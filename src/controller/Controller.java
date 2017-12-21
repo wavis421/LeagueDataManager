@@ -142,12 +142,20 @@ public class Controller {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		// Get data from Pike13
-		ArrayList<AttendanceEventModel> eventList = pike13Api.getEnrollment(startDate);
+		// Get attendance data from Pike13 for all students
+		ArrayList<AttendanceEventModel> eventList = pike13Api.getAttendance(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
 			sqlDb.importAttendance(eventList);
+
+		// Get 'missing' attendance for new and returned students
+		ArrayList<StudentModel> newStudents = sqlDb.getStudentsUsingFlag("NewStudent");
+		if (newStudents.size() > 0) {
+			eventList = pike13Api.getMissingAttendance(startDate, newStudents);
+			if (eventList.size() > 0)
+				sqlDb.importAttendance(eventList);
+		}
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());

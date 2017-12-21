@@ -115,7 +115,7 @@ public class GithubApi {
 
 	public void updateMissingGithubComments() {
 		// Import github comments from start date for new github user names
-		ArrayList<StudentModel> newGithubList = sqlDb.getStudentsWithNewGithub();
+		ArrayList<StudentModel> newGithubList = sqlDb.getStudentsUsingFlag("NewGithub");
 
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
@@ -128,7 +128,7 @@ public class GithubApi {
 				importGithubCommentsByLevel(0, catchupStartDate, student.getClientID());
 
 				// Set student 'new github' flag back to false
-				sqlDb.updateStudentGithubFlag(student, 0);
+				sqlDb.updateStudentFlags(student, "NewGithub", 0);
 			}
 		}
 	}
