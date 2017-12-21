@@ -22,6 +22,7 @@ BEGIN
 		CurrentClass varchar(25) DEFAULT NULL,
 		NumClasses int(11) DEFAULT 0,
 		NewGithub boolean DEFAULT 0,
+		NewStudent boolean DEFAULT 0,
 		
 		UNIQUE KEY (GithubName)
 	) ENGINE=InnoDB;

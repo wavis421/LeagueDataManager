@@ -16,6 +16,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
@@ -93,9 +96,11 @@ public class MainFrame {
 		PasswordDialog pwDialog = new PasswordDialog();
 		String awsPassword = pwDialog.getDialogResponse();
 
-		// Retrieve tokens
+		// Retrieve tokens from registry (Windows only)
 		githubToken = prefs.get("GithubToken", "");
 		pike13Token = prefs.get("Pike13Token", "");
+		if (pike13Token.equals(""))
+			pike13Token = getPike13TokenFromFile();
 
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
@@ -188,9 +193,11 @@ public class MainFrame {
 		createScheduleMenu(scheduleMenu);
 
 		// Add Reports menu to menu bar
-		JMenu reportsMenu = new JMenu("Reports");
-		menuBar.add(reportsMenu);
-		createReportsMenu(reportsMenu);
+		if (!pike13Token.equals("")) {
+			JMenu reportsMenu = new JMenu("Reports");
+			menuBar.add(reportsMenu);
+			createReportsMenu(reportsMenu);
+		}
 
 		// Add help menu to menu bar
 		JMenu helpMenu = new JMenu("Help");
@@ -597,6 +604,23 @@ public class MainFrame {
 		logTable.removeData();
 		scheduleTable.removeData();
 		invoiceTable.removeData();
+	}
+
+	private String getPike13TokenFromFile() {
+		try {
+			File file = new File("./Pike13Token.txt");
+			FileInputStream fis = new FileInputStream(file);
+
+			byte[] data = new byte[(int) file.length()];
+			fis.read(data);
+			fis.close();
+
+			return new String(data, "UTF-8");
+
+		} catch (IOException e) {
+			// Do nothing if file is not there
+		}
+		return "";
 	}
 
 	public static void shutdown() {
