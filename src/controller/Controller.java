@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import org.joda.time.DateTime;
+
 import model.AttendanceEventModel;
 import model.AttendanceModel;
 import model.DateRangeEvent;
@@ -115,7 +117,9 @@ public class Controller {
 	}
 
 	public void importStudentsFromPike13() {
-		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0, " ***");
+		String today = new DateTime().toString("yyyy-MM-dd").substring(0, 10);
+		sqlDb.insertLogData(LogDataModel.STARTING_STUDENT_IMPORT, new StudentNameModel("", "", false), 0,
+				" for " + today + " ***");
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -129,7 +133,8 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.STUDENT_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+				" for " + today + " ***");
 	}
 
 	public void importAttendanceFromPike13(String startDate) {
@@ -156,17 +161,21 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+				" starting from " + startDate.substring(0, 10) + " ***");
 	}
 
 	public void importScheduleFromPike13() {
-		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0, " ***");
+		// Get last 2 weeks of data since if there's a holiday there won't be any data!
+		String startDate = new DateTime().minusDays(14).toString("yyyy-MM-dd");
+		sqlDb.insertLogData(LogDataModel.STARTING_SCHEDULE_IMPORT, new StudentNameModel("", "", false), 0,
+				" as of " + startDate.substring(0, 10) + " ***");
 
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 		// Get data from Pike13
-		ArrayList<ScheduleModel> eventList = pike13Api.getSchedule();
+		ArrayList<ScheduleModel> eventList = pike13Api.getSchedule(startDate);
 
 		// Update changes in database
 		if (eventList.size() > 0)
@@ -174,7 +183,8 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+		sqlDb.insertLogData(LogDataModel.SCHEDULE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
+				" as of " + startDate.substring(0, 10) + " ***");
 	}
 
 	public void importGithubComments(String startDate) {
@@ -196,7 +206,8 @@ public class Controller {
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
 		if (result)
-			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, " ***");
+			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+					" starting from " + startDate.substring(0, 10) + " ***");
 		else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 					": Github API rate limit exceeded ***");

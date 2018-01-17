@@ -323,14 +323,12 @@ public class Pike13Api {
 		return eventList;
 	}
 
-	public ArrayList<ScheduleModel> getSchedule() {
+	public ArrayList<ScheduleModel> getSchedule(String startDate) {
 		ArrayList<ScheduleModel> scheduleList = new ArrayList<ScheduleModel>();
 
 		// Insert start date and end date into schedule command string.
-		// Get last 2 weeks of data since if there's a holiday there won't be any data!
-		DateTime today = new DateTime();
-		String scheduleString = getScheduleData.replaceFirst("0000-00-00", today.minusDays(14).toString("yyyy-MM-dd"));
-		scheduleString = scheduleString.replaceFirst("1111-11-11", today.toString("yyyy-MM-dd"));
+		String scheduleString = getScheduleData.replaceFirst("0000-00-00", startDate);
+		scheduleString = scheduleString.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
 
 		try {
 			// Get URL connection with authorization
