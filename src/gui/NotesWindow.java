@@ -24,11 +24,12 @@ public class NotesWindow {
 			+ "      => The Print Table menu option prints the currently displayed table. Note that the printing uses auto-fit width,\n"
 			+ "            so if you're printing attendance data then landscape will be your best option.\n"
 			+ "      => The Export Data to CSV file option allows you to export the currently displayed table to\n"
-			+ "            a CSV file, which can than be imported to an Excel spreadsheet. The tables than can\n"
-			+ "             be exported include the Log Data table, Student table and Report tables.\n\n"
+			+ "            a CSV file, which can than be imported to an Excel spreadsheet. The tables that can\n"
+			+ "            be exported include the Log Data table, Student table and Report tables.\n"
+			+ "            Note: Reports are visible only to admin users.\n\n"
 			// Student Menu
 			+ "   Student Menu:\n"
-			+ "      => The Student menu shows basic information for ALL students and for inactive students.\n"
+			+ "      => The Student menu shows basic information for ALL students as well as for inactive students.\n"
 			+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
 			+ "      => You can select a student and use the Right Mouse button to view the student's attendance data.\n"
 			+ "            See below for more details regarding attendance.\n\n"
@@ -37,8 +38,8 @@ public class NotesWindow {
 			+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
 			+ "      => You can right-click on the user name to get the Student Info or Student Attendance.\n"
 			+ "      => Double-click on the attendance column to get the complete attendance history for a student.\n"
-			+ "      => Right-click on any of the attendance rows to get attendance data by Class to determine what that class has been\n"
-			+ "            working on for the last 4 weeks. \n\n"
+			+ "      => Select and right-click on any of the attendance rows to get attendance data by Class to \n"
+			+ "            determine what that class has been working on for the last 4 weeks. \n\n"
 			// Schedule Menu
 			+ "   Schedule Menu:\n"
 			+ "      => The Schedule menu shows the class schedule by day. You can then select a class and right click\n"
@@ -46,7 +47,8 @@ public class NotesWindow {
 			// Reports Menu
 			+ "   Reports Menu:\n"
 			+ "      => There is currently only one active report in the report menu, which provides Course Invoices for\n"
-			+ "             a specified date interval. This report provides payer information and detailed transaction data.\n\n",
+			+ "             a specified date interval. This report provides payer information and detailed transaction data.\n"
+			+ "             Only admin users have access to the Reports menu. Request admin rights from Vickie.\n\n",
 
 			// Examples
 			"\n   YOU ARE A SUB FOR A CLASS:\n        There are two ways to select a class that you want to view:\n"

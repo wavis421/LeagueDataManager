@@ -2,6 +2,7 @@ package model;
 
 import java.awt.Cursor;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.swing.JFrame;
@@ -13,16 +14,16 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 public class MySqlConnection {
 	// Constants
 	private static final int REMOTE_PORT = 3306;
+	private static final String REMOTE_HOST = "student-tracker-db.curyeogxssy9.us-west-1.rds.amazonaws.com";
 	private static final String SERVER = "localhost";
+	private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
 
 	// SSH/Database connect constants
-	// Once DB testing is complete, these will be final constants
 	private static final String SSH_HOST = "ec2-54-67-22-241.us-west-1.compute.amazonaws.com";
 	private static final String SSH_USER = "ec2-user";
 	private static final String SSH_KEY_FILE_PATH = "./student_tracker_key.pem";
 	private static final String DATABASE = "StudentTracker";
 	private static final String DB_USER = "awsleague";
-	private static final String REMOTE_HOST = "student-tracker-db.curyeogxssy9.us-west-1.rds.amazonaws.com";
 
 	// Save SSH Session and database connection
 	private int localSshPort;
@@ -48,9 +49,13 @@ public class MySqlConnection {
 		}
 
 		// Create new SSH and database connections
-		if (session == null)
-			connectSSH();
-		connectToDataBase(DB_USER, password);
+		if (localSshPort == MySqlDatabase.STUDENT_IMPORT_NO_SSH)
+			connectToLambdaDatabase(DB_USER, password);
+		else {
+			if (session == null)
+				connectSSH();
+			connectToRemoteDataBase(DB_USER, password);
+		}
 
 		// Set cursor back to original setting
 		if (parent != null)
@@ -82,13 +87,12 @@ public class MySqlConnection {
 		}
 	}
 
-	private void connectToDataBase(String user, String password) throws SQLException {
+	private void connectToRemoteDataBase(String user, String password) throws SQLException {
 		if (session == null)
 			return;
 
 		try {
-			String driverName = "com.mysql.jdbc.Driver";
-			Class.forName(driverName).newInstance();
+			Class.forName(DRIVER_NAME).newInstance();
 			MysqlDataSource dataSource = new MysqlDataSource();
 
 			// Connecting through SSH tunnel
@@ -103,6 +107,18 @@ public class MySqlConnection {
 
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
 			// TODO: How to handle this exception?
+		}
+	}
+
+	private void connectToLambdaDatabase(String user, String password) {
+		try {
+			Class.forName(DRIVER_NAME);
+			connection = DriverManager.getConnection("jdbc:mysql://" + REMOTE_HOST + ":3306/" + DATABASE + "?user='"
+					+ user + "'&password='" + password + "'");
+
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO: How to handle this exception?
+			System.out.println("Lambda function failed to connect to DB: " + e.getMessage());
 		}
 	}
 

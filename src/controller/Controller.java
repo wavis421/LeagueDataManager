@@ -17,9 +17,6 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class Controller {
-	// Different port than League Student Tracker to allow simultaneous connects
-	private static final int LOCAL_SSH_PORT = 5000;
-
 	private MySqlDatabase sqlDb;
 	private GithubApi githubApi;
 	private Pike13Api pike13Api;
@@ -27,7 +24,7 @@ public class Controller {
 
 	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
 		this.parent = parent;
-		sqlDb = new MySqlDatabase(parent, awsPassword, LOCAL_SSH_PORT);
+		sqlDb = new MySqlDatabase(parent, awsPassword, MySqlDatabase.TRACKER_APP_SSH_PORT);
 		githubApi = new GithubApi(sqlDb, githubToken);
 		pike13Api = new Pike13Api(sqlDb, pike13Token);
 	}

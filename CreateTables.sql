@@ -70,7 +70,7 @@ BEGIN
 		DayOfWeek int(11) DEFAULT NULL,
 		StartTime varchar(10) DEFAULT NULL,
 		Duration int(5) DEFAULT NULL,
-		ClassName varchar(30) DEFAULT NULL,
+		ClassName varchar(40) DEFAULT NULL,
 
 		# All fields of this table must be unique
 		UNIQUE KEY(DayOfWeek, StartTime, Duration, ClassName)

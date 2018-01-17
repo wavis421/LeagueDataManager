@@ -16,10 +16,16 @@ import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
 public class MySqlDatabase {
+	// Use different port for Tracker App and Import to allow simultaneous connects
+	public static final int TRACKER_APP_SSH_PORT = 5000;
+	public static final int STUDENT_IMPORT_SSH_PORT = 6000;
+	public static final int STUDENT_IMPORT_NO_SSH = 0;
+	
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int REPO_NAME_WIDTH = 50;
 	private static final int LOG_APPEND_WIDTH = 100;
+	private static final int CLASS_NAME_WIDTH = 40;
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
@@ -458,7 +464,7 @@ public class MySqlDatabase {
 				PreparedStatement addStudentStmt = dbConnection.prepareStatement(
 						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent,"
 								+ "Gender, StartDate, Location, GradYear, isInMasterDb) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);");
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
@@ -1233,10 +1239,14 @@ public class MySqlDatabase {
 						"INSERT INTO Schedule (DayOfWeek, StartTime, Duration, ClassName) VALUES (?, ?, ?, ?);");
 
 				int col = 1;
+				String className = importEvent.getClassName();
+				
 				addScheduleStmt.setInt(col++, importEvent.getDayOfWeek());
 				addScheduleStmt.setString(col++, importEvent.getStartTime());
 				addScheduleStmt.setInt(col++, importEvent.getDuration());
-				addScheduleStmt.setString(col, importEvent.getClassName());
+				if (className.length() >= CLASS_NAME_WIDTH)
+					className = className.substring(0, CLASS_NAME_WIDTH);
+				addScheduleStmt.setString(col, className);
 
 				addScheduleStmt.executeUpdate();
 				addScheduleStmt.close();
