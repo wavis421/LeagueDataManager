@@ -26,7 +26,6 @@ import model.StudentModel;
 
 public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
-	private final String DATABASE_START_DATE = "2017-09-01";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -306,9 +305,10 @@ public class Pike13Api {
 				if (catchupStartDate.compareTo(endDate) >= 0)
 					continue;
 
-				// Catch up only as far back as database start
-				if (catchupStartDate.compareTo(DATABASE_START_DATE) < 0)
-					catchupStartDate = DATABASE_START_DATE;
+				// Catch up only as far back as 3 months ago
+				String earliestDate = new DateTime().minusMonths(3).toString("yyyy-MM-dd");
+				if (catchupStartDate.compareTo(earliestDate) < 0)
+					catchupStartDate = earliestDate;
 
 				// Get attendance for this student
 				String enrollTemp = enroll2.replaceFirst("0000-00-00", catchupStartDate);

@@ -20,8 +20,6 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class GithubApi {
-	private static final String DATABASE_START_DATE = "2017-09-01";
-
 	private MySqlDatabase sqlDb;
 	private RepositoryService repoService;
 	private CommitService commitService;
@@ -120,9 +118,11 @@ public class GithubApi {
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
 			if (student.getStartDate() != null) {
+				// Catch up only as far back as 3 months ago
+				String earliestDate = new DateTime().minusMonths(3).toString("yyyy-MM-dd");
 				String catchupStartDate = student.getStartDate().toString();
-				if (catchupStartDate.compareTo(DATABASE_START_DATE) < 0)
-					catchupStartDate = DATABASE_START_DATE;
+				if (catchupStartDate.compareTo(earliestDate) < 0)
+					catchupStartDate = earliestDate;
 
 				importGithubComments(catchupStartDate, student.getClientID());
 				importGithubCommentsByLevel(0, catchupStartDate, student.getClientID());
