@@ -44,7 +44,7 @@ public class MySqlDatabase {
 	}
 
 	public MySqlDatabase(String awsPassword, int localPort) {
-		// This constructor is used by the Student Tracking app (no GUI)
+		// This constructor is used by the Student Import app (no GUI)
 		this.awsPassword = awsPassword;
 		mySqlConnection = new MySqlConnection(localPort);
 	}
