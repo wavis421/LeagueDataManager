@@ -20,6 +20,7 @@ import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.SalesForceAttendanceModel;
 import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
@@ -46,6 +47,18 @@ public class Pike13Api {
 	private final int FULL_NAME_IDX = 1;
 	private final int SERVICE_DATE_IDX = 2;
 	private final int EVENT_NAME_IDX = 3;
+
+	// Indices for Sales Force enrollment data
+	private final int SF_PERSON_ID_IDX = 0;
+	private final int SF_SERVICE_DATE_IDX = 1;
+	private final int SF_SERVICE_TIME_IDX = 2;
+	private final int SF_EVENT_NAME_IDX = 3;
+	private final int SF_SERVICE_NAME_IDX = 4;
+	private final int SF_STATE_IDX = 5;
+	private final int SF_VISIT_ID_IDX = 6;
+	private final int SF_EVENT_OCCURRENCE_ID_IDX = 7;
+	private final int SF_LOCATION_NAME_IDX = 8;
+	private final int SF_INSTRUCTOR_NAMES_IDX = 9;
 
 	// Indices for schedule data
 	private final int SERVICE_DAY_IDX = 0;
@@ -87,8 +100,8 @@ public class Pike13Api {
 			+ "                     [\"gt\",\"future_visits\",0],"
 			+ "                     [\"gt\",\"completed_visits\",0]]]}}}";
 
-	// Getting enrollment data is in 2 parts since page info gets inserted in middle
-	private final String getEnrollmentData1 = "{\"data\":{\"type\":\"queries\","
+	// Getting enrollment data is in 2 parts since page info gets inserted in middle.
+	private final String getEnrollmentStudentTracker = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
@@ -96,18 +109,32 @@ public class Pike13Api {
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
-	private final String getEnrollmentData2 = "},"
+	private final String getEnrollmentStudentTracker2 = "},"
 			// Filter on State completed and since date
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"starts\",\"service_category\",\"Class\"]]]}}}";
 
-	private final String getEnrollmentData2WithName = "},"
+	private final String getEnrollmentStudentTracker2WithName = "},"
 			// Filter on State completed, since date and student name
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
 			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "           [\"starts\",\"service_category\",\"Class\"],"
 			+ "           [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
+
+	private final String getEnrollmentSalesForce = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"service_date\",\"service_time\",\"event_name\",\"service_name\","
+			+ "            \"state\",\"visit_id\",\"event_occurrence_id\","
+			+ "            \"service_location_name\",\"instructor_names\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500";
+
+	private final String getEnrollmentSalesForce2 = "},"
+			// Filter on since date
+			+ "\"filter\":[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
 
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
@@ -222,7 +249,7 @@ public class Pike13Api {
 
 	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {
 		// Insert start date and end date into enrollment command string
-		String enroll2 = getEnrollmentData2.replaceFirst("0000-00-00", startDate);
+		String enroll2 = getEnrollmentStudentTracker2.replaceFirst("0000-00-00", startDate);
 		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
 
 		// Get attendance for all students
@@ -241,9 +268,10 @@ public class Pike13Api {
 
 				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn, getEnrollmentData1 + ",\"starting_after\":\"" + lastKey + "\"" + cmdString);
+					sendQueryToUrl(conn,
+							getEnrollmentStudentTracker + ",\"starting_after\":\"" + lastKey + "\"" + cmdString);
 				else
-					sendQueryToUrl(conn, getEnrollmentData1 + cmdString);
+					sendQueryToUrl(conn, getEnrollmentStudentTracker + cmdString);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
@@ -291,11 +319,82 @@ public class Pike13Api {
 		return eventList;
 	}
 
+	public ArrayList<SalesForceAttendanceModel> getSalesForceAttendance(String startDate) {
+		// Get attendance for export to Sales Force database
+		ArrayList<SalesForceAttendanceModel> eventList = new ArrayList<SalesForceAttendanceModel>();
+		boolean hasMore = false;
+		String lastKey = "";
+
+		// Insert start date and end date into enrollment command string
+		String enroll2 = getEnrollmentSalesForce2.replaceFirst("0000-00-00", startDate);
+		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
+
+		try {
+			do {
+				// Get URL connection with authorization
+				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/enrollments/queries");
+
+				// Send the query; add page info if necessary
+				if (hasMore)
+					sendQueryToUrl(conn, getEnrollmentSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
+				else
+					sendQueryToUrl(conn, getEnrollmentSalesForce + enroll2);
+
+				// Check result
+				int responseCode = conn.getResponseCode();
+				if (responseCode != HttpURLConnection.HTTP_OK) {
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+							" " + responseCode + ": " + conn.getResponseMessage());
+					conn.disconnect();
+					return eventList;
+				}
+
+				// Get input stream and read data
+				JsonObject jsonObj = readInputStream(conn);
+				if (jsonObj == null) {
+					conn.disconnect();
+					return eventList;
+				}
+				JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+				for (int i = 0; i < jsonArray.size(); i++) {
+					// Get fields for each event
+					JsonArray eventArray = (JsonArray) jsonArray.get(i);
+
+					// Add event to list
+					eventList.add(new SalesForceAttendanceModel(eventArray.get(SF_PERSON_ID_IDX).toString(),
+							eventArray.get(SF_SERVICE_DATE_IDX).toString(),
+							eventArray.get(SF_SERVICE_TIME_IDX).toString(),
+							eventArray.get(SF_EVENT_NAME_IDX).toString(),
+							eventArray.get(SF_SERVICE_NAME_IDX).toString(),
+							eventArray.get(SF_STATE_IDX).toString(),
+							eventArray.get(SF_VISIT_ID_IDX).toString(),
+							eventArray.get(SF_EVENT_OCCURRENCE_ID_IDX).toString(),
+							eventArray.get(SF_LOCATION_NAME_IDX).toString(),
+							eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString()));
+				}
+
+				// Check to see if there are more pages
+				hasMore = jsonObj.getBoolean("has_more");
+				if (hasMore)
+					lastKey = jsonObj.getString("last_key");
+
+				conn.disconnect();
+
+			} while (hasMore);
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Enrollment DB: " + e1.getMessage());
+		}
+
+		return eventList;
+	}
+
 	public ArrayList<AttendanceEventModel> getMissingAttendance(String endDate, ArrayList<StudentModel> studentList) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
 		// Insert end date into enrollment command string
-		String enroll2 = getEnrollmentData2WithName.replaceFirst("1111-11-11", endDate);
+		String enroll2 = getEnrollmentStudentTracker2WithName.replaceFirst("1111-11-11", endDate);
 
 		for (int i = 0; i < studentList.size(); i++) {
 			StudentModel student = studentList.get(i);

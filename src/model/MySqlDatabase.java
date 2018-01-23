@@ -20,7 +20,7 @@ public class MySqlDatabase {
 	public static final int TRACKER_APP_SSH_PORT = 5000;
 	public static final int STUDENT_IMPORT_SSH_PORT = 6000;
 	public static final int STUDENT_IMPORT_NO_SSH = 0;
-	
+
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int REPO_NAME_WIDTH = 50;
