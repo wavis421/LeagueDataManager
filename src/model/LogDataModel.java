@@ -40,9 +40,17 @@ public class LogDataModel {
 	public static final int GITHUB_IMPORT_ABORTED = 32;
 	public static final int STARTING_SCHEDULE_IMPORT = 33;
 	public static final int SCHEDULE_IMPORT_COMPLETE = 34;
+	public static final int STARTING_SALES_FORCE_IMPORT = 35;
+	public static final int SALES_FORCE_IMPORT_COMPLETE = 36;
+
+	public static final int SALES_FORCE_CONNECTION_ERROR = 37;
+	public static final int SALES_FORCE_CONTACTS_IMPORT_ERROR = 38;
+	public static final int SALES_FORCE_UPSERT_ATTENDANCE_ERROR = 39;
+	public static final int MISSING_SALES_FORCE_CONTACT = 40;
+	public static final int SALES_FORCE_ATTENDANCE_UPDATED = 41;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 35;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 42;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -57,7 +65,11 @@ public class LogDataModel {
 
 			"*** BEGIN STUDENT IMPORT", "*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT",
 			"*** ATTENDANCE IMPORT COMPLETE", "*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE",
-			"*** GITHUB IMPORT ABORTED", "*** BEGIN SCHEDULE IMPORT", "*** SCHEDULE IMPORT COMPLETE" };
+			"*** GITHUB IMPORT ABORTED", "*** BEGIN SCHEDULE IMPORT", "*** SCHEDULE IMPORT COMPLETE",
+			"*** BEGIN SALES FORCE IMPORT", "*** SALES FORCE IMPORT COMPLETE",
+
+			"Sales Force Connection error", "Sales Force Contacts Import error", "Sales Force Upsert Attendance error",
+			"Missing Sales Force contact", "Sales Force attendance updated" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
