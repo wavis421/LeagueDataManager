@@ -319,7 +319,7 @@ public class Pike13Api {
 		return eventList;
 	}
 
-	public ArrayList<SalesForceAttendanceModel> getSalesForceAttendance(String startDate) {
+	public ArrayList<SalesForceAttendanceModel> getSalesForceAttendance(String startDate, String endDate) {
 		// Get attendance for export to Sales Force database
 		ArrayList<SalesForceAttendanceModel> eventList = new ArrayList<SalesForceAttendanceModel>();
 		boolean hasMore = false;
@@ -327,7 +327,7 @@ public class Pike13Api {
 
 		// Insert start date and end date into enrollment command string
 		String enroll2 = getEnrollmentSalesForce2.replaceFirst("0000-00-00", startDate);
-		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
+		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
 
 		try {
 			do {
