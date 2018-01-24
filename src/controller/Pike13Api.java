@@ -363,15 +363,15 @@ public class Pike13Api {
 
 					// Add event to list
 					eventList.add(new SalesForceAttendanceModel(eventArray.get(SF_PERSON_ID_IDX).toString(),
-							eventArray.get(SF_SERVICE_DATE_IDX).toString(),
-							eventArray.get(SF_SERVICE_TIME_IDX).toString(),
-							eventArray.get(SF_EVENT_NAME_IDX).toString(),
-							eventArray.get(SF_SERVICE_NAME_IDX).toString(),
-							eventArray.get(SF_STATE_IDX).toString(),
+							stripQuotes(eventArray.get(SF_SERVICE_DATE_IDX).toString()),
+							stripQuotes(eventArray.get(SF_SERVICE_TIME_IDX).toString()),
+							stripQuotes(eventArray.get(SF_EVENT_NAME_IDX).toString()),
+							stripQuotes(eventArray.get(SF_SERVICE_NAME_IDX).toString()),
+							stripQuotes(eventArray.get(SF_STATE_IDX).toString()),
 							eventArray.get(SF_VISIT_ID_IDX).toString(),
 							eventArray.get(SF_EVENT_OCCURRENCE_ID_IDX).toString(),
-							eventArray.get(SF_LOCATION_NAME_IDX).toString(),
-							eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString()));
+							stripQuotes(eventArray.get(SF_LOCATION_NAME_IDX).toString()),
+							stripQuotes(eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString())));
 				}
 
 				// Check to see if there are more pages

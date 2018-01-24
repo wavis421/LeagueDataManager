@@ -46,11 +46,14 @@ public class LogDataModel {
 	public static final int SALES_FORCE_CONNECTION_ERROR = 37;
 	public static final int SALES_FORCE_CONTACTS_IMPORT_ERROR = 38;
 	public static final int SALES_FORCE_UPSERT_ATTENDANCE_ERROR = 39;
-	public static final int MISSING_SALES_FORCE_CONTACT = 40;
-	public static final int SALES_FORCE_ATTENDANCE_UPDATED = 41;
+	public static final int SALES_FORCE_DELETE_ATTENDANCE_ERROR = 40;
+	public static final int MISSING_SALES_FORCE_CONTACT = 41;
+	public static final int SALES_FORCE_ATTENDANCE_UPDATED = 42;
+	public static final int SALES_FORCE_FUTURE_ATTEND_CLEANUP = 43;
+	public static final int SALES_FORCE_DELETE_ATTENDANCE_RECORD = 44;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 42;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 45;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -69,7 +72,8 @@ public class LogDataModel {
 			"*** BEGIN SALES FORCE IMPORT", "*** SALES FORCE IMPORT COMPLETE",
 
 			"Sales Force Connection error", "Sales Force Contacts Import error", "Sales Force Upsert Attendance error",
-			"Missing Sales Force contact", "Sales Force attendance updated" };
+			"Sales Force Delete Attendance error", "Missing Sales Force contact", "Sales Force attendance updated",
+			"Sales Force removed obsolete future enrollments", "Deleted future Visit ID" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
