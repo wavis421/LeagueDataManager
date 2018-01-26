@@ -19,6 +19,7 @@ public class MySqlDatabase {
 	// Use different port for Tracker App and Import to allow simultaneous connects
 	public static final int TRACKER_APP_SSH_PORT = 5000;
 	public static final int STUDENT_IMPORT_SSH_PORT = 6000;
+	public static final int SALES_FORCE_SYNC_SSH_PORT = 7000;
 	public static final int STUDENT_IMPORT_NO_SSH = 0;
 
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
