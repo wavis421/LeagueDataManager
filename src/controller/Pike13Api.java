@@ -21,6 +21,7 @@ import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.SalesForceAttendanceModel;
+import model.SalesForceStaffHoursModel;
 import model.ScheduleModel;
 import model.StudentImportModel;
 import model.StudentModel;
@@ -84,6 +85,20 @@ public class Pike13Api {
 	private final int PLAN_CLIENT_ID_IDX = 0;
 	private final int PLAN_START_DATE_IDX = 1;
 	private final int PLAN_END_DATE_IDX = 2;
+
+	// Indices for Staff Hours data
+	private final int STAFF_CLIENT_ID_IDX = 0;
+	private final int STAFF_SERVICE_NAME_IDX = 1;
+	private final int STAFF_SERVICE_DATE_IDX = 2;
+	private final int STAFF_SERVICE_TIME_IDX = 3;
+	private final int STAFF_DURATION_IDX = 4;
+	private final int STAFF_LOCATION_IDX = 5;
+	private final int STAFF_COMPLETED_COUNT_IDX = 6;
+	private final int STAFF_NO_SHOW_COUNT_IDX = 7;
+	private final int STAFF_CANCELED_COUNT_IDX = 8;
+	private final int STAFF_EVENT_NAME_IDX = 9;
+	private final int STAFF_SCHEDULE_ID_IDX = 10;
+	private final int STAFF_FULL_NAME_IDX = 11;
 
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
@@ -182,6 +197,22 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":10},"
 			// Filter on plan_id which is filled in at run-time
 			+ "\"filter\":[\"eq\",\"plan_id\",0]}}}";
+
+	private final String getStaffHoursSalesForce = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"service_name\",\"service_date\",\"service_time\",\"duration_in_hours\","
+			+ "            \"service_location_name\",\"completed_enrollment_count\",\"noshowed_enrollment_count\","
+			+ "            \"late_canceled_enrollment_count\",\"event_name\",\"event_occurrence_id\",\"full_name\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500";
+
+	private final String getStaffHoursSalesForce2 = "},"
+			// Filter on since date
+			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "           [\"eq\",\"attendance_completed\",\"t\"],"
+			+ "           [\"ne\",\"full_name\",\"Sub Teacher\"],[\"ne\",\"full_name\",\"League Admin\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
@@ -646,6 +677,79 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
 		}
+	}
+
+	public ArrayList<SalesForceStaffHoursModel> getSalesForceStaffHours(String startDate, String endDate) {
+		// Get staff hours for export to Sales Force database
+		ArrayList<SalesForceStaffHoursModel> eventList = new ArrayList<SalesForceStaffHoursModel>();
+		boolean hasMore = false;
+		String lastKey = "";
+
+		// Insert start date and end date into staff hours command string
+		String staffHours2 = getStaffHoursSalesForce2.replaceFirst("0000-00-00", startDate);
+		staffHours2 = staffHours2.replaceFirst("1111-11-11", endDate);
+
+		try {
+			do {
+				// Get URL connection with authorization
+				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/event_occurrence_staff_members/queries");
+
+				// Send the query; add page info if necessary
+				if (hasMore)
+					sendQueryToUrl(conn, getStaffHoursSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + staffHours2);
+				else
+					sendQueryToUrl(conn, getStaffHoursSalesForce + staffHours2);
+
+				// Check result
+				int responseCode = conn.getResponseCode();
+				if (responseCode != HttpURLConnection.HTTP_OK) {
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+							" " + responseCode + ": " + conn.getResponseMessage());
+					conn.disconnect();
+					return eventList;
+				}
+
+				// Get input stream and read data
+				JsonObject jsonObj = readInputStream(conn);
+				if (jsonObj == null) {
+					conn.disconnect();
+					return eventList;
+				}
+				JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+				for (int i = 0; i < jsonArray.size(); i++) {
+					// Get fields for each event
+					JsonArray eventArray = (JsonArray) jsonArray.get(i);
+
+					// Add event to list
+					eventList.add(new SalesForceStaffHoursModel(eventArray.get(STAFF_CLIENT_ID_IDX).toString(),
+							eventArray.getString(STAFF_FULL_NAME_IDX),
+							eventArray.getString(STAFF_SERVICE_NAME_IDX),
+							eventArray.getString(STAFF_SERVICE_DATE_IDX),
+							eventArray.getString(STAFF_SERVICE_TIME_IDX),
+							eventArray.getJsonNumber(STAFF_DURATION_IDX).doubleValue(),
+							eventArray.getString(STAFF_LOCATION_IDX),
+							eventArray.getJsonNumber(STAFF_COMPLETED_COUNT_IDX).doubleValue(),
+							eventArray.getJsonNumber(STAFF_NO_SHOW_COUNT_IDX).doubleValue(),
+							eventArray.getJsonNumber(STAFF_CANCELED_COUNT_IDX).doubleValue(),
+							eventArray.getString(STAFF_EVENT_NAME_IDX),
+							eventArray.get(STAFF_SCHEDULE_ID_IDX).toString()));
+				}
+
+				// Check to see if there are more pages
+				hasMore = jsonObj.getBoolean("has_more");
+				if (hasMore)
+					lastKey = jsonObj.getString("last_key");
+
+				conn.disconnect();
+
+			} while (hasMore);
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Staff Hours DB: " + e1.getMessage());
+		}
+
+		return eventList;
 	}
 
 	private HttpURLConnection connectUrl(String queryUrl) {
