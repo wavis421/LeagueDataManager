@@ -734,7 +734,7 @@ public class Pike13Api {
 							eventArray.getJsonNumber(STAFF_COMPLETED_COUNT_IDX).doubleValue(),
 							eventArray.getJsonNumber(STAFF_NO_SHOW_COUNT_IDX).doubleValue(),
 							eventArray.getJsonNumber(STAFF_CANCELED_COUNT_IDX).doubleValue(),
-							eventArray.getString(STAFF_EVENT_NAME_IDX),
+							stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
 							eventArray.get(STAFF_SCHEDULE_ID_IDX).toString()));
 				}
 
