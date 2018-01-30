@@ -55,11 +55,12 @@ public class Pike13Api {
 	private final int SF_SERVICE_TIME_IDX = 2;
 	private final int SF_EVENT_NAME_IDX = 3;
 	private final int SF_SERVICE_NAME_IDX = 4;
-	private final int SF_STATE_IDX = 5;
-	private final int SF_VISIT_ID_IDX = 6;
-	private final int SF_EVENT_OCCURRENCE_ID_IDX = 7;
-	private final int SF_LOCATION_NAME_IDX = 8;
-	private final int SF_INSTRUCTOR_NAMES_IDX = 9;
+	private final int SF_SERVICE_CATEGORY_IDX = 5;
+	private final int SF_STATE_IDX = 6;
+	private final int SF_VISIT_ID_IDX = 7;
+	private final int SF_EVENT_OCCURRENCE_ID_IDX = 8;
+	private final int SF_LOCATION_NAME_IDX = 9;
+	private final int SF_INSTRUCTOR_NAMES_IDX = 10;
 
 	// Indices for schedule data
 	private final int SERVICE_DAY_IDX = 0;
@@ -142,7 +143,7 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"service_date\",\"service_time\",\"event_name\",\"service_name\","
-			+ "            \"state\",\"visit_id\",\"event_occurrence_id\","
+			+ "            \"service_category\",\"state\",\"visit_id\",\"event_occurrence_id\","
 			+ "            \"service_location_name\",\"instructor_names\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
@@ -397,6 +398,7 @@ public class Pike13Api {
 							stripQuotes(eventArray.get(SF_SERVICE_DATE_IDX).toString()),
 							stripQuotes(eventArray.get(SF_SERVICE_TIME_IDX).toString()),
 							stripQuotes(eventArray.get(SF_EVENT_NAME_IDX).toString()),
+							stripQuotes(eventArray.get(SF_SERVICE_CATEGORY_IDX).toString()),
 							stripQuotes(eventArray.get(SF_SERVICE_NAME_IDX).toString()),
 							stripQuotes(eventArray.get(SF_STATE_IDX).toString()),
 							eventArray.get(SF_VISIT_ID_IDX).toString(),

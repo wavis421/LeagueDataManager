@@ -6,6 +6,7 @@ public class SalesForceAttendanceModel {
 	private String serviceDate;
 	private String serviceTime;
 	private String eventName;
+	private String eventType;
 	private String serviceName;
 	private String status;
 	private String visitID;
@@ -14,12 +15,14 @@ public class SalesForceAttendanceModel {
 	private String staff;
 
 	public SalesForceAttendanceModel(String clientID, String serviceDate, String serviceTime, String eventName,
-			String serviceName, String status, String visitID, String scheduleID, String location, String staff) {
+			String eventType, String serviceName, String status, String visitID, String scheduleID, String location,
+			String staff) {
 
 		this.clientID = clientID;
 		this.serviceDate = serviceDate;
 		this.serviceTime = serviceTime;
 		this.eventName = eventName;
+		this.eventType = eventType;
 		this.serviceName = serviceName;
 		this.status = status;
 		this.visitID = visitID;
@@ -42,6 +45,10 @@ public class SalesForceAttendanceModel {
 
 	public String getEventName() {
 		return eventName;
+	}
+
+	public String getEventType() {
+		return eventType;
 	}
 
 	public String getServiceName() {
