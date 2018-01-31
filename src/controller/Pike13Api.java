@@ -23,6 +23,7 @@ import model.MySqlDatabase;
 import model.SalesForceAttendanceModel;
 import model.SalesForceStaffHoursModel;
 import model.ScheduleModel;
+import model.StaffMemberModel;
 import model.StudentImportModel;
 import model.StudentModel;
 
@@ -40,9 +41,13 @@ public class Pike13Api {
 	private final int FIRST_VISIT_IDX = 7;
 
 	// Custom field names for client data
-	private final String GENDER_NAME = "custom_field_106320";
-	private final String GITHUB_NAME = "custom_field_127885";
-	private final String GRAD_YEAR_NAME = "custom_field_145902";
+	private final String GENDER_FIELD = "custom_field_106320";
+	private final String GITHUB_FIELD = "custom_field_127885";
+	private final String GRAD_YEAR_FIELD = "custom_field_145902";
+	
+	// Custom field names for Staff Member data
+	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
+	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
 
 	// Indices for enrollment data
 	private final int FULL_NAME_IDX = 1;
@@ -87,6 +92,14 @@ public class Pike13Api {
 	private final int PLAN_START_DATE_IDX = 1;
 	private final int PLAN_END_DATE_IDX = 2;
 
+	// Indices for Staff Member data
+	private final int TEACHER_CLIENT_ID_IDX = 0;
+	private final int TEACHER_FIRST_NAME_IDX = 1;
+	private final int TEACHER_LAST_NAME_IDX = 2;
+	private final int TEACHER_SF_CLIENT_ID_IDX = 3;
+	private final int TEACHER_STATE_IDX = 4;
+	private final int TEACHER_CATEGORY_IDX = 5;
+
 	// Indices for Staff Hours data
 	private final int STAFF_CLIENT_ID_IDX = 0;
 	private final int STAFF_SERVICE_NAME_IDX = 1;
@@ -106,8 +119,8 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_NAME + "\",\"" + GRAD_YEAR_NAME + "\","
-			+ "            \"" + GENDER_NAME + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\","
+			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_FIELD + "\",\"" + GRAD_YEAR_FIELD + "\","
+			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\","
 			+ "            \"completed_visits\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
@@ -199,6 +212,25 @@ public class Pike13Api {
 			// Filter on plan_id which is filled in at run-time
 			+ "\"filter\":[\"eq\",\"plan_id\",0]}}}";
 
+	// Get staff member data
+	private final String getStaffMemberData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + SF_CLIENT_ID_FIELD + "\","
+			+             "\"person_state\",\"" + STAFF_CATEGORY_FIELD + "\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
+			// Filter on Staff Category and staff member active
+			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
+			+ "                     [\"or\",[[\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Teaching Staff\"],"
+			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Vol Teacher\"],"
+			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Student TA\"],"
+			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Admin Staff\"],"
+			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Board Member\"]]]]]}}}";
+			
+
+	// Get staff hours data
 	private final String getStaffHoursSalesForce = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
@@ -679,6 +711,56 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
 		}
+	}
+
+	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
+		ArrayList<StaffMemberModel> staffList = new ArrayList<StaffMemberModel>();
+
+		try {
+			// Get URL connection with authorization
+			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/staff_members/queries");
+
+			// Send the query
+			sendQueryToUrl(conn, getStaffMemberData);
+
+			// Check result
+			int responseCode = conn.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
+				return staffList;
+			}
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return staffList;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each staff member
+				JsonArray staffArray = (JsonArray) jsonArray.get(i);
+
+				// Get fields for this Json array entry
+				String sfClientID = null;
+				if (staffArray.get(TEACHER_SF_CLIENT_ID_IDX) != null)
+					sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
+
+				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
+						staffArray.getString(TEACHER_FIRST_NAME_IDX) + " " + staffArray.getString(TEACHER_LAST_NAME_IDX),
+						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString())));
+			}
+
+			conn.disconnect();
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Staff Member DB: " + e1.getMessage());
+		}
+
+		return staffList;
 	}
 
 	public ArrayList<SalesForceStaffHoursModel> getSalesForceStaffHours(String startDate, String endDate) {
