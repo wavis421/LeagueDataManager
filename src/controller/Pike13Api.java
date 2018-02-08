@@ -617,13 +617,13 @@ public class Pike13Api {
 				// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
 				//   1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
 				//         service name in case that's all we get (due to Pike 13 bug, these are not always correct)
-				//   2) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the 
-				//         plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug)
-				//   3) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
-				//         then updates start/end dates and event name
+				//   2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
+				//         then updates start/end dates and verbose event name. These records are sometimes not found.
+				//   3) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the 
+				//         plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug?).
 				getPersonPlans(model, planID);
-				if (!getEnrollmentsByPlanId(model, planID))
-					getEnrollmentsByServiceName(model);
+				if (!getEnrollmentsByServiceName(model))
+					getEnrollmentsByPlanId(model, planID);
 
 				// Add invoice to list
 				invoiceList.add(model);
@@ -765,12 +765,11 @@ public class Pike13Api {
 		if (model.size() > 0) {
 			invoice.setItemName(model.get(0).getEventName());
 			return true;
-		}
-		else
+		} else
 			return false;
 	}
 
-	private void getEnrollmentsByServiceName(InvoiceModel model) {
+	private boolean getEnrollmentsByServiceName(InvoiceModel model) {
 		String enroll = getEnrollmentDataByService.replace("1111", model.getClientID().toString());
 		enroll = enroll.replace("NNNN", model.getItemName());
 		
@@ -781,7 +780,9 @@ public class Pike13Api {
 			model.setItemName(modelList.get(0).getEventName());
 			model.setItemStartDate(modelList.get(0).getServiceDateString());
 			model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
-		}
+			return true;
+		} else
+			return false;
 	}
 
 	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
