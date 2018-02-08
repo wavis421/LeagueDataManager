@@ -11,7 +11,7 @@ public class InvoiceTableModel extends AbstractTableModel {
 	public static final int INVOICE_DATE_COLUMN = 0;
 	public static final int AMOUNT_COLUMN = 1;
 	public static final int ITEM_NAME_COLUMN = 2;
-	public static final int CLIENT_ID_COLUMN = 3;
+	public static final int IS_CANCELED_COLUMN = 3;
 	public static final int STUDENT_NAME_COLUMN = 4;
 	public static final int PAYER_NAME_COLUMN = 5;
 	public static final int START_DATE_COLUMN = 6;
@@ -20,7 +20,7 @@ public class InvoiceTableModel extends AbstractTableModel {
 	public static final int TRANSACTION_ID_COLUMN = 9;
 
 	private ArrayList<InvoiceModel> invoiceList;
-	private final String[] colNames = { " Date ", " Amount ", " Item Name ", " Client ID ", " Student Name ",
+	private final String[] colNames = { " Date ", " Amount ", " Item Name ", "  ", " Student Name ",
 			" Payer Name ", " Start ", " End ", " Pay Method ", " Ext Transaction # " };
 
 	public InvoiceTableModel(ArrayList<InvoiceModel> invoiceList) {
@@ -72,8 +72,11 @@ public class InvoiceTableModel extends AbstractTableModel {
 			return invoiceData.getStudentName();
 		case PAYER_NAME_COLUMN:
 			return invoiceData.getPayerName();
-		case CLIENT_ID_COLUMN:
-			return invoiceData.getClientID().toString();
+		case IS_CANCELED_COLUMN:
+			if (invoiceData.getIsCanceled())
+				return "X";
+			else
+				return "";
 		case START_DATE_COLUMN:
 			if (invoiceData.getItemStartDate() == null)
 				return "";

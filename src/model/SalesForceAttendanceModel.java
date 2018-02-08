@@ -1,6 +1,6 @@
 package model;
 
-//Model for importing data into Sales Force
+//Model for importing data into SalesForce
 public class SalesForceAttendanceModel {
 	private String clientID;
 	private String serviceDate;

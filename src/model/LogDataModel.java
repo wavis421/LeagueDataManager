@@ -76,14 +76,14 @@ public class LogDataModel {
 			"*** BEGIN STUDENT IMPORT", "*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT",
 			"*** ATTENDANCE IMPORT COMPLETE", "*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE",
 			"*** GITHUB IMPORT ABORTED", "*** BEGIN SCHEDULE IMPORT", "*** SCHEDULE IMPORT COMPLETE",
-			"*** BEGIN SALES FORCE IMPORT", "*** SALES FORCE IMPORT COMPLETE",
+			"*** BEGIN SALESFORCE IMPORT", "*** SALESFORCE IMPORT COMPLETE",
 
-			"Sales Force Connection error", "Sales Force Contacts Import error", "Sales Force Upsert Attendance error",
-			"Sales Force Delete Attendance error", "Missing SF contact for Attendance",
-			"Sales Force attendance updated", "Sales Force removed canceled visits", "Deleted canceled Visit ID",
-			"*** SALES FORCE IMPORT ABORTED", "Sales Force Staff Hours updated", "Sales Force Upsert Staff Hours error",
-			"Missing SF Staff Member", "Missing Pike13 Staff Member", "Sales Force Attendance import error",
-			"Sales Force Staff Hours Import error" };
+			"SalesForce Connection error", "SalesForce Contacts Import error", "SalesForce Upsert Attendance error",
+			"SalesForce Delete Attendance error", "Missing SF contact for Attendance",
+			"SalesForce attendance updated", "SalesForce canceled visits removed", "Deleted canceled Visit ID",
+			"*** SALESFORCE IMPORT ABORTED", "SalesForce Staff Hours updated", "SalesForce Upsert Staff Hours error",
+			"Missing SF Staff Member", "Missing Pike13 Staff Member", "SalesForce Attendance import error",
+			"SalesForce Staff Hours Import error" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

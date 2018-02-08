@@ -67,7 +67,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		else if (!githubComments.contains(comments))
 			githubComments += " / " + comments.trim();
 	}
-	
+
 	public String getRepoName() {
 		return repoName;
 	}

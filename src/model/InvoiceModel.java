@@ -5,6 +5,7 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 	private String transactionID, invoiceDate, itemName, itemStartDate, itemEndDate, payMethod;
 	String studentName, payerName;
 	private Integer amount, clientID, planID;
+	private boolean isCanceled;
 
 	public InvoiceModel(String invoiceDate, String itemName, String itemStartDate, String itemEndDate, int clientID,
 			String studentName, String payerName, int planID, String payMethod, String transactionID, int amount) {
@@ -21,6 +22,7 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 		this.payMethod = payMethod;
 		this.transactionID = transactionID;
 		this.amount = amount;
+		this.isCanceled = false;
 	}
 
 	public String getInvoiceDate() {
@@ -29,6 +31,10 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 
 	public String getItemName() {
 		return itemName;
+	}
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
 	}
 
 	public String getItemStartDate() {
@@ -92,6 +98,14 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 
 	public Integer getAmount() {
 		return amount;
+	}
+
+	public boolean getIsCanceled() {
+		return isCanceled;
+	}
+
+	public void setIsCanceled(boolean canceled) {
+		isCanceled = canceled;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package model;
 
-//Model for importing Staff Hours data into Sales Force
+//Model for importing Staff Hours data into SalesForce
 public class SalesForceStaffHoursModel {
 	private String clientID;
 	private String fullName;

@@ -26,9 +26,19 @@ import model.ScheduleModel;
 import model.StaffMemberModel;
 import model.StudentImportModel;
 import model.StudentModel;
+import model.StudentNameModel;
 
 public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
+
+	// Custom field names for client data
+	private final String GENDER_FIELD = "custom_field_106320";
+	private final String GITHUB_FIELD = "custom_field_127885";
+	private final String GRAD_YEAR_FIELD = "custom_field_145902";
+	
+	// Custom field names for Staff Member data
+	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
+	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -40,21 +50,13 @@ public class Pike13Api {
 	private final int HOME_LOC_IDX = 6;
 	private final int FIRST_VISIT_IDX = 7;
 
-	// Custom field names for client data
-	private final String GENDER_FIELD = "custom_field_106320";
-	private final String GITHUB_FIELD = "custom_field_127885";
-	private final String GRAD_YEAR_FIELD = "custom_field_145902";
-	
-	// Custom field names for Staff Member data
-	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
-	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
-
 	// Indices for enrollment data
-	private final int FULL_NAME_IDX = 1;
-	private final int SERVICE_DATE_IDX = 2;
-	private final int EVENT_NAME_IDX = 3;
+	private final int ENROLL_CLIENT_ID_IDX = 0;
+	private final int ENROLL_FULL_NAME_IDX = 1;
+	private final int ENROLL_SERVICE_DATE_IDX = 2;
+	private final int ENROLL_EVENT_NAME_IDX = 3;
 
-	// Indices for Sales Force enrollment data
+	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
 	private final int SF_SERVICE_DATE_IDX = 1;
 	private final int SF_SERVICE_TIME_IDX = 2;
@@ -91,13 +93,14 @@ public class Pike13Api {
 	private final int PLAN_CLIENT_ID_IDX = 0;
 	private final int PLAN_START_DATE_IDX = 1;
 	private final int PLAN_END_DATE_IDX = 2;
+	private final int PLAN_IS_CANCELED_IDX = 3;
+	private final int PLAN_NAME_IDX = 4;
 
 	// Indices for Staff Member data
 	private final int TEACHER_CLIENT_ID_IDX = 0;
 	private final int TEACHER_FIRST_NAME_IDX = 1;
 	private final int TEACHER_LAST_NAME_IDX = 2;
 	private final int TEACHER_SF_CLIENT_ID_IDX = 3;
-	private final int TEACHER_STATE_IDX = 4;
 	private final int TEACHER_CATEGORY_IDX = 5;
 
 	// Indices for Staff Hours data
@@ -141,15 +144,15 @@ public class Pike13Api {
 	private final String getEnrollmentStudentTracker2 = "},"
 			// Filter on State completed and since date
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "           [\"starts\",\"service_category\",\"Class\"]]]}}}";
+			+ "                     [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                     [\"starts\",\"service_category\",\"Class\"]]]}}}";
 
 	private final String getEnrollmentStudentTracker2WithName = "},"
 			// Filter on State completed, since date and student name
 			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "           [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "           [\"starts\",\"service_category\",\"Class\"],"
-			+ "           [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
+			+ "                     [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                     [\"starts\",\"service_category\",\"Class\"],"
+			+ "                     [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
 
 	private final String getEnrollmentSalesForce = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
@@ -165,6 +168,27 @@ public class Pike13Api {
 			// Filter on since date
 			+ "\"filter\":[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
 
+	private final String getEnrollmentDataByPlanId = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			// Page limit max is 10 (only need first entry)
+			+ "\"page\":{\"limit\":500},"
+			// Filter on Plan ID which is filled in at run time
+			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
+
+	private final String getEnrollmentDataByService = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			// Page limit max is 10 (only need first entry)
+			+ "\"page\":{\"limit\":500},"
+			// Filter on client ID and service name
+			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",1111],"
+			+ "                     [\"eq\",\"service_name\",\"NNNN\"]]]}}}";
+	
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -206,11 +230,11 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\"],"
+			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\",\"is_canceled\",\"plan_name\"],"
 			// Page limit max is 10
 			+ "\"page\":{\"limit\":10},"
 			// Filter on plan_id which is filled in at run-time
-			+ "\"filter\":[\"eq\",\"plan_id\",0]}}}";
+			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
 
 	// Get staff member data
 	private final String getStaffMemberData = "{\"data\":{\"type\":\"queries\","
@@ -244,8 +268,8 @@ public class Pike13Api {
 	private final String getStaffHoursSalesForce2 = "},"
 			// Filter on since date
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "           [\"eq\",\"attendance_completed\",\"t\"],"
-			+ "           [\"ne\",\"full_name\",\"Sub Teacher\"],[\"ne\",\"full_name\",\"League Admin\"]]]}}}";
+			+ "                     [\"eq\",\"attendance_completed\",\"t\"],"
+			+ "                     [\"ne\",\"full_name\",\"Sub Teacher\"],[\"ne\",\"full_name\",\"League Admin\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
@@ -268,7 +292,7 @@ public class Pike13Api {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return studentList;
@@ -305,7 +329,8 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Client DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Client DB: " + e1.getMessage());
 		}
 
 		return studentList;
@@ -317,10 +342,10 @@ public class Pike13Api {
 		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
 
 		// Get attendance for all students
-		return getEnrollmentByCmdString(enroll2);
+		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);
 	}
 
-	private ArrayList<AttendanceEventModel> getEnrollmentByCmdString(String cmdString) {
+	private ArrayList<AttendanceEventModel> getEnrollmentByCmdString(String cmdString1, String cmdString2) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 		boolean hasMore = false;
 		String lastKey = "";
@@ -332,15 +357,14 @@ public class Pike13Api {
 
 				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn,
-							getEnrollmentStudentTracker + ",\"starting_after\":\"" + lastKey + "\"" + cmdString);
+					sendQueryToUrl(conn, cmdString1 + ",\"starting_after\":\"" + lastKey + "\"" + cmdString2);
 				else
-					sendQueryToUrl(conn, getEnrollmentStudentTracker + cmdString);
+					sendQueryToUrl(conn, cmdString1 + cmdString2);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
 					return eventList;
@@ -357,13 +381,13 @@ public class Pike13Api {
 				for (int i = 0; i < jsonArray.size(); i++) {
 					// Get fields for each event
 					JsonArray eventArray = (JsonArray) jsonArray.get(i);
-					String eventName = stripQuotes(eventArray.get(EVENT_NAME_IDX).toString());
-					String serviceDate = stripQuotes(eventArray.get(SERVICE_DATE_IDX).toString());
+					String eventName = stripQuotes(eventArray.get(ENROLL_EVENT_NAME_IDX).toString());
+					String serviceDate = stripQuotes(eventArray.get(ENROLL_SERVICE_DATE_IDX).toString());
 
 					// Add event to list
 					if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
-						eventList.add(new AttendanceEventModel(eventArray.getInt(CLIENT_ID_IDX),
-								stripQuotes(eventArray.get(FULL_NAME_IDX).toString()), serviceDate, eventName));
+						eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
+								stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName));
 					}
 				}
 
@@ -374,17 +398,18 @@ public class Pike13Api {
 
 				conn.disconnect();
 
-			} while (hasMore);
+			} while (hasMore && cmdString2 != "");
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Enrollment DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Enrollment DB: " + e1.getMessage());
 		}
 
 		return eventList;
 	}
 
 	public ArrayList<SalesForceAttendanceModel> getSalesForceAttendance(String startDate, String endDate) {
-		// Get attendance for export to Sales Force database
+		// Get attendance for export to SalesForce database
 		ArrayList<SalesForceAttendanceModel> eventList = new ArrayList<SalesForceAttendanceModel>();
 		boolean hasMore = false;
 		String lastKey = "";
@@ -407,7 +432,7 @@ public class Pike13Api {
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
 					return eventList;
@@ -449,7 +474,8 @@ public class Pike13Api {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Enrollment DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Enrollment DB: " + e1.getMessage());
 		}
 
 		return eventList;
@@ -477,7 +503,7 @@ public class Pike13Api {
 				// Get attendance for this student
 				String enrollTemp = enroll2.replaceFirst("0000-00-00", catchupStartDate);
 				enrollTemp = enrollTemp.replaceFirst("NNNNNN", student.getFirstName() + " " + student.getLastName());
-				eventList.addAll(getEnrollmentByCmdString(enrollTemp));
+				eventList.addAll(getEnrollmentByCmdString(getEnrollmentStudentTracker, enrollTemp));
 
 				// Set student 'NewStudent' flag back to false
 				mysqlDb.updateStudentFlags(student, "NewStudent", 0);
@@ -504,7 +530,7 @@ public class Pike13Api {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return scheduleList;
@@ -536,7 +562,8 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Schedule DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Schedule DB: " + e1.getMessage());
 		}
 
 		return scheduleList;
@@ -550,15 +577,14 @@ public class Pike13Api {
 			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/invoice_items/queries");
 
 			// Send the query
-			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00",
-					dateRange.getStartDate().toString("yyyy-MM-dd"));
+			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
 			invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
 			sendQueryToUrl(conn, invoiceCmd);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return invoiceList;
@@ -588,8 +614,16 @@ public class Pike13Api {
 				if (couponCode != null)
 					model.setPayMethod(stripQuotes(couponCode.toString()));
 
-				// Fill in remaining person plan data: client ID, start/end date
+				// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
+				//   1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
+				//         service name in case that's all we get (due to Pike 13 bug, these are not always correct)
+				//   2) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the 
+				//         plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug)
+				//   3) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
+				//         then updates start/end dates and event name
 				getPersonPlans(model, planID);
+				if (!getEnrollmentsByPlanId(model, planID))
+					getEnrollmentsByServiceName(model);
 
 				// Add invoice to list
 				invoiceList.add(model);
@@ -615,7 +649,8 @@ public class Pike13Api {
 			}
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Invoice DB: " + e1.getMessage());
 		}
 
 		return invoiceList;
@@ -636,7 +671,7 @@ public class Pike13Api {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return;
@@ -667,7 +702,8 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Transaction DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Transaction DB: " + e1.getMessage());
 		}
 	}
 
@@ -677,13 +713,13 @@ public class Pike13Api {
 			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/person_plans/queries");
 
 			// Fill in plan_id field and send the query
-			String planString = getPersonPlanData.replace("\"plan_id\",0", "\"plan_id\"," + planID.toString());
+			String planString = getPersonPlanData.replace("PPPP", planID.toString());
 			sendQueryToUrl(conn, planString);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return;
@@ -697,19 +733,54 @@ public class Pike13Api {
 			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each plan in the list
-				JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
+			if (jsonArray.size() > 0) {
+				// Get fields for first plan in the list
+				JsonArray invoiceArray = (JsonArray) jsonArray.get(0);
 
 				// Add person plans fields to invoice model
 				invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
-				invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
-				invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
+				invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
+				
+				boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
+				invoice.setIsCanceled(isCanceled);
+				if (!isCanceled) {
+					invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
+					invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
+				}
 			}
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Invoice DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Invoice DB: " + e1.getMessage());
+		}
+	}
+
+	private boolean getEnrollmentsByPlanId(InvoiceModel invoice, Integer planID) {
+		// Insert plan ID into enrollment command string
+		String enroll = getEnrollmentDataByPlanId.replace("PPPP", planID.toString());
+
+		// Get attendance for this plan ID
+		ArrayList<AttendanceEventModel> model = getEnrollmentByCmdString(enroll, "");
+		if (model.size() > 0) {
+			invoice.setItemName(model.get(0).getEventName());
+			return true;
+		}
+		else
+			return false;
+	}
+
+	private void getEnrollmentsByServiceName(InvoiceModel model) {
+		String enroll = getEnrollmentDataByService.replace("1111", model.getClientID().toString());
+		enroll = enroll.replace("NNNN", model.getItemName());
+		
+		// Get attendance for this clientID and service name pair
+		ArrayList<AttendanceEventModel> modelList = getEnrollmentByCmdString(enroll, "");
+
+		if (modelList.size() > 0) {
+			model.setItemName(modelList.get(0).getEventName());
+			model.setItemStartDate(modelList.get(0).getServiceDateString());
+			model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
 		}
 	}
 
@@ -726,7 +797,7 @@ public class Pike13Api {
 			// Check result
 			int responseCode = conn.getResponseCode();
 			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
 				return staffList;
@@ -757,14 +828,15 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Staff Member DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Staff Member DB: " + e1.getMessage());
 		}
 
 		return staffList;
 	}
 
 	public ArrayList<SalesForceStaffHoursModel> getSalesForceStaffHours(String startDate, String endDate) {
-		// Get staff hours for export to Sales Force database
+		// Get staff hours for export to SalesForce database
 		ArrayList<SalesForceStaffHoursModel> eventList = new ArrayList<SalesForceStaffHoursModel>();
 		boolean hasMore = false;
 		String lastKey = "";
@@ -787,7 +859,7 @@ public class Pike13Api {
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, null, 0,
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
 					return eventList;
@@ -830,7 +902,8 @@ public class Pike13Api {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, " for Staff Hours DB: " + e1.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					" for Staff Hours DB: " + e1.getMessage());
 		}
 
 		return eventList;
@@ -852,7 +925,8 @@ public class Pike13Api {
 			return conn;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					": " + e.getMessage());
 		}
 		return null;
 	}
@@ -881,7 +955,8 @@ public class Pike13Api {
 			return object;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					": " + e.getMessage());
 		}
 		return null;
 	}
