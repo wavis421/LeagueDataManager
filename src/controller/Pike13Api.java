@@ -35,7 +35,7 @@ public class Pike13Api {
 	private final String GENDER_FIELD = "custom_field_106320";
 	private final String GITHUB_FIELD = "custom_field_127885";
 	private final String GRAD_YEAR_FIELD = "custom_field_145902";
-	
+
 	// Custom field names for Staff Member data
 	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
 	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
@@ -188,7 +188,7 @@ public class Pike13Api {
 			// Filter on client ID and service name
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",1111],"
 			+ "                     [\"eq\",\"service_name\",\"NNNN\"]]]}}}";
-	
+
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -212,7 +212,8 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":150},"
 			// Filter on hard-coded month for now
 			+ "\"filter\":[\"and\",[[\"btw\",\"issued_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"eq\",\"revenue_category\",\"Courses\"]]]}}}";
+			+ "                     [\"eq\",\"revenue_category\",\"Courses\"],"
+			+ "                     [\"gt\",\"gross_amount\",0]]]}}}";
 
 	// Get transaction data
 	private final String getTransactionData = "{\"data\":{\"type\":\"queries\","
@@ -242,17 +243,17 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + SF_CLIENT_ID_FIELD + "\","
-			+             "\"person_state\",\"" + STAFF_CATEGORY_FIELD + "\"],"
+			+ "            \"person_state\",\"" + STAFF_CATEGORY_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			// Filter on Staff Category and staff member active
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"or\",[[\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Teaching Staff\"],"
 			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Vol Teacher\"],"
+			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Volunteer\"],"
 			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Student TA\"],"
 			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Admin Staff\"],"
 			+ "                              [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Board Member\"]]]]]}}}";
-			
 
 	// Get staff hours data
 	private final String getStaffHoursSalesForce = "{\"data\":{\"type\":\"queries\","
@@ -268,7 +269,8 @@ public class Pike13Api {
 	private final String getStaffHoursSalesForce2 = "},"
 			// Filter on since date
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"eq\",\"attendance_completed\",\"t\"],"
+			+ "                     [\"or\",[[\"eq\",\"attendance_completed\",\"t\"],"
+			+ "                              [\"eq\",\"service_name\",\"Volunteer Time\"]]],"
 			+ "                     [\"ne\",\"full_name\",\"Sub Teacher\"],[\"ne\",\"full_name\",\"League Admin\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
@@ -329,7 +331,7 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Client DB: " + e1.getMessage());
 		}
 
@@ -401,7 +403,7 @@ public class Pike13Api {
 			} while (hasMore && cmdString2 != "");
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Enrollment DB: " + e1.getMessage());
 		}
 
@@ -474,7 +476,7 @@ public class Pike13Api {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Enrollment DB: " + e1.getMessage());
 		}
 
@@ -562,7 +564,7 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Schedule DB: " + e1.getMessage());
 		}
 
@@ -577,7 +579,8 @@ public class Pike13Api {
 			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/invoice_items/queries");
 
 			// Send the query
-			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
+			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00",
+					dateRange.getStartDate().toString("yyyy-MM-dd"));
 			invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
 			sendQueryToUrl(conn, invoiceCmd);
 
@@ -615,12 +618,12 @@ public class Pike13Api {
 					model.setPayMethod(stripQuotes(couponCode.toString()));
 
 				// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
-				//   1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
-				//         service name in case that's all we get (due to Pike 13 bug, these are not always correct)
-				//   2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
-				//         then updates start/end dates and verbose event name. These records are sometimes not found.
-				//   3) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the 
-				//         plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug?).
+				// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
+				//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
+				// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
+				//    then updates start/end dates and verbose event name. These records are sometimes not found.
+				// 3) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the
+				//    plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug?).
 				getPersonPlans(model, planID);
 				if (!getEnrollmentsByServiceName(model))
 					getEnrollmentsByPlanId(model, planID);
@@ -633,13 +636,23 @@ public class Pike13Api {
 			// Fill in payment method and transaction ID
 			getPaymentInfo(invoiceList, dateRange);
 
-			// Now clear out all start/end date fields except the final one
 			for (int i = invoiceList.size() - 1; i >= 0; i--) {
 				InvoiceModel invoice = invoiceList.get(i);
+				int clientID = invoice.getClientID();
+
+				// If final invoice is not canceled, clear previous canceled indicators
+				if (!invoice.getIsCanceled()) {
+					for (int j = i - 1; j >= 0; j--) {
+						if (invoiceList.get(j).getClientID() == clientID) {
+							invoiceList.get(j).setIsCanceled(false);
+						}
+					}
+				}
+
+				// Now clear out all start/end date fields except the final one
 				if (invoice.getItemStartDate() == null)
 					continue;
 
-				int clientID = invoice.getClientID();
 				for (int j = i - 1; j >= 0; j--) {
 					if (invoiceList.get(j).getClientID() == clientID) {
 						invoiceList.get(j).setItemStartDate(null);
@@ -649,7 +662,7 @@ public class Pike13Api {
 			}
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Invoice DB: " + e1.getMessage());
 		}
 
@@ -702,7 +715,7 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Transaction DB: " + e1.getMessage());
 		}
 	}
@@ -740,7 +753,7 @@ public class Pike13Api {
 				// Add person plans fields to invoice model
 				invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
 				invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
-				
+
 				boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
 				invoice.setIsCanceled(isCanceled);
 				if (!isCanceled) {
@@ -751,7 +764,7 @@ public class Pike13Api {
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Invoice DB: " + e1.getMessage());
 		}
 	}
@@ -772,14 +785,16 @@ public class Pike13Api {
 	private boolean getEnrollmentsByServiceName(InvoiceModel model) {
 		String enroll = getEnrollmentDataByService.replace("1111", model.getClientID().toString());
 		enroll = enroll.replace("NNNN", model.getItemName());
-		
+
 		// Get attendance for this clientID and service name pair
 		ArrayList<AttendanceEventModel> modelList = getEnrollmentByCmdString(enroll, "");
 
 		if (modelList.size() > 0) {
 			model.setItemName(modelList.get(0).getEventName());
-			model.setItemStartDate(modelList.get(0).getServiceDateString());
-			model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
+			if (!model.getIsCanceled()) {
+				model.setItemStartDate(modelList.get(0).getServiceDateString());
+				model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
+			}
 			return true;
 		} else
 			return false;
@@ -822,14 +837,15 @@ public class Pike13Api {
 					sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
 
 				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
-						staffArray.getString(TEACHER_FIRST_NAME_IDX) + " " + staffArray.getString(TEACHER_LAST_NAME_IDX),
+						staffArray.getString(TEACHER_FIRST_NAME_IDX) + " "
+								+ staffArray.getString(TEACHER_LAST_NAME_IDX),
 						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString())));
 			}
 
 			conn.disconnect();
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Staff Member DB: " + e1.getMessage());
 		}
 
@@ -849,11 +865,13 @@ public class Pike13Api {
 		try {
 			do {
 				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/event_occurrence_staff_members/queries");
+				HttpURLConnection conn = connectUrl(
+						"https://jtl.pike13.com/desk/api/v3/reports/event_occurrence_staff_members/queries");
 
 				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn, getStaffHoursSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + staffHours2);
+					sendQueryToUrl(conn,
+							getStaffHoursSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + staffHours2);
 				else
 					sendQueryToUrl(conn, getStaffHoursSalesForce + staffHours2);
 
@@ -903,7 +921,7 @@ public class Pike13Api {
 			} while (hasMore);
 
 		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Staff Hours DB: " + e1.getMessage());
 		}
 
@@ -926,7 +944,7 @@ public class Pike13Api {
 			return conn;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					": " + e.getMessage());
 		}
 		return null;
@@ -956,7 +974,7 @@ public class Pike13Api {
 			return object;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					": " + e.getMessage());
 		}
 		return null;

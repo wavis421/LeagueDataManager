@@ -67,7 +67,7 @@ public class InvoiceTableModel extends AbstractTableModel {
 		case AMOUNT_COLUMN:
 			return "$" + (invoiceData.getAmount() / 100);
 		case ITEM_NAME_COLUMN:
-			return invoiceData.getItemName();
+			return parseItemName(invoiceData.getItemName());
 		case STUDENT_NAME_COLUMN:
 			return invoiceData.getStudentName();
 		case PAYER_NAME_COLUMN:
@@ -126,5 +126,11 @@ public class InvoiceTableModel extends AbstractTableModel {
 			csvString += getValueByColumn(invoice, i);
 		}
 		return csvString;
+	}
+
+	private String parseItemName(String eventName) {
+		eventName = eventName.replace(", ", "-");
+		eventName = eventName.replace(",", "-");
+		return eventName;
 	}
 }
