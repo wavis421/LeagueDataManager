@@ -834,12 +834,20 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	public ArrayList<AttendanceEventModel> getEventsWithNoComments(String startDate, int clientID) {
+	public ArrayList<AttendanceEventModel> getEventsWithNoComments(String startDate, int clientID,
+			boolean includeEmpty) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
+		// Can either filter on null comments or both null + empty comments.
+		// Null comments transition to empty comments to mark them as processed.
 		String clientIdFilter = "";
-		if (clientID != 0) // Specific github user
+		if (clientID != 0) // Specific github user being updated
 			clientIdFilter = "Students.ClientID = " + clientID + " AND ";
+
+		if (includeEmpty)
+			clientIdFilter += "(Comments IS NULL OR Comments = '') ";
+		else
+			clientIdFilter += "Comments IS NULL ";
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -847,8 +855,8 @@ public class MySqlDatabase {
 				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
-								+ "Comments IS NULL AND GithubName IS NOT NULL AND " + clientIdFilter
-								+ "ServiceDate >= ? ORDER BY GithubName;");
+								+ clientIdFilter
+								+ "AND GithubName IS NOT NULL AND ServiceDate >= ? ORDER BY GithubName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();
 
@@ -1113,10 +1121,10 @@ public class MySqlDatabase {
 						"UPDATE Attendance SET Comments=?, RepoName=? WHERE ClientID=? AND ServiceDate=?;");
 
 				int col = 1;
-				if (comments.length() >= COMMENT_WIDTH)
+				if (comments != null && comments.length() >= COMMENT_WIDTH)
 					comments = comments.substring(0, COMMENT_WIDTH);
 				updateAttendanceStmt.setString(col++, comments);
-				if (repoName.length() >= REPO_NAME_WIDTH)
+				if (repoName != null && repoName.length() >= REPO_NAME_WIDTH)
 					repoName = repoName.substring(0, REPO_NAME_WIDTH);
 				updateAttendanceStmt.setString(col++, repoName);
 				updateAttendanceStmt.setInt(col++, clientID);
@@ -1125,8 +1133,9 @@ public class MySqlDatabase {
 				updateAttendanceStmt.executeUpdate();
 				updateAttendanceStmt.close();
 
-				insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
-						" for repo " + repoName + " (" + serviceDate + ")");
+				if (repoName != null)
+					insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
+							" for repo " + repoName + " (" + serviceDate + ")");
 				return;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1241,7 +1250,7 @@ public class MySqlDatabase {
 
 				int col = 1;
 				String className = importEvent.getClassName();
-				
+
 				addScheduleStmt.setInt(col++, importEvent.getDayOfWeek());
 				addScheduleStmt.setString(col++, importEvent.getStartTime());
 				addScheduleStmt.setInt(col++, importEvent.getDuration());

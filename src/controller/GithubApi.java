@@ -36,10 +36,8 @@ public class GithubApi {
 		commitService = new CommitService(client);
 	}
 
-	public boolean importGithubComments(String startDate, int clientID) {
-		// Get all attendance since 'startDate' w/ github user name (use null for ALL
-		// users) and no comments.
-		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, clientID);
+	public boolean importGithubComments(String startDate, ArrayList<AttendanceEventModel> eventList) {
+		// eventList contains all attendance since 'startDate' with null comments
 		String lastGithubUser = "";
 		List<Repository> repoList = null;
 
@@ -79,20 +77,23 @@ public class GithubApi {
 		return true;
 	}
 
-	public void importGithubCommentsByLevel(int level, String startDate, int clientID) {
+	public void importGithubCommentsByLevel(int level, String startDate, ArrayList<AttendanceEventModel> eventList) {
 		// Get all repositories by league level
 		List<Repository> repoList = getRepoListByLevel(level);
 		if (repoList == null)
 			return;
 
-		// Get all attendance since start date w/ github user name (use null for ALL
-		// users) and no comments
-		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, clientID);
+		// eventList contains all attendance since 'startDate' with null comments
 		String lastGithubUser = "";
 
 		for (int i = 0; i < eventList.size(); i++) {
 			// Get commit info from DB for each student/date combo
 			AttendanceEventModel event = eventList.get(i);
+
+			// Skip this event if it has already been processed
+			if (!event.getGithubComments().equals(""))
+				continue;
+
 			String gitUser = event.getGithubName();
 
 			if (!gitUser.equals(lastGithubUser)) {
@@ -124,13 +125,36 @@ public class GithubApi {
 				if (catchupStartDate.compareTo(earliestDate) < 0)
 					catchupStartDate = earliestDate;
 
-				importGithubComments(catchupStartDate, student.getClientID());
-				importGithubCommentsByLevel(0, catchupStartDate, student.getClientID());
+				// Import missing github comments
+				ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(catchupStartDate,
+						student.getClientID(), true);
+				importGithubComments(catchupStartDate, eventList);
+				importGithubCommentsByLevel(0, catchupStartDate, eventList);
 
 				// Set student 'new github' flag back to false
 				sqlDb.updateStudentFlags(student, "NewGithub", 0);
 			}
 		}
+	}
+
+	public void updateEmptyGithubComments(ArrayList<AttendanceEventModel> eventList) {
+		String today = new DateTime().toString("yyyy-MM-dd");
+		int recordCount = 0;
+
+		for (int i = 0; i < eventList.size(); i++) {
+			// Update any event with null github comments to avoid repeated searches in the
+			// future
+			AttendanceEventModel event = eventList.get(i);
+			if (event.getGithubComments().equals("") && event.getServiceDateString().compareTo(today) < 0) {
+				recordCount++;
+				sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), event.getServiceDateString(),
+						null, "");
+			}
+		}
+		
+		if (recordCount > 0)
+			sqlDb.insertLogData(LogDataModel.MISSING_COMMENTS_FOR_ATTENDANCE, new StudentNameModel("", "", false),
+					0, ": " + recordCount + " records");
 	}
 
 	private List<Repository> getRepoListByLevel(int level) {

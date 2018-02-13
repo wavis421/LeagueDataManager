@@ -286,7 +286,7 @@ public class Pike13Api {
 
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/clients/queries");
+			HttpURLConnection conn = connectUrl("clients");
 
 			// Send the query
 			sendQueryToUrl(conn, getClientData);
@@ -355,7 +355,7 @@ public class Pike13Api {
 		try {
 			do {
 				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/enrollments/queries");
+				HttpURLConnection conn = connectUrl("enrollments");
 
 				// Send the query; add page info if necessary
 				if (hasMore)
@@ -423,7 +423,7 @@ public class Pike13Api {
 		try {
 			do {
 				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/enrollments/queries");
+				HttpURLConnection conn = connectUrl("enrollments");
 
 				// Send the query; add page info if necessary
 				if (hasMore)
@@ -524,7 +524,7 @@ public class Pike13Api {
 
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/event_occurrences/queries");
+			HttpURLConnection conn = connectUrl("event_occurrences");
 
 			// Send the query
 			sendQueryToUrl(conn, scheduleString);
@@ -576,7 +576,7 @@ public class Pike13Api {
 
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/invoice_items/queries");
+			HttpURLConnection conn = connectUrl("invoice_items");
 
 			// Send the query
 			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00",
@@ -672,8 +672,7 @@ public class Pike13Api {
 	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList, DateRangeEvent dateRange) {
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl(
-					"https://jtl.pike13.com/desk/api/v3/reports/invoice_item_transactions/queries");
+			HttpURLConnection conn = connectUrl("invoice_item_transactions");
 
 			// Send the query
 			String transCmd = getTransactionData.replaceFirst("0000-00-00",
@@ -723,7 +722,7 @@ public class Pike13Api {
 	private void getPersonPlans(InvoiceModel invoice, Integer planID) {
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/person_plans/queries");
+			HttpURLConnection conn = connectUrl("person_plans");
 
 			// Fill in plan_id field and send the query
 			String planString = getPersonPlanData.replace("PPPP", planID.toString());
@@ -805,7 +804,7 @@ public class Pike13Api {
 
 		try {
 			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("https://jtl.pike13.com/desk/api/v3/reports/staff_members/queries");
+			HttpURLConnection conn = connectUrl("staff_members");
 
 			// Send the query
 			sendQueryToUrl(conn, getStaffMemberData);
@@ -865,8 +864,7 @@ public class Pike13Api {
 		try {
 			do {
 				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl(
-						"https://jtl.pike13.com/desk/api/v3/reports/event_occurrence_staff_members/queries");
+				HttpURLConnection conn = connectUrl("event_occurrence_staff_members");
 
 				// Send the query; add page info if necessary
 				if (hasMore)
@@ -928,10 +926,10 @@ public class Pike13Api {
 		return eventList;
 	}
 
-	private HttpURLConnection connectUrl(String queryUrl) {
+	private HttpURLConnection connectUrl(String endPoint) {
 		try {
 			// Get URL connection with authorization
-			URL url = new URL(queryUrl);
+			URL url = new URL("https://jtl.pike13.com/desk/api/v3/reports/" + endPoint + "/queries");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			String basicAuth = "Bearer " + pike13Token;
 			conn.setRequestProperty("Authorization", basicAuth);

@@ -161,7 +161,7 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
-		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+		sqlDb.insertLogData(LogDataModel.ATTENDANCE_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 				" starting from " + startDate.substring(0, 10) + " ***");
 	}
 
@@ -188,7 +188,7 @@ public class Controller {
 	}
 
 	public void importGithubComments(String startDate) {
-		boolean result;
+		boolean result = true;
 
 		// Import github from start date, update missing github data for new users
 		sqlDb.insertLogData(LogDataModel.STARTING_GITHUB_IMPORT, new StudentNameModel("", "", false), 0,
@@ -197,16 +197,33 @@ public class Controller {
 		// Set cursor to "wait" cursor
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		result = githubApi.importGithubComments(startDate, 0);
-		if (result) {
-			githubApi.importGithubCommentsByLevel(0, startDate, 0);
-			githubApi.updateMissingGithubComments();
+		// Get list of events with missing comments
+		ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(startDate, 0, false);
+		if (eventList.size() > 0) {
+			// Import Github comments
+			result = githubApi.importGithubComments(startDate, eventList);
+
+			if (result) {
+				// Remove updated events from eventList before processing further
+				removeUpdatedGithubEvents(eventList);
+
+				if (eventList.size() > 0) {
+					// Import github comments for level 0
+					githubApi.importGithubCommentsByLevel(0, startDate, eventList);
+
+					// Update any remaining null comments to show event was processed
+					githubApi.updateEmptyGithubComments(eventList);
+				}
+			}
 		}
+
+		// Updated github comments for users with new user name
+		githubApi.updateMissingGithubComments();
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
 		if (result)
-			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0, 
+			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_COMPLETE, new StudentNameModel("", "", false), 0,
 					" starting from " + startDate.substring(0, 10) + " ***");
 		else
 			sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
@@ -219,5 +236,14 @@ public class Controller {
 		importAttendanceFromPike13(startDate);
 		importScheduleFromPike13();
 		importGithubComments(startDate);
+	}
+
+	private void removeUpdatedGithubEvents(ArrayList<AttendanceEventModel> eventList) {
+		for (int i = eventList.size() - 1; i >= 0; i--) {
+			AttendanceEventModel model = eventList.get(i);
+			if (!model.getGithubComments().equals("")) {
+				eventList.remove(model);
+			}
+		}
 	}
 }

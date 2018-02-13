@@ -58,9 +58,10 @@ public class LogDataModel {
 	public static final int MISSING_PIKE13_STAFF_MEMBER = 49;
 	public static final int SF_ATTENDANCE_IMPORT_ERROR = 50;
 	public static final int SF_STAFF_HOURS_IMPORT_ERROR = 51;
+	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 52;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 53;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -83,7 +84,7 @@ public class LogDataModel {
 			"SalesForce attendance updated", "SalesForce canceled visits removed", "Deleted canceled Visit ID",
 			"*** SALESFORCE IMPORT ABORTED", "SalesForce Staff Hours updated", "SalesForce Upsert Staff Hours error",
 			"Missing SF Staff Member", "Missing Pike13 Staff Member", "SalesForce Attendance import error",
-			"SalesForce Staff Hours Import error" };
+			"SalesForce Staff Hours Import error", "Attendance update with no Github comments" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
