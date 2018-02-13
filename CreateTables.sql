@@ -55,7 +55,7 @@ BEGIN
 		ClientID int(11) DEFAULT NULL,
 		LogType int(11) NOT NULL,
 		StudentName varchar(50) DEFAULT NULL,
-		AppendedString varchar(100) DEFAULT NULL,
+		AppendedString varchar(120) DEFAULT NULL,
 		LogDate datetime DEFAULT NULL,
 
 		UNIQUE KEY(ClientID, LogType, StudentName, AppendedString)

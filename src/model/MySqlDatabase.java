@@ -25,7 +25,7 @@ public class MySqlDatabase {
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int REPO_NAME_WIDTH = 50;
-	private static final int LOG_APPEND_WIDTH = 100;
+	private static final int LOG_APPEND_WIDTH = 120;
 	private static final int CLASS_NAME_WIDTH = 40;
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
