@@ -3,8 +3,8 @@ package model;
 public class InvoiceModel implements Comparable<InvoiceModel> {
 
 	private String transactionID, invoiceDate, itemName, itemStartDate, itemEndDate, payMethod;
-	String studentName, payerName;
-	private Integer amount, clientID, planID;
+	private String studentName, payerName;
+	private Integer amount, clientID, planID, productID;
 	private boolean isCanceled;
 
 	public InvoiceModel(String invoiceDate, String itemName, String itemStartDate, String itemEndDate, int clientID,
@@ -106,6 +106,14 @@ public class InvoiceModel implements Comparable<InvoiceModel> {
 
 	public void setIsCanceled(boolean canceled) {
 		isCanceled = canceled;
+	}
+
+	public Integer getProductID() {
+		return productID;
+	}
+
+	public void setProductID(Integer productID) {
+		this.productID = productID;
 	}
 
 	@Override

@@ -95,7 +95,11 @@ public class Pike13Api {
 	private final int PLAN_END_DATE_IDX = 2;
 	private final int PLAN_IS_CANCELED_IDX = 3;
 	private final int PLAN_NAME_IDX = 4;
+	private final int PLAN_PRODUCT_ID_IDX = 5;
 
+	// Indices for Person Plans by Product ID
+	private final int PLAN2_IS_CANCELED_IDX = 0;
+	
 	// Indices for Staff Member data
 	private final int TEACHER_CLIENT_ID_IDX = 0;
 	private final int TEACHER_FIRST_NAME_IDX = 1;
@@ -231,11 +235,23 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\",\"is_canceled\",\"plan_name\"],"
+			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\",\"is_canceled\",\"plan_name\",\"product_id\"],"
 			// Page limit max is 10
 			+ "\"page\":{\"limit\":10},"
 			// Filter on plan_id which is filled in at run-time
 			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
+
+	// Get person plan data by product ID
+	private final String getPersonPlanDataByProductId = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"is_canceled\"],"
+			// Page limit max is 150
+			+ "\"page\":{\"limit\":150},"
+			// Filter on Product ID for this client
+			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",IIII],"
+			+ "                     [\"eq\",\"product_id\",PPPP]]]}}}";
 
 	// Get staff member data
 	private final String getStaffMemberData = "{\"data\":{\"type\":\"queries\","
@@ -640,16 +656,7 @@ public class Pike13Api {
 				InvoiceModel invoice = invoiceList.get(i);
 				int clientID = invoice.getClientID();
 
-				// If final invoice is not canceled, clear previous canceled indicators
-				if (!invoice.getIsCanceled()) {
-					for (int j = i - 1; j >= 0; j--) {
-						if (invoiceList.get(j).getClientID() == clientID) {
-							invoiceList.get(j).setIsCanceled(false);
-						}
-					}
-				}
-
-				// Now clear out all start/end date fields except the final one
+				// Clear out all start/end date fields except the final one
 				if (invoice.getItemStartDate() == null)
 					continue;
 
@@ -752,12 +759,17 @@ public class Pike13Api {
 				// Add person plans fields to invoice model
 				invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
 				invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
+				invoice.setProductID(invoiceArray.getInt(PLAN_PRODUCT_ID_IDX));
 
 				boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
 				invoice.setIsCanceled(isCanceled);
 				if (!isCanceled) {
+					// Only set start/end dates if plan is active
 					invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
 					invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
+				} else {
+					// Clear canceled flag if this client has other active records for this product
+					invoice.setIsCanceled(getCanceledFlagsByProductId(invoice.getClientID(), invoice.getProductID()));
 				}
 			}
 			conn.disconnect();
@@ -797,6 +809,51 @@ public class Pike13Api {
 			return true;
 		} else
 			return false;
+	}
+	
+	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
+		try {
+			// Get URL connection with authorization
+			HttpURLConnection conn = connectUrl("person_plans");
+
+			// Send the query
+			String planCmd = getPersonPlanDataByProductId.replace("IIII", clientID.toString());
+			planCmd = planCmd.replace("PPPP", productID.toString());
+			sendQueryToUrl(conn, planCmd);
+
+			// Check result
+			int responseCode = conn.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
+						" " + responseCode + ": " + conn.getResponseMessage());
+				conn.disconnect();
+				return true;
+			}
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return true;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each plan in the list
+				JsonArray planArray = (JsonArray) jsonArray.get(i);
+				
+				if (planArray.getString(PLAN2_IS_CANCELED_IDX).equals("f")) {
+					conn.disconnect();
+					return false;
+				}
+			}
+			conn.disconnect();
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
+					" for Invoice DB: " + e1.getMessage());
+		}
+		return true;
 	}
 
 	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
