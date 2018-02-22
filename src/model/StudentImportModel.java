@@ -1,9 +1,7 @@
 package model;
 
-import org.joda.time.DateTime;
-
 public class StudentImportModel implements Comparable<StudentImportModel> {
-	private Integer clientID;
+	private int clientID;
 	private String lastName, firstName, githubName, startDate, homeLocString;
 	private int homeLocation, gender, gradYear, isInMasterDb;
 
@@ -119,7 +117,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		return firstName + " " + lastName + " (" + clientID + ")";
 	}
 
-	public Integer getClientID() {
+	public int getClientID() {
 		return clientID;
 	}
 
