@@ -77,11 +77,18 @@ public class GithubApi {
 		return true;
 	}
 
-	public void importGithubCommentsByLevel(int level, String startDate, ArrayList<AttendanceEventModel> eventList) {
-		// Get all repositories by league level
-		List<Repository> repoList = getRepoListByLevel(level);
-		if (repoList == null)
+	public void importGithubCommentsByLevel(int level, String startDate, List<Repository> repoList,
+			ArrayList<AttendanceEventModel> eventList) {
+		// Check for empty event list
+		if (eventList.size() == 0)
 			return;
+
+		// Get all repositories by league level
+		if (repoList == null) {
+			repoList = getRepoListByLevel(level);
+			if (repoList == null)
+				return;
+		}
 
 		// eventList contains all attendance since 'startDate' with null comments
 		String lastGithubUser = "";
@@ -94,7 +101,7 @@ public class GithubApi {
 			if (!event.getGithubComments().equals(""))
 				continue;
 
-			String gitUser = event.getGithubName();
+			String gitUser = event.getGithubName().toLowerCase();
 
 			if (!gitUser.equals(lastGithubUser)) {
 				// New github user, need to get new repos
@@ -102,8 +109,9 @@ public class GithubApi {
 
 				for (int j = 0; j < repoList.size(); j++) {
 					Repository repo = repoList.get(j);
+					String repoName = repo.getName().toLowerCase();
 
-					if (repo.getName().endsWith("-" + gitUser)) {
+					if (repoName.endsWith("-" + gitUser)) {
 						// Update all user comments in this repo list
 						updateUserGithubComments(gitUser, startDate, eventList, repo);
 					}
@@ -115,12 +123,18 @@ public class GithubApi {
 	public void updateMissingGithubComments() {
 		// Import github comments from start date for new github user names
 		ArrayList<StudentModel> newGithubList = sqlDb.getStudentsUsingFlag("NewGithub");
+		if (newGithubList.size() == 0)
+			return;
 
+		// Create repo lists for each level
+		List<Repository> repoListLevel0 = getRepoListByLevel(0);
+		List<Repository> repoListLevel1 = getRepoListByLevel(1);
+		String earliestDate = new DateTime().minusMonths(4).toString("yyyy-MM-dd");
+		
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
 			if (student.getStartDate() != null) {
 				// Catch up only as far back as 4 months ago
-				String earliestDate = new DateTime().minusMonths(4).toString("yyyy-MM-dd");
 				String catchupStartDate = student.getStartDate().toString();
 				if (catchupStartDate.compareTo(earliestDate) < 0)
 					catchupStartDate = earliestDate;
@@ -129,7 +143,8 @@ public class GithubApi {
 				ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(catchupStartDate,
 						student.getClientID(), true);
 				importGithubComments(catchupStartDate, eventList);
-				importGithubCommentsByLevel(0, catchupStartDate, eventList);
+				importGithubCommentsByLevel(0, catchupStartDate, repoListLevel0, eventList);
+				importGithubCommentsByLevel(1, catchupStartDate, repoListLevel1, eventList);
 
 				// Set student 'new github' flag back to false
 				sqlDb.updateStudentFlags(student, "NewGithub", 0);
@@ -151,10 +166,10 @@ public class GithubApi {
 						null, "");
 			}
 		}
-		
+
 		if (recordCount > 0)
-			sqlDb.insertLogData(LogDataModel.MISSING_COMMENTS_FOR_ATTENDANCE, new StudentNameModel("", "", false),
-					0, ": " + recordCount + " records");
+			sqlDb.insertLogData(LogDataModel.MISSING_COMMENTS_FOR_ATTENDANCE, new StudentNameModel("", "", false), 0,
+					": " + recordCount + " records");
 	}
 
 	private List<Repository> getRepoListByLevel(int level) {
@@ -198,7 +213,7 @@ public class GithubApi {
 					for (int k = 0; k < eventList.size(); k++) {
 						AttendanceEventModel event = eventList.get(k);
 						if (commitDate.equals(event.getServiceDateString())
-								&& githubUser.equals(event.getGithubName())) {
+								&& githubUser.equals(event.getGithubName().toLowerCase())) {
 							// Trim github message to get only summary data
 							String message = trimMessage(commit.getCommit().getMessage());
 
