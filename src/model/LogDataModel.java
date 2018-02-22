@@ -60,8 +60,13 @@ public class LogDataModel {
 	public static final int SF_STAFF_HOURS_IMPORT_ERROR = 51;
 	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
 
+	public static final int MISSING_SF_CONTACT_FOR_CLIENT_IMPORT = 53;
+	public static final int SF_CLIENT_IMPORT_ERROR = 54;
+	public static final int SALES_FORCE_UPSERT_CLIENTS_ERROR = 55;
+	public static final int SF_CLIENTS_UPDATED = 56;
+
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 53;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 57;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -69,22 +74,29 @@ public class LogDataModel {
 			"Updated Student Attendance", "Updated Github Comments", "Removed inactive student",
 			"Removed class from schedule",
 
+			// 13
 			"Attendance data with no matching student", "Invalid Class Name", "Invalid Grad Year field",
 			"Unrecognized Home Location", "Failure importing Github data", "Failure parsing Github data",
 			"Student Database error", "Attendance Database error", "Logging Database error", "Schedule Database error",
 			"Pike13 Connection error", "Pike13 Import error", "Failure getting Module Repo",
 
+			// 26
 			"*** BEGIN STUDENT IMPORT", "*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT",
 			"*** ATTENDANCE IMPORT COMPLETE", "*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE",
 			"*** GITHUB IMPORT ABORTED", "*** BEGIN SCHEDULE IMPORT", "*** SCHEDULE IMPORT COMPLETE",
 			"*** BEGIN SALESFORCE IMPORT", "*** SALESFORCE IMPORT COMPLETE",
 
+			// 37
 			"SalesForce Connection error", "SalesForce Contacts Import error", "SalesForce Upsert Attendance error",
 			"SalesForce Delete Attendance error", "Missing SF contact for Attendance",
 			"SalesForce attendance updated", "SalesForce canceled visits removed", "Deleted canceled Visit ID",
 			"*** SALESFORCE IMPORT ABORTED", "SalesForce Staff Hours updated", "SalesForce Upsert Staff Hours error",
 			"Missing SF Staff Member", "Missing Pike13 Staff Member", "SalesForce Attendance import error",
-			"SalesForce Staff Hours Import error", "Attendance update with no Github comments" };
+			"SalesForce Staff Hours Import error", "Attendance update with no Github comments", 
+			
+			// 53
+			"Missing SF contact for Client Import", "SalesForce Client import error", "SalesForce Upsert Clients error",
+			"SalesForce clients updated" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

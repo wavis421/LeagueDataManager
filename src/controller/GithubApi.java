@@ -119,8 +119,8 @@ public class GithubApi {
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
 			if (student.getStartDate() != null) {
-				// Catch up only as far back as 3 months ago
-				String earliestDate = new DateTime().minusMonths(3).toString("yyyy-MM-dd");
+				// Catch up only as far back as 4 months ago
+				String earliestDate = new DateTime().minusMonths(4).toString("yyyy-MM-dd");
 				String catchupStartDate = student.getStartDate().toString();
 				if (catchupStartDate.compareTo(earliestDate) < 0)
 					catchupStartDate = earliestDate;
