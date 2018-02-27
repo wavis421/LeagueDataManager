@@ -97,6 +97,8 @@ public class Pike13Api {
 	private final int CLIENT_FIRST_VISIT_IDX = 29;
 	private final int CLIENT_HOME_PHONE_IDX = 30;
 	private final int CLIENT_ACCOUNT_MGR_NAMES = 31;
+	private final int CLIENT_ACCOUNT_MGR_EMAILS = 32;
+	private final int CLIENT_ACCOUNT_MGR_PHONES = 33;
 
 	// Indices for enrollment data
 	private final int ENROLL_CLIENT_ID_IDX = 0;
@@ -197,12 +199,24 @@ public class Pike13Api {
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"" + FINANCIAL_AID_FIELD + "\",\"" + FINANCIAL_AID_PERCENT_FIELD + "\","
 			+ "            \"" + GITHUB_FIELD + "\",\"" + GRANT_INFO_FIELD + "\",\"" + LEAVE_REASON_FIELD + "\","
 			+ "            \"" + STOP_EMAIL_FIELD + "\",\"first_visit_date\",\"" + HOME_PHONE_FIELD + "\","
-			+ "            \"account_manager_names\"],"
+			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\"],"
 			// Page limit max is 500
-			+ "\"page\":{\"limit\":500},"
+			+ "\"page\":{\"limit\":500";
+	
+	private final String getClientDataForSF2 = "},"
 			// Filter on Dependents NULL and future visits > 0
 			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\"],"
 			+ "                     [\"eq\",\"person_state\",\"active\"]]]}}}";
+
+	private final String getClientDataByAcctMgr = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\"],"
+			// Page limit max is 10
+			+ "\"page\":{\"limit\":10},"
+			// Filter on account manager name
+			+ "\"filter\":[\"eq\",\"full_name\",\"NNNN\"]}}}";
 
 	// Getting enrollment data is in 2 parts since page info gets inserted in middle.
 	private final String getEnrollmentStudentTracker = "{\"data\":{\"type\":\"queries\","
@@ -424,13 +438,110 @@ public class Pike13Api {
 
 	public ArrayList<StudentImportModel> getClientsForSfImport() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
+		boolean hasMore = false;
+		String lastKey = "";
+
+		try {
+			do {
+				// Get URL connection with authorization
+				HttpURLConnection conn = connectUrl("clients");
+
+				// Send the query
+				if (hasMore)
+					sendQueryToUrl(conn, getClientDataForSF + ",\"starting_after\":\"" + lastKey + "\"" + getClientDataForSF2);
+				else
+					sendQueryToUrl(conn, getClientDataForSF + getClientDataForSF2);
+
+				// Check result
+				int responseCode = conn.getResponseCode();
+				if (responseCode != HttpURLConnection.HTTP_OK) {
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
+							" " + responseCode + ": " + conn.getResponseMessage());
+					conn.disconnect();
+					return studentList;
+				}
+
+				// Get input stream and read data
+				JsonObject jsonObj = readInputStream(conn);
+				if (jsonObj == null) {
+					conn.disconnect();
+					return studentList;
+				}
+				JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+				for (int i = 0; i < jsonArray.size(); i++) {
+					// Get fields for each person
+					JsonArray personArray = (JsonArray) jsonArray.get(i);
+					String firstName = stripQuotes(personArray.get(CLIENT_FIRST_NAME_IDX).toString());
+
+					if (!firstName.startsWith("Guest")) {
+						// Get fields for this Json array entry
+						StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
+								personArray.getString(CLIENT_FIRST_NAME_IDX),
+								personArray.getString(CLIENT_LAST_NAME_IDX),
+								stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
+								personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
+								personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
+								stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
+								stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
+								stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
+								stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
+								stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES).toString()),
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES).toString()),
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS).toString()));
+
+						studentList.add(model);
+					}
+				}
+				
+				// Check to see if there are more pages
+				hasMore = jsonObj.getBoolean("has_more");
+				if (hasMore)
+					lastKey = jsonObj.getString("last_key");
+
+				conn.disconnect();
+
+			} while (hasMore);
+
+		} catch (IOException e1) {
+			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
+					" for Client DB: " + e1.getMessage());
+		}
+
+		return studentList;
+	}
+
+	public StudentImportModel getClientByAcctMgr(String accountMgrName) {
+		StudentImportModel student = null;
 
 		try {
 			// Get URL connection with authorization
 			HttpURLConnection conn = connectUrl("clients");
 
 			// Send the query
-			sendQueryToUrl(conn, getClientDataForSF);
+			String nameCmd = getClientDataByAcctMgr.replace("NNNN", accountMgrName);
+			sendQueryToUrl(conn, nameCmd);
 
 			// Check result
 			int responseCode = conn.getResponseCode();
@@ -438,60 +549,27 @@ public class Pike13Api {
 				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
-				return studentList;
+				return null;
 			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
 			if (jsonObj == null) {
 				conn.disconnect();
-				return studentList;
+				return null;
 			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each person
-				JsonArray personArray = (JsonArray) jsonArray.get(i);
-				String firstName = stripQuotes(personArray.get(CLIENT_FIRST_NAME_IDX).toString());
+			// Get fields for this person
+			if (jsonArray.size() == 0)
+				return null;
 
-				if (!firstName.startsWith("Guest")) {
-					// Get fields for this Json array entry
-					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
-							personArray.getString(CLIENT_FIRST_NAME_IDX),
-							personArray.getString(CLIENT_LAST_NAME_IDX),
-							stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
-							personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
-							personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
-							stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
-							stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES).toString()));
-
-					studentList.add(model);
-				}
-			}
+			// Get fields for 1st Json array entry
+			JsonArray personArray = (JsonArray) jsonArray.get(0);
+			student = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
+					stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
+					stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
+					"", "", "", "", "");
 
 			conn.disconnect();
 
@@ -500,7 +578,7 @@ public class Pike13Api {
 					" for Client DB: " + e1.getMessage());
 		}
 
-		return studentList;
+		return student;
 	}
 
 	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {

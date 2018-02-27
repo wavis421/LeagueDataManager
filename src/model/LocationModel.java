@@ -12,7 +12,7 @@ public class LocationModel {
 	private static final int CLASS_LOCATION_SAN_ELIJO_MIDDLE = 7;
 
 	public static int convertStringToLocation(String classString) {
-		if (classString.startsWith("Carmel Valley Classroom"))
+		if (classString.startsWith("Carmel Valley"))
 			return CLASS_LOCATION_CARMEL_VALLEY;
 		else if (classString.startsWith("Downtown Central Library"))
 			return CLASS_LOCATION_DOWNTOWN_CENTRAL_LIBRARY;

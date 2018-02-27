@@ -44,7 +44,7 @@ public class GithubApi {
 		for (int i = 0; i < eventList.size(); i++) {
 			// Get commit info from DB for each student/date combo
 			AttendanceEventModel event = eventList.get(i);
-			String gitUser = event.getGithubName();
+			String gitUser = event.getGithubName().toLowerCase();
 
 			try {
 				if (!gitUser.equals(lastGithubUser)) {
@@ -130,7 +130,7 @@ public class GithubApi {
 		List<Repository> repoListLevel0 = getRepoListByLevel(0);
 		List<Repository> repoListLevel1 = getRepoListByLevel(1);
 		String earliestDate = new DateTime().minusMonths(4).toString("yyyy-MM-dd");
-		
+
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
 			if (student.getStartDate() != null) {

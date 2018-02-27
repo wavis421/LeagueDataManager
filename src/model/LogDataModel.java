@@ -60,13 +60,18 @@ public class LogDataModel {
 	public static final int SF_STAFF_HOURS_IMPORT_ERROR = 51;
 	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
 
-	public static final int MISSING_SF_CONTACT_FOR_CLIENT_IMPORT = 53;
-	public static final int SF_CLIENT_IMPORT_ERROR = 54;
-	public static final int SALES_FORCE_UPSERT_CLIENTS_ERROR = 55;
-	public static final int SF_CLIENTS_UPDATED = 56;
+	public static final int CREATE_SF_ACCOUNT_FOR_CLIENT = 53;
+	public static final int ADD_CLIENT_TO_SF_ACCOUNT = 54;
+	public static final int MISSING_PIKE13_ACCT_MGR_FOR_CLIENT = 55;
+	public static final int SALES_FORCE_DELETE_CLIENT_RECORD = 56;
+	public static final int SF_CLIENT_IMPORT_ERROR = 57;
+	public static final int SF_ACCOUNT_IMPORT_ERROR = 58;
+	public static final int SALES_FORCE_UPSERT_CLIENTS_ERROR = 59;
+	public static final int SALES_FORCE_UPSERT_ACCOUNT_ERROR = 60;
+	public static final int SF_CLIENTS_UPDATED = 61;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 57;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 62;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -88,15 +93,16 @@ public class LogDataModel {
 
 			// 37
 			"SalesForce Connection error", "SalesForce Contacts Import error", "SalesForce Upsert Attendance error",
-			"SalesForce Delete Attendance error", "Missing SF contact for Attendance",
-			"SalesForce attendance updated", "SalesForce canceled visits removed", "Deleted canceled Visit ID",
-			"*** SALESFORCE IMPORT ABORTED", "SalesForce Staff Hours updated", "SalesForce Upsert Staff Hours error",
-			"Missing SF Staff Member", "Missing Pike13 Staff Member", "SalesForce Attendance import error",
-			"SalesForce Staff Hours Import error", "Attendance update with no Github comments", 
-			
+			"SalesForce Delete Attendance error", "Missing SF contact for Attendance", "SalesForce attendance updated",
+			"SalesForce canceled visits removed", "Deleted canceled Visit ID", "*** SALESFORCE IMPORT ABORTED",
+			"SalesForce Staff Hours updated", "SalesForce Upsert Staff Hours error", "Missing SF Staff Member",
+			"Missing Pike13 Staff Member", "SalesForce Attendance import error", "SalesForce Staff Hours Import error",
+			"Attendance update with no Github comments",
+
 			// 53
-			"Missing SF contact for Client Import", "SalesForce Client import error", "SalesForce Upsert Clients error",
-			"SalesForce clients updated" };
+			"Create SF account for Client", "Add client to SF Account", "Missing Pike13 Acct Manager for Client",
+			"Deleted SalesForce Client record", "SalesForce Client import error", "SalesForce Account import error",
+			"SalesForce Upsert Clients error", "SalesForce Upsert Account error", "SalesForce clients updated" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
