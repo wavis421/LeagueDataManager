@@ -13,7 +13,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
-	private String accountMgrNames, accountMgrPhones, accountMgrEmails;
+	private String accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
 	private int completedVisits, futureVisits;
 	private boolean signedWaiver, stopEmail, financialAid;
 
@@ -66,7 +66,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 			String tShirtSize, boolean signedWaiver, String membership, String passOnFile, boolean stopEmail,
 			boolean financialAid, String financialAidPercent, String grantInfo, String leaveReason, String hearAboutUs,
 			String whoToThank, String emergContactName, String emergContactPhone, String emergContactEmail,
-			String homePhone, String accountMgrNames, String accountMgrPhones, String accountMgrEmails) {
+			String homePhone, String accountMgrNames, String accountMgrPhones, String accountMgrEmails,
+			String dependentNames) {
 
 		this.clientID = clientID;
 		this.firstName = firstName;
@@ -102,6 +103,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.accountMgrPhones = accountMgrPhones;
 		this.accountMgrEmails = accountMgrEmails;
 		this.homePhone = homePhone;
+		if (dependentNames == null)
+			this.dependentNames = "";
+		else
+			this.dependentNames = dependentNames;
 	}
 
 	private String parseGithubName(String githubName) {
@@ -277,6 +282,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public String getAccountMgrEmails() {
 		return accountMgrEmails;
+	}
+
+	public String getDependentNames() {
+		return dependentNames;
 	}
 
 	@Override

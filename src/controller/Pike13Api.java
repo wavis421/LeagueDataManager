@@ -96,9 +96,10 @@ public class Pike13Api {
 	private final int CLIENT_STOP_EMAIL_IDX = 28;
 	private final int CLIENT_FIRST_VISIT_IDX = 29;
 	private final int CLIENT_HOME_PHONE_IDX = 30;
-	private final int CLIENT_ACCOUNT_MGR_NAMES = 31;
-	private final int CLIENT_ACCOUNT_MGR_EMAILS = 32;
-	private final int CLIENT_ACCOUNT_MGR_PHONES = 33;
+	private final int CLIENT_ACCOUNT_MGR_NAMES_IDX = 31;
+	private final int CLIENT_ACCOUNT_MGR_EMAILS_IDX = 32;
+	private final int CLIENT_ACCOUNT_MGR_PHONES_IDX = 33;
+	private final int CLIENT_DEPENDENT_NAMES_IDX = 34;
 
 	// Indices for enrollment data
 	private final int ENROLL_CLIENT_ID_IDX = 0;
@@ -199,13 +200,13 @@ public class Pike13Api {
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"" + FINANCIAL_AID_FIELD + "\",\"" + FINANCIAL_AID_PERCENT_FIELD + "\","
 			+ "            \"" + GITHUB_FIELD + "\",\"" + GRANT_INFO_FIELD + "\",\"" + LEAVE_REASON_FIELD + "\","
 			+ "            \"" + STOP_EMAIL_FIELD + "\",\"first_visit_date\",\"" + HOME_PHONE_FIELD + "\","
-			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\"],"
+			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\",\"dependent_names\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
 	private final String getClientDataForSF2 = "},"
 			// Filter on Dependents NULL and future visits > 0
-			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\"],"
+			+ "\"filter\":[\"and\",[[\"MMM\",\"dependent_names\"],"
 			+ "                     [\"eq\",\"person_state\",\"active\"]]]}}}";
 
 	private final String getClientDataByAcctMgr = "{\"data\":{\"type\":\"queries\","
@@ -436,7 +437,7 @@ public class Pike13Api {
 		return studentList;
 	}
 
-	public ArrayList<StudentImportModel> getClientsForSfImport() {
+	public ArrayList<StudentImportModel> getClientsForSfImport(boolean isAcctMgr) {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 		boolean hasMore = false;
 		String lastKey = "";
@@ -446,11 +447,16 @@ public class Pike13Api {
 				// Get URL connection with authorization
 				HttpURLConnection conn = connectUrl("clients");
 
-				// Send the query
-				if (hasMore)
-					sendQueryToUrl(conn, getClientDataForSF + ",\"starting_after\":\"" + lastKey + "\"" + getClientDataForSF2);
+				// Send the query (set dependents not empty for manager)
+				String cmd2;
+				if (isAcctMgr)
+					cmd2 = getClientDataForSF2.replace("MMM", "nemp");
 				else
-					sendQueryToUrl(conn, getClientDataForSF + getClientDataForSF2);
+					cmd2 = getClientDataForSF2.replace("MMM", "emp");
+				if (hasMore)
+					sendQueryToUrl(conn, getClientDataForSF + ",\"starting_after\":\"" + lastKey + "\"" + cmd2);
+				else
+					sendQueryToUrl(conn, getClientDataForSF + cmd2);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
@@ -507,9 +513,10 @@ public class Pike13Api {
 								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
 								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
 								stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS).toString()));
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
+								stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
 
 						studentList.add(model);
 					}
