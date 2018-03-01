@@ -61,7 +61,7 @@ public class LogDataModel {
 	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
 
 	public static final int CREATE_SF_ACCOUNT_FOR_CLIENT = 53;
-	public static final int ADD_CLIENT_TO_SF_ACCOUNT = 54;
+	public static final int DUPLICATE_SF_ACCOUNT_NAME = 54;
 	public static final int MISSING_PIKE13_ACCT_MGR_FOR_CLIENT = 55;
 	public static final int SALES_FORCE_DELETE_CLIENT_RECORD = 56;
 	public static final int SF_CLIENT_IMPORT_ERROR = 57;
@@ -100,9 +100,10 @@ public class LogDataModel {
 			"Attendance update with no Github comments",
 
 			// 53
-			"Create SF account for Client", "Add client to SF Account", "Missing Pike13 Acct Manager for Client",
-			"Deleted SalesForce Client record", "SalesForce Client import error", "SalesForce Account import error",
-			"SalesForce Upsert Clients error", "SalesForce Upsert Account error", "SalesForce clients updated" };
+			"Create SF account for Client", "Warning: Duplicate SalesForce account name",
+			"Missing Pike13 Acct Manager for Client", "Deleted SalesForce Client record",
+			"SalesForce Client import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
+			"SalesForce Upsert Account error", "SalesForce clients updated" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
