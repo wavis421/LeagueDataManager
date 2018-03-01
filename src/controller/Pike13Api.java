@@ -464,14 +464,14 @@ public class Pike13Api {
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
-					return studentList;
+					return null;
 				}
 
 				// Get input stream and read data
 				JsonObject jsonObj = readInputStream(conn);
 				if (jsonObj == null) {
 					conn.disconnect();
-					return studentList;
+					return null;
 				}
 				JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
@@ -534,11 +534,13 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Client DB: " + e1.getMessage());
+			return null;
 		}
 
 		return studentList;
 	}
 
+	// Currently not being used
 	public StudentImportModel getClientByAcctMgr(String accountMgrName) {
 		StudentImportModel student = null;
 
@@ -687,14 +689,14 @@ public class Pike13Api {
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
-					return eventList;
+					return null;
 				}
 
 				// Get input stream and read data
 				JsonObject jsonObj = readInputStream(conn);
 				if (jsonObj == null) {
 					conn.disconnect();
-					return eventList;
+					return null;
 				}
 				JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
@@ -728,6 +730,7 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Enrollment DB: " + e1.getMessage());
+			return null;
 		}
 
 		return eventList;
@@ -1106,14 +1109,14 @@ public class Pike13Api {
 				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 						" " + responseCode + ": " + conn.getResponseMessage());
 				conn.disconnect();
-				return staffList;
+				return null;
 			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
 			if (jsonObj == null) {
 				conn.disconnect();
-				return staffList;
+				return null;
 			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
@@ -1137,6 +1140,7 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Staff Member DB: " + e1.getMessage());
+			return null;
 		}
 
 		return staffList;
@@ -1170,14 +1174,14 @@ public class Pike13Api {
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + ": " + conn.getResponseMessage());
 					conn.disconnect();
-					return eventList;
+					return null;
 				}
 
 				// Get input stream and read data
 				JsonObject jsonObj = readInputStream(conn);
 				if (jsonObj == null) {
 					conn.disconnect();
-					return eventList;
+					return null;
 				}
 				JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
@@ -1212,6 +1216,7 @@ public class Pike13Api {
 		} catch (IOException e1) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					" for Staff Hours DB: " + e1.getMessage());
+			return null;
 		}
 
 		return eventList;
