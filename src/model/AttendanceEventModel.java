@@ -3,16 +3,17 @@ package model;
 import java.sql.Date;
 
 public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
-	private int clientID;
+	private int clientID, visitID;
 	private String eventName;
 	private Date serviceDate;
 	private String serviceDateString;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 
-	public AttendanceEventModel(int clientID, Date serviceDate, String eventName, String githubName, String repoName,
+	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String eventName, String githubName, String repoName,
 			String githubComments, StudentNameModel nameModel) {
 		this.clientID = clientID;
+		this.visitID = visitID;
 		this.serviceDate = serviceDate;
 		this.eventName = eventName;
 		this.githubName = githubName;
@@ -26,8 +27,9 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
-	public AttendanceEventModel(int clientID, String studentName, String serviceDate, String eventName) {
+	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String eventName) {
 		this.clientID = clientID;
+		this.visitID = visitID;
 		this.nameModel = new StudentNameModel(studentName, "", false);
 		this.serviceDateString = serviceDate;
 		this.eventName = eventName;
@@ -35,6 +37,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public int getClientID() {
 		return clientID;
+	}
+
+	public int getVisitID() {
+		return visitID;
 	}
 
 	public String getEventName() {

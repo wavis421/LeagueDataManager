@@ -106,6 +106,7 @@ public class Pike13Api {
 	private final int ENROLL_FULL_NAME_IDX = 1;
 	private final int ENROLL_SERVICE_DATE_IDX = 2;
 	private final int ENROLL_EVENT_NAME_IDX = 3;
+	private final int ENROLL_VISIT_ID_IDX = 4;
 
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
@@ -224,7 +225,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -259,7 +260,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
 			// Page limit max is 10 (only need first entry)
 			+ "\"page\":{\"limit\":500},"
 			// Filter on Plan ID which is filled in at run time
@@ -269,7 +270,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
 			// Page limit max is 10 (only need first entry)
 			+ "\"page\":{\"limit\":500},"
 			// Filter on client ID and service name
@@ -641,6 +642,7 @@ public class Pike13Api {
 					// Add event to list
 					if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
 						eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
+								eventArray.getInt(ENROLL_VISIT_ID_IDX),
 								stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName));
 					}
 				}

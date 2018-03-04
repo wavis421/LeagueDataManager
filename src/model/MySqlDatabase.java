@@ -797,7 +797,7 @@ public class MySqlDatabase {
 		return attendanceList;
 	}
 
-	private ArrayList<AttendanceEventModel> getAllEvents() {
+	public ArrayList<AttendanceEventModel> getAllEvents() {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
 		for (int i = 0; i < 2; i++) {
@@ -809,9 +809,9 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
-							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
-							result.getString("Comments"),
+					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 				}
 
@@ -861,9 +861,9 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getDate("ServiceDate"),
-							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
-							result.getString("Comments"),
+					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
+							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 				}
 
@@ -898,7 +898,7 @@ public class MySqlDatabase {
 				if (lastClientID == thisClientID) {
 					// Add more data to existing client
 					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(result.getInt("ClientID"),
-							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 
@@ -908,10 +908,11 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("Students.FirstName"),
 									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"),
-							new AttendanceEventModel(result.getInt("CLientID"), result.getDate("ServiceDate"),
-									result.getString("EventName"), result.getString("GithubName"),
-									result.getString("RepoName"), result.getString("Comments"), new StudentNameModel(
-											result.getString("FirstName"), result.getString("LastName"), true)));
+							new AttendanceEventModel(result.getInt("CLientID"), result.getInt("VisitID"),
+									result.getDate("ServiceDate"), result.getString("EventName"),
+									result.getString("GithubName"), result.getString("RepoName"),
+									result.getString("Comments"), new StudentNameModel(result.getString("FirstName"),
+											result.getString("LastName"), true)));
 					attendanceList.add(lastAttendanceModel);
 					lastClientID = thisClientID;
 				}
@@ -1036,8 +1037,9 @@ public class MySqlDatabase {
 						dbListIdx++;
 
 					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
-						addAttendance(importEvent.getClientID(), importEvent.getServiceDateString(),
-								importEvent.getEventName(), dbList.get(dbListIdx).getStudentNameModel());
+						addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+								importEvent.getServiceDateString(), importEvent.getEventName(),
+								dbList.get(dbListIdx).getStudentNameModel());
 
 					} else
 						insertLogData(LogDataModel.STUDENT_NOT_FOUND,
@@ -1052,8 +1054,9 @@ public class MySqlDatabase {
 
 				if (idx >= 0) {
 					// Student exists in DB, so add attendance data for this student
-					addAttendance(importEvent.getClientID(), importEvent.getServiceDateString(),
-							importEvent.getEventName(), studentList.get(idx).getNameModel());
+					addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+							importEvent.getServiceDateString(), importEvent.getEventName(),
+							studentList.get(idx).getNameModel());
 
 				} else {
 					// Student not found
@@ -1074,17 +1077,19 @@ public class MySqlDatabase {
 		return -1;
 	}
 
-	public void addAttendance(int clientID, String serviceDate, String eventName, StudentNameModel nameModel) {
+	private void addAttendance(int clientID, int visitID, String serviceDate, String eventName,
+			StudentNameModel nameModel) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addAttendanceStmt = dbConnection.prepareStatement(
-						"INSERT INTO Attendance " + "(ClientID, ServiceDate, EventName) VALUES (?, ?, ?);");
+						"INSERT INTO Attendance " + "(ClientID, ServiceDate, EventName, VisitID) VALUES (?, ?, ?, ?);");
 
 				int col = 1;
 				addAttendanceStmt.setInt(col++, clientID);
 				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 				addAttendanceStmt.setString(col++, eventName);
+				addAttendanceStmt.setInt(col, visitID);
 
 				addAttendanceStmt.executeUpdate();
 				addAttendanceStmt.close();
