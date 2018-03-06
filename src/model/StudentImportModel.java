@@ -13,7 +13,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
-	private String accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
+	private String accountID, accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
 	private int completedVisits, futureVisits;
 	private boolean signedWaiver, stopEmail, financialAid;
 
@@ -129,12 +129,24 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		return clientID;
 	}
 
+	public String getAccountID() {
+		return accountID;
+	}
+
+	public void setAccountID(String id) {
+		accountID = id;
+	}
+
 	public String getLastName() {
 		return lastName;
 	}
 
 	public String getFirstName() {
 		return firstName;
+	}
+
+	public String getFullName() {
+		return firstName + " " + lastName;
 	}
 
 	public String getGithubName() {

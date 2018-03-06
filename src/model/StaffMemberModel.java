@@ -6,8 +6,10 @@ public class StaffMemberModel {
 	private String staffID;
 	private String fullName;
 	private String category; // teacher, volunteer, TA
+	private String occupation, employer, startInfo;
 
-	public StaffMemberModel(String clientID, String staffID, String fullName, String category) {
+	public StaffMemberModel(String clientID, String staffID, String fullName, String category, String occupation,
+			String employer, String startInfo) {
 		this.clientID = clientID;
 		if (staffID != null && (staffID.startsWith("null") || staffID.equals("")))
 			this.staffID = null;
@@ -15,6 +17,9 @@ public class StaffMemberModel {
 			this.staffID = staffID;
 		this.fullName = fullName;
 		this.category = category;
+		this.occupation = occupation;
+		this.employer = employer;
+		this.startInfo = startInfo;
 	}
 
 	@Override
@@ -39,5 +44,17 @@ public class StaffMemberModel {
 
 	public String getCategory() {
 		return category;
+	}
+
+	public String getOccupation() {
+		return occupation;
+	}
+
+	public String getEmployer() {
+		return employer;
+	}
+
+	public String getStartInfo() {
+		return startInfo;
 	}
 }

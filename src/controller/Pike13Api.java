@@ -53,6 +53,9 @@ public class Pike13Api {
 	// Custom field names for Staff Member data
 	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
 	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
+	private final String STAFF_OCCUPATION_FIELD = "custom_field_106324";
+	private final String STAFF_EMPLOYER_FIELD = "custom_field_133180";
+	private final String STAFF_START_INFO_FIELD = "custom_field_140367";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -158,6 +161,9 @@ public class Pike13Api {
 	private final int TEACHER_LAST_NAME_IDX = 2;
 	private final int TEACHER_SF_CLIENT_ID_IDX = 3;
 	private final int TEACHER_CATEGORY_IDX = 5;
+	private final int TEACHER_OCCUPATION_IDX = 6;
+	private final int TEACHER_EMPLOYER_IDX = 7;
+	private final int TEACHER_START_INFO_IDX = 8;
 
 	// Indices for Staff Hours data
 	private final int STAFF_CLIENT_ID_IDX = 0;
@@ -343,7 +349,8 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + SF_CLIENT_ID_FIELD + "\","
-			+ "            \"person_state\",\"" + STAFF_CATEGORY_FIELD + "\"],"
+			+ "            \"person_state\",\"" + STAFF_CATEGORY_FIELD + "\",\"" + STAFF_OCCUPATION_FIELD + "\","
+			+ "            \"" + STAFF_EMPLOYER_FIELD + "\",\"" + STAFF_START_INFO_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			// Filter on Staff Category and staff member active
@@ -1134,7 +1141,10 @@ public class Pike13Api {
 				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
 						staffArray.getString(TEACHER_FIRST_NAME_IDX) + " "
 								+ staffArray.getString(TEACHER_LAST_NAME_IDX),
-						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString())));
+						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_OCCUPATION_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_EMPLOYER_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_START_INFO_IDX).toString())));
 			}
 
 			conn.disconnect();
