@@ -262,16 +262,6 @@ public class Pike13Api {
 			// Filter on since date
 			+ "\"filter\":[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
 
-	private final String getEnrollmentDataByPlanId = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
-			// Page limit max is 10 (only need first entry)
-			+ "\"page\":{\"limit\":500},"
-			// Filter on Plan ID which is filled in at run time
-			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
-
 	private final String getEnrollmentDataByService = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
@@ -281,7 +271,7 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":500},"
 			// Filter on client ID and service name
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",1111],"
-			+ "                     [\"eq\",\"service_name\",\"NNNN\"]]]}}}";
+			+ "                     [\"starts\",\"service_name\",\"NNNN\"]]]}}}";
 
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
@@ -883,12 +873,9 @@ public class Pike13Api {
 				// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
 				//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
 				// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
-				//    then updates start/end dates and verbose event name. These records are sometimes not found.
-				// 3) Enrollments-by-Plan: attempts to get verbose name from enrollments end-point using the
-				//    plan_id field, but the enrollments end-point sometimes has a NULL plan_id (Pike13 bug?).
+				//    then updates start/end dates and verbose event name.
 				getPersonPlans(model, planID);
-				if (!getEnrollmentsByServiceName(model))
-					getEnrollmentsByPlanId(model, planID);
+				getEnrollmentsByServiceName(model);
 
 				// Add invoice to list
 				invoiceList.add(model);
@@ -1026,35 +1013,32 @@ public class Pike13Api {
 		}
 	}
 
-	private boolean getEnrollmentsByPlanId(InvoiceModel invoice, Integer planID) {
-		// Insert plan ID into enrollment command string
-		String enroll = getEnrollmentDataByPlanId.replace("PPPP", planID.toString());
-
-		// Get attendance for this plan ID
-		ArrayList<AttendanceEventModel> model = getEnrollmentByCmdString(enroll, "");
-		if (model.size() > 0) {
-			invoice.setItemName(model.get(0).getEventName());
-			return true;
-		} else
-			return false;
-	}
-
-	private boolean getEnrollmentsByServiceName(InvoiceModel model) {
+	private void getEnrollmentsByServiceName(InvoiceModel model) {
 		String enroll = getEnrollmentDataByService.replace("1111", model.getClientID().toString());
-		enroll = enroll.replace("NNNN", model.getItemName());
+
+		// Get enrollment command string using item name
+		String itemName = model.getItemName();
+		int idx = itemName.indexOf('@');
+		if (idx > 0)
+			itemName = itemName.substring(0, idx);
+		enroll = enroll.replace("NNNN", itemName);
 
 		// Get attendance for this clientID and service name pair
 		ArrayList<AttendanceEventModel> modelList = getEnrollmentByCmdString(enroll, "");
 
 		if (modelList.size() > 0) {
 			model.setItemName(modelList.get(0).getEventName());
+
 			if (!model.getIsCanceled()) {
 				model.setItemStartDate(modelList.get(0).getServiceDateString());
 				model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
 			}
-			return true;
-		} else
-			return false;
+
+		} else if (!model.getIsCanceled()) {
+			mysqlDb.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND, 
+					new StudentNameModel(model.getStudentName(), "", true), model.getClientID(),
+					" for '" + model.getItemName() + "'");
+		}
 	}
 	
 	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
