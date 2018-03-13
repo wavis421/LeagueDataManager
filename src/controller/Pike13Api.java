@@ -51,11 +51,25 @@ public class Pike13Api {
 	private final String STOP_EMAIL_FIELD = "custom_field_149207";
 
 	// Custom field names for Staff Member data
-	private final String SF_CLIENT_ID_FIELD = "custom_field_152501";
+	private final String STAFF_SF_CLIENT_ID_FIELD = "custom_field_152501";
 	private final String STAFF_CATEGORY_FIELD = "custom_field_106325";
+	private final String STAFF_GENDER_FIELD = "custom_field_106320";
+	private final String STAFF_HOME_PHONE_FIELD = "custom_field_106498";
 	private final String STAFF_OCCUPATION_FIELD = "custom_field_106324";
 	private final String STAFF_EMPLOYER_FIELD = "custom_field_133180";
 	private final String STAFF_START_INFO_FIELD = "custom_field_140367";
+	private final String STAFF_ALTERNATE_EMAIL_FIELD = "custom_field_140368";
+	private final String STAFF_KEY_HOLDER_FIELD = "custom_field_149098";
+	private final String STAFF_LIVE_SCAN_DATE_FIELD = "custom_field_149097";
+	private final String STAFF_T_SHIRT_FIELD = "custom_field_106737";
+	private final String STAFF_WHERE_DID_YOU_HEAR_FIELD = "custom_field_128371";
+	private final String STAFF_LEAVE_FIELD = "custom_field_149559";
+	private final String STAFF_EMERG_NAME_FIELD = "custom_field_106321";
+	private final String STAFF_EMERG_EMAIL_FIELD = "custom_field_149434";
+	private final String STAFF_EMERG_PHONE_FIELD = "custom_field_106322";
+	private final String STAFF_CURR_BOARD_MEMBER_FIELD = "custom_field_153299";
+	private final String STAFF_CURR_STAFF_MEMBER_FIELD = "custom_field_153300";
+	private final String STAFF_GITHUB_USER_FIELD = "custom_field_127885";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -125,15 +139,15 @@ public class Pike13Api {
 	private final int SF_INSTRUCTOR_NAMES_IDX = 10;
 
 	// Indices for schedule data
-	private final int SERVICE_DAY_IDX = 0;
-	private final int SERVICE_TIME_IDX = 1;
-	private final int DURATION_MINS_IDX = 2;
-	private final int WKLY_EVENT_NAME_IDX = 3;
+	private final int SCHED_SERVICE_DAY_IDX = 0;
+	private final int SCHED_SERVICE_TIME_IDX = 1;
+	private final int SCHED_DURATION_MINS_IDX = 2;
+	private final int SCHED_WKLY_EVENT_NAME_IDX = 3;
 
 	// Indices for transaction data
-	private final int PLAN_ID_IDX = 0;
-	private final int PAYMENT_METHOD_IDX = 1;
-	private final int TRANSACTION_ID_IDX = 2;
+	private final int TRANS_PLAN_ID_IDX = 0;
+	private final int TRANS_PAYMENT_METHOD_IDX = 1;
+	private final int TRANS_TRANSACTION_ID_IDX = 2;
 
 	// Indices for invoice data
 	private final int INVOICE_ISSUED_DATE_IDX = 0;
@@ -160,24 +174,46 @@ public class Pike13Api {
 	private final int TEACHER_FIRST_NAME_IDX = 1;
 	private final int TEACHER_LAST_NAME_IDX = 2;
 	private final int TEACHER_SF_CLIENT_ID_IDX = 3;
-	private final int TEACHER_CATEGORY_IDX = 5;
+	private final int TEACHER_CATEGORY_IDX = 4;
+	private final int TEACHER_ROLE_IDX = 5;
 	private final int TEACHER_OCCUPATION_IDX = 6;
 	private final int TEACHER_EMPLOYER_IDX = 7;
 	private final int TEACHER_START_INFO_IDX = 8;
+	private final int TEACHER_GENDER_IDX = 9;
+	private final int TEACHER_PHONE_IDX = 10;
+	private final int TEACHER_HOME_PHONE_IDX = 11;
+	private final int TEACHER_ADDRESS_IDX = 12;
+	private final int TEACHER_EMAIL_IDX = 13;
+	private final int TEACHER_ALTERNATE_EMAIL_IDX = 14;
+	private final int TEACHER_HOME_LOCATION_IDX = 15;
+	private final int TEACHER_GITHUB_USER_IDX = 16;
+	private final int TEACHER_BIRTHDATE_IDX = 17;
+	private final int TEACHER_PAST_EVENTS_IDX = 18;
+	private final int TEACHER_FUTURE_EVENTS_IDX = 19;
+	private final int TEACHER_KEY_HOLDER_IDX = 20;
+	private final int TEACHER_LIVE_SCAN_DATE_IDX = 21;
+	private final int TEACHER_T_SHIRT_IDX = 22;
+	private final int TEACHER_WHERE_DID_YOU_HEAR_IDX = 23;
+	private final int TEACHER_LEAVE_IDX = 24;
+	private final int TEACHER_EMERG_NAME_IDX = 25;
+	private final int TEACHER_EMERG_EMAIL_IDX = 26;
+	private final int TEACHER_EMERG_PHONE_IDX = 27;
+	private final int TEACHER_CURR_BOARD_MEMBER_IDX = 28;
+	private final int TEACHER_CURR_STAFF_MEMBER_IDX = 29;
 
 	// Indices for Staff Hours data
 	private final int STAFF_CLIENT_ID_IDX = 0;
-	private final int STAFF_SERVICE_NAME_IDX = 1;
-	private final int STAFF_SERVICE_DATE_IDX = 2;
-	private final int STAFF_SERVICE_TIME_IDX = 3;
-	private final int STAFF_DURATION_IDX = 4;
-	private final int STAFF_LOCATION_IDX = 5;
-	private final int STAFF_COMPLETED_COUNT_IDX = 6;
-	private final int STAFF_NO_SHOW_COUNT_IDX = 7;
-	private final int STAFF_CANCELED_COUNT_IDX = 8;
+	private final int STAFF_EVENT_SERVICE_NAME_IDX = 1;
+	private final int STAFF_EVENT_SERVICE_DATE_IDX = 2;
+	private final int STAFF_EVENT_SERVICE_TIME_IDX = 3;
+	private final int STAFF_EVENT_DURATION_IDX = 4;
+	private final int STAFF_EVENT_LOCATION_IDX = 5;
+	private final int STAFF_EVENT_COMPLETED_COUNT_IDX = 6;
+	private final int STAFF_EVENT_NO_SHOW_COUNT_IDX = 7;
+	private final int STAFF_EVENT_CANCELED_COUNT_IDX = 8;
 	private final int STAFF_EVENT_NAME_IDX = 9;
-	private final int STAFF_SCHEDULE_ID_IDX = 10;
-	private final int STAFF_FULL_NAME_IDX = 11;
+	private final int STAFF_EVENT_SCHEDULE_ID_IDX = 10;
+	private final int STAFF_EVENT_FULL_NAME_IDX = 11;
 
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
@@ -338,9 +374,17 @@ public class Pike13Api {
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + SF_CLIENT_ID_FIELD + "\","
-			+ "            \"person_state\",\"" + STAFF_CATEGORY_FIELD + "\",\"" + STAFF_OCCUPATION_FIELD + "\","
-			+ "            \"" + STAFF_EMPLOYER_FIELD + "\",\"" + STAFF_START_INFO_FIELD + "\"],"
+			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + STAFF_SF_CLIENT_ID_FIELD + "\","
+			+ "            \"" + STAFF_CATEGORY_FIELD + "\",\"role\",\"" + STAFF_OCCUPATION_FIELD + "\","
+			+ "            \"" + STAFF_EMPLOYER_FIELD + "\",\"" + STAFF_START_INFO_FIELD + "\","
+			+ "            \"" + STAFF_GENDER_FIELD + "\",\"phone\",\"" + STAFF_HOME_PHONE_FIELD + "\",\"address\","
+			+ "            \"email\",\"" + STAFF_ALTERNATE_EMAIL_FIELD + "\",\"home_location_name\","
+			+ "            \"" + STAFF_GITHUB_USER_FIELD + "\",\"birthdate\",\"past_events\","
+			+ "            \"future_events\",\"" + STAFF_KEY_HOLDER_FIELD + "\",\"" + STAFF_LIVE_SCAN_DATE_FIELD + "\","
+			+ "            \"" + STAFF_T_SHIRT_FIELD + "\",\"" + STAFF_WHERE_DID_YOU_HEAR_FIELD + "\","
+			+ "            \"" + STAFF_LEAVE_FIELD + "\",\"" + STAFF_EMERG_NAME_FIELD + "\",\"" + STAFF_EMERG_EMAIL_FIELD + "\","
+			+ "            \"" + STAFF_EMERG_PHONE_FIELD + "\",\"" + STAFF_CURR_BOARD_MEMBER_FIELD + "\","
+			+ "            \"" + STAFF_CURR_STAFF_MEMBER_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			// Filter on Staff Category and staff member active
@@ -803,11 +847,11 @@ public class Pike13Api {
 				JsonArray scheduleArray = (JsonArray) jsonArray.get(i);
 
 				// Get event name, day-of-week and duration
-				String eventName = stripQuotes(scheduleArray.get(WKLY_EVENT_NAME_IDX).toString());
-				String serviceDayString = stripQuotes(scheduleArray.get(SERVICE_DAY_IDX).toString());
+				String eventName = stripQuotes(scheduleArray.get(SCHED_WKLY_EVENT_NAME_IDX).toString());
+				String serviceDayString = stripQuotes(scheduleArray.get(SCHED_SERVICE_DAY_IDX).toString());
 				int serviceDay = Integer.parseInt(serviceDayString);
-				String startTime = stripQuotes(scheduleArray.get(SERVICE_TIME_IDX).toString());
-				int duration = scheduleArray.getInt(DURATION_MINS_IDX);
+				String startTime = stripQuotes(scheduleArray.get(SCHED_SERVICE_TIME_IDX).toString());
+				int duration = scheduleArray.getInt(SCHED_DURATION_MINS_IDX);
 
 				// Add event to list
 				scheduleList.add(new ScheduleModel(0, serviceDay, startTime, duration, eventName));
@@ -943,10 +987,10 @@ public class Pike13Api {
 
 				for (int j = 0; j < invoiceList.size(); j++) {
 					InvoiceModel invoice = invoiceList.get(j);
-					if (transactionArray.getInt(PLAN_ID_IDX) == invoice.getPlanID()) {
+					if (transactionArray.getInt(TRANS_PLAN_ID_IDX) == invoice.getPlanID()) {
 						// Plan ID match, update transaction ID and payment method
-						invoice.setPayMethod(stripQuotes(transactionArray.get(PAYMENT_METHOD_IDX).toString()));
-						invoice.setTransactionID(transactionArray.getString(TRANSACTION_ID_IDX).toString());
+						invoice.setPayMethod(stripQuotes(transactionArray.get(TRANS_PAYMENT_METHOD_IDX).toString()));
+						invoice.setTransactionID(transactionArray.getString(TRANS_TRANSACTION_ID_IDX).toString());
 						break;
 					}
 				}
@@ -1123,12 +1167,33 @@ public class Pike13Api {
 					sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
 
 				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
-						staffArray.getString(TEACHER_FIRST_NAME_IDX) + " "
-								+ staffArray.getString(TEACHER_LAST_NAME_IDX),
+						staffArray.getString(TEACHER_FIRST_NAME_IDX), staffArray.getString(TEACHER_LAST_NAME_IDX),			
 						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_ROLE_IDX).toString()),
 						stripQuotes(staffArray.get(TEACHER_OCCUPATION_IDX).toString()),
 						stripQuotes(staffArray.get(TEACHER_EMPLOYER_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_START_INFO_IDX).toString())));
+						stripQuotes(staffArray.get(TEACHER_START_INFO_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_GENDER_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_BIRTHDATE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_PHONE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_HOME_PHONE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_ADDRESS_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_EMAIL_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_ALTERNATE_EMAIL_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_HOME_LOCATION_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_GITHUB_USER_IDX).toString()),
+						staffArray.getInt(TEACHER_PAST_EVENTS_IDX),
+						staffArray.getInt(TEACHER_FUTURE_EVENTS_IDX),
+						stripQuotes(staffArray.get(TEACHER_KEY_HOLDER_IDX).toString()).equals("t") ? true : false,
+						stripQuotes(staffArray.get(TEACHER_LIVE_SCAN_DATE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_T_SHIRT_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_WHERE_DID_YOU_HEAR_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_LEAVE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_EMERG_NAME_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_EMERG_EMAIL_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_EMERG_PHONE_IDX).toString()),
+						stripQuotes(staffArray.get(TEACHER_CURR_BOARD_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
+						stripQuotes(staffArray.get(TEACHER_CURR_STAFF_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false));
 			}
 
 			conn.disconnect();
@@ -1187,17 +1252,17 @@ public class Pike13Api {
 
 					// Add event to list
 					eventList.add(new SalesForceStaffHoursModel(eventArray.get(STAFF_CLIENT_ID_IDX).toString(),
-							eventArray.getString(STAFF_FULL_NAME_IDX),
-							eventArray.getString(STAFF_SERVICE_NAME_IDX),
-							eventArray.getString(STAFF_SERVICE_DATE_IDX),
-							eventArray.getString(STAFF_SERVICE_TIME_IDX),
-							eventArray.getJsonNumber(STAFF_DURATION_IDX).doubleValue(),
-							eventArray.getString(STAFF_LOCATION_IDX),
-							eventArray.getJsonNumber(STAFF_COMPLETED_COUNT_IDX).doubleValue(),
-							eventArray.getJsonNumber(STAFF_NO_SHOW_COUNT_IDX).doubleValue(),
-							eventArray.getJsonNumber(STAFF_CANCELED_COUNT_IDX).doubleValue(),
+							eventArray.getString(STAFF_EVENT_FULL_NAME_IDX),
+							eventArray.getString(STAFF_EVENT_SERVICE_NAME_IDX),
+							eventArray.getString(STAFF_EVENT_SERVICE_DATE_IDX),
+							eventArray.getString(STAFF_EVENT_SERVICE_TIME_IDX),
+							eventArray.getJsonNumber(STAFF_EVENT_DURATION_IDX).doubleValue(),
+							eventArray.getString(STAFF_EVENT_LOCATION_IDX),
+							eventArray.getJsonNumber(STAFF_EVENT_COMPLETED_COUNT_IDX).doubleValue(),
+							eventArray.getJsonNumber(STAFF_EVENT_NO_SHOW_COUNT_IDX).doubleValue(),
+							eventArray.getJsonNumber(STAFF_EVENT_CANCELED_COUNT_IDX).doubleValue(),
 							stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
-							eventArray.get(STAFF_SCHEDULE_ID_IDX).toString()));
+							eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString()));
 				}
 
 				// Check to see if there are more pages
