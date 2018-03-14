@@ -248,7 +248,7 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":500";
 	
 	private final String getClientDataForSF2 = "},"
-			// Filter on Dependents NULL and future visits > 0
+			// Filter on Dependents NULL or not NULL ("MMM" filled in at run-time)
 			+ "\"filter\":[\"and\",[[\"MMM\",\"dependent_names\"],"
 			+ "                     [\"eq\",\"person_state\",\"active\"]]]}}}";
 

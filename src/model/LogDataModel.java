@@ -70,9 +70,10 @@ public class LogDataModel {
 	public static final int SALES_FORCE_UPSERT_ACCOUNT_ERROR = 60;
 	public static final int SF_CLIENTS_UPDATED = 61;
 	public static final int INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND = 62;
+	public static final int MISSING_SF_CLIENT_ID_FOR_TA = 63;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 63;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 64;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -104,7 +105,8 @@ public class LogDataModel {
 			"Create SF account for Client", "Warning: Duplicate SalesForce account name",
 			"Missing Pike13 Acct Manager for Client", "Deleted SalesForce Client record",
 			"SalesForce Client import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
-			"SalesForce Upsert Account error", "SalesForce clients updated", "Invoice Report: Enrollment record not found" };
+			"SalesForce Upsert Account error", "SalesForce clients updated", "Invoice Report: Enrollment record not found",
+			"Missing SalesForce ClientID" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
