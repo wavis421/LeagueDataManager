@@ -103,8 +103,8 @@ public class LogDataModel {
 			"Attendance update with no Github comments",
 
 			// 53
-			"Create SF account for Client", "Warning: Duplicate SalesForce account name",
-			"Missing Pike13 Acct Manager for Client", "Deleted SalesForce Contact record",
+			"Create SF account for client", "Warning: Duplicate SalesForce account name",
+			"Missing Pike13 Acct Manager for client", "Deleted SalesForce Contact record",
 			"SalesForce Contact import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
 			"SalesForce Upsert Account error", "SalesForce Contacts updated", "Invoice Report: Enrollment record not found",
 			"Missing SalesForce ClientID", "Blank Event Name for Attendance record" };

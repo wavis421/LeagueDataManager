@@ -3,6 +3,7 @@ package model;
 //Model for importing data into SalesForce
 public class SalesForceAttendanceModel {
 	private String clientID;
+	private String fullName;
 	private String serviceDate;
 	private String serviceTime;
 	private String eventName;
@@ -14,11 +15,12 @@ public class SalesForceAttendanceModel {
 	private String location;
 	private String staff;
 
-	public SalesForceAttendanceModel(String clientID, String serviceDate, String serviceTime, String eventName,
-			String eventType, String serviceName, String status, String visitID, String scheduleID, String location,
-			String staff) {
+	public SalesForceAttendanceModel(String clientID, String fullName, String serviceDate, String serviceTime,
+			String eventName, String eventType, String serviceName, String status, String visitID, String scheduleID,
+			String location, String staff) {
 
 		this.clientID = clientID;
+		this.fullName = fullName;
 		this.serviceDate = serviceDate;
 		this.serviceTime = serviceTime;
 		this.eventName = eventName;
@@ -33,6 +35,10 @@ public class SalesForceAttendanceModel {
 
 	public String getClientID() {
 		return clientID;
+	}
+
+	public String getFullName() {
+		return fullName;
 	}
 
 	public String getServiceDate() {

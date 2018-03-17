@@ -137,6 +137,7 @@ public class Pike13Api {
 	private final int SF_EVENT_OCCURRENCE_ID_IDX = 8;
 	private final int SF_LOCATION_NAME_IDX = 9;
 	private final int SF_INSTRUCTOR_NAMES_IDX = 10;
+	private final int SF_FULL_NAME_IDX = 11;
 
 	// Indices for schedule data
 	private final int SCHED_SERVICE_DAY_IDX = 0;
@@ -291,7 +292,7 @@ public class Pike13Api {
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"service_date\",\"service_time\",\"event_name\",\"service_name\","
 			+ "            \"service_category\",\"state\",\"visit_id\",\"event_occurrence_id\","
-			+ "            \"service_location_name\",\"instructor_names\"],"
+			+ "            \"service_location_name\",\"instructor_names\",\"full_name\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -752,6 +753,7 @@ public class Pike13Api {
 
 					// Add event to list
 					eventList.add(new SalesForceAttendanceModel(eventArray.get(SF_PERSON_ID_IDX).toString(),
+							stripQuotes(eventArray.get(SF_FULL_NAME_IDX).toString()),
 							stripQuotes(eventArray.get(SF_SERVICE_DATE_IDX).toString()),
 							stripQuotes(eventArray.get(SF_SERVICE_TIME_IDX).toString()),
 							stripQuotes(eventArray.get(SF_EVENT_NAME_IDX).toString()),
