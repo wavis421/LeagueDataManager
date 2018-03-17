@@ -103,9 +103,9 @@ public class LogDataModel {
 
 			// 53
 			"Create SF account for Client", "Warning: Duplicate SalesForce account name",
-			"Missing Pike13 Acct Manager for Client", "Deleted SalesForce Client record",
-			"SalesForce Client import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
-			"SalesForce Upsert Account error", "SalesForce clients updated", "Invoice Report: Enrollment record not found",
+			"Missing Pike13 Acct Manager for Client", "Deleted SalesForce Contact record",
+			"SalesForce Contact import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
+			"SalesForce Upsert Account error", "SalesForce Contacts updated", "Invoice Report: Enrollment record not found",
 			"Missing SalesForce ClientID" };
 
 	private int logType, clientID;

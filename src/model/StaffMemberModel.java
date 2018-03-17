@@ -2,23 +2,22 @@ package model;
 
 public class StaffMemberModel {
 	// clientID and staffID are identical except for TA's
-	private String clientID;
-	private String sfClientID;
+	private String clientID, sfClientID, accountID;
 	private String firstName, lastName, birthdate;
 	private String githubName, homeLocation;
 	private String category; // teacher, volunteer, TA
 	private String occupation, employer, startInfo;
 	private String gender, phone, homePhone, address, email, alternateEmail, liveScan, tShirt;
 	private String role, whereDidYouHear, leave, emergName, emergEmail, emergPhone;
-	private boolean isBoardMember, isStaffMember, isKeyHolder;
+	private boolean isBoardMember, isStaffMember, isKeyHolder, isAlsoClient;
 	private int pastEvents, futureEvents;
 
 	public StaffMemberModel(String clientID, String sfClientID, String firstName, String lastName, String category,
 			String role, String occupation, String employer, String startInfo, String gender, String birthdate,
 			String phone, String homePhone, String address, String email, String alternateEmail, String homeLocation,
-			String githubName, int pastEvents, int futureEvents, boolean keyHolder,
-			String liveScan, String tShirt, String whereDidYouHear, String leave, String emergName, String emergEmail,
-			String emergPhone, boolean isBoardMember, boolean isStaffMember) {
+			String githubName, int pastEvents, int futureEvents, boolean keyHolder, String liveScan, String tShirt,
+			String whereDidYouHear, String leave, String emergName, String emergEmail, String emergPhone,
+			boolean isBoardMember, boolean isStaffMember, boolean isAlsoClient) {
 
 		this.clientID = clientID;
 		if (sfClientID != null && (sfClientID.startsWith("null") || sfClientID.equals("")))
@@ -53,6 +52,7 @@ public class StaffMemberModel {
 		this.emergPhone = emergPhone;
 		this.isBoardMember = isBoardMember;
 		this.isStaffMember = isStaffMember;
+		this.isAlsoClient = isAlsoClient;
 	}
 
 	@Override
@@ -193,5 +193,17 @@ public class StaffMemberModel {
 
 	public int getFutureEvents() {
 		return futureEvents;
+	}
+
+	public boolean isAlsoClient() {
+		return isAlsoClient;
+	}
+
+	public String getAccountID() {
+		return accountID;
+	}
+
+	public void setAccountID(String id) {
+		accountID = id;
 	}
 }
