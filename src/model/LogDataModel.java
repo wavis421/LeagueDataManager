@@ -73,11 +73,12 @@ public class LogDataModel {
 	public static final int MISSING_SF_CLIENT_ID_FOR_TA = 63;
 	public static final int BLANK_EVENT_NAME_FOR_ATTENDANCE = 64;
 	public static final int ATTENDANCE_LOC_CODE_INVALID = 65;
-	public static final int MISSING_ACCOUNT_FOR_TA_OR_PARENT = 66;
-	public static final int UPSERTED_ACCOUNT_RETRIEVAL_ERROR = 67;
+	public static final int ATTENDANCE_LOC_CODE_MISMATCH = 66;
+	public static final int MISSING_ACCOUNT_FOR_TA_OR_PARENT = 67;
+	public static final int UPSERTED_ACCOUNT_RETRIEVAL_ERROR = 68;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 68;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 69;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -111,7 +112,7 @@ public class LogDataModel {
 			"SalesForce Contact import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
 			"SalesForce Upsert Account error", "SalesForce Contacts updated", "Invoice Report: Enrollment record not found",
 			"Missing SalesForce ClientID", "Blank Event Name for Attendance record", "Attendance Location Code invalid",
-			"Missing Account for TA/Parent", "Failure retrieving upserted Account" };
+			"Attendance event Location Code mismatch", "Missing Account for TA/Parent", "Failure retrieving upserted Account" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

@@ -15,7 +15,7 @@ public class LocationModel {
 	private static final int CLASS_LOCATION_OFFSITE = 10;
 	private static final int CLASS_LOCATION_SERRA_HIGH = 11;
 	private static final int CLASS_LOCATION_SOLANA_RANCH_ELEM = 12;
-	
+
 	private static final int CLASS_LAST_LOCATION_NUM = 12; // Must be last!
 
 	private static final String[] locationCodes = new String[] { "", "CV", "DL", "MX", "GP", "WM", "SM", "SE", "HH",
@@ -88,8 +88,16 @@ public class LocationModel {
 		else
 			return "";
 	}
-	
+
 	public static int getNumLocactions() {
 		return CLASS_LAST_LOCATION_NUM;
+	}
+
+	public static int findLocationCodeMatch(String locCode, String locLongString) {
+		for (int i = 1; i <= CLASS_LAST_LOCATION_NUM; i++) {
+			if (locationCodes[i].equals(locCode) && convertStringToLocation(locLongString) == i)
+				return i;
+		}
+		return -1;
 	}
 }
