@@ -73,7 +73,7 @@ public class NotesWindow {
 					+ "    *** Please send any feedback, suggestions and bug reports to wendy.avis@jointheleague.org *** \n",
 
 			// About League Data Manager
-			"\n   VERSION 3.2\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
+			"\n   VERSION 3.3\n\n   LEAGUE DATA MANAGER OVERVIEW:\n\n"
 					+ "      The League Data Manager gets data from:\n"
 					+ "         => Pike13 client database\n"
 					+ "         => Pike13 attendance database\n"
