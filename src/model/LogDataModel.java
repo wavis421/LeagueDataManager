@@ -60,7 +60,7 @@ public class LogDataModel {
 	public static final int SF_STAFF_HOURS_IMPORT_ERROR = 51;
 	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
 
-	public static final int CREATE_SF_ACCOUNT_FOR_CLIENT = 53;
+	public static final int CREATE_SALES_FORCE_ACCOUNT = 53;
 	public static final int DUPLICATE_SF_ACCOUNT_NAME = 54;
 	public static final int MISSING_PIKE13_ACCT_MGR_FOR_CLIENT = 55;
 	public static final int SALES_FORCE_DELETE_CLIENT_RECORD = 56;
@@ -72,9 +72,10 @@ public class LogDataModel {
 	public static final int INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND = 62;
 	public static final int MISSING_SF_CLIENT_ID_FOR_TA = 63;
 	public static final int BLANK_EVENT_NAME_FOR_ATTENDANCE = 64;
+	public static final int ATTENDANCE_LOC_CODE_INVALID = 65;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 65;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 66;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -103,11 +104,11 @@ public class LogDataModel {
 			"Attendance update with no Github comments",
 
 			// 53
-			"Create SF account for client", "Warning: Duplicate SalesForce account name",
+			"Create SalesForce account", "Warning: Duplicate SalesForce account name",
 			"Missing Pike13 Acct Manager for client", "Deleted SalesForce Contact record",
 			"SalesForce Contact import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
 			"SalesForce Upsert Account error", "SalesForce Contacts updated", "Invoice Report: Enrollment record not found",
-			"Missing SalesForce ClientID", "Blank Event Name for Attendance record" };
+			"Missing SalesForce ClientID", "Blank Event Name for Attendance record", "Attendance Location Code invalid" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

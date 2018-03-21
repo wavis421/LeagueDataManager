@@ -10,6 +10,16 @@ public class LocationModel {
 	private static final int CLASS_LOCATION_WILSON_MIDDLE_SCHOOL = 5;
 	private static final int CLASS_LOCATION_SAN_MARCOS_MIDDLE = 6;
 	private static final int CLASS_LOCATION_SAN_ELIJO_MIDDLE = 7;
+	private static final int CLASS_LOCATION_HOOVER_HIGH = 8;
+	private static final int CLASS_LOCATION_E3_CIVIC_HIGH = 9;
+	private static final int CLASS_LOCATION_OFFSITE = 10;
+	private static final int CLASS_LOCATION_SERRA_HIGH = 11;
+	private static final int CLASS_LOCATION_SOLANA_RANCH_ELEM = 12;
+	
+	private static final int CLASS_LAST_LOCATION_NUM = 12; // Must be last!
+
+	private static final String[] locationCodes = new String[] { "", "CV", "DL", "MX", "GP", "WM", "SM", "SE", "HH",
+			"E3", "OS", "SH", "SR" };
 
 	public static int convertStringToLocation(String classString) {
 		if (classString.startsWith("Carmel Valley"))
@@ -26,6 +36,16 @@ public class LocationModel {
 			return CLASS_LOCATION_SAN_MARCOS_MIDDLE;
 		else if (classString.startsWith("San Elijo Middle"))
 			return CLASS_LOCATION_SAN_ELIJO_MIDDLE;
+		else if (classString.startsWith("Hoover High"))
+			return CLASS_LOCATION_HOOVER_HIGH;
+		else if (classString.startsWith("E3Civic High"))
+			return CLASS_LOCATION_E3_CIVIC_HIGH;
+		else if (classString.startsWith("Offsite"))
+			return CLASS_LOCATION_OFFSITE;
+		else if (classString.startsWith("Serra High"))
+			return CLASS_LOCATION_SERRA_HIGH;
+		else if (classString.startsWith("Solana Ranch Elem"))
+			return CLASS_LOCATION_SOLANA_RANCH_ELEM;
 		else
 			return CLASS_LOCATION_UNKNOWN;
 	}
@@ -46,8 +66,30 @@ public class LocationModel {
 			return "San Marcos Middle";
 		case CLASS_LOCATION_SAN_ELIJO_MIDDLE:
 			return "San Elijo Middle";
+		case CLASS_LOCATION_HOOVER_HIGH:
+			return "Hoover High";
+		case CLASS_LOCATION_E3_CIVIC_HIGH:
+			return "E3Civic High";
+		case CLASS_LOCATION_OFFSITE:
+			return "Offsite";
+		case CLASS_LOCATION_SERRA_HIGH:
+			return "Serra High";
+		case CLASS_LOCATION_SOLANA_RANCH_ELEM:
+			return "Solana Ranch";
 		default:
 			return "";
 		}
+	}
+
+	public static String getLocationCodeString(int locNum) {
+		locNum++;
+		if (locNum <= CLASS_LAST_LOCATION_NUM)
+			return locationCodes[locNum];
+		else
+			return "";
+	}
+	
+	public static int getNumLocactions() {
+		return CLASS_LAST_LOCATION_NUM;
 	}
 }

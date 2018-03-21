@@ -227,8 +227,10 @@ public class Pike13Api {
 			+ "            \"completed_visits\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
+			+ "\"sort\":[\"person_id+\"],"
 			// Filter on Dependents NULL and future/completed visits both > 0
-			+ "\"filter\":[\"and\",[[\"emp\",\"dependent_names\"],"
+			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
+			+ "                     [\"emp\",\"dependent_names\"],"
 			+ "                     [\"gt\",\"future_visits\",0],"
 			+ "                     [\"gt\",\"completed_visits\",0]]]}}}";
 
