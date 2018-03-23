@@ -288,7 +288,6 @@ public class Pike13Api {
 			+ "                     [\"starts\",\"service_category\",\"Class\"],"
 			+ "                     [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
 
-	private final String sfEnrollmentSort = "\"sort\":[\"service_date+\"],";
 	private final String getEnrollmentSalesForce = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
@@ -296,8 +295,6 @@ public class Pike13Api {
 			+ "\"fields\":[\"person_id\",\"service_date\",\"service_time\",\"event_name\",\"service_name\","
 			+ "            \"service_category\",\"state\",\"visit_id\",\"event_occurrence_id\","
 			+ "            \"service_location_name\",\"instructor_names\",\"full_name\"],"
-			// Sort by service date in ascending order
-			+ sfEnrollmentSort
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -721,7 +718,6 @@ public class Pike13Api {
 		String lastKey = "";
 
 		// Insert start date and end date into enrollment command string
-		String enroll = getEnrollmentSalesForce;
 		String enroll2 = getEnrollmentSalesForce2.replaceFirst("0000-00-00", startDate);
 		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
 
@@ -732,12 +728,10 @@ public class Pike13Api {
 
 				// Send the query; add page info if necessary
 				if (hasMore)
-					sendQueryToUrl(conn, enroll + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
-				else {
+					sendQueryToUrl(conn, getEnrollmentSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
+				else
 					// Only sort first query
-					sendQueryToUrl(conn, enroll + enroll2);
-					enroll = enroll.replace(sfEnrollmentSort, "");
-				}
+					sendQueryToUrl(conn, getEnrollmentSalesForce + enroll2);
 
 				// Check result
 				int responseCode = conn.getResponseCode();
