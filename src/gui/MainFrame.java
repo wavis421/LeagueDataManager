@@ -513,8 +513,9 @@ public class MainFrame {
 			}
 
 			@Override
-			public void removeStudent(int clientID) {
-				controller.removeStudentByClientID(clientID);
+			public void updateGithubUser(String clientID, String name) {
+				// Get Github user name
+				new GithubUserDialog(clientID, name);
 				refreshStudentTable(currentStudentTable, 0);
 			}
 		};

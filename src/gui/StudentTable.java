@@ -106,21 +106,24 @@ public class StudentTable extends JPanel {
 	private void createStudentTablePopups() {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem removeStudentItem = new JMenuItem("Remove student ");
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show attendance ");
+		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
 		tablePopup.add(showStudentAttendanceItem);
-		tablePopup.add(removeStudentItem);
+		tablePopup.add(updateGithubUserItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 
 		// POP UP action listeners
-		removeStudentItem.addActionListener(new ActionListener() {
+		updateGithubUserItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get row, model, and clientID for the row
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				StudentTableModel model = (StudentTableModel) table.getModel();
-				int clientID = Integer.parseInt((String) model.getValueAt(row, StudentTableModel.CLIENT_ID_COLUMN));
+				String clientID = (String) model.getValueAt(row, StudentTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel nameModel = (StudentNameModel) model.getValueAt(row,
+						StudentTableModel.STUDENT_NAME_COLUMN);
 
-				// Remove student from database
-				studentListener.removeStudent(clientID);
+				// Send email to LeagueBot with new github user name
+				studentListener.updateGithubUser(clientID, nameModel.getFirstName() + " " + nameModel.getLastName());
 				table.clearSelection();
 			}
 		});
@@ -142,18 +145,7 @@ public class StudentTable extends JPanel {
 			public void mousePressed(MouseEvent e) {
 				int row = table.getSelectedRow();
 				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
-					row = table.convertRowIndexToModel(row);
-					StudentTableModel model = (StudentTableModel) table.getModel();
-
-					// Either add or remove the "remove student" item
-					if (((StudentNameModel) model.getValueAt(row, StudentTableModel.STUDENT_NAME_COLUMN))
-							.getIsInMasterDb()) {
-						tablePopup.remove(removeStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-					} else {
-						tablePopup.add(removeStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-					}
+					// Show popup menu
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
@@ -189,7 +181,7 @@ public class StudentTable extends JPanel {
 
 				super.setForeground(Color.black);
 				super.setBorder(BorderFactory.createEmptyBorder());
-				
+
 				if (((StudentTableModel) table.getModel()).getValueByRow(row).isMissingData()) {
 					// Text RED for students missing data
 					if (column == StudentTableModel.STUDENT_NAME_COLUMN)
