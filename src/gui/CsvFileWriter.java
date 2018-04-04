@@ -39,6 +39,11 @@ public class CsvFileWriter {
 			return;
 		}
 
+		// Add .csv extension if needed
+		String filePath = file.getAbsolutePath();
+		if (!filePath.endsWith(".csv"))
+			file = new File(filePath + ".csv");
+
 		// Write records to CSV file
 		FileWriter fileWriter = null;
 		try {
