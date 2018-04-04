@@ -31,7 +31,7 @@ public class AttendanceTable extends JPanel {
 
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
-	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
+	private static final int POPUP_MENU_HEIGHT_3ROWS = 70;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -166,9 +166,11 @@ public class AttendanceTable extends JPanel {
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
+		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
 		tablePopup.add(showStudentAttendanceItem);
+		tablePopup.add(updateGithubUserItem);
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
@@ -203,6 +205,20 @@ public class AttendanceTable extends JPanel {
 				attendanceListener.viewAttendanceByStudent(clientID, studentName.toString());
 			}
 		});
+		updateGithubUserItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Client ID for selected row/column
+				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
+				AttendanceTableModel model = (AttendanceTableModel) mainTable.getModel();
+				String clientID = (String) model.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
+				StudentNameModel studentNameModel = (StudentNameModel) model.getValueAt(row,
+						AttendanceTableModel.STUDENT_NAME_COLUMN);
+
+				attendanceListener.updateGithubUser(clientID,
+						studentNameModel.getFirstName() + " " + studentNameModel.getLastName());
+				mainTable.clearSelection();
+			}
+		});
 		mainTable.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = mainTable.getSelectedRow();
@@ -218,7 +234,8 @@ public class AttendanceTable extends JPanel {
 						tablePopup.remove(showStudentClassItem);
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
+						tablePopup.add(updateGithubUserItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_3ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
@@ -227,6 +244,7 @@ public class AttendanceTable extends JPanel {
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);
 							tablePopup.remove(showStudentAttendanceItem);
+							tablePopup.remove(updateGithubUserItem);
 							tablePopup.add(showStudentClassItem);
 							tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
 							tablePopup.show(mainTable, e.getX(), e.getY());
