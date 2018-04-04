@@ -8,9 +8,10 @@ public class StudentModel implements Comparable<StudentModel> {
 	private int homeLocation, gender, gradYear;
 	private Date startDate;
 	private StudentNameModel nameModel;
+	private boolean missingData;
 
-	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender,
-			Date startDate, int homeLocation, int gradYear) {
+	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender, Date startDate,
+			int homeLocation, int gradYear) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.githubName = githubName;
@@ -18,10 +19,21 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.gender = gender;
 		this.gradYear = gradYear;
 		this.startDate = startDate;
+
+		if (nameModel.getIsInMasterDb()
+				&& (homeLocation == LocationModel.CLASS_LOCATION_UNKNOWN || gender == GenderModel.getGenderUnknown()
+						|| gradYear == 0 || githubName == null || githubName.equals("")))
+			missingData = true;
+		else
+			missingData = false;
 	}
 
 	public String toString() {
 		return nameModel.toString() + " (" + clientID + ")";
+	}
+
+	public boolean isMissingData() {
+		return missingData;
 	}
 
 	public int getClientID() {

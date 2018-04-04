@@ -95,6 +95,10 @@ public class StudentTableModel extends AbstractTableModel {
 		return null;
 	}
 
+	public StudentModel getValueByRow(int row) {
+		return studentList.get(row);
+	}
+
 	@Override
 	public Object getValueAt(int row, int col) {
 		StudentModel student = studentList.get(row);

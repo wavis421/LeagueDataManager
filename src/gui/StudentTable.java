@@ -169,21 +169,36 @@ public class StudentTable extends JPanel {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			String text;
 			if (value instanceof Integer)
-				setText(String.valueOf(value));
+				text = (String.valueOf(value));
 			else if (value instanceof Date)
-				setText(((Date) value).toString());
+				text = (((Date) value).toString());
 			else if (value instanceof StudentNameModel)
-				setText(((StudentNameModel) value).toString());
+				text = (((StudentNameModel) value).toString());
 			else
-				setText((String) value);
+				text = ((String) value);
+			setText(text);
 
 			if (column != -1) {
+				// Italics for inactive students
 				if (value instanceof StudentNameModel && ((StudentNameModel) value).getIsInMasterDb() == false)
 					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
 				else
 					setFont(CustomFonts.TABLE_TEXT_FONT);
+
 				super.setForeground(Color.black);
+				super.setBorder(BorderFactory.createEmptyBorder());
+				
+				if (((StudentTableModel) table.getModel()).getValueByRow(row).isMissingData()) {
+					// Text RED for students missing data
+					if (column == StudentTableModel.STUDENT_NAME_COLUMN)
+						super.setForeground(Color.red);
+
+					// Border RED for cells with missing data
+					if (text == null || text.equals(""))
+						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.red));
+				}
 
 				if (isSelected)
 					super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);

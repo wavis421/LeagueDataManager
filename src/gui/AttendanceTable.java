@@ -293,7 +293,11 @@ public class AttendanceTable extends JPanel {
 				int row, int column) {
 
 			// Set foreground/background colors
-			super.setForeground(Color.black);
+			if (table == mainTable && ((AttendanceTableModel) mainTable.getModel()).getGithubNameByRow(row) == null)
+				super.setForeground(Color.red);
+			else
+				super.setForeground(Color.black);
+
 			if (isSelected)
 				super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
 			else
@@ -306,6 +310,7 @@ public class AttendanceTable extends JPanel {
 			else
 				super.setHorizontalAlignment(CENTER);
 
+			setFont(CustomFonts.TABLE_TEXT_FONT);
 			if (value instanceof String) {
 				// String columns
 				if (table != mainTable && isSelected && eventSelectedRow == row)
@@ -318,8 +323,6 @@ public class AttendanceTable extends JPanel {
 				// Students not in master DB are in italics
 				if (((StudentNameModel) value).getIsInMasterDb() == false)
 					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
-				else
-					setFont(CustomFonts.TABLE_TEXT_FONT);
 
 				StudentNameModel student = (StudentNameModel) value;
 				super.setText(student.toString());
