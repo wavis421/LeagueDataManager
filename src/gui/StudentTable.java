@@ -28,7 +28,6 @@ public class StudentTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_1ROW = 30;
 	private static final int POPUP_HEIGHT_2ROWS = 50;
 
 	private JPanel tablePanel;

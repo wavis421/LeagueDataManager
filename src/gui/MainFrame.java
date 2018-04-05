@@ -134,7 +134,7 @@ public class MainFrame {
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
 		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
-		studentTable = new StudentTable(tablePanel, controller.getAllStudents());
+		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
 
 		createTableListeners();
@@ -418,7 +418,7 @@ public class MainFrame {
 		// Set up listeners for Reports menu
 		invoiceMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog();
+				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog(mainPanel);
 				DateRangeEvent dateRange = dateSelector.getDialogResponse();
 				if (dateRange != null) {
 					refreshInvoiceTable(dateRange);
@@ -533,7 +533,7 @@ public class MainFrame {
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
 			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel, controller.getAllStudents());
+			studentTable.setData(tablePanel, controller.getActiveStudents());
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());

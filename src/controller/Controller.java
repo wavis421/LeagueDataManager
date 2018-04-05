@@ -56,8 +56,8 @@ public class Controller {
 	/*
 	 * ------- Database Queries -------
 	 */
-	public ArrayList<StudentModel> getAllStudents() {
-		return sqlDb.getAllStudents();
+	public ArrayList<StudentModel> getActiveStudents() {
+		return sqlDb.getActiveStudents();
 	}
 
 	public ArrayList<StudentModel> getStudentByClientID(int clientID) {

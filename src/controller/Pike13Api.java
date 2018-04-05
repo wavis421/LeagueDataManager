@@ -223,16 +223,15 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_FIELD + "\",\"" + GRAD_YEAR_FIELD + "\","
-			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\",\"future_visits\","
-			+ "            \"completed_visits\"],"
+			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
+			+ "            \"future_visits\",\"completed_visits\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			+ "\"sort\":[\"person_id+\"],"
 			// Filter on Dependents NULL and future/completed visits both > 0
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"emp\",\"dependent_names\"],"
-			+ "                     [\"gt\",\"future_visits\",0],"
-			+ "                     [\"gt\",\"completed_visits\",0]]]}}}";
+			+ "                     [\"eq\",\"has_membership\",\"t\"]]]}}}";
 
 	private final String getClientDataForSF = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -526,46 +525,44 @@ public class Pike13Api {
 					JsonArray personArray = (JsonArray) jsonArray.get(i);
 					String firstName = stripQuotes(personArray.get(CLIENT_FIRST_NAME_IDX).toString());
 
-					if (!firstName.startsWith("Guest")) {
-						// Get fields for this Json array entry
-						StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
-								personArray.getString(CLIENT_FIRST_NAME_IDX),
-								personArray.getString(CLIENT_LAST_NAME_IDX),
-								stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
-								personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
-								personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
-								stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
-								stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
-								stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
-								stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
-								stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
-								stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
+					// Get fields for this Json array entry
+					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
+							personArray.getString(CLIENT_FIRST_NAME_IDX),
+							personArray.getString(CLIENT_LAST_NAME_IDX),
+							stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
+							personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
+							personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
+							stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
+							stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
+							stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
+							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
+							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
+							stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
 
-						studentList.add(model);
-					}
+					studentList.add(model);
 				}
 				
 				// Check to see if there are more pages

@@ -104,7 +104,7 @@ public class GithubUserDialog extends JDialog implements ActionListener {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Update Github user for " + studentName);
 		setSize(480, 200);
-		setLocation(200, 200);
+		setLocation(300, 300);
 		setResizable(false);
 		setVisible(true);
 	}
@@ -157,13 +157,13 @@ public class GithubUserDialog extends JDialog implements ActionListener {
 			message.setSentDate(new Date());
 
 			// Set email recipient
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress("leaguebot@jointheleague.org"));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress("info@jointheleague.org"));
 
 			// Send email
 			Transport.send(message);
 
 		} catch (MessagingException e) {
-			JOptionPane.showMessageDialog(getParent(), "Failure sending email to leaguebot: " + e.getMessage());
+			JOptionPane.showMessageDialog(getParent(), "Failure sending email to League: " + e.getMessage());
 		}
 
 		// Set cursor back to default

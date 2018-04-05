@@ -78,14 +78,14 @@ public class MySqlDatabase {
 	/*
 	 * ------- Student Database Queries -------
 	 */
-	public ArrayList<StudentModel> getAllStudents() {
+	public ArrayList<StudentModel> getActiveStudents() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Students ORDER BY FirstName, LastName;");
+						.prepareStatement("SELECT * FROM Students WHERE isInMasterDb ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -704,7 +704,7 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
+						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getAttendanceList(attendanceList, result);
@@ -736,8 +736,8 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
-								+ "EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -1004,7 +1004,7 @@ public class MySqlDatabase {
 
 	public void importAttendance(ArrayList<AttendanceEventModel> importList) {
 		ArrayList<AttendanceEventModel> dbList = getAllEvents();
-		ArrayList<StudentModel> studentList = getAllStudents();
+		ArrayList<StudentModel> studentList = getActiveStudents();
 		int dbListIdx = 0;
 		int dbListSize = dbList.size();
 		Collections.sort(importList);

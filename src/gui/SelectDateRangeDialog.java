@@ -34,7 +34,7 @@ public class SelectDateRangeDialog extends JDialog {
 	private JDatePickerImpl startDatePicker;
 	private JDatePickerImpl endDatePicker;
 
-	public SelectDateRangeDialog() {
+	public SelectDateRangeDialog(JPanel parent) {
 		setModal(true);
 
 		// Default start/end date is for last month
@@ -113,7 +113,7 @@ public class SelectDateRangeDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Select date range");
 		setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-		setLocation(300, 300);
+		setLocationRelativeTo(parent);
 		setVisible(true);
 	}
 
