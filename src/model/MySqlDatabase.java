@@ -30,7 +30,7 @@ public class MySqlDatabase {
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
-	private static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 120;
+	private static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 45;
 
 	private static Connection dbConnection = null;
 	private JFrame parent;

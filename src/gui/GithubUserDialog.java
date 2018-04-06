@@ -49,11 +49,11 @@ public class GithubUserDialog extends JDialog implements ActionListener {
 		JLabel spacerLabel = new JLabel("      ");
 
 		// Set label sizes
-		Dimension labelDimension = new Dimension(140, emailUserLabel.getPreferredSize().height);
+		Dimension labelDimension = new Dimension(150, emailUserLabel.getPreferredSize().height);
 		emailUserLabel.setPreferredSize(labelDimension);
 		emailPwLabel.setPreferredSize(labelDimension);
 		githubLabel.setPreferredSize(labelDimension);
-		spacerLabel.setPreferredSize(new Dimension(400, emailUserLabel.getPreferredSize().height));
+		spacerLabel.setPreferredSize(new Dimension(450, emailUserLabel.getPreferredSize().height));
 
 		// Right justify the label text
 		emailUserLabel.setHorizontalAlignment(JLabel.RIGHT);
@@ -103,7 +103,7 @@ public class GithubUserDialog extends JDialog implements ActionListener {
 		// Configure dialog window
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Update Github user for " + studentName);
-		setSize(480, 200);
+		setSize(500, 200);
 		setLocation(300, 300);
 		setResizable(false);
 		setVisible(true);
