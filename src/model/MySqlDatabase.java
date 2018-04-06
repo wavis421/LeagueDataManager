@@ -30,6 +30,7 @@ public class MySqlDatabase {
 	private static final int NUM_CLASS_LEVELS = 9;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
+	private static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 120;
 
 	private static Connection dbConnection = null;
 	private JFrame parent;
@@ -707,7 +708,7 @@ public class MySqlDatabase {
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result);
+				getAttendanceList(attendanceList, result, false);
 				Collections.sort(attendanceList);
 
 				result.close();
@@ -741,7 +742,7 @@ public class MySqlDatabase {
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result);
+				getAttendanceList(attendanceList, result, true);
 				Collections.sort(attendanceList);
 
 				result.close();
@@ -775,7 +776,7 @@ public class MySqlDatabase {
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result);
+				getAttendanceList(attendanceList, result, false);
 				Collections.sort(attendanceList);
 
 				result.close();
@@ -886,9 +887,11 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	private void getAttendanceList(ArrayList<AttendanceModel> attendanceList, ResultSet result) {
+	private void getAttendanceList(ArrayList<AttendanceModel> attendanceList, ResultSet result, boolean filterOnDate) {
 		int lastClientID = -1;
 		AttendanceModel lastAttendanceModel = null;
+		boolean removeAttendance = false;
+		String beginDate = new DateTime().minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
 
 		// Process DB query result containing attendance by grouping the attendance by
 		// student and then adding the resulting Attendance Model to the attendanceList.
@@ -896,6 +899,10 @@ public class MySqlDatabase {
 			while (result.next()) {
 				int thisClientID = result.getInt("Students.ClientID");
 				if (lastClientID == thisClientID) {
+					if (filterOnDate && removeAttendance) {
+						// Don't use attendance if too far back
+						continue;
+					}
 					// Add more data to existing client
 					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(result.getInt("ClientID"),
 							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
@@ -903,6 +910,16 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
 
 				} else {
+					lastClientID = thisClientID;
+
+					if (filterOnDate && result.getString("ServiceDate").compareTo(beginDate) < 0) {
+						// Don't use attendance if too far back
+						removeAttendance = true;
+						continue;
+
+					} else
+						removeAttendance = false;
+
 					// Create student model for new client
 					lastAttendanceModel = new AttendanceModel(thisClientID,
 							new StudentNameModel(result.getString("Students.FirstName"),
@@ -914,7 +931,6 @@ public class MySqlDatabase {
 									result.getString("Comments"), new StudentNameModel(result.getString("FirstName"),
 											result.getString("LastName"), true)));
 					attendanceList.add(lastAttendanceModel);
-					lastClientID = thisClientID;
 				}
 			}
 
