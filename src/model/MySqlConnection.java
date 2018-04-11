@@ -113,8 +113,7 @@ public class MySqlConnection {
 	private void connectToLambdaDatabase(String user, String password) {
 		try {
 			Class.forName(DRIVER_NAME);
-			connection = DriverManager.getConnection("jdbc:mysql://" + REMOTE_HOST + ":3306/" + DATABASE + "?user='"
-					+ user + "'&password='" + password + "'");
+			connection = DriverManager.getConnection("jdbc:mysql://" + REMOTE_HOST + ":3306/" + DATABASE, user, password);
 
 		} catch (SQLException | ClassNotFoundException e) {
 			// TODO: How to handle this exception?

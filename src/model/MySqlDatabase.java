@@ -23,6 +23,7 @@ public class MySqlDatabase {
 	public static final int STUDENT_IMPORT_NO_SSH = 0;
 
 	private static final int MAX_CONNECTION_ATTEMPTS = 3;
+	private static final int MAX_CONNECT_ATTEMPTS_LAMBDA = 1;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int REPO_NAME_WIDTH = 50;
 	private static final int LOG_APPEND_WIDTH = 120;
@@ -36,11 +37,13 @@ public class MySqlDatabase {
 	private JFrame parent;
 	private String awsPassword;
 	private MySqlConnection mySqlConnection;
+	private int localPort;
 
 	public MySqlDatabase(JFrame parent, String awsPassword, int localPort) {
 		// This constructor is used by LeagueDataManager GUI
 		this.parent = parent;
 		this.awsPassword = awsPassword;
+		this.localPort = localPort;
 
 		mySqlConnection = new MySqlConnection(localPort);
 	}
@@ -55,7 +58,11 @@ public class MySqlDatabase {
 	 * ------- Database Connections -------
 	 */
 	public boolean connectDatabase() {
-		for (int i = 0; i < MAX_CONNECTION_ATTEMPTS; i++) {
+		int numRetries = MAX_CONNECTION_ATTEMPTS;
+		if (localPort == STUDENT_IMPORT_NO_SSH)
+			numRetries = MAX_CONNECT_ATTEMPTS_LAMBDA;
+		
+		for (int i = 0; i < numRetries; i++) {
 			try {
 				dbConnection = mySqlConnection.connectToServer(parent, awsPassword);
 
