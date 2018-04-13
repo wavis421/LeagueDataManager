@@ -436,10 +436,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, getClientData);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return studentList;
 			}
@@ -504,10 +501,7 @@ public class Pike13Api {
 					sendQueryToUrl(conn, getClientDataForSF + cmd2);
 
 				// Check result
-				int responseCode = conn.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-							" " + responseCode + ": " + conn.getResponseMessage());
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 					conn.disconnect();
 					return null;
 				}
@@ -596,10 +590,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, nameCmd);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return null;
 			}
@@ -661,10 +652,7 @@ public class Pike13Api {
 					sendQueryToUrl(conn, cmdString1 + cmdString2);
 
 				// Check result
-				int responseCode = conn.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-							" " + responseCode + ": " + conn.getResponseMessage());
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 					conn.disconnect();
 					return eventList;
 				}
@@ -731,10 +719,7 @@ public class Pike13Api {
 					sendQueryToUrl(conn, getEnrollmentSalesForce + enroll2);
 
 				// Check result
-				int responseCode = conn.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-							" " + responseCode + ": " + conn.getResponseMessage());
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 					conn.disconnect();
 					return null;
 				}
@@ -831,10 +816,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, scheduleString);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return scheduleList;
 			}
@@ -886,10 +868,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, invoiceCmd);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return invoiceList;
 			}
@@ -970,10 +949,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, transCmd);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return;
 			}
@@ -1019,9 +995,7 @@ public class Pike13Api {
 
 			// Check result
 			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return;
 			}
@@ -1101,10 +1075,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, planCmd);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return true;
 			}
@@ -1146,10 +1117,7 @@ public class Pike13Api {
 			sendQueryToUrl(conn, getStaffMemberData);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
-			if (responseCode != HttpURLConnection.HTTP_OK) {
-				mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-						" " + responseCode + ": " + conn.getResponseMessage());
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return null;
 			}
@@ -1236,10 +1204,7 @@ public class Pike13Api {
 					sendQueryToUrl(conn, getStaffHoursSalesForce + staffHours2);
 
 				// Check result
-				int responseCode = conn.getResponseCode();
-				if (responseCode != HttpURLConnection.HTTP_OK) {
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-							" " + responseCode + ": " + conn.getResponseMessage());
+				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 					conn.disconnect();
 					return null;
 				}
@@ -1313,10 +1278,22 @@ public class Pike13Api {
 
 	private void sendQueryToUrl(HttpURLConnection conn, String getCommand) {
 		try {
-			OutputStream outputStream = conn.getOutputStream();
-			outputStream.write(getCommand.getBytes("UTF-8"));
-			outputStream.flush();
-			outputStream.close();
+			for (int i = 0; i < 2; i++) {
+				// If necessary, try twice to send query
+				OutputStream outputStream = conn.getOutputStream();
+				outputStream.write(getCommand.getBytes("UTF-8"));
+				outputStream.flush();
+				outputStream.close();
+			
+				// Check result
+				int responseCode = conn.getResponseCode();
+				if (responseCode == HttpURLConnection.HTTP_OK)
+					return;
+				else {
+					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
+							" " + responseCode + " (attempt #" + (i+1) + "): " + conn.getResponseMessage());
+				}
+			}
 
 		} catch (IOException e) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
