@@ -11,6 +11,7 @@ import java.util.Collections;
 import javax.swing.JFrame;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
@@ -61,7 +62,7 @@ public class MySqlDatabase {
 		int numRetries = MAX_CONNECTION_ATTEMPTS;
 		if (localPort == STUDENT_IMPORT_NO_SSH)
 			numRetries = MAX_CONNECT_ATTEMPTS_LAMBDA;
-		
+
 		for (int i = 0; i < numRetries; i++) {
 			try {
 				dbConnection = mySqlConnection.connectToServer(parent, awsPassword);
@@ -898,7 +899,8 @@ public class MySqlDatabase {
 		int lastClientID = -1;
 		AttendanceModel lastAttendanceModel = null;
 		boolean removeAttendance = false;
-		String beginDate = new DateTime().minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
+		String beginDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+				.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
 
 		// Process DB query result containing attendance by grouping the attendance by
 		// student and then adding the resulting Attendance Model to the attendanceList.
@@ -1363,7 +1365,8 @@ public class MySqlDatabase {
 				if (appendedMsg.length() >= LOG_APPEND_WIDTH)
 					appendedMsg = appendedMsg.substring(0, LOG_APPEND_WIDTH);
 				addLogDataStmt.setString(col++, appendedMsg);
-				addLogDataStmt.setString(col++, new DateTime().toString("yyyy-MM-dd HH:mm:ss"));
+				addLogDataStmt.setString(col++, new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+						.toString("yyyy-MM-dd HH:mm:ss"));
 
 				addLogDataStmt.executeUpdate();
 				addLogDataStmt.close();

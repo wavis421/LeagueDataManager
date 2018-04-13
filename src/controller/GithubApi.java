@@ -12,6 +12,7 @@ import org.eclipse.egit.github.core.client.NoSuchPageException;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
 import model.LogDataModel;
@@ -129,7 +130,8 @@ public class GithubApi {
 		// Create repo lists for each level
 		List<Repository> repoListLevel0 = getRepoListByLevel(0);
 		List<Repository> repoListLevel1 = getRepoListByLevel(1);
-		String earliestDate = new DateTime().minusMonths(4).toString("yyyy-MM-dd");
+		String earliestDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusMonths(4)
+				.toString("yyyy-MM-dd");
 
 		for (int i = 0; i < newGithubList.size(); i++) {
 			StudentModel student = newGithubList.get(i);
@@ -153,7 +155,7 @@ public class GithubApi {
 	}
 
 	public void updateEmptyGithubComments(ArrayList<AttendanceEventModel> eventList) {
-		String today = new DateTime().toString("yyyy-MM-dd");
+		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd");
 		int recordCount = 0;
 
 		for (int i = 0; i < eventList.size(); i++) {
@@ -203,7 +205,8 @@ public class GithubApi {
 				for (RepositoryCommit commit : commitPage) {
 					// Get commit date
 					long commitDateLong = commit.getCommit().getCommitter().getDate().getTime();
-					String commitDate = new DateTime(commitDateLong).toString("yyyy-MM-dd");
+					String commitDate = new DateTime(commitDateLong).withZone(DateTimeZone.forID("America/Los_Angeles"))
+							.toString("yyyy-MM-dd");
 
 					// Commits ordered by date, so once date is old then move on
 					if (commitDate.compareTo(startDate) < 0)

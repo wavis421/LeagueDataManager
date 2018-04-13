@@ -14,6 +14,7 @@ import javax.json.JsonReader;
 import javax.json.JsonValue;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
 import model.DateRangeEvent;
@@ -169,7 +170,7 @@ public class Pike13Api {
 
 	// Indices for Person Plans by Product ID
 	private final int PLAN2_IS_CANCELED_IDX = 0;
-	
+
 	// Indices for Staff Member data
 	private final int TEACHER_CLIENT_ID_IDX = 0;
 	private final int TEACHER_FIRST_NAME_IDX = 1;
@@ -249,7 +250,7 @@ public class Pike13Api {
 			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\",\"dependent_names\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
-	
+
 	private final String getClientDataForSF2 = "},"
 			// Filter on Dependents NULL or not NULL ("MMM" filled in at run-time)
 			+ "\"filter\":[\"and\",[[\"MMM\",\"dependent_names\"],"
@@ -517,11 +518,10 @@ public class Pike13Api {
 				for (int i = 0; i < jsonArray.size(); i++) {
 					// Get fields for each person
 					JsonArray personArray = (JsonArray) jsonArray.get(i);
-					String firstName = stripQuotes(personArray.get(CLIENT_FIRST_NAME_IDX).toString());
 
 					// Get fields for this Json array entry
 					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
-							personArray.getString(CLIENT_FIRST_NAME_IDX),
+							personArray.getString(CLIENT_FIRST_NAME_IDX), 
 							personArray.getString(CLIENT_LAST_NAME_IDX),
 							stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
 							stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
@@ -558,7 +558,7 @@ public class Pike13Api {
 
 					studentList.add(model);
 				}
-				
+
 				// Check to see if there are more pages
 				hasMore = jsonObj.getBoolean("has_more");
 				if (hasMore)
@@ -613,8 +613,7 @@ public class Pike13Api {
 			JsonArray personArray = (JsonArray) jsonArray.get(0);
 			student = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
 					stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
-					stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
-					"", "", "", "", "");
+					stripQuotes(personArray.get(FIRST_NAME_IDX).toString()), "", "", "", "", "");
 
 			conn.disconnect();
 
@@ -629,7 +628,8 @@ public class Pike13Api {
 	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {
 		// Insert start date and end date into enrollment command string
 		String enroll2 = getEnrollmentStudentTracker2.replaceFirst("0000-00-00", startDate);
-		enroll2 = enroll2.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
+		enroll2 = enroll2.replaceFirst("1111-11-11",
+				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"));
 
 		// Get attendance for all students
 		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);
@@ -784,7 +784,8 @@ public class Pike13Api {
 					continue;
 
 				// Catch up only as far back as 3 months ago
-				String earliestDate = new DateTime().minusMonths(3).toString("yyyy-MM-dd");
+				String earliestDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusMonths(3)
+						.toString("yyyy-MM-dd");
 				if (catchupStartDate.compareTo(earliestDate) < 0)
 					catchupStartDate = earliestDate;
 
@@ -806,7 +807,8 @@ public class Pike13Api {
 
 		// Insert start date and end date into schedule command string.
 		String scheduleString = getScheduleData.replaceFirst("0000-00-00", startDate);
-		scheduleString = scheduleString.replaceFirst("1111-11-11", new DateTime().toString("yyyy-MM-dd"));
+		scheduleString = scheduleString.replaceFirst("1111-11-11",
+				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"));
 
 		try {
 			// Get URL connection with authorization
@@ -898,7 +900,7 @@ public class Pike13Api {
 					model.setPayMethod(stripQuotes(couponCode.toString()));
 
 				// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
-				// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic 
+				// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic
 				//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
 				// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
 				//    then updates start/end dates and verbose event name.
@@ -994,7 +996,6 @@ public class Pike13Api {
 			sendQueryToUrl(conn, planString);
 
 			// Check result
-			int responseCode = conn.getResponseCode();
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				conn.disconnect();
 				return;
@@ -1058,12 +1059,12 @@ public class Pike13Api {
 			}
 
 		} else if (!model.getIsCanceled()) {
-			mysqlDb.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND, 
+			mysqlDb.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND,
 					new StudentNameModel(model.getStudentName(), "", true), model.getClientID(),
 					" for '" + model.getItemName() + "'");
 		}
 	}
-	
+
 	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
 		try {
 			// Get URL connection with authorization
@@ -1091,7 +1092,7 @@ public class Pike13Api {
 			for (int i = 0; i < jsonArray.size(); i++) {
 				// Get fields for each plan in the list
 				JsonArray planArray = (JsonArray) jsonArray.get(i);
-				
+
 				if (planArray.getString(PLAN2_IS_CANCELED_IDX).equals("f")) {
 					conn.disconnect();
 					return false;
@@ -1140,7 +1141,7 @@ public class Pike13Api {
 					sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
 
 				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
-						staffArray.getString(TEACHER_FIRST_NAME_IDX), staffArray.getString(TEACHER_LAST_NAME_IDX),			
+						staffArray.getString(TEACHER_FIRST_NAME_IDX), staffArray.getString(TEACHER_LAST_NAME_IDX),
 						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString()),
 						stripQuotes(staffArray.get(TEACHER_ROLE_IDX).toString()),
 						stripQuotes(staffArray.get(TEACHER_OCCUPATION_IDX).toString()),
@@ -1284,14 +1285,14 @@ public class Pike13Api {
 				outputStream.write(getCommand.getBytes("UTF-8"));
 				outputStream.flush();
 				outputStream.close();
-			
+
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode == HttpURLConnection.HTTP_OK)
 					return;
 				else {
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
-							" " + responseCode + " (attempt #" + (i+1) + "): " + conn.getResponseMessage());
+							" " + responseCode + " (attempt #" + (i + 1) + "): " + conn.getResponseMessage());
 				}
 			}
 

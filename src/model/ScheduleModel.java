@@ -1,6 +1,7 @@
 package model;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 
 public class ScheduleModel implements Comparable<ScheduleModel> {
@@ -15,7 +16,7 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 		this.className = className;
 
 		// Need original startTime for sorting; create formatted start time as 12 hour
-		MutableDateTime mdt = (new DateTime()).toMutableDateTime();
+		MutableDateTime mdt = (new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))).toMutableDateTime();
 		mdt.setHourOfDay(Integer.parseInt(startTime.substring(0, 2)));
 		mdt.setMinuteOfHour(Integer.parseInt(startTime.substring(3, 5)));
 		this.startTimeFormatted = mdt.toDateTime().toString("h:mm a");
