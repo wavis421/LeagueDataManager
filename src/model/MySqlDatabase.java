@@ -1119,7 +1119,8 @@ public class MySqlDatabase {
 				addAttendanceStmt.executeUpdate();
 				addAttendanceStmt.close();
 
-				insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID, " for " + serviceDate);
+				insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, nameModel, clientID,
+						" for " + eventName + " " + serviceDate);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
