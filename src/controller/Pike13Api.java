@@ -429,54 +429,39 @@ public class Pike13Api {
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("clients");
+		// Get URL connection with authorization and send the query
+		HttpURLConnection conn = sendQueryToUrl("clients", getClientData);
+		if (conn == null)
+			return studentList;
 
-			// Send the query
-			sendQueryToUrl(conn, getClientData);
-
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return studentList;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return studentList;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each person
-				JsonArray personArray = (JsonArray) jsonArray.get(i);
-				String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
-
-				if (!firstName.startsWith("Guest")) {
-					// Get fields for this Json array entry
-					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
-							stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
-							stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
-							stripQuotes(personArray.get(GITHUB_IDX).toString()),
-							stripQuotes(personArray.get(GENDER_IDX).toString()),
-							stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
-							stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
-							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
-
-					studentList.add(model);
-				}
-			}
-
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
+			return studentList;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Client DB: " + e1.getMessage());
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each person
+			JsonArray personArray = (JsonArray) jsonArray.get(i);
+			String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
+
+			if (!firstName.startsWith("Guest")) {
+				// Get fields for this Json array entry
+				StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
+						stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
+						stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
+						stripQuotes(personArray.get(GITHUB_IDX).toString()),
+						stripQuotes(personArray.get(GENDER_IDX).toString()),
+						stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
+						stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
+						stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
+					studentList.add(model);
+			}
 		}
 
+		conn.disconnect();
 		return studentList;
 	}
 
@@ -485,115 +470,24 @@ public class Pike13Api {
 		boolean hasMore = false;
 		String lastKey = "";
 
-		try {
-			do {
-				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("clients");
+		do {
+			// URL connection with authorization
+			HttpURLConnection conn;
 
-				// Send the query (set dependents not empty for manager)
-				String cmd2;
-				if (isAcctMgr)
-					cmd2 = getClientDataForSF2.replace("MMM", "nemp");
-				else
-					cmd2 = getClientDataForSF2.replace("MMM", "emp");
-				if (hasMore)
-					sendQueryToUrl(conn, getClientDataForSF + ",\"starting_after\":\"" + lastKey + "\"" + cmd2);
-				else
-					sendQueryToUrl(conn, getClientDataForSF + cmd2);
-
-				// Check result
-				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-					conn.disconnect();
-					return null;
-				}
-
-				// Get input stream and read data
-				JsonObject jsonObj = readInputStream(conn);
-				if (jsonObj == null) {
-					conn.disconnect();
-					return null;
-				}
-				JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-				for (int i = 0; i < jsonArray.size(); i++) {
-					// Get fields for each person
-					JsonArray personArray = (JsonArray) jsonArray.get(i);
-
-					// Get fields for this Json array entry
-					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
-							personArray.getString(CLIENT_FIRST_NAME_IDX), 
-							personArray.getString(CLIENT_LAST_NAME_IDX),
-							stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
-							personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
-							personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
-							stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
-							stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
-							stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
-							stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
-
-					studentList.add(model);
-				}
-
-				// Check to see if there are more pages
-				hasMore = jsonObj.getBoolean("has_more");
-				if (hasMore)
-					lastKey = jsonObj.getString("last_key");
-
-				conn.disconnect();
-
-			} while (hasMore);
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Client DB: " + e1.getMessage());
-			return null;
-		}
-
-		return studentList;
-	}
-
-	// Currently not being used
-	public StudentImportModel getClientByAcctMgr(String accountMgrName) {
-		StudentImportModel student = null;
-
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("clients");
-
-			// Send the query
-			String nameCmd = getClientDataByAcctMgr.replace("NNNN", accountMgrName);
-			sendQueryToUrl(conn, nameCmd);
+			// Send the query (set dependents not empty for manager)
+			String cmd2;
+			if (isAcctMgr)
+				cmd2 = getClientDataForSF2.replace("MMM", "nemp");
+			else
+				cmd2 = getClientDataForSF2.replace("MMM", "emp");
+			if (hasMore)
+				conn = sendQueryToUrl("clients", getClientDataForSF + ",\"starting_after\":\"" + lastKey + "\"" + cmd2);
+			else
+				conn = sendQueryToUrl("clients", getClientDataForSF + cmd2);
 
 			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
+			if (conn == null)
 				return null;
-			}
 
 			// Get input stream and read data
 			JsonObject jsonObj = readInputStream(conn);
@@ -603,25 +497,94 @@ public class Pike13Api {
 			}
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			// Get fields for this person
-			if (jsonArray.size() == 0) {
-				conn.disconnect();
-				return null;
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each person
+				JsonArray personArray = (JsonArray) jsonArray.get(i);
+
+				// Get fields for this Json array entry
+				StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
+						personArray.getString(CLIENT_FIRST_NAME_IDX), 
+						personArray.getString(CLIENT_LAST_NAME_IDX),
+						stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_CURR_GRADE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_GRAD_YEAR_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_FIRST_VISIT_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_HOME_LOC_LONG_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_EMAIL_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_MOBILE_PHONE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_FULL_ADDRESS_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_SCHOOL_NAME_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_GITHUB_IDX).toString()),
+						personArray.getInt(CLIENT_COMPLETED_VISITS_IDX),
+						personArray.getInt(CLIENT_FUTURE_VISITS_IDX),
+						stripQuotes(personArray.get(CLIENT_TSHIRT_SIZE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_HAS_SIGNED_WAIVER_IDX).toString()).equals("t") ? true : false,
+						stripQuotes(personArray.get(CLIENT_HAS_MEMBERSHIP_IDX).toString()).equals("t") ? "Yes" : "No",
+						stripQuotes(personArray.get(CLIENT_PASS_ON_FILE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_STOP_EMAIL_IDX).toString()).equals("t") ? true : false,
+						stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_IDX).toString()).equals("t") ? true : false,
+						stripQuotes(personArray.get(CLIENT_FINANCIAL_AID_PERCENT_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_GRANT_INFO_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_LEAVE_REASON_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_HEAR_ABOUT_US_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_WHO_TO_THANK_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_NAME_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_PHONE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_EMERG_CONTACT_EMAIL_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_HOME_PHONE_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
+
+				studentList.add(model);
 			}
 
-			// Get fields for 1st Json array entry
-			JsonArray personArray = (JsonArray) jsonArray.get(0);
-			student = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
-					stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
-					stripQuotes(personArray.get(FIRST_NAME_IDX).toString()), "", "", "", "", "");
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
 
 			conn.disconnect();
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Client DB: " + e1.getMessage());
+		} while (hasMore);
+
+		return studentList;
+	}
+
+	// Currently not being used
+	public StudentImportModel getClientByAcctMgr(String accountMgrName) {
+		StudentImportModel student = null;
+
+		// Get URL connection and send the query
+		String nameCmd = getClientDataByAcctMgr.replace("NNNN", accountMgrName);
+		HttpURLConnection conn = sendQueryToUrl("clients", nameCmd);
+
+		if (conn == null)
+			return null;
+
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
+			conn.disconnect();
+			return null;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+		// Get fields for this person
+		if (jsonArray.size() == 0) {
+			conn.disconnect();
+			return null;
 		}
 
+		// Get fields for 1st Json array entry
+		JsonArray personArray = (JsonArray) jsonArray.get(0);
+		student = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
+				stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
+				stripQuotes(personArray.get(FIRST_NAME_IDX).toString()), "", "", "", "", "");
+
+		conn.disconnect();
 		return student;
 	}
 
@@ -640,58 +603,47 @@ public class Pike13Api {
 		boolean hasMore = false;
 		String lastKey = "";
 
-		try {
-			do {
-				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("enrollments");
+		do {
+			// Get URL connection with authorization and send the query; add page info if necessary
+			HttpURLConnection conn;
+			if (hasMore)
+				conn = sendQueryToUrl("enrollments", cmdString1 + ",\"starting_after\":\"" + lastKey + "\"" + cmdString2);
+			else
+				conn = sendQueryToUrl("enrollments", cmdString1 + cmdString2);
 
-				// Send the query; add page info if necessary
-				if (hasMore)
-					sendQueryToUrl(conn, cmdString1 + ",\"starting_after\":\"" + lastKey + "\"" + cmdString2);
-				else
-					sendQueryToUrl(conn, cmdString1 + cmdString2);
+			if (conn == null)
+				return eventList;
 
-				// Check result
-				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-					conn.disconnect();
-					return eventList;
-				}
-
-				// Get input stream and read data
-				JsonObject jsonObj = readInputStream(conn);
-				if (jsonObj == null) {
-					conn.disconnect();
-					return eventList;
-				}
-				JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-				for (int i = 0; i < jsonArray.size(); i++) {
-					// Get fields for each event
-					JsonArray eventArray = (JsonArray) jsonArray.get(i);
-					String eventName = stripQuotes(eventArray.get(ENROLL_EVENT_NAME_IDX).toString());
-					String serviceDate = stripQuotes(eventArray.get(ENROLL_SERVICE_DATE_IDX).toString());
-
-					// Add event to list
-					if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
-						eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
-								eventArray.getInt(ENROLL_VISIT_ID_IDX),
-								stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName));
-					}
-				}
-
-				// Check to see if there are more pages
-				hasMore = jsonObj.getBoolean("has_more");
-				if (hasMore)
-					lastKey = jsonObj.getString("last_key");
-
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
 				conn.disconnect();
+				return eventList;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			} while (hasMore && cmdString2 != "");
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each event
+				JsonArray eventArray = (JsonArray) jsonArray.get(i);
+				String eventName = stripQuotes(eventArray.get(ENROLL_EVENT_NAME_IDX).toString());
+				String serviceDate = stripQuotes(eventArray.get(ENROLL_SERVICE_DATE_IDX).toString());
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Enrollment DB: " + e1.getMessage());
-		}
+				// Add event to list
+				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
+					eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
+							eventArray.getInt(ENROLL_VISIT_ID_IDX),
+							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName));
+				}
+			}
+
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
+
+			conn.disconnect();
+
+		} while (hasMore && cmdString2 != "");
 
 		return eventList;
 	}
@@ -706,65 +658,52 @@ public class Pike13Api {
 		String enroll2 = getEnrollmentSalesForce2.replaceFirst("0000-00-00", startDate);
 		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
 
-		try {
-			do {
-				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("enrollments");
+		do {
+			// Get URL connection and send the query; add page info if necessary
+			HttpURLConnection conn;
+			if (hasMore)
+				conn = sendQueryToUrl("enrollments", getEnrollmentSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
+			else
+				conn = sendQueryToUrl("enrollments", getEnrollmentSalesForce + enroll2);
 
-				// Send the query; add page info if necessary
-				if (hasMore)
-					sendQueryToUrl(conn, getEnrollmentSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
-				else
-					// Only sort first query
-					sendQueryToUrl(conn, getEnrollmentSalesForce + enroll2);
+			if (conn == null)
+				return null;
 
-				// Check result
-				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-					conn.disconnect();
-					return null;
-				}
-
-				// Get input stream and read data
-				JsonObject jsonObj = readInputStream(conn);
-				if (jsonObj == null) {
-					conn.disconnect();
-					return null;
-				}
-				JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-				for (int i = 0; i < jsonArray.size(); i++) {
-					// Get fields for each event
-					JsonArray eventArray = (JsonArray) jsonArray.get(i);
-
-					// Add event to list
-					eventList.add(new SalesForceAttendanceModel(eventArray.get(SF_PERSON_ID_IDX).toString(),
-							stripQuotes(eventArray.get(SF_FULL_NAME_IDX).toString()),
-							stripQuotes(eventArray.get(SF_SERVICE_DATE_IDX).toString()),
-							stripQuotes(eventArray.get(SF_SERVICE_TIME_IDX).toString()),
-							stripQuotes(eventArray.get(SF_EVENT_NAME_IDX).toString()),
-							stripQuotes(eventArray.get(SF_SERVICE_CATEGORY_IDX).toString()),
-							stripQuotes(eventArray.get(SF_SERVICE_NAME_IDX).toString()),
-							stripQuotes(eventArray.get(SF_STATE_IDX).toString()),
-							eventArray.get(SF_VISIT_ID_IDX).toString(),
-							eventArray.get(SF_EVENT_OCCURRENCE_ID_IDX).toString(),
-							stripQuotes(eventArray.get(SF_LOCATION_NAME_IDX).toString()),
-							stripQuotes(eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString())));
-				}
-
-				// Check to see if there are more pages
-				hasMore = jsonObj.getBoolean("has_more");
-				if (hasMore)
-					lastKey = jsonObj.getString("last_key");
-
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
 				conn.disconnect();
+				return null;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			} while (hasMore);
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each event
+				JsonArray eventArray = (JsonArray) jsonArray.get(i);
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Enrollment DB: " + e1.getMessage());
-			return null;
-		}
+				// Add event to list
+				eventList.add(new SalesForceAttendanceModel(eventArray.get(SF_PERSON_ID_IDX).toString(),
+						stripQuotes(eventArray.get(SF_FULL_NAME_IDX).toString()),
+						stripQuotes(eventArray.get(SF_SERVICE_DATE_IDX).toString()),
+						stripQuotes(eventArray.get(SF_SERVICE_TIME_IDX).toString()),
+						stripQuotes(eventArray.get(SF_EVENT_NAME_IDX).toString()),
+						stripQuotes(eventArray.get(SF_SERVICE_CATEGORY_IDX).toString()),
+						stripQuotes(eventArray.get(SF_SERVICE_NAME_IDX).toString()),
+						stripQuotes(eventArray.get(SF_STATE_IDX).toString()),
+						eventArray.get(SF_VISIT_ID_IDX).toString(),
+						eventArray.get(SF_EVENT_OCCURRENCE_ID_IDX).toString(),
+						stripQuotes(eventArray.get(SF_LOCATION_NAME_IDX).toString()),
+						stripQuotes(eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString())));
+			}
+
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
+
+			conn.disconnect();
+
+		} while (hasMore);
 
 		return eventList;
 	}
@@ -810,231 +749,179 @@ public class Pike13Api {
 		scheduleString = scheduleString.replaceFirst("1111-11-11",
 				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"));
 
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("event_occurrences");
+		// Get URL connection with authorization and send query
+		HttpURLConnection conn = sendQueryToUrl("event_occurrences", scheduleString);
+		if (conn == null)
+			return scheduleList;
 
-			// Send the query
-			sendQueryToUrl(conn, scheduleString);
-
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return scheduleList;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return scheduleList;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each event in the schedule
-				JsonArray scheduleArray = (JsonArray) jsonArray.get(i);
-
-				// Get event name, day-of-week and duration
-				String eventName = stripQuotes(scheduleArray.get(SCHED_WKLY_EVENT_NAME_IDX).toString());
-				String serviceDayString = stripQuotes(scheduleArray.get(SCHED_SERVICE_DAY_IDX).toString());
-				int serviceDay = Integer.parseInt(serviceDayString);
-				String startTime = stripQuotes(scheduleArray.get(SCHED_SERVICE_TIME_IDX).toString());
-				int duration = scheduleArray.getInt(SCHED_DURATION_MINS_IDX);
-
-				// Add event to list
-				scheduleList.add(new ScheduleModel(0, serviceDay, startTime, duration, eventName));
-			}
-
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
+			return scheduleList;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Schedule DB: " + e1.getMessage());
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each event in the schedule
+			JsonArray scheduleArray = (JsonArray) jsonArray.get(i);
+
+			// Get event name, day-of-week and duration
+			String eventName = stripQuotes(scheduleArray.get(SCHED_WKLY_EVENT_NAME_IDX).toString());
+			String serviceDayString = stripQuotes(scheduleArray.get(SCHED_SERVICE_DAY_IDX).toString());
+			int serviceDay = Integer.parseInt(serviceDayString);
+			String startTime = stripQuotes(scheduleArray.get(SCHED_SERVICE_TIME_IDX).toString());
+			int duration = scheduleArray.getInt(SCHED_DURATION_MINS_IDX);
+
+			// Add event to list
+			scheduleList.add(new ScheduleModel(0, serviceDay, startTime, duration, eventName));
 		}
 
+		conn.disconnect();
 		return scheduleList;
 	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
 		ArrayList<InvoiceModel> invoiceList = new ArrayList<InvoiceModel>();
 
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("invoice_items");
+		// Get URL connection and send the query
+		String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
+		invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
+		HttpURLConnection conn = sendQueryToUrl("invoice_items", invoiceCmd);
 
-			// Send the query
-			String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00",
-					dateRange.getStartDate().toString("yyyy-MM-dd"));
-			invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
-			sendQueryToUrl(conn, invoiceCmd);
+		if (conn == null)
+			return invoiceList;
 
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return invoiceList;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return invoiceList;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each invoice in the list
-				JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
-
-				// Get invoice date/amount, student name, product name
-				int planID = invoiceArray.getInt(INVOICE_PLAN_ID_IDX);
-				InvoiceModel model = new InvoiceModel(stripQuotes(invoiceArray.get(INVOICE_ISSUED_DATE_IDX).toString()),
-						invoiceArray.getString(INVOICE_PRODUCT_NAME_IDX).toString(), "", "", 0,
-						invoiceArray.getString(INVOICE_RECIPIENT_NAME_IDX),
-						invoiceArray.getString(INVOICE_PAYER_NAME_IDX), planID, "", "",
-						invoiceArray.getInt(INVOICE_GROSS_AMOUNT_IDX));
-
-				JsonValue couponCode = invoiceArray.get(INVOICE_COUPON_CODE_IDX);
-				if (couponCode != null)
-					model.setPayMethod(stripQuotes(couponCode.toString()));
-
-				// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
-				// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic
-				//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
-				// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
-				//    then updates start/end dates and verbose event name.
-				getPersonPlans(model, planID);
-				getEnrollmentsByServiceName(model);
-
-				// Add invoice to list
-				invoiceList.add(model);
-			}
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
+			return invoiceList;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			// Fill in payment method and transaction ID
-			getPaymentInfo(invoiceList, dateRange);
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each invoice in the list
+			JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
 
-			for (int i = invoiceList.size() - 1; i >= 0; i--) {
-				InvoiceModel invoice = invoiceList.get(i);
-				int clientID = invoice.getClientID();
+			// Get invoice date/amount, student name, product name
+			int planID = invoiceArray.getInt(INVOICE_PLAN_ID_IDX);
+			InvoiceModel model = new InvoiceModel(stripQuotes(invoiceArray.get(INVOICE_ISSUED_DATE_IDX).toString()),
+					invoiceArray.getString(INVOICE_PRODUCT_NAME_IDX).toString(), "", "", 0,
+					invoiceArray.getString(INVOICE_RECIPIENT_NAME_IDX),
+					invoiceArray.getString(INVOICE_PAYER_NAME_IDX), planID, "", "",
+					invoiceArray.getInt(INVOICE_GROSS_AMOUNT_IDX));
 
-				// Clear out all start/end date fields except the final one
-				if (invoice.getItemStartDate() == null)
-					continue;
+			JsonValue couponCode = invoiceArray.get(INVOICE_COUPON_CODE_IDX);
+			if (couponCode != null)
+				model.setPayMethod(stripQuotes(couponCode.toString()));
 
-				for (int j = i - 1; j >= 0; j--) {
-					if (invoiceList.get(j).getClientID() == clientID) {
-						invoiceList.get(j).setItemStartDate(null);
-						invoiceList.get(j).setItemEndDate(null);
-					}
+			// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
+			// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic
+			//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
+			// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
+			//    then updates start/end dates and verbose event name.
+			getPersonPlans(model, planID);
+			getEnrollmentsByServiceName(model);
+
+			// Add invoice to list
+			invoiceList.add(model);
+		}
+		conn.disconnect();
+
+		// Fill in payment method and transaction ID
+		getPaymentInfo(invoiceList, dateRange);
+
+		for (int i = invoiceList.size() - 1; i >= 0; i--) {
+			InvoiceModel invoice = invoiceList.get(i);
+			int clientID = invoice.getClientID();
+
+			// Clear out all start/end date fields except the final one
+			if (invoice.getItemStartDate() == null)
+				continue;
+
+			for (int j = i - 1; j >= 0; j--) {
+				if (invoiceList.get(j).getClientID() == clientID) {
+					invoiceList.get(j).setItemStartDate(null);
+					invoiceList.get(j).setItemEndDate(null);
 				}
 			}
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Invoice DB: " + e1.getMessage());
 		}
 
 		return invoiceList;
 	}
 
 	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList, DateRangeEvent dateRange) {
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("invoice_item_transactions");
+		// Get URL connection and send query
+		String transCmd = getTransactionData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
+		transCmd = transCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
+		HttpURLConnection conn = sendQueryToUrl("invoice_item_transactions", transCmd);
 
-			// Send the query
-			String transCmd = getTransactionData.replaceFirst("0000-00-00",
-					dateRange.getStartDate().toString("yyyy-MM-dd"));
-			transCmd = transCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
-			sendQueryToUrl(conn, transCmd);
+		if (conn == null)
+			return;
 
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return;
-			}
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
+			conn.disconnect();
+			return;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each invoice in the list
+			JsonArray transactionArray = (JsonArray) jsonArray.get(i);
 
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each invoice in the list
-				JsonArray transactionArray = (JsonArray) jsonArray.get(i);
-
-				for (int j = 0; j < invoiceList.size(); j++) {
-					InvoiceModel invoice = invoiceList.get(j);
-					if (transactionArray.getInt(TRANS_PLAN_ID_IDX) == invoice.getPlanID()) {
-						// Plan ID match, update transaction ID and payment method
-						invoice.setPayMethod(stripQuotes(transactionArray.get(TRANS_PAYMENT_METHOD_IDX).toString()));
-						invoice.setTransactionID(transactionArray.getString(TRANS_TRANSACTION_ID_IDX).toString());
-						break;
-					}
+			for (int j = 0; j < invoiceList.size(); j++) {
+				InvoiceModel invoice = invoiceList.get(j);
+				if (transactionArray.getInt(TRANS_PLAN_ID_IDX) == invoice.getPlanID()) {
+					// Plan ID match, update transaction ID and payment method
+					invoice.setPayMethod(stripQuotes(transactionArray.get(TRANS_PAYMENT_METHOD_IDX).toString()));
+					invoice.setTransactionID(transactionArray.getString(TRANS_TRANSACTION_ID_IDX).toString());
+					break;
 				}
 			}
-			conn.disconnect();
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Transaction DB: " + e1.getMessage());
 		}
+		conn.disconnect();
 	}
 
 	private void getPersonPlans(InvoiceModel invoice, Integer planID) {
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("person_plans");
+		// Fill in plan_id field and send the query
+		String planString = getPersonPlanData.replace("PPPP", planID.toString());
+		HttpURLConnection conn = sendQueryToUrl("person_plans", planString);
 
-			// Fill in plan_id field and send the query
-			String planString = getPersonPlanData.replace("PPPP", planID.toString());
-			sendQueryToUrl(conn, planString);
+		if (conn == null)
+			return;
 
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			if (jsonArray.size() > 0) {
-				// Get fields for first plan in the list
-				JsonArray invoiceArray = (JsonArray) jsonArray.get(0);
-
-				// Add person plans fields to invoice model
-				invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
-				invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
-				invoice.setProductID(invoiceArray.getInt(PLAN_PRODUCT_ID_IDX));
-
-				boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
-				invoice.setIsCanceled(isCanceled);
-				if (!isCanceled) {
-					// Only set start/end dates if plan is active
-					invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
-					invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
-				} else {
-					// Clear canceled flag if this client has other active records for this product
-					invoice.setIsCanceled(getCanceledFlagsByProductId(invoice.getClientID(), invoice.getProductID()));
-				}
-			}
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Invoice DB: " + e1.getMessage());
+			return;
 		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+		if (jsonArray.size() > 0) {
+			// Get fields for first plan in the list
+			JsonArray invoiceArray = (JsonArray) jsonArray.get(0);
+
+			// Add person plans fields to invoice model
+			invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
+			invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
+			invoice.setProductID(invoiceArray.getInt(PLAN_PRODUCT_ID_IDX));
+
+			boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
+			invoice.setIsCanceled(isCanceled);
+			if (!isCanceled) {
+				// Only set start/end dates if plan is active
+				invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
+				invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
+			} else {
+				// Clear canceled flag if this client has other active records for this product
+				invoice.setIsCanceled(getCanceledFlagsByProductId(invoice.getClientID(), invoice.getProductID()));
+			}
+		}
+		conn.disconnect();
 	}
 
 	private void getEnrollmentsByServiceName(InvoiceModel model) {
@@ -1066,119 +953,92 @@ public class Pike13Api {
 	}
 
 	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("person_plans");
+		// Get URL connection and send the query
+		String planCmd = getPersonPlanDataByProductId.replace("IIII", clientID.toString());
+		planCmd = planCmd.replace("PPPP", productID.toString());
+		HttpURLConnection conn = sendQueryToUrl("person_plans", planCmd);
 
-			// Send the query
-			String planCmd = getPersonPlanDataByProductId.replace("IIII", clientID.toString());
-			planCmd = planCmd.replace("PPPP", productID.toString());
-			sendQueryToUrl(conn, planCmd);
+		if (conn == null)
+			return true;
 
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return true;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return true;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each plan in the list
-				JsonArray planArray = (JsonArray) jsonArray.get(i);
-
-				if (planArray.getString(PLAN2_IS_CANCELED_IDX).equals("f")) {
-					conn.disconnect();
-					return false;
-				}
-			}
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Invoice DB: " + e1.getMessage());
+			return true;
 		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each plan in the list
+			JsonArray planArray = (JsonArray) jsonArray.get(i);
+
+			if (planArray.getString(PLAN2_IS_CANCELED_IDX).equals("f")) {
+				conn.disconnect();
+				return false;
+			}
+		}
+		conn.disconnect();
 		return true;
 	}
 
 	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
 		ArrayList<StaffMemberModel> staffList = new ArrayList<StaffMemberModel>();
 
-		try {
-			// Get URL connection with authorization
-			HttpURLConnection conn = connectUrl("staff_members");
+		// Get URL connection and send the query
+		HttpURLConnection conn = sendQueryToUrl("staff_members", getStaffMemberData);
+		if (conn == null)
+			return null;
 
-			// Send the query
-			sendQueryToUrl(conn, getStaffMemberData);
-
-			// Check result
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				conn.disconnect();
-				return null;
-			}
-
-			// Get input stream and read data
-			JsonObject jsonObj = readInputStream(conn);
-			if (jsonObj == null) {
-				conn.disconnect();
-				return null;
-			}
-			JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get fields for each staff member
-				JsonArray staffArray = (JsonArray) jsonArray.get(i);
-
-				// Get fields for this Json array entry
-				String sfClientID = null;
-				if (staffArray.get(TEACHER_SF_CLIENT_ID_IDX) != null)
-					sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
-
-				staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
-						staffArray.getString(TEACHER_FIRST_NAME_IDX), staffArray.getString(TEACHER_LAST_NAME_IDX),
-						stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_ROLE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_OCCUPATION_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_EMPLOYER_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_START_INFO_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_GENDER_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_BIRTHDATE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_PHONE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_HOME_PHONE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_ADDRESS_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_EMAIL_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_ALTERNATE_EMAIL_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_HOME_LOCATION_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_GITHUB_USER_IDX).toString()),
-						staffArray.getInt(TEACHER_PAST_EVENTS_IDX),
-						staffArray.getInt(TEACHER_FUTURE_EVENTS_IDX),
-						stripQuotes(staffArray.get(TEACHER_KEY_HOLDER_IDX).toString()).equals("t") ? true : false,
-						stripQuotes(staffArray.get(TEACHER_LIVE_SCAN_DATE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_T_SHIRT_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_WHERE_DID_YOU_HEAR_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_LEAVE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_EMERG_NAME_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_EMERG_EMAIL_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_EMERG_PHONE_IDX).toString()),
-						stripQuotes(staffArray.get(TEACHER_CURR_BOARD_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
-						stripQuotes(staffArray.get(TEACHER_CURR_STAFF_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
-						stripQuotes(staffArray.get(TEACHER_IS_ALSO_CLIENT_IDX).toString()).equalsIgnoreCase("t") ? true : false));
-			}
-
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
 			conn.disconnect();
-
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Staff Member DB: " + e1.getMessage());
 			return null;
 		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each staff member
+			JsonArray staffArray = (JsonArray) jsonArray.get(i);
+
+			// Get fields for this Json array entry
+			String sfClientID = null;
+			if (staffArray.get(TEACHER_SF_CLIENT_ID_IDX) != null)
+				sfClientID = stripQuotes(staffArray.get(TEACHER_SF_CLIENT_ID_IDX).toString());
+
+			staffList.add(new StaffMemberModel(staffArray.get(TEACHER_CLIENT_ID_IDX).toString(), sfClientID,
+					staffArray.getString(TEACHER_FIRST_NAME_IDX), staffArray.getString(TEACHER_LAST_NAME_IDX),
+					stripQuotes(staffArray.get(TEACHER_CATEGORY_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_ROLE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_OCCUPATION_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_EMPLOYER_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_START_INFO_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_GENDER_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_BIRTHDATE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_PHONE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_HOME_PHONE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_ADDRESS_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_EMAIL_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_ALTERNATE_EMAIL_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_HOME_LOCATION_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_GITHUB_USER_IDX).toString()),
+					staffArray.getInt(TEACHER_PAST_EVENTS_IDX),
+					staffArray.getInt(TEACHER_FUTURE_EVENTS_IDX),
+					stripQuotes(staffArray.get(TEACHER_KEY_HOLDER_IDX).toString()).equals("t") ? true : false,
+					stripQuotes(staffArray.get(TEACHER_LIVE_SCAN_DATE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_T_SHIRT_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_WHERE_DID_YOU_HEAR_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_LEAVE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_EMERG_NAME_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_EMERG_EMAIL_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_EMERG_PHONE_IDX).toString()),
+					stripQuotes(staffArray.get(TEACHER_CURR_BOARD_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
+					stripQuotes(staffArray.get(TEACHER_CURR_STAFF_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
+					stripQuotes(staffArray.get(TEACHER_IS_ALSO_CLIENT_IDX).toString()).equalsIgnoreCase("t") ? true : false));
+		}
+
+		conn.disconnect();
 		return staffList;
 	}
 
@@ -1192,65 +1052,53 @@ public class Pike13Api {
 		String staffHours2 = getStaffHoursSalesForce2.replaceFirst("0000-00-00", startDate);
 		staffHours2 = staffHours2.replaceFirst("1111-11-11", endDate);
 
-		try {
-			do {
-				// Get URL connection with authorization
-				HttpURLConnection conn = connectUrl("event_occurrence_staff_members");
+		do {
+			// Get URL connection and send the query; add page info if necessary
+			HttpURLConnection conn;
+			if (hasMore)
+				conn = sendQueryToUrl("event_occurrence_staff_members",
+						getStaffHoursSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + staffHours2);
+			else
+				conn = sendQueryToUrl("event_occurrence_staff_members", getStaffHoursSalesForce + staffHours2);
 
-				// Send the query; add page info if necessary
-				if (hasMore)
-					sendQueryToUrl(conn,
-							getStaffHoursSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + staffHours2);
-				else
-					sendQueryToUrl(conn, getStaffHoursSalesForce + staffHours2);
+			if (conn == null)
+				return null;
 
-				// Check result
-				if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-					conn.disconnect();
-					return null;
-				}
-
-				// Get input stream and read data
-				JsonObject jsonObj = readInputStream(conn);
-				if (jsonObj == null) {
-					conn.disconnect();
-					return null;
-				}
-				JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-				for (int i = 0; i < jsonArray.size(); i++) {
-					// Get fields for each event
-					JsonArray eventArray = (JsonArray) jsonArray.get(i);
-
-					// Add event to list
-					eventList.add(new SalesForceStaffHoursModel(eventArray.get(STAFF_CLIENT_ID_IDX).toString(),
-							eventArray.getString(STAFF_EVENT_FULL_NAME_IDX),
-							eventArray.getString(STAFF_EVENT_SERVICE_NAME_IDX),
-							eventArray.getString(STAFF_EVENT_SERVICE_DATE_IDX),
-							eventArray.getString(STAFF_EVENT_SERVICE_TIME_IDX),
-							eventArray.getJsonNumber(STAFF_EVENT_DURATION_IDX).doubleValue(),
-							eventArray.getString(STAFF_EVENT_LOCATION_IDX),
-							eventArray.getJsonNumber(STAFF_EVENT_COMPLETED_COUNT_IDX).doubleValue(),
-							eventArray.getJsonNumber(STAFF_EVENT_NO_SHOW_COUNT_IDX).doubleValue(),
-							eventArray.getJsonNumber(STAFF_EVENT_CANCELED_COUNT_IDX).doubleValue(),
-							stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
-							eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString()));
-				}
-
-				// Check to see if there are more pages
-				hasMore = jsonObj.getBoolean("has_more");
-				if (hasMore)
-					lastKey = jsonObj.getString("last_key");
-
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
 				conn.disconnect();
+				return null;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-			} while (hasMore);
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each event
+				JsonArray eventArray = (JsonArray) jsonArray.get(i);
 
-		} catch (IOException e1) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
-					" for Staff Hours DB: " + e1.getMessage());
-			return null;
-		}
+				// Add event to list
+				eventList.add(new SalesForceStaffHoursModel(eventArray.get(STAFF_CLIENT_ID_IDX).toString(),
+						eventArray.getString(STAFF_EVENT_FULL_NAME_IDX),
+						eventArray.getString(STAFF_EVENT_SERVICE_NAME_IDX),
+						eventArray.getString(STAFF_EVENT_SERVICE_DATE_IDX),
+						eventArray.getString(STAFF_EVENT_SERVICE_TIME_IDX),
+						eventArray.getJsonNumber(STAFF_EVENT_DURATION_IDX).doubleValue(),
+						eventArray.getString(STAFF_EVENT_LOCATION_IDX),
+						eventArray.getJsonNumber(STAFF_EVENT_COMPLETED_COUNT_IDX).doubleValue(),
+						eventArray.getJsonNumber(STAFF_EVENT_NO_SHOW_COUNT_IDX).doubleValue(),
+						eventArray.getJsonNumber(STAFF_EVENT_CANCELED_COUNT_IDX).doubleValue(),
+						stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
+						eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString()));
+			}
+
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
+
+			conn.disconnect();
+
+		} while (hasMore);
 
 		return eventList;
 	}
@@ -1277,10 +1125,14 @@ public class Pike13Api {
 		return null;
 	}
 
-	private void sendQueryToUrl(HttpURLConnection conn, String getCommand) {
+	private HttpURLConnection sendQueryToUrl(String connName, String getCommand) {
 		try {
+			// If necessary, try twice to send query
 			for (int i = 0; i < 2; i++) {
-				// If necessary, try twice to send query
+				// Get URL connection with authorization
+				HttpURLConnection conn = connectUrl(connName);
+				
+				// Send the query
 				OutputStream outputStream = conn.getOutputStream();
 				outputStream.write(getCommand.getBytes("UTF-8"));
 				outputStream.flush();
@@ -1289,8 +1141,9 @@ public class Pike13Api {
 				// Check result
 				int responseCode = conn.getResponseCode();
 				if (responseCode == HttpURLConnection.HTTP_OK)
-					return;
+					return conn;
 				else {
+					conn.disconnect();
 					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + " (attempt #" + (i + 1) + "): " + conn.getResponseMessage());
 				}
@@ -1299,6 +1152,8 @@ public class Pike13Api {
 		} catch (IOException e) {
 			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
 		}
+
+		return null;
 	}
 
 	private JsonObject readInputStream(HttpURLConnection conn) {
