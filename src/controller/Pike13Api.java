@@ -416,7 +416,7 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"or\",[[\"eq\",\"attendance_completed\",\"t\"],"
 			+ "                              [\"eq\",\"service_name\",\"Volunteer Time\"]]],"
-			+ "                     [\"ne\",\"full_name\",\"Sub Teacher\"],[\"ne\",\"full_name\",\"League Admin\"]]]}}}";
+			+ "                     [\"wo\",\"home_location_name\",\"Tax ID#\"]]]}}}";
 
 	private MySqlDatabase mysqlDb;
 	private String pike13Token;
