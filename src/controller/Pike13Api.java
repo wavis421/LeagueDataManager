@@ -217,6 +217,7 @@ public class Pike13Api {
 	private final int STAFF_EVENT_NAME_IDX = 9;
 	private final int STAFF_EVENT_SCHEDULE_ID_IDX = 10;
 	private final int STAFF_EVENT_FULL_NAME_IDX = 11;
+	private final int STAFF_EVENT_SERVICE_CATEGORY_IDX = 12;
 
 	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
@@ -407,7 +408,8 @@ public class Pike13Api {
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"service_name\",\"service_date\",\"service_time\",\"duration_in_hours\","
 			+ "            \"service_location_name\",\"completed_enrollment_count\",\"noshowed_enrollment_count\","
-			+ "            \"late_canceled_enrollment_count\",\"event_name\",\"event_occurrence_id\",\"full_name\"],"
+			+ "            \"late_canceled_enrollment_count\",\"event_name\",\"event_occurrence_id\",\"full_name\","
+			+ "            \"service_category\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -1088,7 +1090,8 @@ public class Pike13Api {
 						eventArray.getJsonNumber(STAFF_EVENT_NO_SHOW_COUNT_IDX).doubleValue(),
 						eventArray.getJsonNumber(STAFF_EVENT_CANCELED_COUNT_IDX).doubleValue(),
 						stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
-						eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString()));
+						eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString(),
+						stripQuotes(eventArray.get(STAFF_EVENT_SERVICE_CATEGORY_IDX).toString())));
 			}
 
 			// Check to see if there are more pages
