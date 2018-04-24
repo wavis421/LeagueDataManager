@@ -806,6 +806,81 @@ public class MySqlDatabase {
 		return attendanceList;
 	}
 
+	public ArrayList<GithubModel> getStudentsWithNoRecentGithub(String sinceDate, int minClassesWithoutGithub) {
+		ArrayList<GithubModel> githubList = new ArrayList<GithubModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND ServiceDate > ?  "
+								+ "ORDER BY Attendance.ClientID, ServiceDate ASC, EventName;");
+				selectStmt.setString(1, sinceDate);
+
+				ResultSet result = selectStmt.executeQuery();
+
+				int count = 0;
+				boolean ignore = false;
+				int lastClientID = -1;
+				GithubModel lastGithubModel = null;
+
+				while (result.next()) {
+					int thisClientID = result.getInt("Students.ClientID");
+
+					if (thisClientID != lastClientID) {
+						// Next client ID
+						if (!ignore && count >= minClassesWithoutGithub && lastGithubModel != null) {
+							// No comments for at least 4 class visits, so add to list
+							githubList.add(lastGithubModel);
+						}
+
+						// Reset flags/counters for next Client ID
+						count = 0;
+						ignore = false;
+						lastClientID = thisClientID;
+						lastGithubModel = null;
+					}
+
+					String comments = result.getString("Comments");
+					if (!ignore && (comments == null || comments.equals(""))) {
+						// No github comments for this client either previously or now
+						String eventName = result.getString("EventName");
+						count++;
+
+						if (eventName.charAt(0) >= '0' && eventName.charAt(0) <= '3') {
+							// Save this record for possible addition to list
+							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
+							lastGithubModel = new GithubModel(thisClientID,
+									result.getString("FirstName") + " " + result.getString("LastName"),
+									serviceDate.toString("EEEEE"), eventName, result.getString("GithubName"));
+						}
+
+					} else // Ignore this student if ANY github comments exist
+						ignore = true;
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+
+		Collections.sort(githubList); // Sort by student name
+		return githubList;
+	}
+
 	public ArrayList<AttendanceEventModel> getAllEvents() {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 

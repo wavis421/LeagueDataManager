@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import model.AttendanceEventModel;
 import model.AttendanceModel;
 import model.DateRangeEvent;
+import model.GithubModel;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
@@ -66,6 +67,10 @@ public class Controller {
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		return sqlDb.getStudentsNotInMasterDB();
+	}
+
+	public ArrayList<GithubModel> getStudentsWithNoRecentGithub(String sinceDate, int minClassesWithoutGithub) {
+		return sqlDb.getStudentsWithNoRecentGithub(sinceDate, minClassesWithoutGithub);
 	}
 
 	public void removeInactiveStudents() {

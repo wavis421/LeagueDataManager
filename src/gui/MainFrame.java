@@ -37,9 +37,12 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.joda.time.DateTime;
+
 import controller.Controller;
 import model.AttendanceModel;
 import model.DateRangeEvent;
+import model.GithubModel;
 import model.InvoiceModel;
 import model.LogDataModel;
 
@@ -62,6 +65,10 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
 
+	// Report missing github if 4 or more classes with no github in the last 36 days
+	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 36;
+	private static final int MIN_CLASSES_WITH_NO_GITHUB = 4;
+
 	/* Private instance variables */
 	private Preferences prefs = Preferences.userRoot();
 	private static Controller controller;
@@ -73,6 +80,7 @@ public class MainFrame {
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
 	private InvoiceTable invoiceTable;
+	private GithubTable githubTable;
 	private int currentStudentTable;
 	private JTable activeTable;
 	private String activeTableHeader;
@@ -134,6 +142,7 @@ public class MainFrame {
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
 		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
+		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
 		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
 
@@ -342,11 +351,13 @@ public class MainFrame {
 		// Create sub-menus for the Students menu
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
 		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
+		JMenuItem studentNoRecentGitItem = new JMenuItem("View students without recent Github ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
 
 		// Add these sub-menus to the Student menu
 		studentMenu.add(studentNotInMasterMenu);
 		studentMenu.add(studentRemoveInactiveMenu);
+		studentMenu.add(studentNoRecentGitItem);
 		studentMenu.add(studentViewAllMenu);
 
 		// Set up listeners for the Student menu
@@ -362,6 +373,18 @@ public class MainFrame {
 				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
+		studentNoRecentGitItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				removeDataFromTables();
+				String sinceDate = (new DateTime()).minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
+				headerLabel.setText("Students with no Github comments since " + sinceDate);
+				githubTable.setData(tablePanel,
+						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
+
+				activeTable = githubTable.getTable();
+				activeTableHeader = headerLabel.getText();
+			}
+		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshStudentTable(STUDENT_TABLE_ALL, 0);
@@ -371,8 +394,8 @@ public class MainFrame {
 
 	private void createAttendanceMenu(JMenu attendanceMenu) {
 		// Create sub-menus for the Attendance menu
-		JMenu attendanceViewByClassMenu = new JMenu("View by Class ");
-		JMenuItem attendanceViewAllItem = new JMenuItem("View all ");
+		JMenu attendanceViewByClassMenu = new JMenu("View Attendance by Class ");
+		JMenuItem attendanceViewAllItem = new JMenuItem("View All Attendance ");
 		attendanceMenu.add(attendanceViewByClassMenu);
 		attendanceMenu.add(attendanceViewAllItem);
 
@@ -524,6 +547,7 @@ public class MainFrame {
 		attendanceTable.setTableListener(listener);
 		studentTable.setTableListener(listener);
 		logTable.setTableListener(listener);
+		githubTable.setTableListener(listener);
 	}
 
 	private void refreshStudentTable(int tableType, int clientID) {
@@ -537,7 +561,7 @@ public class MainFrame {
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
-		} else { // CURR_TABLE_BY_STUDENT
+		} else { // STUDENT_TABLE_BY_STUDENT
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID));
 		}
@@ -604,6 +628,7 @@ public class MainFrame {
 		logTable.removeData();
 		scheduleTable.removeData();
 		invoiceTable.removeData();
+		githubTable.removeData();
 	}
 
 	private String getPike13TokenFromFile() {
