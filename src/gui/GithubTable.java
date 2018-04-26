@@ -129,7 +129,6 @@ public class GithubTable extends JPanel {
 
 				// Display attendance table for selected student
 				table.clearSelection();
-				System.out.println("Show attendance for " + clientID + ", " + studentName);
 				githubListener.viewAttendanceByStudent(clientID, studentName);
 			}
 		});
