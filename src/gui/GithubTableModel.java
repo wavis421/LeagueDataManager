@@ -12,9 +12,10 @@ public class GithubTableModel extends AbstractTableModel {
 	public static final int DOW_COLUMN = 2;
 	public static final int CLASS_NAME_COLUMN = 3;
 	public static final int GITHUB_NAME_COLUMN = 4;
+	public static final int TEACHER_COLUMN = 5;
 
 	private ArrayList<GithubModel> githubList;
-	private final String colNames[] = { " ID ", " Student Name ", " DOW ", " Class ", " Github " };
+	private final String colNames[] = { " ID ", " Student Name ", " DOW ", " Class ", " Github ", " Teachers " };
 
 	public GithubTableModel(ArrayList<GithubModel> githubList) {
 		this.githubList = githubList;
@@ -70,6 +71,8 @@ public class GithubTableModel extends AbstractTableModel {
 			return student.getClassName();
 		case GITHUB_NAME_COLUMN:
 			return student.getGithubName();
+		case TEACHER_COLUMN:
+			return student.getTeachers();
 		}
 		return null;
 	}

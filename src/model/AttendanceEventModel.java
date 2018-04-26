@@ -4,18 +4,19 @@ import java.sql.Date;
 
 public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private int clientID, visitID;
-	private String eventName;
+	private String eventName, teacherNames;
 	private Date serviceDate;
 	private String serviceDateString;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 
-	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String eventName, String githubName, String repoName,
-			String githubComments, StudentNameModel nameModel) {
+	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String eventName, String githubName,
+			String repoName, String githubComments, StudentNameModel nameModel) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
 		this.eventName = eventName;
+		this.teacherNames = "";
 		this.githubName = githubName;
 		if (githubName != null)
 			this.githubName = githubName.trim();
@@ -27,12 +28,14 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
-	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String eventName) {
+	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String eventName,
+			String teacherNames) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.nameModel = new StudentNameModel(studentName, "", false);
 		this.serviceDateString = serviceDate;
 		this.eventName = eventName;
+		this.teacherNames = teacherNames;
 	}
 
 	public int getClientID() {
@@ -45,6 +48,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public String getEventName() {
 		return eventName;
+	}
+
+	public String getTeacherNames() {
+		return teacherNames;
 	}
 
 	public Date getServiceDate() {
@@ -96,8 +103,8 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			if (comp != 0)
 				// Dates in descending order
 				return -comp;
-			else
-				return this.getEventName().compareTo(other.getEventName());
+
+			return this.getEventName().compareTo(other.getEventName());
 		}
 	}
 }

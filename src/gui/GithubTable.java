@@ -80,8 +80,10 @@ public class GithubTable extends JPanel {
 
 		// Configure column widths
 		table.getColumnModel().getColumn(GithubTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(200);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setMaxWidth(170);
+		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setPreferredWidth(170);
 
 		table.setDefaultRenderer(Object.class, new GithubTableRenderer());
 		table.setAutoCreateRowSorter(true);
@@ -159,13 +161,14 @@ public class GithubTable extends JPanel {
 				super.setForeground(Color.black);
 				super.setBorder(BorderFactory.createEmptyBorder());
 
-				if (((GithubTableModel) table.getModel()).getValueByRow(row).getGithubName().equals("")) {
+				int modelRow = table.convertRowIndexToModel(row);
+				if (((GithubTableModel) table.getModel()).getValueByRow(modelRow).getGithubName().equals("")) {
 					// Text RED for students missing data
 					if (column == GithubTableModel.STUDENT_NAME_COLUMN)
 						super.setForeground(Color.red);
 
-					// Border RED for cells with missing data
-					if (text == null || text.equals(""))
+					// Border RED for missing github
+					else if (column == GithubTableModel.GITHUB_NAME_COLUMN && (text == null || text.equals("")))
 						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.red));
 				}
 

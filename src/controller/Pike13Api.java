@@ -125,6 +125,7 @@ public class Pike13Api {
 	private final int ENROLL_SERVICE_DATE_IDX = 2;
 	private final int ENROLL_EVENT_NAME_IDX = 3;
 	private final int ENROLL_VISIT_ID_IDX = 4;
+	private final int ENROLL_TEACHER_NAMES_IDX = 5;
 
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
@@ -240,7 +241,7 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields for client data import to SF
 			+ "\"fields\":[\"person_id\",\"email\",\"phone\",\"address\",\"birthdate\",\"completed_visits\",\"future_visits\","
-			+ "            \"has_signed_waiver\",\"has_membership\",\"current_plan_revenue_category\","
+			+ "            \"has_signed_waiver\",\"has_membership\",\"current_plans\","
 			+ "            \"home_location_name\",\"first_name\",\"last_name\",\"" + SCHOOL_ATTENDING_FIELD + "\","
 			+ "            \"" + TSHIRT_SIZE_FIELD + "\",\"" + GENDER_FIELD + "\",\"" + EMERG_CONTACT_NAME_FIELD + "\","
 			+ "            \"" + EMERG_CONTACT_PHONE_FIELD + "\",\"" + CURRENT_GRADE_FIELD + "\","
@@ -272,7 +273,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -307,7 +308,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\"],"
 			// Page limit max is 10 (only need first entry)
 			+ "\"page\":{\"limit\":500},"
 			// Filter on client ID and service name
@@ -634,7 +635,8 @@ public class Pike13Api {
 				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
 					eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
 							eventArray.getInt(ENROLL_VISIT_ID_IDX),
-							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName));
+							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName,
+							stripQuotes(eventArray.get(ENROLL_TEACHER_NAMES_IDX).toString())));
 				}
 			}
 
