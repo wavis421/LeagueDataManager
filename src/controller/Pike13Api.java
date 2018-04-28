@@ -325,7 +325,8 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":500},"
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"starts\",\"service_category\",\"Class\"],[\"nemp\",\"event_name\"]]]}}}";
+			+ "                     [\"starts\",\"service_category\",\"Class\"],"
+			+ "                     [\"nemp\",\"event_name\"]]]}}}";
 
 	// Get invoice data
 	private final String getInvoiceData = "{\"data\":{\"type\":\"queries\","

@@ -81,7 +81,6 @@ public class MainFrame {
 	private ScheduleTable scheduleTable;
 	private InvoiceTable invoiceTable;
 	private GithubTable githubTable;
-	private int currentStudentTable;
 	private JTable activeTable;
 	private String activeTableHeader;
 	private String githubToken, pike13Token;
@@ -132,7 +131,6 @@ public class MainFrame {
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
 		// Default tables to display all data
-		currentStudentTable = STUDENT_TABLE_ALL;
 		headerLabel.setText(STUDENT_TITLE);
 		activeTableHeader = STUDENT_TITLE;
 
@@ -177,14 +175,6 @@ public class MainFrame {
 		JMenu fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
 		createFileMenu(fileMenu);
-
-		// Add import menu to menu bar
-		if (!pike13Token.equals("") && !githubToken.equals("")) {
-			// Only show imports if user is authorized
-			JMenu importMenu = new JMenu("Import");
-			menuBar.add(importMenu);
-			createImportMenu(importMenu);
-		}
 
 		// Add student menu to menu bar
 		JMenu studentMenu = new JMenu("Students");
@@ -280,69 +270,6 @@ public class MainFrame {
 		exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				shutdown();
-			}
-		});
-	}
-
-	private void createImportMenu(JMenu importMenu) {
-		// Add Import sub-menus
-		JMenuItem importStudentPike13Item = new JMenuItem("Import Students from Pike13...  ");
-		JMenuItem importAttendanceLogPike13Item = new JMenuItem("Import Attendance Log from Pike13...  ");
-		JMenuItem importGithubItem = new JMenuItem("Import Github comments...  ");
-		JMenuItem importScheduleItem = new JMenuItem("Import Class Schedule...  ");
-		JMenuItem importAllDatabasesItem = new JMenuItem("Import All Databases...  ");
-
-		// Add these sub-menus to the Import menu
-		importMenu.add(importStudentPike13Item);
-		importMenu.add(importAttendanceLogPike13Item);
-		importMenu.add(importGithubItem);
-		importMenu.add(importScheduleItem);
-		importMenu.add(importAllDatabasesItem);
-
-		// Set up listeners for the Import menu
-		importStudentPike13Item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				controller.importStudentsFromPike13();
-				refreshStudentTable(STUDENT_TABLE_ALL, 0);
-			}
-		});
-		importAttendanceLogPike13Item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Get start date for import
-				DatePickerUtility datePicker = new DatePickerUtility();
-				String startDate = datePicker.getDialogResponse();
-				if (startDate != null) {
-					controller.importAttendanceFromPike13(startDate);
-					refreshAttendanceTable(controller.getAllAttendance(), "", false);
-				}
-			}
-		});
-		importGithubItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Get start date for import
-				DatePickerUtility datePicker = new DatePickerUtility();
-				String startDate = datePicker.getDialogResponse();
-				if (startDate != null) {
-					controller.importGithubComments(startDate);
-					refreshAttendanceTable(controller.getAllAttendance(), "", false);
-				}
-			}
-		});
-		importScheduleItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				controller.importScheduleFromPike13();
-				refreshScheduleTable();
-			}
-		});
-		importAllDatabasesItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Get start date for import
-				DatePickerUtility datePicker = new DatePickerUtility();
-				String startDate = datePicker.getDialogResponse();
-				if (startDate != null) {
-					controller.importAllDatabases(startDate);
-					refreshLogTable();
-				}
 			}
 		});
 	}
@@ -567,7 +494,6 @@ public class MainFrame {
 		}
 
 		// Update current table type
-		currentStudentTable = tableType;
 		activeTable = studentTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}
