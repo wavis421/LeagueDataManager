@@ -65,9 +65,9 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
 
-	// Report missing github if 4 or more classes with no github in the last 36 days
-	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 36;
-	private static final int MIN_CLASSES_WITH_NO_GITHUB = 4;
+	// Report missing github if 3 or more classes with no github in the last 35 days
+	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
+	private static final int MIN_CLASSES_WITH_NO_GITHUB = 3;
 
 	/* Private instance variables */
 	private Preferences prefs = Preferences.userRoot();
