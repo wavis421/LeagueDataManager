@@ -1135,13 +1135,20 @@ public class MySqlDatabase {
 
 				// Caught up, now compare again and process
 				if (dbListIdx < dbListSize) {
-					if (dbList.get(dbListIdx).compareTo(importEvent) == 0) {
+					compare = dbList.get(dbListIdx).compareTo(importEvent);
+					if (compare == 0) {
 						dbListIdx++;
 
 					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
-						addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-								importEvent.getServiceDateString(), importEvent.getEventName(),
-								dbList.get(dbListIdx).getStudentNameModel(), teachers);
+						if (compare == 1)
+							addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+									importEvent.getServiceDateString(), importEvent.getEventName(),
+									dbList.get(dbListIdx).getStudentNameModel(), teachers,
+									importEvent.getServiceCategory(), importEvent.getState());
+						else // state field has changed, so update
+							updateAttendanceState(importEvent.getClientID(),
+									dbList.get(dbListIdx).getStudentNameModel(), importEvent.getServiceDateString(),
+									importEvent.getState());
 
 					} else
 						insertLogData(LogDataModel.STUDENT_NOT_FOUND,
@@ -1156,9 +1163,14 @@ public class MySqlDatabase {
 
 				if (idx >= 0) {
 					// Student exists in DB, so add attendance data for this student
-					addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-							importEvent.getServiceDateString(), importEvent.getEventName(),
-							studentList.get(idx).getNameModel(), teachers);
+					if (compare == 1)
+						addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+								importEvent.getServiceDateString(), importEvent.getEventName(),
+								studentList.get(idx).getNameModel(), teachers, importEvent.getServiceCategory(),
+								importEvent.getState());
+					else // state field has changed, so update
+						updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
+								importEvent.getServiceDateString(), importEvent.getState());
 
 				} else {
 					// Student not found
@@ -1198,20 +1210,22 @@ public class MySqlDatabase {
 	}
 
 	private void addAttendance(int clientID, int visitID, String serviceDate, String eventName,
-			StudentNameModel nameModel, String teacherNames) {
+			StudentNameModel nameModel, String teacherNames, String serviceCategory, String state) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addAttendanceStmt = dbConnection.prepareStatement(
-						"INSERT INTO Attendance (ClientID, ServiceDate, EventName, VisitID, TeacherNames) "
-								+ "VALUES (?, ?, ?, ?, ?);");
+						"INSERT INTO Attendance (ClientID, ServiceDate, EventName, VisitID, TeacherNames, ServiceCategory, State) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addAttendanceStmt.setInt(col++, clientID);
 				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 				addAttendanceStmt.setString(col++, eventName);
 				addAttendanceStmt.setInt(col++, visitID);
-				addAttendanceStmt.setString(col, teacherNames);
+				addAttendanceStmt.setString(col++, teacherNames);
+				addAttendanceStmt.setString(col++, serviceCategory);
+				addAttendanceStmt.setString(col, state);
 
 				addAttendanceStmt.executeUpdate();
 				addAttendanceStmt.close();
@@ -1235,6 +1249,40 @@ public class MySqlDatabase {
 						nameModel.getIsInMasterDb());
 				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, ": " + e3.getMessage());
 				break;
+			}
+		}
+	}
+
+	public void updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String state) {
+		PreparedStatement updateAttendanceStmt;
+		for (int i = 0; i < 2; i++) {
+			try {
+				// The only fields that should be updated are the comments and repo name
+				updateAttendanceStmt = dbConnection
+						.prepareStatement("UPDATE Attendance SET State=? WHERE ClientID=? AND ServiceDate=?;");
+
+				int col = 1;
+				updateAttendanceStmt.setString(col++, state);
+				updateAttendanceStmt.setInt(col++, clientID);
+				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+
+				updateAttendanceStmt.executeUpdate();
+				updateAttendanceStmt.close();
+
+				insertLogData(LogDataModel.UPDATE_ATTENDANCE_STATE, nameModel, clientID,
+						": " + state + " (" + serviceDate + ")");
+				return;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e) {
+				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
+						nameModel.getIsInMasterDb());
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID, ": " + e.getMessage());
 			}
 		}
 	}
@@ -1436,6 +1484,209 @@ public class MySqlDatabase {
 
 			} catch (SQLException e2) {
 				insertLogData(LogDataModel.SCHEDULE_DB_ERROR, null, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void importCourses(ArrayList<CoursesModel> importList) {
+		ArrayList<CoursesModel> dbList = getCourseSchedule("CourseID");
+		int dbListIdx = 0;
+		int dbListSize = dbList.size();
+		int lastCourseIdx = 0;
+
+		Collections.sort(importList);
+
+		for (int i = 0; i < importList.size(); i++) {
+			CoursesModel importEvent = importList.get(i);
+
+			// Ignore duplicate courses, only process 1st day
+			if (lastCourseIdx == importEvent.getScheduleID())
+				continue;
+			lastCourseIdx = importEvent.getScheduleID();
+
+			// If at end of DB list, then default operation is insert (1)
+			int compare = 1;
+			if (dbListIdx < dbListSize)
+				compare = dbList.get(dbListIdx).compareTo(importEvent);
+
+			if (compare == 0) {
+				// All data matches
+				dbListIdx++;
+
+			} else if (compare == 1) {
+				// Insert new event into DB
+				addCourseToSchedule(importEvent);
+
+			} else if (compare == 2) {
+				// Same record but content has changed, so update
+				updateCourse(importEvent);
+				dbListIdx++;
+
+			} else {
+				// Extra event(s) in database, so delete them
+				while (compare < 0) {
+					removeCourseFromSchedule(dbList.get(dbListIdx));
+					dbListIdx++;
+
+					compare = 1;
+					if (dbListIdx < dbListSize)
+						// Continue to compare until dbList catches up
+						compare = dbList.get(dbListIdx).compareTo(importEvent);
+				}
+				// One final check to get in sync with importEvent
+				if (compare == 0) {
+					// Match, so continue incrementing through list
+					dbListIdx++;
+
+				} else if (compare == 1) {
+					// Insert new event into DB
+					addCourseToSchedule(importEvent);
+
+				} else if (compare == 2) {
+					// Same record but content has changed, so update
+					updateCourse(importEvent);
+					dbListIdx++;
+				}
+			}
+		}
+
+		// Delete extra entries at end of dbList
+		while (dbListIdx < dbListSize) {
+			removeCourseFromSchedule(dbList.get(dbListIdx));
+			dbListIdx++;
+		}
+	}
+
+	public ArrayList<CoursesModel> getCourseSchedule(String sortOrder) {
+		ArrayList<CoursesModel> eventList = new ArrayList<CoursesModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get course data from the DB
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Courses ORDER BY " + sortOrder + " ASC;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					eventList.add(new CoursesModel(result.getInt("CourseID"), result.getString("EventName"),
+							result.getInt("Enrolled")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.COURSES_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return eventList;
+	}
+
+	private void addCourseToSchedule(CoursesModel courseEvent) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement addCourseStmt = dbConnection
+						.prepareStatement("INSERT INTO Courses (CourseID, EventName, Enrolled) " + "VALUES (?, ?, ?);");
+
+				int col = 1;
+				addCourseStmt.setInt(col++, courseEvent.getScheduleID());
+				addCourseStmt.setString(col++, courseEvent.getEventName());
+				addCourseStmt.setInt(col, courseEvent.getEnrollment());
+
+				addCourseStmt.executeUpdate();
+				addCourseStmt.close();
+
+				insertLogData(LogDataModel.ADD_COURSES_TO_SCHEDULE, new StudentNameModel("", "", false), 0,
+						": " + courseEvent.getEventName());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLIntegrityConstraintViolationException e2) {
+				// Schedule data already exists, do nothing
+				break;
+
+			} catch (SQLException e3) {
+				insertLogData(LogDataModel.COURSES_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e3.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void updateCourse(CoursesModel course) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateCourseStmt = dbConnection
+						.prepareStatement("UPDATE Courses SET EventName=?, Enrolled=? WHERE CourseID=?;");
+
+				int col = 1;
+				updateCourseStmt.setString(col++, course.getEventName());
+				updateCourseStmt.setInt(col++, course.getEnrollment());
+				updateCourseStmt.setInt(col, course.getScheduleID());
+
+				updateCourseStmt.executeUpdate();
+				updateCourseStmt.close();
+
+				insertLogData(LogDataModel.UPDATE_COURSES_INFO, new StudentNameModel("", "", true), 0,
+						": " + course.getEventName());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				StudentNameModel studentModel = new StudentNameModel("", "", true);
+				insertLogData(LogDataModel.COURSES_DB_ERROR, studentModel, 0,
+						" for " + course.getEventName() + ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void removeCourseFromSchedule(CoursesModel course) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement deleteClassStmt = dbConnection
+						.prepareStatement("DELETE FROM Courses WHERE CourseID=?;");
+
+				// Delete class from schedule
+				deleteClassStmt.setInt(1, course.getScheduleID());
+				deleteClassStmt.executeUpdate();
+				deleteClassStmt.close();
+
+				insertLogData(LogDataModel.REMOVE_COURSES_FROM_SCHEDULE, new StudentNameModel("", "", false), 0,
+						": " + course.getEventName());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.COURSES_DB_ERROR, null, 0, ": " + e2.getMessage());
 				break;
 			}
 		}

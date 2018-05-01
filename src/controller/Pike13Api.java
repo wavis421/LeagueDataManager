@@ -28,6 +28,7 @@ import model.StaffMemberModel;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
+import model.CoursesModel;
 
 public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
@@ -126,6 +127,8 @@ public class Pike13Api {
 	private final int ENROLL_EVENT_NAME_IDX = 3;
 	private final int ENROLL_VISIT_ID_IDX = 4;
 	private final int ENROLL_TEACHER_NAMES_IDX = 5;
+	private final int ENROLL_SERVICE_CATEGORY_IDX = 6;
+	private final int ENROLL_STATE_IDX = 7;
 
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
@@ -146,6 +149,11 @@ public class Pike13Api {
 	private final int SCHED_SERVICE_TIME_IDX = 1;
 	private final int SCHED_DURATION_MINS_IDX = 2;
 	private final int SCHED_WKLY_EVENT_NAME_IDX = 3;
+
+	// Indices for courses data
+	private final int COURSES_SCHEDULE_ID_IDX = 0;
+	private final int COURSES_EVENT_NAME_IDX = 1;
+	private final int COURSE_ENROLLMENT_IDX = 2;
 
 	// Indices for transaction data
 	private final int TRANS_PLAN_ID_IDX = 0;
@@ -273,7 +281,8 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\","
+			+ "            \"service_category\",\"state\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -308,7 +317,8 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\"],"
+			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\","
+			+ "            \"service_category\",\"state\"],"
 			// Page limit max is 10 (only need first entry)
 			+ "\"page\":{\"limit\":500},"
 			// Filter on client ID and service name
@@ -327,6 +337,20 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"starts\",\"service_category\",\"Class\"],"
 			+ "                     [\"nemp\",\"event_name\"]]]}}}";
+
+	// Get workshop and summer slam data
+	private final String getCoursesData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"event_id\",\"event_name\",\"enrollment_count\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
+			// Filter on 'this week' and 'starts with Class' and event name not null
+			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                     [\"starts\",\"service_type\",\"course\"],"
+			+ "                     [\"or\",[[\"starts\",\"event_name\",\"Summer Slam\"],"
+			+ "                              [\"starts\",\"event_name\",\"Intro to Java Workshop\"]]]]]}}}";
 
 	// Get invoice data
 	private final String getInvoiceData = "{\"data\":{\"type\":\"queries\","
@@ -637,7 +661,9 @@ public class Pike13Api {
 					eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
 							eventArray.getInt(ENROLL_VISIT_ID_IDX),
 							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName,
-							stripQuotes(eventArray.get(ENROLL_TEACHER_NAMES_IDX).toString())));
+							stripQuotes(eventArray.get(ENROLL_TEACHER_NAMES_IDX).toString()),
+							stripQuotes(eventArray.get(ENROLL_SERVICE_CATEGORY_IDX).toString()),
+							stripQuotes(eventArray.get(ENROLL_STATE_IDX).toString())));
 				}
 			}
 
@@ -784,6 +810,40 @@ public class Pike13Api {
 
 		conn.disconnect();
 		return scheduleList;
+	}
+
+	public ArrayList<CoursesModel> getCourses(String startDate, String endDate) {
+		ArrayList<CoursesModel> coursesList = new ArrayList<CoursesModel>();
+
+		// Insert start date and end date into schedule command string.
+		String coursesString = getCoursesData.replaceFirst("0000-00-00", startDate);
+		coursesString = coursesString.replaceFirst("1111-11-11", endDate);
+
+		// Get URL connection with authorization and send query
+		HttpURLConnection conn = sendQueryToUrl("event_occurrences", coursesString);
+		if (conn == null)
+			return coursesList;
+
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
+			conn.disconnect();
+			return coursesList;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each event in the schedule
+			JsonArray coursesArray = (JsonArray) jsonArray.get(i);
+
+			// Add event to list
+			coursesList.add(new CoursesModel(coursesArray.getInt(COURSES_SCHEDULE_ID_IDX), 
+					stripQuotes(coursesArray.get(COURSES_EVENT_NAME_IDX).toString()), 
+					coursesArray.getInt(COURSE_ENROLLMENT_IDX)));
+		}
+
+		conn.disconnect();
+		return coursesList;
 	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {

@@ -5,17 +5,15 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import org.joda.time.DateTime;
-
 import model.AttendanceEventModel;
 import model.AttendanceModel;
+import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
-import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
 
@@ -103,6 +101,10 @@ public class Controller {
 
 	public ArrayList<ScheduleModel> getClassSchedule() {
 		return sqlDb.getClassSchedule();
+	}
+
+	public ArrayList<CoursesModel> getCourseSchedule() {
+		return sqlDb.getCourseSchedule("EventName");
 	}
 
 	/*

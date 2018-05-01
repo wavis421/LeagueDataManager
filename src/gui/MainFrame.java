@@ -41,6 +41,7 @@ import org.joda.time.DateTime;
 
 import controller.Controller;
 import model.AttendanceModel;
+import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
 import model.InvoiceModel;
@@ -57,8 +58,10 @@ public class MainFrame {
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
-	private static final String SCHEDULE_TITLE = "Class Schedule";
+	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
+	private static final String COURSE_TITLE = "Intro to Java Workshops and Summer Slam Schedule";
 	private static final String INVOICE_TITLE = "Course Invoices for ";
+	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
 
 	private static final int STUDENT_TABLE_ALL = 0;
@@ -81,6 +84,7 @@ public class MainFrame {
 	private ScheduleTable scheduleTable;
 	private InvoiceTable invoiceTable;
 	private GithubTable githubTable;
+	private CoursesTable coursesTable;
 	private JTable activeTable;
 	private String activeTableHeader;
 	private String githubToken, pike13Token;
@@ -141,6 +145,7 @@ public class MainFrame {
 		scheduleTable = new ScheduleTable(tablePanel);
 		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
 		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
+		coursesTable = new CoursesTable(tablePanel, new ArrayList<CoursesModel>());
 		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
 
@@ -304,7 +309,7 @@ public class MainFrame {
 			public void actionPerformed(ActionEvent e) {
 				removeDataFromTables();
 				String sinceDate = (new DateTime()).minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
-				headerLabel.setText("Students with no Github comments since " + sinceDate);
+				headerLabel.setText(GITHUB_TITLE + sinceDate);
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
 
@@ -349,13 +354,20 @@ public class MainFrame {
 
 	private void createScheduleMenu(JMenu scheduleMenu) {
 		// Create sub-menu for the Schedule menu
-		JMenuItem scheduleViewMenu = new JMenuItem("View Class Schedule ");
+		JMenuItem scheduleViewMenu = new JMenuItem("View Weekly Class Schedule ");
+		JMenuItem courseViewMenu = new JMenuItem("View Workshop and Summer Slam Schedule ");
 		scheduleMenu.add(scheduleViewMenu);
+		scheduleMenu.add(courseViewMenu);
 
 		// Set up listeners for Schedule menu
 		scheduleViewMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshScheduleTable();
+			}
+		});
+		courseViewMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshCoursesTable();
 			}
 		});
 	}
@@ -475,6 +487,7 @@ public class MainFrame {
 		studentTable.setTableListener(listener);
 		logTable.setTableListener(listener);
 		githubTable.setTableListener(listener);
+		coursesTable.setTableListener(listener);
 	}
 
 	private void refreshStudentTable(int tableType, int clientID) {
@@ -535,6 +548,18 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
+	private void refreshCoursesTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add log data table and header
+		coursesTable.setData(tablePanel, controller.getCourseSchedule());
+		headerLabel.setText(COURSE_TITLE);
+
+		activeTable = coursesTable.getTable();
+		activeTableHeader = headerLabel.getText();
+	}
+	
 	private void refreshInvoiceTable(DateRangeEvent dateRange) {
 		// Remove data being displayed
 		removeDataFromTables();
@@ -555,6 +580,7 @@ public class MainFrame {
 		scheduleTable.removeData();
 		invoiceTable.removeData();
 		githubTable.removeData();
+		coursesTable.removeData();
 	}
 
 	private String getPike13TokenFromFile() {

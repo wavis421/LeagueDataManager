@@ -78,5 +78,18 @@ BEGIN
 
 	) ENGINE=InnoDB;
 	
+	CREATE TABLE IF NOT EXISTS Courses (
+		CourseID int(11) NOT NULL,
+		PRIMARY KEY (CourseID),
+		
+		# Course data
+		EventName varchar(100) DEFAULT NULL,
+		Enrolled int(11) DEFAULT 0,
+
+		# Course ID is unique
+		UNIQUE KEY(CourseID)
+
+	) ENGINE=InnoDB;
+	
 END$$
 DELIMITER ;
