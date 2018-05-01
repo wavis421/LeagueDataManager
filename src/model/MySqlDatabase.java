@@ -897,7 +897,8 @@ public class MySqlDatabase {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
+							result.getString("ServiceCategory"), result.getString("State")));
 				}
 
 				result.close();
@@ -949,7 +950,8 @@ public class MySqlDatabase {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
+							result.getString("ServiceCategory"), result.getString("State")));
 				}
 
 				result.close();
@@ -992,7 +994,8 @@ public class MySqlDatabase {
 					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(result.getInt("ClientID"),
 							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true)));
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
+							result.getString("ServiceCategory"), result.getString("State")));
 
 				} else {
 					lastClientID = thisClientID;
@@ -1014,7 +1017,8 @@ public class MySqlDatabase {
 									result.getDate("ServiceDate"), result.getString("EventName"),
 									result.getString("GithubName"), result.getString("RepoName"),
 									result.getString("Comments"), new StudentNameModel(result.getString("FirstName"),
-											result.getString("LastName"), true)));
+											result.getString("LastName"), true),
+									result.getString("ServiceCategory"), result.getString("State")));
 					attendanceList.add(lastAttendanceModel);
 				}
 			}

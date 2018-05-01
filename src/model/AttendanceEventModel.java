@@ -11,12 +11,14 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private StudentNameModel nameModel;
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String eventName, String githubName,
-			String repoName, String githubComments, StudentNameModel nameModel) {
+			String repoName, String githubComments, StudentNameModel nameModel,  String serviceCategory, String state) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
 		this.eventName = eventName;
 		this.teacherNames = "";
+		this.serviceCategory = serviceCategory;
+		this.state = state;
 		this.githubName = githubName;
 		if (githubName != null)
 			this.githubName = githubName.trim();
@@ -116,10 +118,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			else if (comp > 0)
 				return -1;
 
-			if (this.getState().equals(other.getState()))
-				return 0;
-			else
+			if (other.getState() == null || !other.getState().equals(this.getState()))
 				return 2;
+			else
+				return 0;
 		}
 	}
 }
