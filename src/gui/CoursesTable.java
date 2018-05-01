@@ -111,6 +111,7 @@ public class CoursesTable extends JPanel {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				CoursesTableModel model = (CoursesTableModel) table.getModel();
 				String courseName = (String) model.getValueAt(row, CoursesTableModel.COURSE_NAME_COLUMN);
+				courseName = courseName.trim();
 
 				// Display attendance table for selected class
 				table.clearSelection();
