@@ -942,7 +942,7 @@ public class Pike13Api {
 				if (transactionArray.getInt(TRANS_PLAN_ID_IDX) == invoice.getPlanID()) {
 					// Plan ID match, update transaction ID and payment method
 					invoice.setPayMethod(stripQuotes(transactionArray.get(TRANS_PAYMENT_METHOD_IDX).toString()));
-					invoice.setTransactionID(transactionArray.getString(TRANS_TRANSACTION_ID_IDX).toString());
+					invoice.setTransactionID(stripQuotes(transactionArray.get(TRANS_TRANSACTION_ID_IDX).toString()));
 					break;
 				}
 			}
