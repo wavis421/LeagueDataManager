@@ -84,9 +84,11 @@ public class LogDataModel {
 	public static final int REMOVE_COURSES_FROM_SCHEDULE = 73;
 	public static final int UPDATE_COURSES_INFO = 74;
 	public static final int UPDATE_ATTENDANCE_STATE = 75;
+	public static final int STARTING_COURSE_ATTENDANCE_IMPORT = 76;
+	public static final int COURSE_ATTENDANCE_IMPORT_COMPLETE = 77;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 76;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 78;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -132,7 +134,8 @@ public class LogDataModel {
 
 			// 70
 			"*** COURSES IMPORT COMPLETE", "Courses Database error", "Add courses to schedule",
-			"Remove Courses from schedule", "Update Courses info", "Update Attendance state" };
+			"Remove Courses from schedule", "Update Courses info", "Update Attendance state", "*** BEGIN COURSE ATTENDANCE IMPORT",
+			"*** COURSE ATTENDANCE IMPORT COMPLETE" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

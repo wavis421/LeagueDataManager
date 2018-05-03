@@ -299,6 +299,13 @@ public class Pike13Api {
 			+ "                     [\"starts\",\"service_category\",\"Class\"],"
 			+ "                     [\"eq\",\"full_name\",\"NNNNNN\"]]]}}}";
 
+	private final String getCourseEnrollmentStudentTracker2 = "},"
+			// Filter on course, state completed or enrolled and since date
+			+ "\"filter\":[\"and\",[[\"or\",[[\"eq\",\"state\",\"completed\"],"
+			+ "                              [\"eq\",\"state\",\"registered\"]]],"
+			+ "                     [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                     [\"starts\",\"service_category\",\"class jslam\"]]]}}}";
+
 	private final String getEnrollmentSalesForce = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
@@ -1015,6 +1022,15 @@ public class Pike13Api {
 					new StudentNameModel(model.getStudentName(), "", true), model.getClientID(),
 					" for '" + model.getItemName() + "'");
 		}
+	}
+
+	public ArrayList<AttendanceEventModel> getCourseAttendance(String startDate, String endDate) {
+		// Insert start date and end date into enrollment command string
+		String enroll2 = getCourseEnrollmentStudentTracker2.replaceFirst("0000-00-00", startDate);
+		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
+
+		// Get attendance for all students
+		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);
 	}
 
 	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
