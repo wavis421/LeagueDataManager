@@ -195,7 +195,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE NOT isInMasterDb AND "
-								+ "(SELECT COUNT(*) FROM Attendance WHERE Attendance.ClientID = Students.ClientID AND State != 'registered') = 0;");
+								+ "(SELECT COUNT(*) FROM Attendance WHERE Attendance.ClientID = Students.ClientID AND State = 'completed') = 0;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -714,7 +714,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State != 'registered' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "AND State = 'completed' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 				getAttendanceList(attendanceList, result, false);
 				Collections.sort(attendanceList);
@@ -746,7 +746,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State != 'registered' AND EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "AND State = 'completed' AND EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
@@ -779,7 +779,7 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND State != 'registered' "
+						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND State = 'completed' "
 								+ "AND Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
@@ -814,7 +814,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State != 'registered' AND ServiceDate > ?  "
+								+ "AND State = 'completed' AND ServiceDate > ?  "
 								+ "ORDER BY Attendance.ClientID, ServiceDate ASC, EventName;");
 				selectStmt.setString(1, sinceDate);
 
@@ -890,7 +890,7 @@ public class MySqlDatabase {
 				// Get attendance data from the DB for all students that have a github user name
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
-								+ "AND State != 'registered' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "AND State = 'completed' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -941,7 +941,7 @@ public class MySqlDatabase {
 				// and the comment field is blank
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND "
-								+ clientIdFilter + " AND State != 'registered' "
+								+ clientIdFilter + " AND State = 'completed' "
 								+ "AND GithubName IS NOT NULL AND ServiceDate >= ? ORDER BY GithubName;");
 				selectStmt.setDate(1, java.sql.Date.valueOf(startDate));
 				ResultSet result = selectStmt.executeQuery();
@@ -1040,13 +1040,13 @@ public class MySqlDatabase {
 				if (filter < NUM_CLASS_LEVELS) {
 					selectStmt = dbConnection.prepareStatement(
 							"SELECT EventName FROM Attendance WHERE EventName != '' AND LEFT(EventName,2) = ? "
-									+ "AND State != 'registered' GROUP BY EventName ORDER BY EventName;");
+									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, String.valueOf(filter) + "@");
 				} else {
 					selectStmt = dbConnection
 							.prepareStatement("SELECT EventName FROM Attendance WHERE EventName != '' AND "
 									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
-									+ "AND State != 'registered' GROUP BY EventName ORDER BY EventName;");
+									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, "L@");
 					selectStmt.setString(2, "E@");
 				}
