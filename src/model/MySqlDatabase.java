@@ -1144,8 +1144,6 @@ public class MySqlDatabase {
 						dbListIdx++;
 
 					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
-						System.out.println("Attendance: " + compare + ", " + importEvent.getServiceCategory()
-								+ ", " + importEvent.getState());
 						if (compare == 1)
 							addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
 									importEvent.getServiceDateString(), importEvent.getEventName(),
