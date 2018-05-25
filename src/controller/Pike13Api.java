@@ -317,8 +317,12 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":500";
 
 	private final String getEnrollmentSalesForce2 = "},"
-			// Filter on since date
-			+ "\"filter\":[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
+			// Filter on between start/end dates OR all future summer slam & workshops
+			+ "\"filter\":[\"or\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                    [\"and\",[[\"gt\",\"service_date\",\"2222-22-22\"],"
+			+ "                              [\"starts\",\"service_category\",\"class jslam\"]]],"
+			+ "                    [\"and\",[[\"gt\",\"service_date\",\"2222-22-22\"],"
+			+ "                              [\"starts\",\"service_category\",\"works\"]]]]]}}}";
 
 	private final String getEnrollmentDataByService = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
@@ -693,6 +697,7 @@ public class Pike13Api {
 		// Insert start date and end date into enrollment command string
 		String enroll2 = getEnrollmentSalesForce2.replaceFirst("0000-00-00", startDate);
 		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
+		enroll2 = enroll2.replace("2222-22-22", startDate);
 
 		do {
 			// Get URL connection and send the query; add page info if necessary
