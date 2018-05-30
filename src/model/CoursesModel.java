@@ -6,7 +6,7 @@ public class CoursesModel implements Comparable<CoursesModel> {
 
 	public CoursesModel(int scheduleID, String eventName, int enrollment) {
 		this.scheduleID = scheduleID;
-		this.eventName = eventName;
+		this.eventName = eventName.trim();
 		this.enrollment = enrollment;
 	}
 

@@ -1138,21 +1138,24 @@ public class MySqlDatabase {
 				}
 
 				// Caught up, now compare again and process
-				if (dbListIdx < dbListSize) {
+				compare = 1;
+				if (dbListIdx < dbListSize)
 					compare = dbList.get(dbListIdx).compareTo(importEvent);
-					if (compare == 0) {
-						dbListIdx++;
 
-					} else if (getClientIdxInStudentList(studentList, importEvent.getClientID()) >= 0) {
+				if (compare == 0) {
+					dbListIdx++;
+
+				} else {
+					int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
+					if (idx >= 0) {
 						if (compare == 1)
 							addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
 									importEvent.getServiceDateString(), importEvent.getEventName(),
-									dbList.get(dbListIdx).getStudentNameModel(), teachers,
-									importEvent.getServiceCategory(), importEvent.getState());
-						else // state field has changed, so update
-							updateAttendanceState(importEvent.getClientID(),
-									dbList.get(dbListIdx).getStudentNameModel(), importEvent.getServiceDateString(),
+									studentList.get(idx).getNameModel(), teachers, importEvent.getServiceCategory(),
 									importEvent.getState());
+						else // state field has changed, so update
+							updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
+									importEvent.getServiceDateString(), importEvent.getState());
 
 					} else
 						insertLogData(LogDataModel.STUDENT_NOT_FOUND,

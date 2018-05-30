@@ -14,12 +14,14 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 public class MySqlConnection {
 	// Constants
 	private static final int REMOTE_PORT = 3306;
-	private static final String REMOTE_HOST = "student-tracker-db.curyeogxssy9.us-west-1.rds.amazonaws.com";
+	private static final String REMOTE_HOST = "student-tracker-db.curyeogxssy9.us-west-1.rds.amazonaws.com"; // OLD
+	//private static final String REMOTE_HOST = "league-trackr-db.curyeogxssy9.us-west-1.rds.amazonaws.com"; // NEW
 	private static final String SERVER = "localhost";
 	private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
 
 	// SSH/Database connect constants
-	private static final String SSH_HOST = "ec2-54-67-22-241.us-west-1.compute.amazonaws.com";
+	private static final String SSH_HOST = "ec2-54-67-22-241.us-west-1.compute.amazonaws.com"; // OLD
+	//private static final String SSH_HOST = "ec2-13-57-176-84.us-west-1.compute.amazonaws.com"; // NEW
 	private static final String SSH_USER = "ec2-user";
 	private static final String SSH_KEY_FILE_PATH = "./student_tracker_key.pem";
 	private static final String DATABASE = "StudentTracker";
