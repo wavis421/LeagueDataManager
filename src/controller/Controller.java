@@ -87,6 +87,10 @@ public class Controller {
 		return sqlDb.getAttendanceByClassName(className);
 	}
 
+	public ArrayList<AttendanceModel> getAttendanceByCourseName(String courseName) {
+		return sqlDb.getAttendanceByCourseName(courseName);
+	}
+
 	public ArrayList<AttendanceModel> getAttendanceByClientID(String clientID) {
 		return sqlDb.getAttendanceByClientID(clientID);
 	}

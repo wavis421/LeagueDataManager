@@ -387,7 +387,7 @@ public class AttendanceTable extends JPanel {
 			AttendanceEventModel attendance = (AttendanceEventModel) inputData.get(row);
 
 			if (col == EVENT_TABLE_DATE_COLUMN)
-				return attendance.getServiceDate().toString();
+				return attendance.getServiceDateString();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
 				return attendance.getEventName();
 			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {

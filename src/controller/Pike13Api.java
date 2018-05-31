@@ -239,10 +239,11 @@ public class Pike13Api {
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			+ "\"sort\":[\"person_id+\"],"
-			// Filter on Dependents NULL and future/completed visits both > 0
+			// Filter on Dependents NULL and either has future visits or recent completed visits
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"emp\",\"dependent_names\"],"
-			+ "                     [\"eq\",\"has_membership\",\"t\"]]]}}}";
+			+ "                     [\"or\",[[\"gt\",\"future_visits\",0],"
+			+ "                              [\"gt\",\"last_visit_date\",\"0000-00-00\"]]]]]}}}";
 
 	private final String getClientDataForSF = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -287,10 +288,14 @@ public class Pike13Api {
 			+ "\"page\":{\"limit\":500";
 
 	private final String getEnrollmentStudentTracker2 = "},"
-			// Filter on State completed and since date
-			+ "\"filter\":[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "                     [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"starts\",\"service_category\",\"Class\"]]]}}}";
+			// Filter on State completed and since date OR open lab class for this week
+			+ "\"filter\":[\"or\",[[\"and\",[[\"eq\",\"state\",\"completed\"],"
+			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                              [\"starts\",\"service_category\",\"Class\"]]],"
+			+ "                    [\"and\",[[\"eq\",\"state\",\"registered\"],"
+			+ "                              [\"btw\",\"service_date\",[\"2222-22-22\",\"3333-33-33\"]],"
+			+ "                              [\"contains\",\"service_category\",\"jlab\"]]]]]}}}";
+	
 
 	private final String getEnrollmentStudentTracker2WithName = "},"
 			// Filter on State completed, since date and student name
@@ -304,7 +309,8 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"or\",[[\"eq\",\"state\",\"completed\"],"
 			+ "                              [\"eq\",\"state\",\"registered\"]]],"
 			+ "                     [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"starts\",\"service_category\",\"class jslam\"]]]}}}";
+			+ "                     [\"starts\",\"service_type\",\"course\"],"
+			+ "                     [\"nemp\",\"event_name\"]]]}}}";
 
 	private final String getEnrollmentSalesForce = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit
@@ -466,8 +472,12 @@ public class Pike13Api {
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
+		// Insert since date for completed visit (in last 30 days)
+		String clients = getClientData.replaceFirst("0000-00-00", 
+				(new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))).minusDays(30).toString("yyyy-MM-dd"));
+		
 		// Get URL connection with authorization and send the query
-		HttpURLConnection conn = sendQueryToUrl("clients", getClientData);
+		HttpURLConnection conn = sendQueryToUrl("clients", clients);
 		if (conn == null)
 			return studentList;
 
@@ -627,9 +637,11 @@ public class Pike13Api {
 
 	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {
 		// Insert start date and end date into enrollment command string
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		String enroll2 = getEnrollmentStudentTracker2.replaceFirst("0000-00-00", startDate);
-		enroll2 = enroll2.replaceFirst("1111-11-11",
-				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"));
+		enroll2 = enroll2.replaceFirst("1111-11-11", today.toString("yyyy-MM-dd"));
+		enroll2 = enroll2.replaceFirst("2222-22-22", today.toString("yyyy-MM-dd"));
+		enroll2 = enroll2.replaceFirst("3333-33-33", today.plusDays(6).toString("yyyy-MM-dd"));
 
 		// Get attendance for all students
 		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);

@@ -39,7 +39,7 @@ BEGIN
 		
 		# Attendance data
 		ServiceDate date DEFAULT NULL,
-		EventName varchar(50) DEFAULT NULL,
+		EventName varchar(100) DEFAULT NULL,
 		RepoName varchar(50) DEFAULT NULL,
 		Comments varchar(150) DEFAULT NULL,
 		TeacherNames varchar(100) DEFAULT NULL,

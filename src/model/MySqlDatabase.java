@@ -772,6 +772,56 @@ public class MySqlDatabase {
 		return attendanceList;
 	}
 
+	public ArrayList<AttendanceModel> getAttendanceByCourseName(String courseName) {
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
+		ArrayList<AttendanceModel> listByClient;
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT Students.ClientID, Students.FirstName, Students.LastName, Attendance.State, "
+								+ "Attendance.ServiceCategory, Attendance.State FROM Attendance, Students "
+								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
+								+ "GROUP BY Students.ClientID;");
+				selectStmt.setString(1, courseName);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					Integer thisClientID = result.getInt("Students.ClientID");
+					StudentNameModel name = new StudentNameModel(result.getString("Students.FirstName"),
+							result.getString("Students.LastName"), true);
+
+					listByClient = getAttendanceByClientID(thisClientID.toString());
+					if (listByClient.size() == 0)
+						attendanceList.add(new AttendanceModel(thisClientID, name, "",
+								new AttendanceEventModel(thisClientID, 0, null, "", "", "", "", name,
+										result.getString("ServiceCategory"), result.getString("State"))));
+					else
+						attendanceList.addAll(listByClient);
+				}
+				Collections.sort(attendanceList);
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return attendanceList;
+	}
+
 	public ArrayList<AttendanceModel> getAttendanceByClientID(String clientID) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 
@@ -1400,8 +1450,11 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
+					String className = result.getString("ClassName");
+					if (className.contains("Garden Club Website"))
+						className = className.substring(0, className.indexOf("Website") + 7);
 					eventList.add(new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
-							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName")));
+							result.getString("StartTime"), result.getInt("Duration"), className));
 				}
 
 				result.close();

@@ -115,7 +115,7 @@ public class CoursesTable extends JPanel {
 
 				// Display attendance table for selected class
 				table.clearSelection();
-				courseListener.viewAttendanceByClass(courseName);
+				courseListener.viewAttendanceByCourse(courseName);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {

@@ -59,7 +59,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
-	private static final String COURSE_TITLE = "Intro to Java Workshops and Summer Slam Schedule";
+	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
 	private static final String INVOICE_TITLE = "Course Invoices for ";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
@@ -308,7 +308,7 @@ public class MainFrame {
 		studentNoRecentGitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				removeDataFromTables();
-				String sinceDate = (new DateTime()).minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
+				String sinceDate = (new DateTime()).withZone(DateTimeZone.forID("America/Los_Angeles").minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
 				headerLabel.setText(GITHUB_TITLE + sinceDate);
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
@@ -471,6 +471,13 @@ public class MainFrame {
 			public void viewAttendanceByClass(String className) {
 				// Display class by class name
 				refreshAttendanceTable(controller.getAttendanceByClassName(className), " for '" + className + "'",
+						false);
+			}
+
+			@Override
+			public void viewAttendanceByCourse(String courseName) {
+				// Get attendance by course name
+				refreshAttendanceTable(controller.getAttendanceByCourseName(courseName), " for '" + courseName + "'",
 						false);
 			}
 
