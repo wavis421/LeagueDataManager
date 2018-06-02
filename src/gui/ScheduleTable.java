@@ -22,6 +22,9 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import model.ScheduleModel;
 
 public class ScheduleTable extends JPanel {
@@ -55,7 +58,7 @@ public class ScheduleTable extends JPanel {
 
 		for (int i = 0; i < DAYS_IN_WEEK; i++) {
 			dowScheduleModelList.add(new ArrayList<ScheduleModel>());
-			dowScheduleTableModel.add(new ScheduleTableModel(dowScheduleModelList.get(i)));
+			dowScheduleTableModel.add(new ScheduleTableModel(dowScheduleModelList.get(i), i));
 			dowTableList.add(new JTable(dowScheduleTableModel.get(i)));
 			dowScrollList.add(createTablePanel(dowTableList.get(i), dowScheduleTableModel.get(i)));
 			dowPanelList.add(new JPanel());
@@ -169,7 +172,16 @@ public class ScheduleTable extends JPanel {
 
 				// Display attendance table for selected class
 				table.clearSelection();
-				scheduleListener.viewAttendanceByClass(className);
+
+				// Translate DOW 0-6 to 1-7 and view class by date for current week
+				DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+				int dow = model.getDow();
+				if (dow == 0)
+					dow = 7;
+				DateTime date = today.withDayOfWeek(dow);
+				if (date.toString("yyyy-MM-dd").compareTo(today.toString("yyyy-MM-dd")) < 0)
+					date = date.plusWeeks(1);
+				scheduleListener.viewAttendanceByClass(className, date.toString("yyyy-MM-dd"));
 			}
 		});
 

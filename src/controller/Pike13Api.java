@@ -243,7 +243,8 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"emp\",\"dependent_names\"],"
 			+ "                     [\"or\",[[\"gt\",\"future_visits\",0],"
-			+ "                              [\"gt\",\"last_visit_date\",\"0000-00-00\"]]]]]}}}";
+			+ "                              [\"gt\",\"last_visit_date\",\"0000-00-00\"],"
+			+ "                              [\"eq\",\"has_membership\",\"t\"]]]]]}}}";
 
 	private final String getClientDataForSF = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -295,7 +296,6 @@ public class Pike13Api {
 			+ "                    [\"and\",[[\"eq\",\"state\",\"registered\"],"
 			+ "                              [\"btw\",\"service_date\",[\"2222-22-22\",\"3333-33-33\"]],"
 			+ "                              [\"contains\",\"service_category\",\"jlab\"]]]]]}}}";
-	
 
 	private final String getEnrollmentStudentTracker2WithName = "},"
 			// Filter on State completed, since date and student name
@@ -472,10 +472,11 @@ public class Pike13Api {
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
-		// Insert since date for completed visit (in last 30 days)
-		String clients = getClientData.replaceFirst("0000-00-00", 
-				(new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))).minusDays(30).toString("yyyy-MM-dd"));
-		
+		// Insert since date for completed visit (in last 45 days)
+		String clients = getClientData.replaceFirst("0000-00-00",
+				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).
+					minusDays(MySqlDatabase.CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd"));
+
 		// Get URL connection with authorization and send the query
 		HttpURLConnection conn = sendQueryToUrl("clients", clients);
 		if (conn == null)
@@ -504,7 +505,7 @@ public class Pike13Api {
 						stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
 						stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
 						stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
-					studentList.add(model);
+				studentList.add(model);
 			}
 		}
 
@@ -550,7 +551,7 @@ public class Pike13Api {
 
 				// Get fields for this Json array entry
 				StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_SF_ID_IDX),
-						personArray.getString(CLIENT_FIRST_NAME_IDX), 
+						personArray.getString(CLIENT_FIRST_NAME_IDX),
 						personArray.getString(CLIENT_LAST_NAME_IDX),
 						stripQuotes(personArray.get(CLIENT_GENDER_IDX).toString()),
 						stripQuotes(personArray.get(CLIENT_BIRTHDATE_IDX).toString()),
@@ -859,8 +860,8 @@ public class Pike13Api {
 			JsonArray coursesArray = (JsonArray) jsonArray.get(i);
 
 			// Add event to list
-			coursesList.add(new CoursesModel(coursesArray.getInt(COURSES_SCHEDULE_ID_IDX), 
-					stripQuotes(coursesArray.get(COURSES_EVENT_NAME_IDX).toString()), 
+			coursesList.add(new CoursesModel(coursesArray.getInt(COURSES_SCHEDULE_ID_IDX),
+					stripQuotes(coursesArray.get(COURSES_EVENT_NAME_IDX).toString()),
 					coursesArray.getInt(COURSE_ENROLLMENT_IDX)));
 		}
 
@@ -1228,7 +1229,7 @@ public class Pike13Api {
 			for (int i = 0; i < 2; i++) {
 				// Get URL connection with authorization
 				HttpURLConnection conn = connectUrl(connName);
-				
+
 				// Send the query
 				OutputStream outputStream = conn.getOutputStream();
 				outputStream.write(getCommand.getBytes("UTF-8"));

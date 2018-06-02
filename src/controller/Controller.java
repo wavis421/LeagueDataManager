@@ -95,6 +95,10 @@ public class Controller {
 		return sqlDb.getAttendanceByClientID(clientID);
 	}
 
+	public ArrayList<AttendanceModel> getAttendanceByClassByDate(String className, String day) {
+		return sqlDb.getAttendanceByClassByDate(className, day);
+	}
+
 	public ArrayList<StudentNameModel> getAllStudentNames() {
 		return sqlDb.getAllStudentNames();
 	}

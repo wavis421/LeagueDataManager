@@ -10,34 +10,19 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 
-	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String eventName, String githubName,
+	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String event, String githubName,
 			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
 
-		// Parse long event names
-		int idx = eventName.indexOf(':');
-		if (idx > 0)
-			eventName = eventName.substring(0, idx);
-		if (eventName.contains("Summer Slam"))
-			this.eventName = "Summer Slam";
-		else if (eventName.contains("iARoC"))
-			this.eventName = "iARoC";
-		else if (eventName.contains("Drone Competition"))
-			this.eventName = "Drone Competition";
-		else if (eventName.contains("Electrical Engineering"))
-			this.eventName = "Electrical Engineering";
-		else if (eventName.contains("Hands on Hardware"))
-			this.eventName = "Hands on Hardware";
-		else if (eventName.contains("Machine Learning"))
-			this.eventName = "Machine Learning";
-		else if (eventName.contains("Intro to Java"))
-			this.eventName = "Intro to Java WShop";
-		else if (eventName.contains("Garden Club Website"))
-			this.eventName = eventName.substring(0, eventName.indexOf("Website") + 7);
-		else
-			this.eventName = eventName;
+		// Parse long event names for workshops
+		eventName = event;
+		if (eventName.contains("Intro to Java Work"))
+			eventName = "Intro to Java WShop";
+		else if (eventName.charAt(1) != '@' && eventName.charAt(2) != '@'
+				&& eventName.contains("Electrical Engineering Intro Work"))
+			eventName = "Electrical Eng WShop";
 
 		this.teacherNames = "";
 		this.serviceCategory = serviceCategory;

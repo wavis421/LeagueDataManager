@@ -48,7 +48,7 @@ public class AttendanceTable extends JPanel {
 	private TableListeners attendanceListener;
 	private int eventTableSelectedRow = -1; // table row
 	private int eventSelectedRow = -1; // row within table row
-	private String selectedClassName;
+	private String selectedClassName, selectedClassDate;
 
 	public AttendanceTable(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		this.parentTablePanel = tablePanel;
@@ -113,12 +113,22 @@ public class AttendanceTable extends JPanel {
 		mainTable.repaint();
 	}
 
-	public String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
+	private String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
 		JTable table = githubEventTableList.get(modelRow);
 		int eventRow = getEventRow(selectedRow, yPos);
 
 		if (eventRow > -1) {
 			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_CLASS_NAME_COLUMN);
+		} else
+			return null;
+	}
+
+	private String getClassDateByRow(int selectedRow, int modelRow, int yPos) {
+		JTable table = githubEventTableList.get(modelRow);
+		int eventRow = getEventRow(selectedRow, yPos);
+
+		if (eventRow > -1) {
+			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_DATE_COLUMN);
 		} else
 			return null;
 	}
@@ -177,7 +187,7 @@ public class AttendanceTable extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				// Add attendance table and header for selected class
 				mainTable.clearSelection();
-				attendanceListener.viewAttendanceByClass(selectedClassName);
+				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate);
 			}
 		});
 		showStudentInfoItem.addActionListener(new ActionListener() {
@@ -241,6 +251,7 @@ public class AttendanceTable extends JPanel {
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 						// Show students by class name
 						selectedClassName = getClassNameByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
+						selectedClassDate = getClassDateByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
 						if (selectedClassName != null) {
 							tablePopup.remove(showStudentInfoItem);
 							tablePopup.remove(showStudentAttendanceItem);

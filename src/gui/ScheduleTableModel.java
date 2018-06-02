@@ -11,10 +11,12 @@ public class ScheduleTableModel extends AbstractTableModel {
 	public static final int CLASS_NAME_COLUMN = 1;
 
 	private ArrayList<ScheduleModel> scheduleList;
+	private int dow;
 	private final String[] colNames = { " Start ", " Class Name " };
 
-	public ScheduleTableModel(ArrayList<ScheduleModel> scheduleList) {
+	public ScheduleTableModel(ArrayList<ScheduleModel> scheduleList, int dow) {
 		this.scheduleList = scheduleList;
+		this.dow = dow; // Starts Sunday (0)
 	}
 
 	public void setData(ArrayList<ScheduleModel> db) {
@@ -23,6 +25,10 @@ public class ScheduleTableModel extends AbstractTableModel {
 
 	public void removeAll() {
 		scheduleList.clear();
+	}
+
+	public int getDow() {
+		return dow;
 	}
 
 	@Override

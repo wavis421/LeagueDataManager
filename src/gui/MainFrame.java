@@ -38,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import controller.Controller;
 import model.AttendanceModel;
@@ -93,7 +94,7 @@ public class MainFrame {
 
 	// Class menu names
 	private static String[] classMenuNames = { "Level 0 ", "Level 1 ", "Level 2 ", "Level 3 ", "Level 4 ", "Level 5 ",
-			"Level 6 ", "Level 7 ", "Level 8 ", "Labs " };
+			"Level 6 ", "Level 7 ", "Level 8 ", "Level 9 ", "Labs " };
 
 	public MainFrame() {
 		frame.setTitle("League Student Tracker");
@@ -308,7 +309,8 @@ public class MainFrame {
 		studentNoRecentGitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				removeDataFromTables();
-				String sinceDate = (new DateTime()).withZone(DateTimeZone.forID("America/Los_Angeles").minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
+				String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+						.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
 				headerLabel.setText(GITHUB_TITLE + sinceDate);
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
@@ -427,7 +429,7 @@ public class MainFrame {
 	}
 
 	private void viewClassMenuListener(JMenu menu, int filter) {
-		// filter: 0 - 8 for levels 0-8, 9 for labs
+		// filter: 0 - 9 for levels 0-9, 10 for labs
 		menu.removeAll();
 
 		ArrayList<String> classList;
@@ -468,10 +470,14 @@ public class MainFrame {
 			}
 
 			@Override
-			public void viewAttendanceByClass(String className) {
+			public void viewAttendanceByClass(String className, String classDate) {
 				// Display class by class name
-				refreshAttendanceTable(controller.getAttendanceByClassName(className), " for '" + className + "'",
-						false);
+				if (className.contains("Open Lab")) {
+					refreshAttendanceTable(controller.getAttendanceByClassByDate(className, classDate),
+							" for '" + className + "' on " + classDate, false);
+				} else
+					refreshAttendanceTable(controller.getAttendanceByClassName(className), " for '" + className + "'",
+							false);
 			}
 
 			@Override
@@ -566,7 +572,7 @@ public class MainFrame {
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
 	}
-	
+
 	private void refreshInvoiceTable(DateRangeEvent dateRange) {
 		// Remove data being displayed
 		removeDataFromTables();

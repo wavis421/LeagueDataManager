@@ -29,10 +29,10 @@ public class MySqlDatabase {
 	private static final int REPO_NAME_WIDTH = 50;
 	private static final int LOG_APPEND_WIDTH = 120;
 	private static final int CLASS_NAME_WIDTH = 40;
-	private static final int NUM_CLASS_LEVELS = 9;
+	private static final int NUM_CLASS_LEVELS = 10;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
-	private static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 45;
+	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 45;
 
 	private static Connection dbConnection = null;
 	private JFrame parent;
@@ -355,11 +355,6 @@ public class MySqlDatabase {
 
 			if (importStudent.getGradYear() == 0)
 				insertLogData(LogDataModel.MISSING_GRAD_YEAR,
-						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), "");
-
-			if (importStudent.getStartDate().equals(""))
-				insertLogData(LogDataModel.MISSING_FIRST_VISIT_DATE,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), "");
 
@@ -772,6 +767,52 @@ public class MySqlDatabase {
 		return attendanceList;
 	}
 
+	public ArrayList<AttendanceModel> getAttendanceByClassByDate(String className, String date) {
+		// Special case of getAttendanceByClassName, selected for specific day
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
+		ArrayList<AttendanceModel> listByClient;
+
+		for (int i = 0; i < 2; i++) {
+			// If Database no longer connected, the exception code will re-connect
+			try {
+				// Get attendance by class and by date
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT Students.ClientID, Students.FirstName, Students.LastName, Attendance.State, "
+								+ "Attendance.ServiceCategory FROM Attendance, Students "
+								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
+								+ "AND ServiceDate=? GROUP BY Students.ClientID;");
+				selectStmt.setString(1, className);
+				selectStmt.setString(2, date);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					// Get attendance for each student in this particular open lab
+					Integer thisClientID = result.getInt("Students.ClientID");
+					listByClient = getAttendanceByClientID(thisClientID.toString());
+					attendanceList.addAll(listByClient);
+				}
+				Collections.sort(attendanceList);
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return attendanceList;
+	}
+
 	public ArrayList<AttendanceModel> getAttendanceByCourseName(String courseName) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 		ArrayList<AttendanceModel> listByClient;
@@ -781,7 +822,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT Students.ClientID, Students.FirstName, Students.LastName, Attendance.State, "
-								+ "Attendance.ServiceCategory, Attendance.State FROM Attendance, Students "
+								+ "Attendance.ServiceCategory FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -796,7 +837,7 @@ public class MySqlDatabase {
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name, "",
-								new AttendanceEventModel(thisClientID, 0, null, "", "", "", "", name,
+								new AttendanceEventModel(thisClientID, 0, null, "   ", "", "", "", name,
 										result.getString("ServiceCategory"), result.getString("State"))));
 					else
 						attendanceList.addAll(listByClient);
@@ -1087,7 +1128,7 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt;
-				if (filter < NUM_CLASS_LEVELS) {
+				if (filter < NUM_CLASS_LEVELS) { // Classes 0 through 9
 					selectStmt = dbConnection.prepareStatement(
 							"SELECT EventName FROM Attendance WHERE EventName != '' AND LEFT(EventName,2) = ? "
 									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
@@ -1095,10 +1136,13 @@ public class MySqlDatabase {
 				} else {
 					selectStmt = dbConnection
 							.prepareStatement("SELECT EventName FROM Attendance WHERE EventName != '' AND "
-									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ?) "
+									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ? OR LEFT(EventName,3) = ?"
+									+ " OR Left(EventName,3) = ?) "
 									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
 					selectStmt.setString(1, "L@");
 					selectStmt.setString(2, "E@");
+					selectStmt.setString(3, "AP@");
+					selectStmt.setString(4, "E1@");
 				}
 
 				ResultSet result = selectStmt.executeQuery();
