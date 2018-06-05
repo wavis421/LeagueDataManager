@@ -18,8 +18,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.LogDataModel;
 import model.StudentNameModel;
@@ -35,6 +37,8 @@ public class LogTable extends JPanel {
 	private JScrollPane scrollPane;
 	private TableListeners tableListener;
 
+	private TableRowSorter<LogTableModel> rowSorter;
+
 	public LogTable(JPanel tablePanel, ArrayList<LogDataModel> logList) {
 		this.tablePanel = tablePanel;
 
@@ -43,6 +47,8 @@ public class LogTable extends JPanel {
 
 		createTablePanel();
 		createLogTablePopups();
+
+		rowSorter = new TableRowSorter<LogTableModel>((LogTableModel) table.getModel());
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -84,6 +90,8 @@ public class LogTable extends JPanel {
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new LogTableRenderer());
 		table.setAutoCreateRowSorter(true);
+		table.setCellSelectionEnabled(true);
+		new TableKeystrokeHandler(table);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -143,6 +151,18 @@ public class LogTable extends JPanel {
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
+
+			public void mouseClicked(MouseEvent e) {
+				// Single row selects one cell (default), double click to get entire row
+				if (e.getClickCount() == 2) {
+					int col = table.getSelectedColumn();
+					int row = table.getSelectedRow();
+					if (row > -1 && col > -1) {
+						table.setRowSelectionInterval(row, row);
+						table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
+					}
+				}
+			}
 		});
 	}
 
@@ -153,6 +173,21 @@ public class LogTable extends JPanel {
 		table.getColumnModel().getColumn(LogTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
+	}
+
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		table.setRowSorter(rowSorter);
 	}
 
 	// TODO: share/merge this table renderer
@@ -188,8 +223,10 @@ public class LogTable extends JPanel {
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				if (column == LogTableModel.STATUS_COLUMN)
+				if (column == LogTableModel.STATUS_COLUMN) {
 					super.setHorizontalAlignment(LEFT);
+					super.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0)); // left pad
+				}
 				else
 					super.setHorizontalAlignment(CENTER);
 			}

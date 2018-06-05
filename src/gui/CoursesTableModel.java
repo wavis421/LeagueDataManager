@@ -69,7 +69,7 @@ public class CoursesTableModel extends AbstractTableModel {
 			else
 				return "";
 		case COURSE_NAME_COLUMN:
-			return "     " + course.getEventName();
+			return course.getEventName();
 		case ENROLLED_COLUMN:
 			return String.valueOf(course.getEnrollment());
 		}

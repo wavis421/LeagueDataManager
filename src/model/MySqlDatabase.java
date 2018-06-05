@@ -1249,7 +1249,8 @@ public class MySqlDatabase {
 									importEvent.getState());
 						else // state field has changed, so update
 							updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
-									importEvent.getServiceDateString(), importEvent.getState());
+									importEvent.getServiceDateString(), importEvent.getEventName(),
+									importEvent.getState());
 
 					} else
 						insertLogData(LogDataModel.STUDENT_NOT_FOUND,
@@ -1271,7 +1272,7 @@ public class MySqlDatabase {
 								importEvent.getState());
 					else // state field has changed, so update
 						updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
-								importEvent.getServiceDateString(), importEvent.getState());
+								importEvent.getServiceDateString(), importEvent.getEventName(), importEvent.getState());
 
 				} else {
 					// Student not found
@@ -1354,7 +1355,8 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String state) {
+	private void updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String eventName,
+			String state) {
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1371,7 +1373,7 @@ public class MySqlDatabase {
 				updateAttendanceStmt.close();
 
 				insertLogData(LogDataModel.UPDATE_ATTENDANCE_STATE, nameModel, clientID,
-						": " + state + " (" + serviceDate + ")");
+						" for " + eventName + ": " + state + " (" + serviceDate + ")");
 				return;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1495,8 +1497,6 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					String className = result.getString("ClassName");
-					if (className.contains("Garden Club Website"))
-						className = className.substring(0, className.indexOf("Website") + 7);
 					eventList.add(new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
 							result.getString("StartTime"), result.getInt("Duration"), className));
 				}

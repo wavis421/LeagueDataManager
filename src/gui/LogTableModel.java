@@ -69,7 +69,7 @@ public class LogTableModel extends AbstractTableModel {
 		case STUDENT_NAME_COLUMN:
 			return logData.getStudentName();
 		case STATUS_COLUMN:
-			return "  " + logData.getLogString();
+			return logData.getLogString();
 		}
 		return null;
 	}

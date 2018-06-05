@@ -2,8 +2,10 @@ package gui;
 
 import java.util.ArrayList;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import gui.AttendanceTable.EventTableModel;
 import model.AttendanceModel;
 
 public class AttendanceTableModel extends AbstractTableModel {
@@ -74,6 +76,8 @@ public class AttendanceTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		if (tableObjects == null || tableObjects.length == 0)
 			return Object.class;
+		else if (columnIndex == GITHUB_COMMENTS_COLUMN)
+			return EventTableModel.class;
 		else
 			return tableObjects[0][columnIndex].getClass();
 	}

@@ -17,8 +17,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.CoursesModel;
 
@@ -34,6 +36,8 @@ public class CoursesTable extends JPanel {
 	private TableListeners courseListener;
 	private JScrollPane scrollPane;
 
+	private TableRowSorter<CoursesTableModel> rowSorter;
+
 	public CoursesTable(JPanel tablePanel, ArrayList<CoursesModel> arrayList) {
 		this.tablePanel = tablePanel;
 
@@ -42,6 +46,8 @@ public class CoursesTable extends JPanel {
 
 		createTablePanel();
 		createCourseTablePopups();
+
+		rowSorter = new TableRowSorter<CoursesTableModel>((CoursesTableModel) table.getModel());
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -88,6 +94,8 @@ public class CoursesTable extends JPanel {
 
 		table.setDefaultRenderer(Object.class, new CourseTableRenderer());
 		table.setAutoCreateRowSorter(true);
+		table.setCellSelectionEnabled(true);
+		new TableKeystrokeHandler(table);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -126,7 +134,34 @@ public class CoursesTable extends JPanel {
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
+
+			public void mouseClicked(MouseEvent e) {
+				// Single row selects one cell (default), double click to get entire row
+				if (e.getClickCount() == 2) {
+					int col = table.getSelectedColumn();
+					int row = table.getSelectedRow();
+					if (row > -1 && col > -1) {
+						table.setRowSelectionInterval(row, row);
+						table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
+					}
+				}
+			}
 		});
+	}
+
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		table.setRowSorter(rowSorter);
 	}
 
 	public class CourseTableRenderer extends JLabel implements TableCellRenderer {
@@ -144,17 +179,19 @@ public class CoursesTable extends JPanel {
 			if (column != -1) {
 				setFont(CustomFonts.TABLE_TEXT_FONT);
 				super.setForeground(Color.black);
-				super.setBorder(BorderFactory.createEmptyBorder());
 
 				if (isSelected)
 					super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
 				else
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 
-				if (column == CoursesTableModel.COURSE_NAME_COLUMN)
+				if (column == CoursesTableModel.COURSE_NAME_COLUMN) {
+					super.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0)); // left pad
 					super.setHorizontalAlignment(LEFT);
-				else
+				} else {
+					super.setBorder(BorderFactory.createEmptyBorder());
 					super.setHorizontalAlignment(CENTER);
+				}
 			}
 			return this;
 		}

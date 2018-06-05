@@ -11,8 +11,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.InvoiceModel;
 
@@ -24,6 +26,8 @@ public class InvoiceTable extends JPanel {
 	private InvoiceTableModel invoiceTableModel;
 	private JScrollPane scrollPane;
 
+	private TableRowSorter<InvoiceTableModel> rowSorter;
+
 	public InvoiceTable(JPanel tablePanel, ArrayList<InvoiceModel> invoiceList) {
 		this.tablePanel = tablePanel;
 
@@ -31,6 +35,8 @@ public class InvoiceTable extends JPanel {
 		table = new JTable(invoiceTableModel);
 
 		createTablePanel();
+
+		rowSorter = new TableRowSorter<InvoiceTableModel>((InvoiceTableModel) table.getModel());
 	}
 
 	public JTable getTable() {
@@ -68,6 +74,8 @@ public class InvoiceTable extends JPanel {
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new InvoiceTableRenderer());
 		table.setAutoCreateRowSorter(true);
+		table.setCellSelectionEnabled(true);
+		new TableKeystrokeHandler(table);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -99,6 +107,21 @@ public class InvoiceTable extends JPanel {
 		table.getColumnModel().getColumn(InvoiceTableModel.IS_CANCELED_COLUMN).setMaxWidth(20);
 	}
 
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		table.setRowSorter(rowSorter);
+	}
+
 	public class InvoiceTableRenderer extends JLabel implements TableCellRenderer {
 		private InvoiceTableRenderer() {
 			super();
@@ -114,7 +137,10 @@ public class InvoiceTable extends JPanel {
 			if (column != -1) {
 				super.setFont(CustomFonts.TABLE_TEXT_FONT);
 				super.setForeground(Color.black);
-				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
+				if (isSelected)
+					super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
+				else
+					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 				super.setHorizontalAlignment(CENTER);
 			}
 			return this;

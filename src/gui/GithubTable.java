@@ -17,8 +17,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.GithubModel;
 
@@ -34,6 +36,8 @@ public class GithubTable extends JPanel {
 	private TableListeners githubListener;
 	private JScrollPane scrollPane;
 
+	private TableRowSorter<GithubTableModel> rowSorter;
+
 	public GithubTable(JPanel tablePanel, ArrayList<GithubModel> arrayList) {
 		this.tablePanel = tablePanel;
 
@@ -42,6 +46,8 @@ public class GithubTable extends JPanel {
 
 		createTablePanel();
 		createGithubTablePopups();
+
+		rowSorter = new TableRowSorter<GithubTableModel>((GithubTableModel) table.getModel());
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -87,6 +93,8 @@ public class GithubTable extends JPanel {
 
 		table.setDefaultRenderer(Object.class, new GithubTableRenderer());
 		table.setAutoCreateRowSorter(true);
+		table.setCellSelectionEnabled(true);
+		new TableKeystrokeHandler(table);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -140,7 +148,34 @@ public class GithubTable extends JPanel {
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
+
+			public void mouseClicked(MouseEvent e) {
+				// Single row selects one cell (default), double click to get entire row
+				if (e.getClickCount() == 2) {
+					int col = table.getSelectedColumn();
+					int row = table.getSelectedRow();
+					if (row > -1 && col > -1) {
+						table.setRowSelectionInterval(row, row);
+						table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
+					}
+				}
+			}
 		});
+	}
+
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		table.setRowSorter(rowSorter);
 	}
 
 	public class GithubTableRenderer extends JLabel implements TableCellRenderer {
@@ -162,13 +197,13 @@ public class GithubTable extends JPanel {
 
 				int modelRow = table.convertRowIndexToModel(row);
 				if (((GithubTableModel) table.getModel()).getValueByRow(modelRow).getGithubName().equals("")) {
-					// Text RED for students missing data
+					// Text ORANGE for students missing data
 					if (column == GithubTableModel.STUDENT_NAME_COLUMN)
-						super.setForeground(Color.red);
+						super.setForeground(CustomFonts.TITLE_COLOR);
 
-					// Border RED for missing github
+					// Border ORANGE for missing github
 					else if (column == GithubTableModel.GITHUB_NAME_COLUMN && (text == null || text.equals("")))
-						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.red));
+						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, CustomFonts.TITLE_COLOR));
 				}
 
 				if (isSelected)

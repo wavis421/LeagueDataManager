@@ -17,9 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.AttendanceEventModel;
 import model.AttendanceModel;
@@ -50,6 +52,8 @@ public class AttendanceTable extends JPanel {
 	private int eventSelectedRow = -1; // row within table row
 	private String selectedClassName, selectedClassDate;
 
+	private TableRowSorter<AttendanceTableModel> rowSorter;
+
 	public AttendanceTable(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		this.parentTablePanel = tablePanel;
 
@@ -64,6 +68,9 @@ public class AttendanceTable extends JPanel {
 		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList,
 				parentTablePanel.getPreferredSize().height - 70);
 		createAttendanceTablePopups();
+
+		rowSorter = new TableRowSorter<AttendanceTableModel>((AttendanceTableModel) mainTable.getModel());
+		rowSorter.setSortable(AttendanceTableModel.GITHUB_COMMENTS_COLUMN, false);
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -159,6 +166,7 @@ public class AttendanceTable extends JPanel {
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new AttendanceTableRenderer(eventList));
 		table.setAutoCreateRowSorter(true);
+		new TableKeystrokeHandler(table);
 
 		panel.setLayout(new BorderLayout());
 		JScrollPane scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -267,6 +275,7 @@ public class AttendanceTable extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2
 						&& mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
+					// Expand attendance
 					int row = mainTable.getSelectedRow();
 					if (row > -1) {
 						String clientID = (String) mainTable.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
@@ -306,6 +315,23 @@ public class AttendanceTable extends JPanel {
 		}
 	}
 
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				// Filter only on the 1st 2 columns
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText, AttendanceTableModel.CLIENT_ID_COLUMN,
+						AttendanceTableModel.STUDENT_NAME_COLUMN));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		mainTable.setRowSorter(rowSorter);
+	}
+
 	// ===== NESTED Class: Renderer for main table ===== //
 	public class AttendanceTableRenderer extends JLabel implements TableCellRenderer {
 
@@ -322,8 +348,10 @@ public class AttendanceTable extends JPanel {
 				int row, int column) {
 
 			// Set foreground/background colors
-			if (table == mainTable && ((AttendanceTableModel) mainTable.getModel()).getGithubNameByRow(row) == null)
-				super.setForeground(Color.red);
+			int modelRow = table.convertRowIndexToModel(row);
+			if (table == mainTable
+					&& ((AttendanceTableModel) mainTable.getModel()).getGithubNameByRow(modelRow) == null)
+				super.setForeground(CustomFonts.TITLE_COLOR);
 			else
 				super.setForeground(Color.black);
 
@@ -345,7 +373,7 @@ public class AttendanceTable extends JPanel {
 				if (table != mainTable && isSelected && eventSelectedRow == row)
 					super.setForeground(CustomFonts.ICON_COLOR);
 
-				super.setText((String) value);
+				super.setText(((String) value).trim());
 				return this;
 
 			} else if (value instanceof StudentNameModel) {
@@ -354,12 +382,11 @@ public class AttendanceTable extends JPanel {
 					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
 
 				StudentNameModel student = (StudentNameModel) value;
-				super.setText(student.toString());
+				super.setText(student.toString().trim());
 				return this;
 
 			} else {
 				// Github comments column
-				int modelRow = table.convertRowIndexToModel(row);
 				if (isSelected && row != eventTableSelectedRow) {
 					// Selecting a new row; remove previous selection
 					for (int i = 0; i < eventTable.size(); i++)
@@ -398,16 +425,16 @@ public class AttendanceTable extends JPanel {
 			AttendanceEventModel attendance = (AttendanceEventModel) inputData.get(row);
 
 			if (col == EVENT_TABLE_DATE_COLUMN)
-				return attendance.getServiceDateString();
+				return attendance.getServiceDateString().trim();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
-				return attendance.getEventName();
+				return attendance.getEventName().trim();
 			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {
 				if (attendance.getRepoName() == null)
 					return "";
 				else
-					return attendance.getRepoName();
+					return attendance.getRepoName().trim();
 			} else
-				return attendance.getGithubComments();
+				return attendance.getGithubComments().trim();
 		}
 	}
 }

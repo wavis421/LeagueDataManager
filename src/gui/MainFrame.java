@@ -13,6 +13,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,6 +36,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -87,6 +91,7 @@ public class MainFrame {
 	private GithubTable githubTable;
 	private CoursesTable coursesTable;
 	private JTable activeTable;
+	private JTextField searchField;
 	private String activeTableHeader;
 	private String githubToken, pike13Token;
 	ImageIcon icon;
@@ -209,6 +214,39 @@ public class MainFrame {
 		menuBar.add(helpMenu);
 		createHelpMenu(helpMenu);
 
+		// Add search label & field on the right side of menu bar
+		JLabel searchLabel = new JLabel(" Search  ");
+		searchLabel.setForeground(CustomFonts.TITLE_COLOR);
+		searchLabel.setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
+
+		searchField = new JTextField();
+		searchField.setMaximumSize(new Dimension(15000, searchField.getPreferredSize().height));
+		searchField.setPreferredSize(new Dimension(30, searchField.getPreferredSize().height));
+		searchField.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
+		searchField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				if (activeTable == studentTable.getTable())
+					studentTable.updateSearchField(searchField.getText());
+				else if (activeTable == attendanceTable.getTable())
+					attendanceTable.updateSearchField(searchField.getText());
+				else if (activeTable == coursesTable.getTable())
+					coursesTable.updateSearchField(searchField.getText());
+				else if (activeTable == logTable.getTable())
+					logTable.updateSearchField(searchField.getText());
+				else if (activeTable == invoiceTable.getTable())
+					invoiceTable.updateSearchField(searchField.getText());
+				else if (activeTable == githubTable.getTable())
+					githubTable.updateSearchField(searchField.getText());
+				else if (activeTable == scheduleTable.getTable())
+					scheduleTable.updateSearchField(searchField.getText());
+			}
+		});
+
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(searchLabel);
+		menuBar.add(searchField);
+
 		return menuBar;
 	}
 
@@ -314,6 +352,7 @@ public class MainFrame {
 				headerLabel.setText(GITHUB_TITLE + sinceDate);
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
+				githubTable.updateSearchField(searchField.getText());
 
 				activeTable = githubTable.getTable();
 				activeTableHeader = headerLabel.getText();
@@ -518,6 +557,7 @@ public class MainFrame {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID));
 		}
+		studentTable.updateSearchField(searchField.getText());
 
 		// Update current table type
 		activeTable = studentTable.getTable();
@@ -532,6 +572,7 @@ public class MainFrame {
 		// Add attendance table and header
 		attendanceTable.setData(tablePanel, list, attendanceByStudent);
 		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
+		attendanceTable.updateSearchField(searchField.getText());
 
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -544,6 +585,7 @@ public class MainFrame {
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(LOGGING_TITLE);
+		logTable.updateSearchField(searchField.getText());
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -556,6 +598,7 @@ public class MainFrame {
 		// Add log data table and header
 		scheduleTable.setData(tablePanel, controller.getClassSchedule());
 		headerLabel.setText(SCHEDULE_TITLE);
+		scheduleTable.updateSearchField(searchField.getText());
 
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -568,6 +611,7 @@ public class MainFrame {
 		// Add log data table and header
 		coursesTable.setData(tablePanel, controller.getCourseSchedule());
 		headerLabel.setText(COURSE_TITLE);
+		coursesTable.updateSearchField(searchField.getText());
 
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -580,6 +624,7 @@ public class MainFrame {
 		// Add invoice data table and header
 		invoiceTable.setData(tablePanel, controller.getInvoices(dateRange));
 		headerLabel.setText(INVOICE_TITLE + dateRange.toString());
+		invoiceTable.updateSearchField(searchField.getText());
 
 		activeTable = invoiceTable.getTable();
 		activeTableHeader = headerLabel.getText();

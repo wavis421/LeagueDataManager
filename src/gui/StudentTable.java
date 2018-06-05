@@ -18,8 +18,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import model.StudentModel;
 import model.StudentNameModel;
@@ -36,6 +38,8 @@ public class StudentTable extends JPanel {
 	private TableListeners studentListener;
 	private JScrollPane scrollPane;
 
+	private TableRowSorter<StudentTableModel> rowSorter;
+
 	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
 		this.tablePanel = tablePanel;
 
@@ -44,6 +48,8 @@ public class StudentTable extends JPanel {
 
 		createTablePanel();
 		createStudentTablePopups();
+
+		rowSorter = new TableRowSorter<StudentTableModel>((StudentTableModel) table.getModel());
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -91,8 +97,11 @@ public class StudentTable extends JPanel {
 		table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setPreferredWidth(90);
 		table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setPreferredWidth(160);
 
+		// Table renderer, sorter and key handler
 		table.setDefaultRenderer(Object.class, new StudentTableRenderer());
+		table.setCellSelectionEnabled(true);
 		table.setAutoCreateRowSorter(true);
+		new TableKeystrokeHandler(table);
 
 		tablePanel.setLayout(new BorderLayout());
 		scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -148,7 +157,34 @@ public class StudentTable extends JPanel {
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
+
+			public void mouseClicked(MouseEvent e) {
+				// Single row selects one cell (default), double click to get entire row
+				if (e.getClickCount() == 2) {
+					int col = table.getSelectedColumn();
+					int row = table.getSelectedRow();
+					if (row > -1 && col > -1) {
+						table.setRowSelectionInterval(row, row);
+						table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
+					}
+				}
+			}
 		});
+	}
+
+	public void updateSearchField(String searchText) {
+		if (searchText.equals("")) {
+			rowSorter.setRowFilter(null);
+		} else {
+			try {
+				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+		table.setRowSorter(rowSorter);
 	}
 
 	public class StudentTableRenderer extends JLabel implements TableCellRenderer {
@@ -181,14 +217,15 @@ public class StudentTable extends JPanel {
 				super.setForeground(Color.black);
 				super.setBorder(BorderFactory.createEmptyBorder());
 
-				if (((StudentTableModel) table.getModel()).getValueByRow(row).isMissingData()) {
-					// Text RED for students missing data
+				int modelRow = table.convertRowIndexToModel(row);
+				if (((StudentTableModel) table.getModel()).getValueByRow(modelRow).isMissingData()) {
+					// Text ORANGE for students missing data
 					if (column == StudentTableModel.STUDENT_NAME_COLUMN)
-						super.setForeground(Color.red);
+						super.setForeground(CustomFonts.TITLE_COLOR);
 
-					// Border RED for cells with missing data
+					// Border ORANGE for cells with missing data
 					if (text == null || text.equals(""))
-						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.red));
+						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, CustomFonts.TITLE_COLOR));
 				}
 
 				if (isSelected)

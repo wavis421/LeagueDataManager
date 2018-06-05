@@ -17,10 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -51,6 +53,8 @@ public class ScheduleTable extends JPanel {
 	private ArrayList<ScheduleTableModel> dowScheduleTableModel = new ArrayList<ScheduleTableModel>();
 	private ArrayList<ArrayList<ScheduleModel>> dowScheduleModelList = new ArrayList<ArrayList<ScheduleModel>>();
 
+	private ArrayList<TableRowSorter<ScheduleTableModel>> rowSorterList = new ArrayList<TableRowSorter<ScheduleTableModel>>();
+
 	public ScheduleTable(JPanel tablePanel) {
 		this.parentTablePanel = tablePanel;
 
@@ -59,7 +63,9 @@ public class ScheduleTable extends JPanel {
 		for (int i = 0; i < DAYS_IN_WEEK; i++) {
 			dowScheduleModelList.add(new ArrayList<ScheduleModel>());
 			dowScheduleTableModel.add(new ScheduleTableModel(dowScheduleModelList.get(i), i));
-			dowTableList.add(new JTable(dowScheduleTableModel.get(i)));
+
+			JTable table = new JTable(dowScheduleTableModel.get(i));
+			dowTableList.add(table);
 			dowScrollList.add(createTablePanel(dowTableList.get(i), dowScheduleTableModel.get(i)));
 			dowPanelList.add(new JPanel());
 			dowPanelList.get(i).add(dowScrollList.get(i));
@@ -69,6 +75,10 @@ public class ScheduleTable extends JPanel {
 
 			dowPanelList.get(i).setBorder(BorderFactory.createTitledBorder(border, dayOfWeek[i], TitledBorder.CENTER,
 					TitledBorder.DEFAULT_POSITION, CustomFonts.PANEL_HEADER_FONT, CustomFonts.TITLE_COLOR));
+
+			rowSorterList.add(new TableRowSorter<ScheduleTableModel>((ScheduleTableModel) table.getModel()));
+			table.setCellSelectionEnabled(true);
+			new TableKeystrokeHandler(table);
 		}
 
 		// Add first 4 days in week to row1, the rest in row 2
@@ -193,6 +203,18 @@ public class ScheduleTable extends JPanel {
 					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
+
+			public void mouseClicked(MouseEvent e) {
+				// Single row selects one cell (default), double click to get entire row
+				if (e.getClickCount() == 2) {
+					int col = table.getSelectedColumn();
+					int row = table.getSelectedRow();
+					if (row > -1 && col > -1) {
+						table.setRowSelectionInterval(row, row);
+						table.setColumnSelectionInterval(0, table.getColumnCount() - 1);
+					}
+				}
+			}
 		});
 	}
 
@@ -203,6 +225,30 @@ public class ScheduleTable extends JPanel {
 			table = dowTableList.get(i);
 			if (table != selectedTable)
 				dowTableList.get(i).clearSelection();
+		}
+	}
+
+	public void updateSearchField(String searchText) {
+		JTable table;
+		RowFilter<ScheduleTableModel, Integer> filter;
+
+		if (searchText.equals(""))
+			filter = null;
+		else {
+			try {
+				filter = RowFilter.regexFilter("\\b" + searchText);
+			} catch (java.util.regex.PatternSyntaxException e) {
+				System.out.println(e.getMessage());
+				return;
+			}
+		}
+
+		// Update filter for all DOW tables
+		for (int i = 0; i < dowTableList.size(); i++) {
+			table = dowTableList.get(i);
+
+			rowSorterList.get(i).setRowFilter(filter);
+			table.setRowSorter(rowSorterList.get(i));
 		}
 	}
 
