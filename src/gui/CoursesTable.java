@@ -85,12 +85,12 @@ public class CoursesTable extends JPanel {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(CoursesTableModel.COURSE_ID_COLUMN).setMaxWidth(110);
-		table.getColumnModel().getColumn(CoursesTableModel.COURSE_ID_COLUMN).setPreferredWidth(110);
-		table.getColumnModel().getColumn(CoursesTableModel.ENROLLED_COLUMN).setMaxWidth(110);
-		table.getColumnModel().getColumn(CoursesTableModel.ENROLLED_COLUMN).setPreferredWidth(110);
-		table.getColumnModel().getColumn(CoursesTableModel.COURSE_DATE_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(CoursesTableModel.COURSE_DATE_COLUMN).setPreferredWidth(200);
+		table.getColumnModel().getColumn(CoursesTableModel.COURSE_ID_COLUMN).setMaxWidth(98);
+		table.getColumnModel().getColumn(CoursesTableModel.COURSE_ID_COLUMN).setPreferredWidth(98);
+		table.getColumnModel().getColumn(CoursesTableModel.ENROLLED_COLUMN).setMaxWidth(104);
+		table.getColumnModel().getColumn(CoursesTableModel.ENROLLED_COLUMN).setPreferredWidth(104);
+		table.getColumnModel().getColumn(CoursesTableModel.COURSE_DATE_COLUMN).setMaxWidth(250);
+		table.getColumnModel().getColumn(CoursesTableModel.COURSE_DATE_COLUMN).setPreferredWidth(224);
 
 		table.setDefaultRenderer(Object.class, new CourseTableRenderer());
 		table.setAutoCreateRowSorter(true);

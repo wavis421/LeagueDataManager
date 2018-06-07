@@ -28,7 +28,7 @@ import model.AttendanceModel;
 import model.StudentNameModel;
 
 public class AttendanceTable extends JPanel {
-	private static final int TEXT_HEIGHT = 16;
+	private static final int TEXT_HEIGHT = 17;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
 	private static final int POPUP_MENU_WIDTH = 240;
@@ -232,9 +232,8 @@ public class AttendanceTable extends JPanel {
 				StudentNameModel studentNameModel = (StudentNameModel) model.getValueAt(row,
 						AttendanceTableModel.STUDENT_NAME_COLUMN);
 
-				attendanceListener.updateGithubUser(clientID,
-						studentNameModel.getFirstName() + " " + studentNameModel.getLastName());
 				mainTable.clearSelection();
+				attendanceListener.updateGithubUser(clientID, studentNameModel.toString());
 			}
 		});
 		mainTable.addMouseListener(new MouseAdapter() {
@@ -258,22 +257,29 @@ public class AttendanceTable extends JPanel {
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 						// Show students by class name
-						selectedClassName = getClassNameByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
-						selectedClassDate = getClassDateByRow(row, mainTable.convertRowIndexToModel(row), e.getY());
-						if (selectedClassName != null) {
-							tablePopup.remove(showStudentInfoItem);
-							tablePopup.remove(showStudentAttendanceItem);
-							tablePopup.remove(updateGithubUserItem);
-							tablePopup.add(showStudentClassItem);
-							tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
-							tablePopup.show(mainTable, e.getX(), e.getY());
+						if (eventSelectedRow > -1) {
+							int modelRow = mainTable.convertRowIndexToModel(row);
+							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow).getModel();
+							selectedClassName = (String) eventModel
+									.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
+							selectedClassDate = (String) eventModel
+									.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
+
+							if (selectedClassName != null) {
+								tablePopup.remove(showStudentInfoItem);
+								tablePopup.remove(showStudentAttendanceItem);
+								tablePopup.remove(updateGithubUserItem);
+								tablePopup.add(showStudentClassItem);
+								tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+								tablePopup.show(mainTable, e.getX(), e.getY());
+							}
 						}
 					}
 				}
 			}
 
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2
+				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1
 						&& mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 					// Expand attendance
 					int row = mainTable.getSelectedRow();
@@ -373,7 +379,7 @@ public class AttendanceTable extends JPanel {
 				if (table != mainTable && isSelected && eventSelectedRow == row)
 					super.setForeground(CustomFonts.ICON_COLOR);
 
-				super.setText(((String) value).trim());
+				super.setText(((String) value));
 				return this;
 
 			} else if (value instanceof StudentNameModel) {
@@ -382,7 +388,7 @@ public class AttendanceTable extends JPanel {
 					setFont(CustomFonts.TABLE_ITALIC_TEXT_FONT);
 
 				StudentNameModel student = (StudentNameModel) value;
-				super.setText(student.toString().trim());
+				super.setText(student.toString());
 				return this;
 
 			} else {
@@ -425,16 +431,16 @@ public class AttendanceTable extends JPanel {
 			AttendanceEventModel attendance = (AttendanceEventModel) inputData.get(row);
 
 			if (col == EVENT_TABLE_DATE_COLUMN)
-				return attendance.getServiceDateString().trim();
+				return attendance.getServiceDateString();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
-				return attendance.getEventName().trim();
+				return attendance.getEventName();
 			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {
 				if (attendance.getRepoName() == null)
 					return "";
 				else
-					return attendance.getRepoName().trim();
+					return attendance.getRepoName();
 			} else
-				return attendance.getGithubComments().trim();
+				return attendance.getGithubComments();
 		}
 	}
 }
