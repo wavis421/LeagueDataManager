@@ -1390,8 +1390,8 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateAttendance(int clientID, StudentNameModel nameModel, String serviceDate, String repoName,
-			String comments) {
+	public void updateAttendance(int clientID, StudentNameModel nameModel, String serviceDate, String eventName,
+			String repoName, String comments) {
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -1414,7 +1414,7 @@ public class MySqlDatabase {
 
 				if (repoName != null)
 					insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
-							" for repo " + repoName + " (" + serviceDate + ")");
+							" for " + eventName + ", repo: " + repoName + " (" + serviceDate + ")");
 				return;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

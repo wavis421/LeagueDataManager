@@ -162,7 +162,7 @@ public class GithubApi {
 			AttendanceEventModel event = eventList.get(i);
 			if (event.getGithubComments().equals("") && event.getServiceDateString().compareTo(today) < 0) {
 				sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), event.getServiceDateString(),
-						null, "");
+						event.getEventName(), null, "");
 				sqlDb.insertLogData(LogDataModel.MISSING_GITHUB_COMMENTS_BY_EVENT, event.getStudentNameModel(),
 						event.getClientID(),
 						" for " + event.getEventName()
@@ -222,7 +222,7 @@ public class GithubApi {
 							if (!message.equals("")) {
 								event.setGithubComments(message);
 								sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), commitDate,
-										repo.getName(), event.getGithubComments());
+										event.getEventName(), repo.getName(), event.getGithubComments());
 							}
 						}
 					}
