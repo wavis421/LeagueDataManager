@@ -138,6 +138,7 @@ public class MainFrame {
 		headerLabel.setHorizontalAlignment(JLabel.CENTER);
 		headerLabel.setFont(CustomFonts.TITLE_FONT);
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
+		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		mainPanel.add(headerLabel, BorderLayout.NORTH);
 
 		// Default tables to display all data
@@ -352,7 +353,8 @@ public class MainFrame {
 				headerLabel.setText(GITHUB_TITLE + sinceDate);
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
-				githubTable.updateSearchField(searchField.getText());
+				searchField.setText("");
+				githubTable.updateSearchField("");
 
 				activeTable = githubTable.getTable();
 				activeTableHeader = headerLabel.getText();
@@ -557,7 +559,8 @@ public class MainFrame {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID));
 		}
-		studentTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		studentTable.updateSearchField("");
 
 		// Update current table type
 		activeTable = studentTable.getTable();
@@ -572,7 +575,8 @@ public class MainFrame {
 		// Add attendance table and header
 		attendanceTable.setData(tablePanel, list, attendanceByStudent);
 		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
-		attendanceTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		attendanceTable.updateSearchField("");
 
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -585,7 +589,8 @@ public class MainFrame {
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(LOGGING_TITLE);
-		logTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		logTable.updateSearchField("");
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -598,7 +603,8 @@ public class MainFrame {
 		// Add log data table and header
 		scheduleTable.setData(tablePanel, controller.getClassSchedule());
 		headerLabel.setText(SCHEDULE_TITLE);
-		scheduleTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		scheduleTable.updateSearchField("");
 
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -611,7 +617,8 @@ public class MainFrame {
 		// Add log data table and header
 		coursesTable.setData(tablePanel, controller.getCourseSchedule());
 		headerLabel.setText(COURSE_TITLE);
-		coursesTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		coursesTable.updateSearchField("");
 
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
@@ -624,7 +631,8 @@ public class MainFrame {
 		// Add invoice data table and header
 		invoiceTable.setData(tablePanel, controller.getInvoices(dateRange));
 		headerLabel.setText(INVOICE_TITLE + dateRange.toString());
-		invoiceTable.updateSearchField(searchField.getText());
+		searchField.setText("");
+		invoiceTable.updateSearchField("");
 
 		activeTable = invoiceTable.getTable();
 		activeTableHeader = headerLabel.getText();

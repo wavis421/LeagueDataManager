@@ -18,11 +18,12 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 		// Parse long event names for workshops
 		eventName = event;
-		if (eventName.contains("Intro to Java Work"))
-			eventName = "Intro to Java WShop";
-		else if (eventName.charAt(1) != '@' && eventName.charAt(2) != '@'
-				&& eventName.contains("Electrical Engineering Intro Work"))
-			eventName = "Electrical Eng WShop";
+		if (eventName.charAt(1) != '@' && eventName.charAt(2) != '@') {
+			if (eventName.contains("Intro to Java Work"))
+				eventName = "Intro to Java WShop";
+			else if (eventName.contains("Electrical Engineering Intro Work"))
+				eventName = "Electrical Eng WShop";
+		}
 
 		this.teacherNames = "";
 		this.serviceCategory = serviceCategory;

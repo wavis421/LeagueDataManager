@@ -156,22 +156,20 @@ public class GithubApi {
 
 	public void updateEmptyGithubComments(ArrayList<AttendanceEventModel> eventList) {
 		String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd");
-		int recordCount = 0;
 
 		for (int i = 0; i < eventList.size(); i++) {
-			// Update any event with null github comments to avoid repeated searches in the
-			// future
+			// Update events with null github comments to avoid repeated searches
 			AttendanceEventModel event = eventList.get(i);
 			if (event.getGithubComments().equals("") && event.getServiceDateString().compareTo(today) < 0) {
-				recordCount++;
 				sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), event.getServiceDateString(),
 						null, "");
+				sqlDb.insertLogData(LogDataModel.MISSING_GITHUB_COMMENTS_BY_EVENT, event.getStudentNameModel(),
+						event.getClientID(),
+						" for " + event.getEventName()
+								+ (event.getGithubName().equals("") ? "" : ", git user: " + event.getGithubName())
+								+ " (" + event.getServiceDateString() + ")");
 			}
 		}
-
-		if (recordCount > 0)
-			sqlDb.insertLogData(LogDataModel.MISSING_COMMENTS_FOR_ATTENDANCE, new StudentNameModel("", "", false), 0,
-					": " + recordCount + " records");
 	}
 
 	private List<Repository> getRepoListByLevel(int level) {

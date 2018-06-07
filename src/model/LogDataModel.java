@@ -58,7 +58,7 @@ public class LogDataModel {
 
 	public static final int SF_ATTENDANCE_IMPORT_ERROR = 50;
 	public static final int SF_STAFF_HOURS_IMPORT_ERROR = 51;
-	public static final int MISSING_COMMENTS_FOR_ATTENDANCE = 52;
+	public static final int MISSING_GITHUB_COMMENTS_BY_EVENT = 52;
 	public static final int CREATE_SALES_FORCE_ACCOUNT = 53;
 	public static final int DUPLICATE_SF_ACCOUNT_NAME = 54;
 	public static final int MISSING_PIKE13_ACCT_MGR_FOR_CLIENT = 55;
@@ -120,7 +120,7 @@ public class LogDataModel {
 
 			// 50
 			"SalesForce Attendance import error", "SalesForce Staff Hours Import error",
-			"Attendance update with no Github comments", "Create SalesForce account",
+			"Missing github comments", "Create SalesForce account",
 			"Warning: Duplicate SalesForce account name", "Missing Pike13 Acct Manager for client",
 			"Deleted SalesForce Contact record", "SalesForce Contact import error", "SalesForce Account import error",
 			"SalesForce Upsert Clients error",
