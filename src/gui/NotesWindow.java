@@ -101,7 +101,7 @@ public class NotesWindow {
 			
 			// About League Student Tracker
 			"\n   VERSION 4.0 \n\n"
-			+ "   LEAGUE STUDENT TRACKER OVERVIEW:\n\n"
+			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
 			+ "         => Pike13 attendance database\n" 
