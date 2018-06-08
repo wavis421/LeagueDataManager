@@ -85,14 +85,13 @@ public class NotesWindow {
 
 			// Search and copy features
 			"     Search, Filter and Copy Features:\n\n"
-			+ "      => All tables have the ability to do a search filter. Enter text in the Search box to\n"
-			+ "            display only the rows in the table where one of the fields in the table starts with this text.\n"
-			+ "            Words are delineated by (, -, :, / etc.\n"
+			+ "      => All tables have the ability to do a search filter. Enter text in the Search box to display only the\n"
+			+ "            rows in the table where one of the fields starts with this text. Words are delineated by (, -, :, / etc.\n"
 			+ "            The only exception is the Attendance table where the right column is not searched.\n\n"
-			+ "      => A cell or multiple contiguous cells can be selected and then copied. Cells are copied\n"
-			+ "            in CSV format so that the copied cells can be imported into an Excel spreadsheet if desired.\n"
-			+ "            The only exception is the Attendance table where the right column is not copied in CSV format.\n\n"
-			+ "            Note that if selected cells are non-contiguous, they will not be copied in CSV format.",
+			+ "      => A cell or multiple contiguous cells can be selected and then copied. Double-click on a cell to select the\n"
+			+ "            entire row. Cells are copied in CSV format so that the copied cells can be imported into Excel if\n"
+			+ "            desired. The only exception is the Attendance table where the right column is not copied using CSV format.\n"
+			+ "            Note that if selected cells are non-contiguous, they will instead be copied with standard tab separators.",
 			
 			// Feedback
 			"\n\n\n"
