@@ -97,7 +97,10 @@ public class MainFrame {
 	ImageIcon icon;
 	private static JFrame frame = new JFrame();
 
-	// Class menu names
+	// Class and Help menu names
+	private final int fileMenuIdx = 0, studentMenuIdx = 1, attendMenuIdx = 2, schedMenuIdx = 3, reportMenuIdx = 4;
+	private String[] menuDescripNames = { "File Menu ", "Student Menu ", "Attendance Menu ", "Schedule Menu ",
+			"Reports Menu " };
 	private static String[] classMenuNames = { "Level 0 ", "Level 1 ", "Level 2 ", "Level 3 ", "Level 4 ", "Level 5 ",
 			"Level 6 ", "Level 7 ", "Level 8 ", "Level 9 ", "Labs " };
 
@@ -128,7 +131,7 @@ public class MainFrame {
 		if (!controller.connectDatabase()) {
 			JOptionPane.showMessageDialog(null,
 					"Verify that the password you entered is correct,\n"
-							+ "that the League Data Manager is not already running\n"
+							+ "that the League Student Tracker is not already running\n"
 							+ "and your key file is in the executable directory.\n",
 					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
 			shutdown();
@@ -423,7 +426,7 @@ public class MainFrame {
 		// Set up listeners for Reports menu
 		invoiceMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog(mainPanel);
+				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog(frame);
 				DateRangeEvent dateRange = dateSelector.getDialogResponse();
 				if (dateRange != null) {
 					refreshInvoiceTable(dateRange);
@@ -434,27 +437,51 @@ public class MainFrame {
 
 	private void createHelpMenu(JMenu helpMenu) {
 		// Create sub-menus for the Help menu
-		JMenuItem menuDescriptionItem = new JMenuItem("Menu Description ");
+		JMenu menuDescription = new JMenu("Menu Descriptions ");
 		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
+		JMenuItem searchFilterCopyItem = new JMenuItem("Search, filter, copy ");
 		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
-		JMenuItem aboutItem = new JMenuItem("About League Data Manager ");
+		JMenuItem aboutItem = new JMenuItem("About League Student Tracker ");
 
 		// Add these sub-menus to the Help menu
-		helpMenu.add(menuDescriptionItem);
+		helpMenu.add(menuDescription);
 		helpMenu.add(exampleUsageItem);
+		helpMenu.add(searchFilterCopyItem);
 		helpMenu.add(feedbackItem);
 		helpMenu.addSeparator();
 		helpMenu.add(aboutItem);
 
+		// Set up listeners for Menu Description help menu
+		for (int i = 0; i < menuDescripNames.length; i++) {
+			int menuFilter = i;
+			JMenuItem subMenu = new JMenuItem(menuDescripNames[i]);
+			menuDescription.add(subMenu);
+			
+			subMenu.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (menuFilter == fileMenuIdx)
+						new NotesWindow(NotesWindow.FILE_MENU);
+					else if (menuFilter == studentMenuIdx)
+						new NotesWindow(NotesWindow.STUDENT_MENU);
+					else if (menuFilter == attendMenuIdx)
+						new NotesWindow(NotesWindow.ATTENDANCE_MENU);
+					else if (menuFilter == schedMenuIdx)
+						new NotesWindow(NotesWindow.SCHEDULE_MENU);
+					else if (menuFilter == reportMenuIdx)
+						new NotesWindow(NotesWindow.REPORTS_MENU);
+				}
+			});
+		}
+
 		// Set up listeners for each of the sub-menus
-		menuDescriptionItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.MENU_DESCRIPTION);
-			}
-		});
 		exampleUsageItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new NotesWindow(NotesWindow.EXAMPLES);
+			}
+		});
+		searchFilterCopyItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new NotesWindow(NotesWindow.SEARCH_COPY);
 			}
 		});
 		feedbackItem.addActionListener(new ActionListener() {

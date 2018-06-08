@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField.AbstractFormatter;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
@@ -34,7 +35,7 @@ public class SelectDateRangeDialog extends JDialog {
 	private JDatePickerImpl startDatePicker;
 	private JDatePickerImpl endDatePicker;
 
-	public SelectDateRangeDialog(JPanel parent) {
+	public SelectDateRangeDialog(JFrame parentFrame) {
 		setModal(true);
 
 		// Default start/end date is for last month
@@ -113,7 +114,7 @@ public class SelectDateRangeDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle("Select date range");
 		setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-		setLocationRelativeTo(parent);
+		setLocation(parentFrame.getX() + 100, parentFrame.getY() + 100);
 		setVisible(true);
 	}
 
