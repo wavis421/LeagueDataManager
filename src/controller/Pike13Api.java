@@ -72,6 +72,7 @@ public class Pike13Api {
 	private final String STAFF_CURR_BOARD_MEMBER_FIELD = "custom_field_153299";
 	private final String STAFF_CURR_STAFF_MEMBER_FIELD = "custom_field_153300";
 	private final String STAFF_GITHUB_USER_FIELD = "custom_field_127885";
+	private final String STAFF_TITLE_FIELD = "custom_field_154726";
 
 	// Indices for client data
 	private final int CLIENT_ID_IDX = 0;
@@ -212,6 +213,7 @@ public class Pike13Api {
 	private final int TEACHER_CURR_BOARD_MEMBER_IDX = 28;
 	private final int TEACHER_CURR_STAFF_MEMBER_IDX = 29;
 	private final int TEACHER_IS_ALSO_CLIENT_IDX = 30;
+	private final int TEACHER_TITLE_IDX = 31;
 
 	// Indices for Staff Hours data
 	private final int STAFF_CLIENT_ID_IDX = 0;
@@ -430,7 +432,7 @@ public class Pike13Api {
 			+ "            \"" + STAFF_T_SHIRT_FIELD + "\",\"" + STAFF_WHERE_DID_YOU_HEAR_FIELD + "\","
 			+ "            \"" + STAFF_LEAVE_FIELD + "\",\"" + STAFF_EMERG_NAME_FIELD + "\",\"" + STAFF_EMERG_EMAIL_FIELD + "\","
 			+ "            \"" + STAFF_EMERG_PHONE_FIELD + "\",\"" + STAFF_CURR_BOARD_MEMBER_FIELD + "\","
-			+ "            \"" + STAFF_CURR_STAFF_MEMBER_FIELD + "\",\"also_client\"],"
+			+ "            \"" + STAFF_CURR_STAFF_MEMBER_FIELD + "\",\"also_client\",\"" + STAFF_TITLE_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500},"
 			// Filter on Staff Category and staff member active
@@ -1132,7 +1134,8 @@ public class Pike13Api {
 					stripQuotes(staffArray.get(TEACHER_EMERG_PHONE_IDX).toString()),
 					stripQuotes(staffArray.get(TEACHER_CURR_BOARD_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
 					stripQuotes(staffArray.get(TEACHER_CURR_STAFF_MEMBER_IDX).toString()).equalsIgnoreCase("t") ? true : false,
-					stripQuotes(staffArray.get(TEACHER_IS_ALSO_CLIENT_IDX).toString()).equalsIgnoreCase("t") ? true : false));
+					stripQuotes(staffArray.get(TEACHER_IS_ALSO_CLIENT_IDX).toString()).equalsIgnoreCase("t") ? true : false,
+					stripQuotes(staffArray.get(TEACHER_TITLE_IDX).toString())));
 		}
 
 		conn.disconnect();

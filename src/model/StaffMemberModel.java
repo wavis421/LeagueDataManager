@@ -6,7 +6,7 @@ public class StaffMemberModel {
 	private String firstName, lastName, birthdate;
 	private String githubName, homeLocation;
 	private String category; // teacher, volunteer, TA
-	private String occupation, employer, startInfo;
+	private String occupation, employer, startInfo, title;
 	private String gender, phone, homePhone, address, email, alternateEmail, liveScan, tShirt;
 	private String role, whereDidYouHear, leave, emergName, emergEmail, emergPhone;
 	private boolean isBoardMember, isStaffMember, isKeyHolder, isAlsoClient;
@@ -17,7 +17,7 @@ public class StaffMemberModel {
 			String phone, String homePhone, String address, String email, String alternateEmail, String homeLocation,
 			String githubName, int pastEvents, int futureEvents, boolean keyHolder, String liveScan, String tShirt,
 			String whereDidYouHear, String leave, String emergName, String emergEmail, String emergPhone,
-			boolean isBoardMember, boolean isStaffMember, boolean isAlsoClient) {
+			boolean isBoardMember, boolean isStaffMember, boolean isAlsoClient, String title) {
 
 		this.clientID = clientID;
 		if (sfClientID != null && (sfClientID.startsWith("null") || sfClientID.equals("")))
@@ -53,6 +53,7 @@ public class StaffMemberModel {
 		this.isBoardMember = isBoardMember;
 		this.isStaffMember = isStaffMember;
 		this.isAlsoClient = isAlsoClient;
+		this.title = title;
 	}
 
 	@Override
@@ -205,5 +206,9 @@ public class StaffMemberModel {
 
 	public void setAccountID(String id) {
 		accountID = id;
+	}
+
+	public String getTitle() {
+		return title;
 	}
 }
