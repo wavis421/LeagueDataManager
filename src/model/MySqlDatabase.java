@@ -735,17 +735,22 @@ public class MySqlDatabase {
 
 	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
+		ArrayList<AttendanceModel> listByClient;
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' AND EventName=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "AND State = 'completed' AND EventName=? GROUP BY Students.ClientID;");
 				selectStmt.setString(1, className);
 
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result, true);
+				while (result.next()) {
+					Integer thisClientID = result.getInt("Students.ClientID");
+					listByClient = getAttendanceByClientID(thisClientID.toString());
+					attendanceList.addAll(listByClient);
+				}
 				Collections.sort(attendanceList);
 
 				result.close();
