@@ -1189,7 +1189,7 @@ public class Pike13Api {
 						eventArray.getJsonNumber(STAFF_EVENT_CANCELED_COUNT_IDX).doubleValue(),
 						stripQuotes(eventArray.get(STAFF_EVENT_NAME_IDX).toString()),
 						eventArray.get(STAFF_EVENT_SCHEDULE_ID_IDX).toString(),
-						stripQuotes(eventArray.get(STAFF_EVENT_SERVICE_CATEGORY_IDX).toString())));
+						stripQuotes(eventArray.get(STAFF_EVENT_SERVICE_CATEGORY_IDX).toString()), ""));
 			}
 
 			// Check to see if there are more pages
