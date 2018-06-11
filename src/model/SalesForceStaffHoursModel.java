@@ -6,7 +6,7 @@ public class SalesForceStaffHoursModel {
 	private String fullName;
 	private String serviceName;
 	private String serviceDate;
-	private String serviceCategory, staffCategory;
+	private String serviceCategory;
 	private String serviceTime;
 	private double hours;
 	private String location;
@@ -18,7 +18,7 @@ public class SalesForceStaffHoursModel {
 
 	public SalesForceStaffHoursModel(String clientID, String fullName, String serviceName, String serviceDate,
 			String serviceTime, double hours, String location, double completed, double noShow, double lateCanceled,
-			String eventName, String scheduleID, String serviceCategory, String staffCategory) {
+			String eventName, String scheduleID, String serviceCategory) {
 
 		this.clientID = clientID;
 		this.fullName = fullName;
@@ -33,7 +33,6 @@ public class SalesForceStaffHoursModel {
 		this.eventName = eventName;
 		this.scheduleID = scheduleID;
 		this.serviceCategory = serviceCategory;
-		this.staffCategory = staffCategory;
 	}
 
 	@Override
@@ -93,13 +92,5 @@ public class SalesForceStaffHoursModel {
 
 	public String getServiceCategory() {
 		return serviceCategory;
-	}
-
-	public String getStaffCategory() {
-		return staffCategory;
-	}
-
-	public void setStaffCategory(String staffCategory) {
-		this.staffCategory = staffCategory;
 	}
 }
