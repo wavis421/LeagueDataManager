@@ -99,7 +99,7 @@ public class NotesWindow {
 			+ "      *** Please send any feedback, suggestions or bug reports to wendy.avis@jointheleague.org *** \n",
 			
 			// About League Student Tracker
-			"\n   VERSION 4.0 \n\n"
+			"\n   VERSION 4.1 \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
