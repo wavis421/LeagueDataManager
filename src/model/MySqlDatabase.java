@@ -32,7 +32,7 @@ public class MySqlDatabase {
 	private static final int NUM_CLASS_LEVELS = 10;
 	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
-	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 45;
+	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 30;
 
 	private static Connection dbConnection = null;
 	private JFrame parent;
@@ -736,14 +736,17 @@ public class MySqlDatabase {
 	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 		ArrayList<AttendanceModel> listByClient;
+		String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+				.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' AND EventName=? GROUP BY Students.ClientID;");
+								+ "AND State = 'completed' AND EventName=? AND ServiceDate > ? GROUP BY Students.ClientID;");
 				selectStmt.setString(1, className);
+				selectStmt.setString(2, sinceDate);
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {

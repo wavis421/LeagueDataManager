@@ -474,7 +474,7 @@ public class Pike13Api {
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
 
-		// Insert since date for completed visit (in last 45 days)
+		// Insert since date for completed visit (in last 30 days)
 		String clients = getClientData.replaceFirst("0000-00-00",
 				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).
 					minusDays(MySqlDatabase.CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd"));
