@@ -74,7 +74,7 @@ BEGIN
 		ClassName varchar(40) DEFAULT NULL,
 
 		# All fields of this table must be unique
-		UNIQUE KEY(DayOfWeek, StartTime, Duration, ClassName)
+		UNIQUE KEY(DayOfWeek, StartTime, ClassName)
 
 	) ENGINE=InnoDB;
 	

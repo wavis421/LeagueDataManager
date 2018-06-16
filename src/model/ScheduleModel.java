@@ -48,9 +48,9 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 
 	@Override
 	public int compareTo(ScheduleModel other) {
-		// Compare order is: DayOfWeek, StartTime, ClassName, duration
+		// Compare order is: DayOfWeek, StartTime, ClassName
 		if (this.className.equals(other.className) && this.dayOfWeek == other.dayOfWeek
-				&& this.startTime.equals(other.startTime) && this.duration == other.duration)
+				&& this.startTime.equals(other.startTime))
 			// All fields match
 			return 0;
 
@@ -66,13 +66,6 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 			if (compare == 0) {
 				// DOW and start time both match, so check class name
 				compare = this.className.compareTo(other.className);
-				if (compare == 0) {
-					// DOW, start time and class name all match; check duration
-					if (this.duration < other.duration)
-						return -1;
-					else
-						return 1;
-				}
 			}
 			return compare;
 		}
