@@ -293,7 +293,7 @@ public class Pike13Api {
 	private final String getEnrollmentStudentTracker2 = "},"
 			// Filter on State completed and since date OR open lab class for this week
 			+ "\"filter\":[\"or\",[[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]]]"
+			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]]],"
 			+ "                    [\"and\",[[\"eq\",\"state\",\"registered\"],"
 			+ "                              [\"btw\",\"service_date\",[\"2222-22-22\",\"3333-33-33\"]],"
 			+ "                              [\"contains\",\"service_category\",\"jlab\"]]]]]}}}";

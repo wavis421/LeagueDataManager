@@ -174,7 +174,12 @@ public class GithubApi {
 
 	private List<Repository> getRepoListByLevel(int level) {
 		// League levels use Github classroom with user 'League-Level0-Student'
-		String ownerName = "League-Level" + level + "-Student";
+		// Intro to Java Workshop uses Github classroom with user 'League-Workshop'
+		String ownerName;
+		if (level == -1)
+			ownerName = "League-Workshop";
+		else
+			ownerName = "League-Level" + level + "-Student";
 		List<Repository> repoList = null;
 
 		try {
