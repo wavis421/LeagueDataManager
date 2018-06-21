@@ -114,10 +114,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	@Override
 	public int compareTo(AttendanceEventModel other) {
-		if (clientID < other.getClientID())
+		if (this.clientID < other.getClientID())
 			return -1;
 
-		else if (clientID > other.getClientID())
+		else if (this.clientID > other.getClientID())
 			return 1;
 
 		else {
@@ -129,7 +129,9 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			else if (comp > 0)
 				return -1;
 
-			if (other.getState() == null || !other.getState().equals(this.getState()))
+			// Same date, so compare state & github
+			if (!other.getState().equals(this.getState())
+					|| (other.getGithubName() != null && !other.getGithubName().equals(this.getGithubName())))
 				return 2;
 			else
 				return 0;

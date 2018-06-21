@@ -829,7 +829,7 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT Students.ClientID, Students.FirstName, Students.LastName, Attendance.State, "
+						"SELECT Students.ClientID, Students.FirstName, Students.LastName, GithubName, Attendance.State, "
 								+ "Attendance.ServiceCategory FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
@@ -845,8 +845,8 @@ public class MySqlDatabase {
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name, "",
-								new AttendanceEventModel(thisClientID, 0, null, "   ", "", "", "", name,
-										result.getString("ServiceCategory"), result.getString("State"))));
+								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
+										"", "", name, result.getString("ServiceCategory"), result.getString("State"))));
 					else
 						attendanceList.addAll(listByClient);
 				}

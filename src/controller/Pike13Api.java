@@ -293,8 +293,7 @@ public class Pike13Api {
 	private final String getEnrollmentStudentTracker2 = "},"
 			// Filter on State completed and since date OR open lab class for this week
 			+ "\"filter\":[\"or\",[[\"and\",[[\"eq\",\"state\",\"completed\"],"
-			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                              [\"starts\",\"service_category\",\"Class\"]]],"
+			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]]]"
 			+ "                    [\"and\",[[\"eq\",\"state\",\"registered\"],"
 			+ "                              [\"btw\",\"service_date\",[\"2222-22-22\",\"3333-33-33\"]],"
 			+ "                              [\"contains\",\"service_category\",\"jlab\"]]]]]}}}";
@@ -357,6 +356,7 @@ public class Pike13Api {
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"starts\",\"service_category\",\"Class\"],"
+			+ "                     [\"ne\",\"service_category\",\"class jslam\"],"
 			+ "                     [\"nemp\",\"event_name\"]]]}}}";
 
 	// Get workshop and summer slam data
