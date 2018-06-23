@@ -828,9 +828,9 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT Students.ClientID, Students.FirstName, Students.LastName, GithubName, Attendance.State, "
-								+ "Attendance.ServiceCategory FROM Attendance, Students "
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
+								+ "ServiceCategory FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -839,12 +839,12 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
 					Integer thisClientID = result.getInt("Students.ClientID");
-					StudentNameModel name = new StudentNameModel(result.getString("Students.FirstName"),
-							result.getString("Students.LastName"), true);
+					StudentNameModel name = new StudentNameModel(result.getString("FirstName"),
+							result.getString("LastName"), true);
 
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					if (listByClient.size() == 0)
-						attendanceList.add(new AttendanceModel(thisClientID, name, "",
+						attendanceList.add(new AttendanceModel(thisClientID, name, result.getString("GithubName"),
 								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
 										"", "", name, result.getString("ServiceCategory"), result.getString("State"))));
 					else
