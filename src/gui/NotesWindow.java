@@ -56,7 +56,7 @@ public class NotesWindow {
 			"     Schedule Menu:\n\n"
 			+ "      => View the weekly class schedule to show the class schedule for each day of the week.\n"
 			+ "            Then select a class and right click to view the attendance data for that class.\n"
-			+ "            Note that you can filter the Schedule data using the search box, e.g. all 'Open Labs'.\n"
+			+ "            Note that you can filter the Schedule data using the search box, e.g. all 'Make-Up' classes.\n"
 			+ "      => Viewing Workshops and Summer Slam shows all the courses available. From there, select\n"
 			+ "            and then right-click a course to view the students enrolled in the course.",
 			

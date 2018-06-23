@@ -795,7 +795,7 @@ public class MySqlDatabase {
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
-					// Get attendance for each student in this particular open lab
+					// Get attendance for each student in this particular make-up class
 					Integer thisClientID = result.getInt("Students.ClientID");
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					attendanceList.addAll(listByClient);
@@ -1301,7 +1301,7 @@ public class MySqlDatabase {
 		String[] values = origTeachers.split("\\s*,\\s*");
 		for (int i = 0; i < values.length; i++) {
 			if (values[i].startsWith("TA-") || values[i].startsWith("Open Lab") || values[i].startsWith("Sub Teacher")
-					|| values[i].startsWith("Padres Game"))
+					|| values[i].startsWith("Padres Game") || values[i].startsWith("Make-Up"))
 				continue;
 
 			if (!teachers.equals(""))

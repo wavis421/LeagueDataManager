@@ -540,7 +540,7 @@ public class MainFrame {
 			@Override
 			public void viewAttendanceByClass(String className, String classDate) {
 				// Display class by class name
-				if (className.contains("Open Lab")) {
+				if (className.toLowerCase().contains("make-up")) {
 					refreshAttendanceTable(controller.getAttendanceByClassByDate(className, classDate),
 							" for '" + className + "' on " + classDate, false);
 				} else
