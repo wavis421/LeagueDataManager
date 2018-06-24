@@ -1679,12 +1679,15 @@ public class MySqlDatabase {
 
 	public ArrayList<CoursesModel> getCourseSchedule(String sortOrder) {
 		ArrayList<CoursesModel> eventList = new ArrayList<CoursesModel>();
+		PreparedStatement selectStmt;
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				// Get course data from the DB
-				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT * FROM Courses ORDER BY " + sortOrder + " ASC;");
+				// Get course data from the DB; if sort order null, then no sort required
+				if (sortOrder == null)
+					selectStmt = dbConnection.prepareStatement("SELECT * FROM Courses;");
+				else
+					selectStmt = dbConnection.prepareStatement("SELECT * FROM Courses ORDER BY " + sortOrder + " ASC;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -1694,6 +1697,9 @@ public class MySqlDatabase {
 
 				result.close();
 				selectStmt.close();
+				
+				if (sortOrder == null)
+					Collections.sort(eventList, new CoursesCompareByDate());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

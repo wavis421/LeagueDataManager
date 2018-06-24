@@ -112,7 +112,7 @@ public class Controller {
 	}
 
 	public ArrayList<CoursesModel> getCourseSchedule() {
-		return sqlDb.getCourseSchedule("EventName");
+		return sqlDb.getCourseSchedule(null);
 	}
 
 	/*

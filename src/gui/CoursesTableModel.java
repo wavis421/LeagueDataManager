@@ -62,12 +62,7 @@ public class CoursesTableModel extends AbstractTableModel {
 		case COURSE_ID_COLUMN:
 			return String.valueOf(course.getScheduleID());
 		case COURSE_DATE_COLUMN:
-			int openParen = course.getEventName().indexOf('(');
-			int closeParen = course.getEventName().indexOf(')');
-			if (openParen >= 0 && closeParen > openParen)
-				return course.getEventName().substring(openParen + 1, closeParen);
-			else
-				return "";
+			return course.getDate();
 		case COURSE_NAME_COLUMN:
 			return course.getEventName();
 		case ENROLLED_COLUMN:

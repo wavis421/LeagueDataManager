@@ -3,11 +3,20 @@ package model;
 public class CoursesModel implements Comparable<CoursesModel> {
 	private int scheduleID, enrollment;
 	private String eventName;
+	private String date;
 
 	public CoursesModel(int scheduleID, String eventName, int enrollment) {
 		this.scheduleID = scheduleID;
 		this.eventName = eventName.trim();
 		this.enrollment = enrollment;
+		
+		// Extract date field from event name
+		int openParen = eventName.indexOf('(');
+		int closeParen = eventName.indexOf(')');
+		if (openParen >= 0 && closeParen > openParen)
+			date = eventName.substring(openParen + 1, closeParen);
+		else
+			date = "";
 	}
 
 	public int getScheduleID() {
@@ -20,6 +29,10 @@ public class CoursesModel implements Comparable<CoursesModel> {
 
 	public int getEnrollment() {
 		return enrollment;
+	}
+
+	public String getDate() {
+		return date;
 	}
 
 	@Override
