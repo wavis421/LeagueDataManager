@@ -989,7 +989,8 @@ public class MySqlDatabase {
 				// Get attendance data from the DB for all students that have a github user name
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "AND (State = 'completed' OR State = 'registered') "
+								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -1215,6 +1216,7 @@ public class MySqlDatabase {
 		int dbListIdx = 0;
 		int dbListSize = dbList.size();
 		Collections.sort(importList);
+		Collections.sort(dbList);
 
 		AttendanceEventModel dbAttendance;
 		for (int i = 0; i < importList.size(); i++) {
@@ -1226,6 +1228,8 @@ public class MySqlDatabase {
 			if (dbListIdx < dbListSize) {
 				dbAttendance = dbList.get(dbListIdx);
 				compare = dbAttendance.compareTo(importEvent);
+				if (compare == 0 && !dbAttendance.getState().equals(importEvent.getState()))
+					compare = 2;
 			}
 
 			if (compare == 0) {
@@ -1235,14 +1239,17 @@ public class MySqlDatabase {
 
 			} else if (compare == -1) {
 				// Extra events in DB; toss data until caught up with import list
-				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0) {
+				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0)
 					dbListIdx++;
-				}
 
 				// Caught up, now compare again and process
 				compare = 1;
-				if (dbListIdx < dbListSize)
-					compare = dbList.get(dbListIdx).compareTo(importEvent);
+				if (dbListIdx < dbListSize) {
+					dbAttendance = dbList.get(dbListIdx);
+					compare = dbAttendance.compareTo(importEvent);
+					if (compare == 0 && !dbAttendance.getState().equals(importEvent.getState()))
+						compare = 2;
+				}
 
 				if (compare == 0) {
 					dbListIdx++;

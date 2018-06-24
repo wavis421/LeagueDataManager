@@ -24,6 +24,9 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			else if (eventName.contains("Electrical Engineering Intro Work"))
 				eventName = "Electrical Eng WShop";
 		}
+		int idx = eventName.indexOf('(');
+		if (idx > 0)
+			eventName = eventName.substring(0, idx).trim();
 
 		this.teacherNames = "";
 		this.serviceCategory = serviceCategory;
@@ -121,18 +124,13 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			return 1;
 
 		else {
-			// Client ID matches
+			// Client ID matches, compare date next
 			int comp = this.getServiceDateString().compareTo(other.getServiceDateString());
 			// Dates in descending order
 			if (comp < 0)
 				return 1;
 			else if (comp > 0)
 				return -1;
-
-			// Same date, so compare state & github
-			if (!other.getState().equals(this.getState())
-					|| (other.getGithubName() != null && !other.getGithubName().equals(this.getGithubName())))
-				return 2;
 			else
 				return 0;
 		}
