@@ -327,7 +327,7 @@ public class AttendanceTable extends JPanel {
 		} else {
 			try {
 				// Filter only on the 1st 2 columns
-				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText, AttendanceTableModel.CLIENT_ID_COLUMN,
+				rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText, AttendanceTableModel.CLIENT_ID_COLUMN,
 						AttendanceTableModel.STUDENT_NAME_COLUMN));
 
 			} catch (java.util.regex.PatternSyntaxException e) {

@@ -112,7 +112,7 @@ public class InvoiceTable extends JPanel {
 			rowSorter.setRowFilter(null);
 		} else {
 			try {
-				rowSorter.setRowFilter(RowFilter.regexFilter("\\b" + searchText));
+				rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText));
 
 			} catch (java.util.regex.PatternSyntaxException e) {
 				System.out.println(e.getMessage());

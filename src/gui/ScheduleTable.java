@@ -236,7 +236,7 @@ public class ScheduleTable extends JPanel {
 			filter = null;
 		else {
 			try {
-				filter = RowFilter.regexFilter("\\b" + searchText);
+				filter = RowFilter.regexFilter("(?i)\\b" + searchText);
 			} catch (java.util.regex.PatternSyntaxException e) {
 				System.out.println(e.getMessage());
 				return;

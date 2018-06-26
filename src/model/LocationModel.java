@@ -19,11 +19,12 @@ public class LocationModel {
 	private static final int CLASS_LOCATION_ONLINE = 14;
 	private static final int CLASS_LOCATION_ROBO_CAMP = 15;
 	private static final int CLASS_LOCATION_SAN_MARCOS_DISTRICT_OFFICE = 16;
+	private static final int CLASS_LOCATION_SAN_MARCOS_CAMPUS = 17;
 
-	private static final int CLASS_LAST_LOCATION_NUM = 16; // Must be last!
+	private static final int CLASS_LAST_LOCATION_NUM = 17; // Must be last!
 
 	private static final String[] locationCodes = new String[] { "", "CV", "DL", "MX", "GPA", "WMS", "SMM", "SEM",
-			"HHS", "E3", "OS", "SHS", "SRE", "MCM", "OL", "ORC", "SMD" };
+			"HHS", "E3", "OS", "SHS", "SRE", "MCM", "OL", "ORC", "SMD", "SMC" };
 
 	public static int convertStringToLocation(String classString) {
 		if (classString.startsWith("Carmel Valley"))
@@ -58,6 +59,8 @@ public class LocationModel {
 			return CLASS_LOCATION_ROBO_CAMP;
 		else if (classString.startsWith("San Marcos District"))
 			return CLASS_LOCATION_SAN_MARCOS_DISTRICT_OFFICE;
+		else if (classString.startsWith("San Marcos Campus"))
+			return CLASS_LOCATION_SAN_MARCOS_CAMPUS;
 		else
 			return CLASS_LOCATION_UNKNOWN;
 	}
@@ -78,6 +81,8 @@ public class LocationModel {
 			return "San Marcos Middle";
 		case CLASS_LOCATION_SAN_MARCOS_DISTRICT_OFFICE:
 			return "San Marcos District";
+		case CLASS_LOCATION_SAN_MARCOS_CAMPUS:
+			return "San Marcos Campus";
 		case CLASS_LOCATION_SAN_ELIJO_MIDDLE:
 			return "San Elijo Middle";
 		case CLASS_LOCATION_HOOVER_HIGH:
