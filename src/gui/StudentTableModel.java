@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import model.GenderModel;
-import model.LocationModel;
+import model.LocationLookup;
 import model.StudentModel;
 import model.StudentNameModel;
 
@@ -80,7 +80,7 @@ public class StudentTableModel extends AbstractTableModel {
 		case GITHUB_NAME_COLUMN:
 			return student.getGithubName();
 		case HOME_LOCATION_COLUMN:
-			return LocationModel.convertLocationToString(student.getHomeLocation());
+			return LocationLookup.convertLocationToString(student.getHomeLocation());
 		case START_DATE_COLUMN:
 			if (student.getStartDate() == null)
 				return "";

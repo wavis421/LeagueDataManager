@@ -11,6 +11,7 @@ import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
 import model.InvoiceModel;
+import model.LocationModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.ScheduleModel;
@@ -50,6 +51,13 @@ public class Controller {
 
 	public void clearDbLogData() {
 		sqlDb.clearLogData();
+	}
+
+	/*
+	 * ------- Location Data -------
+	 */
+	public ArrayList<LocationModel> getLocationList() {
+		return sqlDb.getLocationList();
 	}
 
 	/*

@@ -1697,7 +1697,7 @@ public class MySqlDatabase {
 
 				result.close();
 				selectStmt.close();
-				
+
 				if (sortOrder == null)
 					Collections.sort(eventList, new CoursesCompareByDate());
 				break;
@@ -1915,5 +1915,41 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+	}
+
+	/*
+	 * ------- Location Data -------
+	 */
+	public ArrayList<LocationModel> getLocationList() {
+		ArrayList<LocationModel> locList = new ArrayList<LocationModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Location;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					locList.add(new LocationModel(result.getInt("LocIdx"), result.getString("LocCode"),
+							result.getString("LocName"), result.getString("Notes")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return locList;
 	}
 }

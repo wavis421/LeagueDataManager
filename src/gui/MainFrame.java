@@ -50,6 +50,7 @@ import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
 import model.InvoiceModel;
+import model.LocationLookup;
 import model.LogDataModel;
 
 public class MainFrame {
@@ -150,6 +151,7 @@ public class MainFrame {
 
 		// Configure panel and each table
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
+		LocationLookup.setLocationData(controller.getLocationList());
 		attendanceTable = new AttendanceTable(tablePanel, new ArrayList<AttendanceModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);

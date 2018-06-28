@@ -28,8 +28,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.gender = GenderModel.convertStringToGender(gender);
 		this.startDate = startDate;
 
-		this.homeLocation = LocationModel.convertStringToLocation(homeLocation);
-		this.homeLocString = LocationModel.convertLocationToString(this.homeLocation);
+		this.homeLocation = LocationLookup.convertStringToLocation(homeLocation);
+		this.homeLocString = LocationLookup.convertLocationToString(this.homeLocation);
 
 		if (gradYear.equals("") || gradYear.equals("\"\""))
 			this.gradYear = 0;

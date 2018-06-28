@@ -91,5 +91,19 @@ BEGIN
 
 	) ENGINE=InnoDB;
 	
+	CREATE TABLE IF NOT EXISTS Location (
+		LocDataID int(11) NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY (LocDataID),
+		
+		# Location data
+		LocIdx int(11) DEFAULT 0,
+		LocCode varchar(10) NOT NULL,
+		LocName varchar(50) NOT NULL,
+		Notes varchar(50) DEFAULT NULL,
+
+		UNIQUE KEY(LocIdx, LocCode, LocName)
+
+	) ENGINE=InnoDB;
+	
 END$$
 DELIMITER ;
