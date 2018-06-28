@@ -7,13 +7,14 @@ public class LocationModel {
 	// Location member variables
 	private int locIdx;
 	private String locCode;
-	private String locName;
+	private String locName, locNameLong;
 	private String notes;
 
-	public LocationModel(int locIdx, String locCode, String locName, String notes) {
+	public LocationModel(int locIdx, String locCode, String locName, String locNameLong, String notes) {
 		this.locIdx = locIdx;
 		this.locCode = locCode;
 		this.locName = locName;
+		this.locNameLong = locNameLong;
 		this.notes = notes;
 	}
 
@@ -28,6 +29,10 @@ public class LocationModel {
 
 	public String getLocName() {
 		return locName;
+	}
+
+	public String getLocNameLong() {
+		return locNameLong;
 	}
 
 	public String getNotes() {

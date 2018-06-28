@@ -1931,7 +1931,7 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					locList.add(new LocationModel(result.getInt("LocIdx"), result.getString("LocCode"),
-							result.getString("LocName"), result.getString("Notes")));
+							result.getString("LocName"), result.getString("LocNameLong"), result.getString("Notes")));
 				}
 
 				result.close();

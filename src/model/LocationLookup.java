@@ -18,7 +18,7 @@ public class LocationLookup {
 
 	public static int convertStringToLocation(String locName) {
 		for (LocationModel m : locList) {
-			if (locName.startsWith(m.getLocName()))
+			if (locName.startsWith(m.getLocNameLong()))
 				return m.getLocIdx();
 		}
 		return LocationModel.CLASS_LOCATION_UNKNOWN;
@@ -44,9 +44,9 @@ public class LocationLookup {
 		return locList.size();
 	}
 
-	public static boolean findLocationCodeMatch(String locCode, String locLongString) {
+	public static boolean findLocationCodeMatch(String locCode, String locStringLong) {
 		for (LocationModel m : locList) {
-			if (m.getLocCode().equals(locCode) && locLongString.startsWith(m.getLocName()))
+			if (m.getLocCode().equals(locCode) && locStringLong.startsWith(m.getLocNameLong()))
 				return true;
 		}
 		return false;
