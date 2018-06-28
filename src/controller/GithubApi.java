@@ -130,6 +130,9 @@ public class GithubApi {
 		// Create repo lists for each level
 		List<Repository> repoListLevel0 = getRepoListByLevel(0);
 		List<Repository> repoListLevel1 = getRepoListByLevel(1);
+		List<Repository> repoListLevel2 = getRepoListByLevel(2);
+		List<Repository> repoListLevel3 = getRepoListByLevel(3);
+		List<Repository> repoListLevel5 = getRepoListByLevel(5);
 		String earliestDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusMonths(4)
 				.toString("yyyy-MM-dd");
 
@@ -147,6 +150,9 @@ public class GithubApi {
 				importGithubComments(catchupStartDate, eventList);
 				importGithubCommentsByLevel(0, catchupStartDate, repoListLevel0, eventList);
 				importGithubCommentsByLevel(1, catchupStartDate, repoListLevel1, eventList);
+				importGithubCommentsByLevel(2, catchupStartDate, repoListLevel2, eventList);
+				importGithubCommentsByLevel(3, catchupStartDate, repoListLevel3, eventList);
+				importGithubCommentsByLevel(5, catchupStartDate, repoListLevel5, eventList);
 
 				// Set student 'new github' flag back to false
 				sqlDb.updateStudentFlags(student, "NewGithub", 0);
