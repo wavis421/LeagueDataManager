@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
+import model.LocationLookup;
+
 public class NotesWindow {
 	public static final int FILE_MENU = 0;
 	public static final int STUDENT_MENU = 1;
@@ -18,8 +20,9 @@ public class NotesWindow {
 	public static final int REPORTS_MENU = 4;
 	public static final int EXAMPLES = 5;
 	public static final int SEARCH_COPY = 6;
-	public static final int FEEDBACK = 7;
-	public static final int ABOUT = 8;
+	public static final int LOCATION_CODES = 7;
+	public static final int FEEDBACK = 8;
+	public static final int ABOUT = 9;
 
 	private static final String[] notes = { "\n"
 			// File Menu
@@ -93,6 +96,9 @@ public class NotesWindow {
 			+ "            desired. The only exception is the Attendance table where the right column is not copied using CSV format.\n"
 			+ "            Note that if selected cells are non-contiguous, they will instead be copied with standard tab separators.",
 			
+			// Location Codes
+			"\n     LOCATION CODES:\n\n",
+			
 			// Feedback
 			"\n\n\n"
 			+ "                                       !!! WE APPRECIATE YOUR FEEDBACK !!!\n\n"
@@ -118,12 +124,12 @@ public class NotesWindow {
 			+ "          if the recipe is still In Progress. Please also add comments about written tests and worksheets (WS).\n" };
 
 	private static final String[] titles = { "File Menu Description ", "Student Menu Description ", "Attendance Menu Description ", 
-			"Schedule Menu Description ", "Reports Menu Description ", "Examples ", "Search, Filter and Copy Features", "Provide Feedback ", 
-			"About League Student Tracker " };
+			"Schedule Menu Description ", "Reports Menu Description ", "Examples ", "Search, Filter and Copy Features", 
+			"Location Codes ", "Provide Feedback ",	"About League Student Tracker " };
 
 	private static final Dimension[] sizes = { new Dimension(820, 275), new Dimension(820, 275), new Dimension(820, 275), 
-			new Dimension(820, 275), new Dimension(820, 275), new Dimension(630, 440), new Dimension(820, 300), new Dimension(720, 270), 
-			new Dimension(825, 520) };
+			new Dimension(820, 275), new Dimension(820, 275), new Dimension(630, 440), new Dimension(820, 300), 
+			new Dimension(680, 720), new Dimension(720, 270), new Dimension(825, 520) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);
@@ -131,7 +137,10 @@ public class NotesWindow {
 		JTextArea notesArea = new JTextArea();
 
 		notesArea.setEditable(false);
-		notesArea.setText(notes[notesSelection]);
+		if (notesSelection == LOCATION_CODES)
+			notesArea.setText(notes[notesSelection] + LocationLookup.getAllLocsForDisplay());
+		else
+			notesArea.setText(notes[notesSelection]);
 		notesArea.setFont(CustomFonts.NOTES_WINDOW_FONT);
 		notesArea.setLineWrap(true);
 		notesArea.setPreferredSize(new Dimension(sizes[notesSelection].width - 20, sizes[notesSelection].height - 40));

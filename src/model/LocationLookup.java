@@ -51,4 +51,12 @@ public class LocationLookup {
 		}
 		return false;
 	}
+
+	public static String getAllLocsForDisplay() {
+		String allLocs = "";
+		for (LocationModel m : locList) {
+			allLocs += "\t" + m.getLocCode() + "\t" + m.getLocNameLong() + "\n";
+		}
+		return allLocs;
+	}
 }
