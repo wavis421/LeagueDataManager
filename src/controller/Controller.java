@@ -15,6 +15,7 @@ import model.LocationModel;
 import model.LogDataModel;
 import model.MySqlConnection;
 import model.MySqlDatabase;
+import model.MySqlDbLogging;
 import model.ScheduleModel;
 import model.StudentModel;
 import model.StudentNameModel;
@@ -28,6 +29,7 @@ public class Controller {
 	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
 		this.parent = parent;
 		sqlDb = new MySqlDatabase(parent, awsPassword, MySqlDatabase.TRACKER_APP_SSH_PORT);
+		new MySqlDbLogging(sqlDb);
 		githubApi = new GithubApi(sqlDb, githubToken);
 		pike13Api = new Pike13Api(sqlDb, pike13Token);
 	}
@@ -51,11 +53,11 @@ public class Controller {
 	 * ------- Logging Activity -------
 	 */
 	public ArrayList<LogDataModel> getDbLogData() {
-		return sqlDb.getLogData();
+		return MySqlDbLogging.getLogData();
 	}
 
 	public void clearDbLogData() {
-		sqlDb.clearLogData();
+		MySqlDbLogging.clearLogData();
 	}
 
 	/*

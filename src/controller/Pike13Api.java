@@ -21,6 +21,7 @@ import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.MySqlDbLogging;
 import model.SalesForceAttendanceModel;
 import model.SalesForceStaffHoursModel;
 import model.ScheduleModel;
@@ -1038,7 +1039,7 @@ public class Pike13Api {
 			}
 
 		} else if (!model.getIsCanceled()) {
-			mysqlDb.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND,
+			MySqlDbLogging.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND,
 					new StudentNameModel(model.getStudentName(), "", true), model.getClientID(),
 					" for '" + model.getItemName() + "'");
 		}
@@ -1222,7 +1223,7 @@ public class Pike13Api {
 			return conn;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
+			MySqlDbLogging.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					": " + e.getMessage());
 		}
 		return null;
@@ -1247,13 +1248,14 @@ public class Pike13Api {
 					return conn;
 				else {
 					conn.disconnect();
-					mysqlDb.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
+					MySqlDbLogging.insertLogData(LogDataModel.PIKE13_CONNECTION_ERROR, new StudentNameModel("", "", false), 0,
 							" " + responseCode + " (attempt #" + (i + 1) + "): " + conn.getResponseMessage());
 				}
 			}
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, null, 0, ": " + e.getMessage());
+			MySqlDbLogging.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0, 
+					": " + e.getMessage());
 		}
 
 		return null;
@@ -1271,7 +1273,7 @@ public class Pike13Api {
 			return object;
 
 		} catch (IOException e) {
-			mysqlDb.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
+			MySqlDbLogging.insertLogData(LogDataModel.PIKE13_IMPORT_ERROR, new StudentNameModel("", "", false), 0,
 					": " + e.getMessage());
 		}
 		return null;

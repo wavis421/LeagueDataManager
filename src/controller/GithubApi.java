@@ -17,6 +17,7 @@ import org.joda.time.DateTimeZone;
 import model.AttendanceEventModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
+import model.MySqlDbLogging;
 import model.StudentModel;
 import model.StudentNameModel;
 
@@ -65,12 +66,12 @@ public class GithubApi {
 			} catch (IOException e) {
 				if (e.getMessage().startsWith("API rate limit exceeded")) {
 					// Rate limit exceeded, so abort
-					sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+					MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 							": Github API rate limit exceeded ***");
 					return false;
 
 				} else {
-					sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
+					MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_FAILURE, event.getStudentNameModel(),
 							event.getClientID(), " for gitUser '" + gitUser + "': " + e.getMessage());
 				}
 			}
@@ -169,7 +170,7 @@ public class GithubApi {
 			if (event.getGithubComments().equals("") && event.getServiceDateString().compareTo(today) < 0) {
 				sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), event.getServiceDateString(),
 						event.getEventName(), null, "");
-				sqlDb.insertLogData(LogDataModel.MISSING_GITHUB_COMMENTS_BY_EVENT, event.getStudentNameModel(),
+				MySqlDbLogging.insertLogData(LogDataModel.MISSING_GITHUB_COMMENTS_BY_EVENT, event.getStudentNameModel(),
 						event.getClientID(),
 						" for " + event.getEventName()
 								+ (event.getGithubName().equals("") ? "" : ", git user: " + event.getGithubName())
@@ -195,10 +196,10 @@ public class GithubApi {
 
 		} catch (IOException e1) {
 			if (e1.getMessage().startsWith("API rate limit exceeded"))
-				sqlDb.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
+				MySqlDbLogging.insertLogData(LogDataModel.GITHUB_IMPORT_ABORTED, new StudentNameModel("", "", false), 0,
 						": Github API rate limit exceeded ***");
 			else
-				sqlDb.insertLogData(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
+				MySqlDbLogging.insertLogData(LogDataModel.GITHUB_MODULE_REPO_ERROR, null, 0,
 						" for " + ownerName + ": " + e1.getMessage());
 		}
 
