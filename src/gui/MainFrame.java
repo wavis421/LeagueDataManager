@@ -117,7 +117,7 @@ public class MainFrame {
 		PasswordDialog pwDialog = new PasswordDialog();
 		String awsPassword = pwDialog.getDialogResponse();
 
-		// Retrieve tokens from registry (Windows only)
+		// Retrieve tokens for Pike13 and Github access
 		githubToken = prefs.get("GithubToken", "");
 		pike13Token = prefs.get("Pike13Token", "");
 		if (pike13Token.equals(""))
@@ -128,12 +128,20 @@ public class MainFrame {
 		frame.add(mainPanel);
 		controller = new Controller(frame, awsPassword, githubToken, pike13Token);
 
+		// Check if database key file exists
+		File tmpFile = new File(controller.getKeyFilePath());
+		if (!tmpFile.exists()) {
+			JOptionPane.showMessageDialog(null,
+					"Missing key file. \nPlease place the key file in the executable directory.  \n",
+					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
+			shutdown();
+		}
+
 		// Connect to database
 		if (!controller.connectDatabase()) {
 			JOptionPane.showMessageDialog(null,
-					"Verify that the password you entered is correct,\n"
-							+ "that the League Student Tracker is not already running\n"
-							+ "and your key file is in the executable directory.\n",
+					"Verify that the password you entered is correct \n"
+							+ "and that the Student Tracker is not already running. \n",
 					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
 			shutdown();
 		}
@@ -460,7 +468,7 @@ public class MainFrame {
 			int menuFilter = i;
 			JMenuItem subMenu = new JMenuItem(menuDescripNames[i]);
 			menuDescription.add(subMenu);
-			
+
 			subMenu.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (menuFilter == fileMenuIdx)

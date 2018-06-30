@@ -13,6 +13,7 @@ import model.GithubModel;
 import model.InvoiceModel;
 import model.LocationModel;
 import model.LogDataModel;
+import model.MySqlConnection;
 import model.MySqlDatabase;
 import model.ScheduleModel;
 import model.StudentModel;
@@ -40,6 +41,10 @@ public class Controller {
 
 	public void disconnectDatabase() {
 		sqlDb.disconnectDatabase();
+	}
+	
+	public String getKeyFilePath() {
+		return MySqlConnection.getKeyFilePath();
 	}
 
 	/*

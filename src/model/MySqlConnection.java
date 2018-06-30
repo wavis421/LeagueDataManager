@@ -34,6 +34,10 @@ public class MySqlConnection {
 		localSshPort = localPort;
 	}
 
+	public static String getKeyFilePath() {
+		return SSH_KEY_FILE_PATH;
+	}
+
 	public Connection connectToServer(JFrame parent, String password) throws SQLException {
 		// Save current cursor and set to "wait" cursor
 		Cursor cursor = null;
