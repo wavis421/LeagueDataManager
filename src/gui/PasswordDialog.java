@@ -40,6 +40,9 @@ public class PasswordDialog extends JDialog implements KeyListener {
 		setSize(300, 100);
 		setLocation(200, 200);
 		setVisible(true);
+		
+		setAlwaysOnTop(true);
+		requestFocus();
 	}
 
 	public String getDialogResponse() {

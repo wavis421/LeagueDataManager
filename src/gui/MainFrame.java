@@ -131,7 +131,7 @@ public class MainFrame {
 		// Check if database key file exists
 		File tmpFile = new File(controller.getKeyFilePath());
 		if (!tmpFile.exists()) {
-			JOptionPane.showMessageDialog(null,
+			JOptionPane.showMessageDialog(frame,
 					"Missing key file. \nPlease place the key file in the executable directory.  \n",
 					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
 			shutdown();
@@ -139,7 +139,7 @@ public class MainFrame {
 
 		// Connect to database
 		if (!controller.connectDatabase()) {
-			JOptionPane.showMessageDialog(null,
+			JOptionPane.showMessageDialog(frame,
 					"Verify that the password you entered is correct \n"
 							+ "and that the Student Tracker is not already running. \n",
 					"Failure connecting to database", JOptionPane.ERROR_MESSAGE, icon);
@@ -309,7 +309,7 @@ public class MainFrame {
 
 				} catch (PrinterException e1) {
 					frame.setCursor(Cursor.getDefaultCursor());
-					JOptionPane.showMessageDialog(null, e1.getMessage(), "Printer Failure", JOptionPane.ERROR_MESSAGE,
+					JOptionPane.showMessageDialog(frame, e1.getMessage(), "Printer Failure", JOptionPane.ERROR_MESSAGE,
 							icon);
 				}
 
