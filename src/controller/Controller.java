@@ -3,9 +3,10 @@ package controller;
 import java.awt.Cursor;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
-import model.AttendanceEventModel;
 import model.AttendanceModel;
 import model.CoursesModel;
 import model.DateRangeEvent;
@@ -22,15 +23,16 @@ import model.StudentNameModel;
 
 public class Controller {
 	private MySqlDatabase sqlDb;
-	private GithubApi githubApi;
 	private Pike13Api pike13Api;
 	private JFrame parent;
+	private ImageIcon icon;
 
-	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token) {
+	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token, ImageIcon icon) {
 		this.parent = parent;
+		this.icon = icon;
 		sqlDb = new MySqlDatabase(parent, awsPassword, MySqlDatabase.TRACKER_APP_SSH_PORT);
 		new MySqlDbLogging(sqlDb);
-		githubApi = new GithubApi(sqlDb, githubToken);
+		new GithubApi(sqlDb, githubToken);
 		pike13Api = new Pike13Api(sqlDb, pike13Token);
 	}
 
@@ -44,7 +46,7 @@ public class Controller {
 	public void disconnectDatabase() {
 		sqlDb.disconnectDatabase();
 	}
-	
+
 	public String getKeyFilePath() {
 		return MySqlConnection.getKeyFilePath();
 	}
@@ -53,86 +55,133 @@ public class Controller {
 	 * ------- Logging Activity -------
 	 */
 	public ArrayList<LogDataModel> getDbLogData() {
-		return MySqlDbLogging.getLogData();
+		ArrayList<LogDataModel> result = MySqlDbLogging.getLogData();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public void clearDbLogData() {
 		MySqlDbLogging.clearLogData();
+		if (sqlDb.getConnectError())
+			reportConnectError();
 	}
 
 	/*
 	 * ------- Location Data -------
 	 */
 	public ArrayList<LocationModel> getLocationList() {
-		return sqlDb.getLocationList();
+		ArrayList<LocationModel> result = sqlDb.getLocationList();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	/*
 	 * ------- Database Queries -------
 	 */
 	public ArrayList<StudentModel> getActiveStudents() {
-		return sqlDb.getActiveStudents();
+		ArrayList<StudentModel> result = sqlDb.getActiveStudents();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
-		return sqlDb.getStudentByClientID(clientID);
+		ArrayList<StudentModel> result = sqlDb.getStudentByClientID(clientID);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
-		return sqlDb.getStudentsNotInMasterDB();
+		ArrayList<StudentModel> result = sqlDb.getStudentsNotInMasterDB();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<GithubModel> getStudentsWithNoRecentGithub(String sinceDate, int minClassesWithoutGithub) {
-		return sqlDb.getStudentsWithNoRecentGithub(sinceDate, minClassesWithoutGithub);
+		ArrayList<GithubModel> result = sqlDb.getStudentsWithNoRecentGithub(sinceDate, minClassesWithoutGithub);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public void removeInactiveStudents() {
 		sqlDb.removeInactiveStudents();
+		if (sqlDb.getConnectError())
+			reportConnectError();
 	}
 
 	public void removeStudentByClientID(int clientID) {
 		sqlDb.removeStudentByClientID(clientID);
+		if (sqlDb.getConnectError())
+			reportConnectError();
 	}
 
 	public ArrayList<AttendanceModel> getAllAttendance() {
-		return sqlDb.getAllAttendance();
+		ArrayList<AttendanceModel> result = sqlDb.getAllAttendance();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
-		return sqlDb.getAttendanceByClassName(className);
+		ArrayList<AttendanceModel> result = sqlDb.getAttendanceByClassName(className);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<AttendanceModel> getAttendanceByCourseName(String courseName) {
-		return sqlDb.getAttendanceByCourseName(courseName);
+		ArrayList<AttendanceModel> result = sqlDb.getAttendanceByCourseName(courseName);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<AttendanceModel> getAttendanceByClientID(String clientID) {
-		return sqlDb.getAttendanceByClientID(clientID);
+		ArrayList<AttendanceModel> result = sqlDb.getAttendanceByClientID(clientID);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<AttendanceModel> getAttendanceByClassByDate(String className, String day) {
-		return sqlDb.getAttendanceByClassByDate(className, day);
+		ArrayList<AttendanceModel> result = sqlDb.getAttendanceByClassByDate(className, day);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<StudentNameModel> getAllStudentNames() {
-		return sqlDb.getAllStudentNames();
+		ArrayList<StudentNameModel> result = sqlDb.getAllStudentNames();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<String> getClassNamesByLevel(int level) {
-		return sqlDb.getClassNamesByLevel(level);
+		ArrayList<String> result = sqlDb.getClassNamesByLevel(level);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<ScheduleModel> getClassSchedule() {
-		return sqlDb.getClassSchedule();
+		ArrayList<ScheduleModel> result = sqlDb.getClassSchedule();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
 
 	public ArrayList<CoursesModel> getCourseSchedule() {
-		return sqlDb.getCourseSchedule(null);
+		ArrayList<CoursesModel> result = sqlDb.getCourseSchedule(null);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
 	}
-
-	/*
-	 * ------- File & data import/export -------
-	 */
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
 		// Set cursor to "wait" cursor
@@ -143,15 +192,16 @@ public class Controller {
 
 		// Set cursor back to default
 		parent.setCursor(Cursor.getDefaultCursor());
+
+		if (sqlDb.getConnectError())
+			reportConnectError();
 		return invoiceList;
 	}
 
-	private void removeUpdatedGithubEvents(ArrayList<AttendanceEventModel> eventList) {
-		for (int i = eventList.size() - 1; i >= 0; i--) {
-			AttendanceEventModel model = eventList.get(i);
-			if (!model.getGithubComments().equals("")) {
-				eventList.remove(model);
-			}
-		}
+	private void reportConnectError() {
+		JOptionPane.showMessageDialog(parent,
+				"Check your internet connection, and whether  \nanother Student Tracker is already connected. \n",
+				"Failure re-connecting to database", JOptionPane.ERROR_MESSAGE, icon);
+		sqlDb.clearConnectError();
 	}
 }

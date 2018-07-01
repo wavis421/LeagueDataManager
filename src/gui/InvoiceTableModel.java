@@ -15,13 +15,12 @@ public class InvoiceTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 4;
 	public static final int PAYER_NAME_COLUMN = 5;
 	public static final int START_DATE_COLUMN = 6;
-	public static final int END_DATE_COLUMN = 7;
-	public static final int PAYMENT_METHOD_COLUMN = 8;
-	public static final int TRANSACTION_ID_COLUMN = 9;
+	public static final int PAYMENT_METHOD_COLUMN = 7;
+	public static final int TRANSACTION_ID_COLUMN = 8;
 
 	private ArrayList<InvoiceModel> invoiceList;
 	private final String[] colNames = { " Date ", " Amount ", " Item Name ", "  ", " Student Name ",
-			" Payer Name ", " Start ", " End ", " Pay Method ", " Ext Transaction # " };
+			" Payer Name ", " Start ", " Pay Method ", " Ext Transaction # " };
 
 	public InvoiceTableModel(ArrayList<InvoiceModel> invoiceList) {
 		this.invoiceList = invoiceList;
@@ -82,11 +81,6 @@ public class InvoiceTableModel extends AbstractTableModel {
 				return "";
 			else
 				return invoiceData.getItemStartDate();
-		case END_DATE_COLUMN:
-			if (invoiceData.getItemEndDate() == null)
-				return "";
-			else
-				return invoiceData.getItemEndDate();
 		case PAYMENT_METHOD_COLUMN:
 			return invoiceData.getPayMethod();
 		case TRANSACTION_ID_COLUMN:

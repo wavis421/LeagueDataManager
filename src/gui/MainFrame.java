@@ -126,7 +126,7 @@ public class MainFrame {
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
-		controller = new Controller(frame, awsPassword, githubToken, pike13Token);
+		controller = new Controller(frame, awsPassword, githubToken, pike13Token, icon);
 
 		// Check if database key file exists
 		File tmpFile = new File(controller.getKeyFilePath());

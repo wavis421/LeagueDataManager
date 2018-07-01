@@ -34,6 +34,7 @@ public class MySqlDatabase {
 	private String awsPassword;
 	private MySqlConnection mySqlConnection;
 	private int localPort;
+	private boolean connectError = false;
 
 	public MySqlDatabase(JFrame parent, String awsPassword, int localPort) {
 		// This constructor is used by LeagueDataManager GUI
@@ -50,6 +51,14 @@ public class MySqlDatabase {
 		this.localPort = localPort;
 
 		mySqlConnection = new MySqlConnection(localPort);
+	}
+
+	public boolean getConnectError() {
+		return connectError;
+	}
+
+	public void clearConnectError() {
+		connectError = false;
 	}
 
 	/*
@@ -110,7 +119,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -138,7 +148,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
@@ -174,7 +185,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -211,7 +223,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -248,7 +261,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
@@ -285,7 +299,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -314,7 +329,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, student.getNameModel(),
@@ -348,7 +364,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -387,7 +404,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -429,7 +447,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -475,7 +494,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -525,7 +545,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -559,7 +580,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -633,7 +655,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -688,7 +711,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -792,7 +816,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -825,7 +850,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -867,7 +893,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e) {
 				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
@@ -902,7 +929,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -942,7 +970,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.COURSES_DB_ERROR, new StudentNameModel("", "", false), 0,
@@ -978,7 +1007,8 @@ public class MySqlDatabase {
 				if (i == 0) {
 					// First attempt to re-connect
 					connectDatabase();
-				}
+				} else
+					connectError = true;
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
