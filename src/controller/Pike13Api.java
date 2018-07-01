@@ -231,7 +231,6 @@ public class Pike13Api {
 	private final int STAFF_EVENT_FULL_NAME_IDX = 11;
 	private final int STAFF_EVENT_SERVICE_CATEGORY_IDX = 12;
 
-	// TODO: Currently getting up to 500 fields; get multi pages if necessary
 	private final String getClientData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
 			+ "\"attributes\":{"
@@ -240,8 +239,9 @@ public class Pike13Api {
 			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
 			+ "            \"future_visits\",\"completed_visits\"],"
 			// Page limit max is 500
-			+ "\"page\":{\"limit\":500},"
-			+ "\"sort\":[\"person_id+\"],"
+			+ "\"page\":{\"limit\":500";
+	
+	private final String getClientData2 = "},"
 			// Filter on Dependents NULL and either has future visits or recent completed visits
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"emp\",\"dependent_names\"],"
@@ -476,45 +476,63 @@ public class Pike13Api {
 
 	public ArrayList<StudentImportModel> getClients() {
 		ArrayList<StudentImportModel> studentList = new ArrayList<StudentImportModel>();
+		boolean hasMore = false;
+		String lastKey = "";
 
 		// Insert since date for completed visit (in last 30 days)
-		String clients = getClientData.replaceFirst("0000-00-00",
+		String clients2 = getClientData2.replaceFirst("0000-00-00",
 				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).
 					minusDays(MySqlDatabase.CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd"));
 
-		// Get URL connection with authorization and send the query
-		HttpURLConnection conn = sendQueryToUrl("clients", clients);
-		if (conn == null)
-			return studentList;
+		do {
+			// Get URL connection with authorization
+			HttpURLConnection conn;
 
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return studentList;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+			// Send the query
+			if (hasMore)
+				conn = sendQueryToUrl("clients", getClientData + ",\"starting_after\":\"" + lastKey + "\"" + clients2);
+			else
+				conn = sendQueryToUrl("clients", getClientData + clients2);
 
-		for (int i = 0; i < jsonArray.size(); i++) {
-			// Get fields for each person
-			JsonArray personArray = (JsonArray) jsonArray.get(i);
-			String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
+			if (conn == null)
+				return studentList;
 
-			if (!firstName.startsWith("Guest")) {
-				// Get fields for this Json array entry
-				StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
-						stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
-						stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
-						stripQuotes(personArray.get(GITHUB_IDX).toString()),
-						stripQuotes(personArray.get(GENDER_IDX).toString()),
-						stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
-						stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
-						stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
-				studentList.add(model);
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return studentList;
 			}
-		}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
-		conn.disconnect();
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get fields for each person
+				JsonArray personArray = (JsonArray) jsonArray.get(i);
+				String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
+
+				if (!firstName.startsWith("Guest")) {
+					// Get fields for this Json array entry
+					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
+							stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
+							stripQuotes(personArray.get(FIRST_NAME_IDX).toString()),
+							stripQuotes(personArray.get(GITHUB_IDX).toString()),
+							stripQuotes(personArray.get(GENDER_IDX).toString()),
+							stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
+							stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
+							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
+					studentList.add(model);
+				}
+			}
+
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
+
+			conn.disconnect();
+
+		} while (hasMore);
+
 		return studentList;
 	}
 
