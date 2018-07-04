@@ -276,8 +276,8 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\"],"
-			// Page limit max is 10
-			+ "\"page\":{\"limit\":10},"
+			// Page limit max is 25
+			+ "\"page\":{\"limit\":25},"
 			// Filter on account manager name
 			+ "\"filter\":[\"eq\",\"full_name\",\"NNNN\"]}}}";
 
@@ -379,8 +379,8 @@ public class Pike13Api {
 			// Select fields
 			+ "\"fields\":[\"issued_date\",\"gross_amount\",\"product_name\",\"plan_id\",\"coupon_code\","
 			+ "            \"recipient_names\",\"invoice_payer_name\"],"
-			// Page limit max is 150
-			+ "\"page\":{\"limit\":150},"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
 			// Filter on hard-coded month for now
 			+ "\"filter\":[\"and\",[[\"btw\",\"issued_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"eq\",\"revenue_category\",\"Courses\"],"
@@ -392,8 +392,8 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"plan_id\",\"payment_method\",\"processor_transaction_id\"],"
-			// Page limit max is 150
-			+ "\"page\":{\"limit\":150},"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
 			// Filter on hard-coded month for now
 			+ "\"filter\":[\"btw\",\"transaction_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
 
@@ -403,8 +403,8 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\",\"is_canceled\",\"plan_name\",\"product_id\"],"
-			// Page limit max is 10
-			+ "\"page\":{\"limit\":10},"
+			// Page limit max is 25
+			+ "\"page\":{\"limit\":25},"
 			// Filter on plan_id which is filled in at run-time
 			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
 
@@ -414,8 +414,8 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"is_canceled\"],"
-			// Page limit max is 150
-			+ "\"page\":{\"limit\":150},"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
 			// Filter on Product ID for this client
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",IIII],"
 			+ "                     [\"eq\",\"product_id\",PPPP]]]}}}";
