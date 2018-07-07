@@ -129,6 +129,7 @@ public class GithubApi {
 			return;
 
 		// Create repo lists for each level
+		List<Repository> repoListLevelIntro = getRepoListByLevel(-1);
 		List<Repository> repoListLevel0 = getRepoListByLevel(0);
 		List<Repository> repoListLevel1 = getRepoListByLevel(1);
 		List<Repository> repoListLevel2 = getRepoListByLevel(2);
@@ -149,6 +150,7 @@ public class GithubApi {
 				ArrayList<AttendanceEventModel> eventList = sqlDb.getEventsWithNoComments(catchupStartDate,
 						student.getClientID(), true);
 				importGithubComments(catchupStartDate, eventList);
+				importGithubCommentsByLevel(-1, catchupStartDate, repoListLevelIntro, eventList);
 				importGithubCommentsByLevel(0, catchupStartDate, repoListLevel0, eventList);
 				importGithubCommentsByLevel(1, catchupStartDate, repoListLevel1, eventList);
 				importGithubCommentsByLevel(2, catchupStartDate, repoListLevel2, eventList);
