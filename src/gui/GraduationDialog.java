@@ -71,12 +71,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
 	private GradTableModel gradTableModel;
-	private JButton cancelButton;
-	private JButton okButton;
+	private JButton emailAllButton;
+	private JButton submitButton;
+	private JButton doneButton;
 	private JLabel errorField;
 	private String gradClassName;
 	private String[] gradLevels = new String[10];
 	private int gradLevelNum;
+	private boolean emailAllParents = false;
 
 	// Temporary: for test only
 	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
@@ -136,8 +138,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		errorField.setPreferredSize(new Dimension(PANEL_WIDTH - 20, errorField.getPreferredSize().height));
 		errorField.setHorizontalTextPosition(JLabel.CENTER);
 		errorField.setHorizontalAlignment(JLabel.CENTER);
-		cancelButton = new JButton("Cancel");
-		okButton = new JButton("Submit Scores");
+		emailAllButton = new JButton("Email All Parents");
+		submitButton = new JButton("Submit Scores");
+		doneButton = new JButton("Done");
 
 		// Set panel height/width
 		controlPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_PANEL_HEIGHT));
@@ -173,8 +176,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		tablePanel.add(gradScrollPane);
 		errorPanel.add(errorField, JPanel.CENTER_ALIGNMENT);
-		okCancelPanel.add(cancelButton);
-		okCancelPanel.add(okButton);
+		okCancelPanel.add(emailAllButton);
+		okCancelPanel.add(submitButton);
+		okCancelPanel.add(doneButton);
 		buttonPanel.add(errorPanel, JPanel.CENTER_ALIGNMENT);
 		buttonPanel.add(okCancelPanel);
 
@@ -185,8 +189,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		add(buttonPanel, BorderLayout.SOUTH);
 
 		// Add listener to buttons
-		cancelButton.addActionListener(this);
-		okButton.addActionListener(this);
+		emailAllButton.addActionListener(this);
+		submitButton.addActionListener(this);
+		doneButton.addActionListener(this);
 
 		// Set icon
 		// TODO: Don't hard-code file name
@@ -280,7 +285,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == okButton) {
+		if (e.getSource() == submitButton) {
 			String pw = emailPwField.getText();
 			int countGrads = 0;
 
@@ -324,6 +329,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			} else {
 				errorField.setText("Teacher email password required");
 			}
+
+		} else if (e.getSource() == emailAllButton) {
+			emailAllParents = true;
+			updateEmailParents();
 
 		} else {
 			setVisible(false);
@@ -432,6 +441,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
+			updateEmailParents();
 			textField = (JTextField) ((GradTableModel) table.getModel()).getValueAt(row, column);
 			return textField;
 		}
@@ -504,5 +514,16 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		for (int i = 0; i < gradLevels.length; i++) {
 			gradLevels[i] = "Level " + i + "  ";
 		}
+	}
+
+	private void updateEmailParents() {
+		for (int i = 0; i < gradTable.getRowCount(); i++) {
+			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
+			if (score.equals(""))
+				gradTableModel.setEmailParents(i, false);
+			else if (emailAllParents)
+				gradTableModel.setEmailParents(i, true);
+		}
+		gradTableModel.fireTableDataChanged();
 	}
 }
