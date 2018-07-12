@@ -24,7 +24,6 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -42,12 +41,14 @@ import javax.swing.table.TableCellRenderer;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.joda.time.DateTime;
 
+import model.AttendanceModel;
+
 public class GraduationDialog extends JDialog implements ActionListener {
 	private final static int FRAME_WIDTH = 600;
-	private final static int FRAME_HEIGHT = 500;
+	private final static int FRAME_HEIGHT = 460;
 
 	// Main panel heights
-	private final static int CONTROL_PANEL_HEIGHT = 205;
+	private final static int CONTROL_PANEL_HEIGHT = 185;
 	private final static int TABLE_PANEL_HEIGHT = 150;
 	private final static int BUTTON_PANEL_HEIGHT = 80;
 
@@ -59,7 +60,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private final static int PASSWORD_FIELD_WIDTH = 20;
 
 	// Table width/height
-	private final static int GRAD_TABLE_WIDTH = PANEL_WIDTH - 50;
+	private final static int GRAD_TABLE_WIDTH = PANEL_WIDTH - 20;
 	private final static int GRAD_TABLE_HEIGHT = TABLE_PANEL_HEIGHT - 10;
 
 	// GUI components
@@ -68,22 +69,23 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JComboBox<String> gradLevelList;
 	private ArrayList<GraduationModel> gradList;
 	private JDatePickerImpl gradDatePicker;
-	private JCheckBox emailParentCheckBox;
 	private JTable gradTable;
 	private GradTableModel gradTableModel;
 	private JButton cancelButton;
 	private JButton okButton;
 	private JLabel errorField;
 	private String gradClassName;
+	private String[] gradLevels = new String[10];
+	private int gradLevelNum;
 
 	// Temporary: for test only
 	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
-	String[] gradLevels = { "Level 0  ", "Level 1  ", "Level 2  ", "Level 3  ", "Level 4  ", "Level 5  ", "Level 6  ",
-			"Level 7  ", "Level 8  ", "Level 9  " };
 
-	public GraduationDialog(String clientID, String gradClassName) {
+	public GraduationDialog(String gradClassName, ArrayList<AttendanceModel> attendanceList) {
 		setModal(true);
 		this.gradClassName = gradClassName;
+		gradLevelNum = getLevelFromClassName(gradClassName);
+		createGradLevelList();
 
 		// Create top level panels
 		JPanel controlPanel = new JPanel();
@@ -95,7 +97,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		JPanel passwordPanel = new JPanel();
 		JPanel levelPanel = new JPanel();
 		JPanel gradDatePanel = new JPanel();
-		JPanel emailParentPanel = new JPanel();
 
 		// Create sub-panels inside of button panel
 		JPanel errorPanel = new JPanel();
@@ -116,21 +117,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		emailUserList = new JComboBox<String>(teacherEmails);
 		emailPwField = new JPasswordField(PASSWORD_FIELD_WIDTH);
 		gradLevelList = new JComboBox<String>(gradLevels);
+		gradLevelList.setSelectedIndex(gradLevelNum);
 		gradDatePicker = new DatePicker(new DateTime()).getDatePicker();
-		emailParentCheckBox = new JCheckBox("Send email to parent: ");
-		emailParentCheckBox.setHorizontalTextPosition(JCheckBox.LEFT);
 
 		// Create table field
 		gradList = new ArrayList<GraduationModel>();
-		gradList.add(new GraduationModel("Alice Anderson", false, ""));
-		gradList.add(new GraduationModel("Betty Broderson", false, ""));
-		gradList.add(new GraduationModel("Cathy Clarke", false, ""));
-		gradList.add(new GraduationModel("Donald Duck", false, ""));
-		gradList.add(new GraduationModel("Emerson Elliot", false, ""));
-		gradList.add(new GraduationModel("Frank Ferguson", false, ""));
-		gradList.add(new GraduationModel("Gregory Grayson", false, ""));
-		gradList.add(new GraduationModel("Herb Halstead", false, ""));
-
+		for (AttendanceModel a : attendanceList)
+			gradList.add(new GraduationModel(a.getStudentName().toString(), "", false));
 		gradTableModel = new GradTableModel(gradList);
 		gradTable = new JTable(gradTableModel);
 		gradTable.addMouseListener(new GradTableListener());
@@ -152,7 +145,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		passwordPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
 		levelPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
 		gradDatePanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT + 5));
-		emailParentPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
 		buttonPanel.setPreferredSize(new Dimension(PANEL_WIDTH, BUTTON_PANEL_HEIGHT));
 
 		// Add orange borders for all input fields
@@ -162,7 +154,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		emailPwField.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradLevelList.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradDatePicker.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-		emailParentCheckBox.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradScrollPane.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
 		// Add all of the above to the panels
@@ -174,13 +165,11 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		levelPanel.add(gradLevelList);
 		gradDatePanel.add(gradDateLabel);
 		gradDatePanel.add(gradDatePicker);
-		emailParentPanel.add(emailParentCheckBox);
 
 		controlPanel.add(emailPanel);
 		controlPanel.add(passwordPanel);
 		controlPanel.add(levelPanel);
 		controlPanel.add(gradDatePanel);
-		controlPanel.add(emailParentPanel);
 
 		tablePanel.add(gradScrollPane);
 		errorPanel.add(errorField, JPanel.CENTER_ALIGNMENT);
@@ -223,9 +212,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(GradTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
-		table.getColumnModel().getColumn(GradTableModel.IS_SELECTED_COLUMN).setMaxWidth(70);
+		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(80);
 		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(80);
+		table.getColumnModel().getColumn(GradTableModel.PARENT_EMAIL_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(GradTableModel.PARENT_EMAIL_COLUMN).setMaxWidth(120);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
@@ -292,34 +282,39 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == okButton) {
 			String pw = emailPwField.getText();
-			int countSelected = 0;
+			int countGrads = 0;
 
 			// Check that all fields are filled in, then create body and send email
 			if (!pw.equals("")) {
 				String body = "Test Graduation for class " + gradClassName;
 				for (int i = 0; i < gradTableModel.getRowCount(); i++) {
-					if ((boolean) gradTableModel.getValueAt(i, GradTableModel.IS_SELECTED_COLUMN)) {
+					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
+							.getText();
+					boolean emailParent = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PARENT_EMAIL_COLUMN));
+
+					if (!scoreString.equals("")) {
 						try {
-							String scoreString = ((JTextField) gradTableModel.getValueAt(i,
-									GradTableModel.SCORE_COLUMN)).getText();
-							int score = Integer.parseInt(scoreString);
+							Double score = Double.parseDouble(scoreString);
 							if (score < 70 || score > 100) {
 								errorField.setText("Student must have a passing score (%) between 70 and 100");
 								return;
 							}
-							body += "\n\tStudent Name: "
-									+ gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN) + ", Score: "
-									+ scoreString;
-							countSelected++;
+							body += "\n\t" + gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN)
+									+ ", Score: " + scoreString + "%";
+							countGrads++;
 
 						} catch (NumberFormatException e2) {
 							errorField.setText("Student score (%) must be between 70 and 100");
 							return;
 						}
+
+					} else if (emailParent) {
+						errorField.setText("Cannot send parent email without a valid score");
+						return;
 					}
 				}
-				if (countSelected == 0)
-					errorField.setText("No students selected");
+				if (countGrads == 0)
+					errorField.setText("No student grades entered");
 
 				else if (generateAndSendEmail(emailUserList.getSelectedItem().toString(), pw, body)) {
 					setVisible(false);
@@ -337,18 +332,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private class GraduationModel {
-		private boolean isChecked;
 		private String studentName;
 		private JTextField score = new JTextField();
+		private boolean emailParents;
 
-		public GraduationModel(String studentName, boolean isChecked, String score) {
+		public GraduationModel(String studentName, String score, boolean emailParents) {
 			this.studentName = studentName;
-			this.isChecked = isChecked;
 			this.score.setText(score);
-		}
-
-		public boolean isChecked() {
-			return isChecked;
+			this.emailParents = emailParents;
 		}
 
 		public String getStudentName() {
@@ -362,23 +353,27 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		public JTextField getScoreTextField() {
 			return score;
 		}
+
+		public boolean getEmailParents() {
+			return emailParents;
+		}
 	}
 
 	private class GradTableModel extends AbstractTableModel {
 		public static final int STUDENT_NAME_COLUMN = 0;
-		public static final int IS_SELECTED_COLUMN = 1;
-		public static final int SCORE_COLUMN = 2;
+		public static final int SCORE_COLUMN = 1;
+		public static final int PARENT_EMAIL_COLUMN = 2;
 
+		private final String[] colNames = { " Student Name ", " Score (%) ", " Email Parents " };
 		private Object[][] tableObjects;
-		private final String[] colNames = { " Student Name ", " Submit ", " Score " };
 
 		public GradTableModel(ArrayList<GraduationModel> grads) {
 			tableObjects = new Object[grads.size()][colNames.length];
 
 			for (int row = 0; row < grads.size(); row++) {
 				tableObjects[row][STUDENT_NAME_COLUMN] = grads.get(row).getStudentName();
-				tableObjects[row][IS_SELECTED_COLUMN] = grads.get(row).isChecked();
 				tableObjects[row][SCORE_COLUMN] = grads.get(row).getScoreTextField();
+				tableObjects[row][PARENT_EMAIL_COLUMN] = grads.get(row).getEmailParents();
 			}
 		}
 
@@ -410,14 +405,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		@Override
 		public boolean isCellEditable(int row, int col) {
-			if (col == IS_SELECTED_COLUMN || col == SCORE_COLUMN)
+			if (col == PARENT_EMAIL_COLUMN || col == SCORE_COLUMN)
 				return true;
 			else
 				return false;
 		}
 
-		public void setCheckedStatus(int row, boolean checked) {
-			tableObjects[row][IS_SELECTED_COLUMN] = checked;
+		public void setEmailParents(int row, boolean checked) {
+			tableObjects[row][PARENT_EMAIL_COLUMN] = checked;
 		}
 
 		@Override
@@ -427,18 +422,18 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private class GradCellEditor extends AbstractCellEditor implements TableCellEditor {
-		JTextField editor;
+		JTextField textField;
 
 		@Override
 		public Object getCellEditorValue() {
-			return editor.getText();
+			return textField.getText();
 		}
 
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
-			editor = (JTextField) ((GradTableModel) table.getModel()).getValueAt(row, column);
-			return editor;
+			textField = (JTextField) ((GradTableModel) table.getModel()).getValueAt(row, column);
+			return textField;
 		}
 	}
 
@@ -485,12 +480,29 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			int col = gradTable.getSelectedColumn();
 
 			if (e.getButton() == MouseEvent.BUTTON1 && row > -1) {
-				if (col == GradTableModel.IS_SELECTED_COLUMN) {
-					boolean checked = (boolean) gradTable.getValueAt(row, col);
-					gradTableModel.setCheckedStatus(row, !checked);
-
+				if (col == GradTableModel.PARENT_EMAIL_COLUMN) {
+					String score = ((JTextField) (gradTable.getValueAt(row, GradTableModel.SCORE_COLUMN))).getText();
+					if (score.equals(""))
+						gradTableModel.setEmailParents(row, false);
+					else {
+						boolean checked = (boolean) gradTable.getValueAt(row, col);
+						gradTableModel.setEmailParents(row, !checked);
+					}
 				}
 			}
+		}
+	}
+
+	private int getLevelFromClassName(String className) {
+		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
+			return className.charAt(0) - '0';
+		else
+			return 0;
+	}
+
+	private void createGradLevelList() {
+		for (int i = 0; i < gradLevels.length; i++) {
+			gradLevels[i] = "Level " + i + "  ";
 		}
 	}
 }
