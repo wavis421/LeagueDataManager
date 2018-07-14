@@ -78,7 +78,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private String gradClassName;
 	private String[] gradLevels = new String[10];
 	private int gradLevelNum;
-	private boolean emailAllParents = false;
 
 	// Temporary: for test only
 	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
@@ -115,7 +114,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		levelLabel.setHorizontalAlignment(JLabel.RIGHT);
 		gradDateLabel.setHorizontalAlignment(JLabel.RIGHT);
 
-		// Create text input fields
+		// Create input fields
 		emailUserList = new JComboBox<String>(teacherEmails);
 		emailPwField = new JPasswordField(PASSWORD_FIELD_WIDTH);
 		gradLevelList = new JComboBox<String>(gradLevels);
@@ -138,7 +137,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		errorField.setPreferredSize(new Dimension(PANEL_WIDTH - 20, errorField.getPreferredSize().height));
 		errorField.setHorizontalTextPosition(JLabel.CENTER);
 		errorField.setHorizontalAlignment(JLabel.CENTER);
-		emailAllButton = new JButton("Email All Parents");
+		emailAllButton = new JButton("Select all 'Email Parents'");
 		submitButton = new JButton("Submit Scores");
 		doneButton = new JButton("Done");
 
@@ -244,8 +243,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		properties.put("mail.smtp.socketFactory.port", "465");
 		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		properties.put("mail.smtp.port", "465");
+		properties.put("mail.smtp.connectiontimeout", 10000); // 10 seconds
 
-		Session session = Session.getDefaultInstance(properties, new javax.mail.Authenticator() {
+		Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication(emailUser, new String(emailPassword));
 			}
@@ -318,23 +318,23 @@ public class GraduationDialog extends JDialog implements ActionListener {
 						return;
 					}
 				}
-				if (countGrads == 0)
+				if (countGrads == 0) {
 					errorField.setText("No student grades entered");
-
-				else if (generateAndSendEmail(emailUserList.getSelectedItem().toString(), pw, body)) {
-					setVisible(false);
-					dispose();
+					return;
 				}
+
+				// Send email. If error occurs, generateAndSendEmail method will report error
+				if (generateAndSendEmail(emailUserList.getSelectedItem().toString(), pw, body))
+					errorField.setText("Email sent successfully");
 
 			} else {
 				errorField.setText("Teacher email password required");
 			}
 
 		} else if (e.getSource() == emailAllButton) {
-			emailAllParents = true;
 			updateEmailParents();
 
-		} else {
+		} else { // Done button
 			setVisible(false);
 			dispose();
 		}
@@ -349,6 +349,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			this.studentName = studentName;
 			this.score.setText(score);
 			this.emailParents = emailParents;
+			
+			this.score.setFont(CustomFonts.TABLE_TEXT_FONT);
+			this.score.setHorizontalAlignment(JTextField.CENTER);
 		}
 
 		public String getStudentName() {
@@ -441,7 +444,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
-			updateEmailParents();
 			textField = (JTextField) ((GradTableModel) table.getModel()).getValueAt(row, column);
 			return textField;
 		}
@@ -521,7 +523,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
 			if (score.equals(""))
 				gradTableModel.setEmailParents(i, false);
-			else if (emailAllParents)
+			else
 				gradTableModel.setEmailParents(i, true);
 		}
 		gradTableModel.fireTableDataChanged();

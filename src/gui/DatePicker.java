@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Properties;
 
+import javax.swing.JFormattedTextField;
+import javax.swing.JTextField;
 import javax.swing.JFormattedTextField.AbstractFormatter;
 
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -33,8 +35,11 @@ public class DatePicker {
 
 		datePanel = new JDatePanelImpl(dateModel, prop);
 		datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-		datePicker.setFont(CustomFonts.TABLE_TEXT_FONT);
 		datePicker.setPreferredSize(new Dimension(130, 32));
+		
+		JFormattedTextField textField = datePicker.getJFormattedTextField();
+		textField.setFont(CustomFonts.TABLE_TEXT_FONT);
+		textField.setHorizontalAlignment(JTextField.CENTER);
 	}
 
 	public JDatePickerImpl getDatePicker() {
