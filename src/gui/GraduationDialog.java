@@ -67,7 +67,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JComboBox<String> emailUserList;
 	private JPasswordField emailPwField;
 	private JComboBox<String> gradLevelList;
-	private String[] gradLevels = new String[10];
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
 	private GradTableModel gradTableModel;
@@ -75,6 +74,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JButton submitButton;
 	private JButton doneButton;
 	private JLabel errorField;
+	private static String[] gradLevels = new String[10];
 
 	// Temporary: for test only
 	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
@@ -539,5 +539,15 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				gradTableModel.setEmailParents(i, true);
 		}
 		gradTableModel.fireTableDataChanged();
+	}
+
+	public static boolean isValidClassName(String className) {
+		if (className == null || className.length() < 2)
+			return false;
+		
+		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
+			return true;
+		else
+			return false;
 	}
 }
