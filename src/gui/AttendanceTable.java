@@ -32,8 +32,8 @@ public class AttendanceTable extends JPanel {
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
 	private static final int POPUP_MENU_WIDTH = 240;
-	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
-	private static final int POPUP_MENU_HEIGHT_3ROWS = 70;
+	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
+	private static final int POPUP_MENU_HEIGHT_4ROWS = 90;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -50,7 +50,7 @@ public class AttendanceTable extends JPanel {
 	private TableListeners attendanceListener;
 	private int eventTableSelectedRow = -1; // table row
 	private int eventSelectedRow = -1; // row within table row
-	private String selectedClassName, selectedClassDate;
+	private String selectedClassName, selectedClassDate, selectedStudentName, selectedClientID;
 
 	private TableRowSorter<AttendanceTableModel> rowSorter;
 
@@ -184,11 +184,15 @@ public class AttendanceTable extends JPanel {
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
-		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name");
+		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
+		JMenuItem graduateClassItem = new JMenuItem("Graduate class ");
+		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
 		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(updateGithubUserItem);
+		tablePopup.add(graduateClassItem);
+		tablePopup.add(graduateStudentItem);
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
@@ -236,41 +240,64 @@ public class AttendanceTable extends JPanel {
 				attendanceListener.updateGithubUser(clientID, studentNameModel.toString());
 			}
 		});
+		graduateClassItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainTable.clearSelection();
+				attendanceListener.graduateClass(selectedClassName);
+			}
+		});
+		graduateStudentItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainTable.clearSelection();
+				attendanceListener.graduateStudent(selectedClientID, selectedStudentName);
+			}
+		});
 		mainTable.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = mainTable.getSelectedRow();
 
-				if (e.getButton() == MouseEvent.BUTTON1 && row > -1
-						&& mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
-					// Highlight selected row in github event table
-					setSelectedEventRow(row, e.getY());
+				if (e.getButton() == MouseEvent.BUTTON1 && row > -1) {
+					if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
+						// Highlight selected row in github event table
+						setSelectedEventRow(row, e.getY());
+
+					} else {
+						selectedClientID = (String) mainTable.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
+						selectedStudentName = mainTable.getValueAt(row, AttendanceTableModel.STUDENT_NAME_COLUMN)
+								.toString();
+					}
 
 				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
 					if (mainTable.getSelectedColumn() == AttendanceTableModel.STUDENT_NAME_COLUMN) {
 						// Show student's info
 						tablePopup.remove(showStudentClassItem);
+						tablePopup.remove(graduateClassItem);
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
 						tablePopup.add(updateGithubUserItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_3ROWS));
+						tablePopup.add(graduateStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_4ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 						// Show students by class name
 						if (eventSelectedRow > -1) {
 							int modelRow = mainTable.convertRowIndexToModel(row);
-							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow).getModel();
-							selectedClassName = (String) eventModel
-									.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
-							selectedClassDate = (String) eventModel
-									.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
+							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow)
+									.getModel();
+							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow,
+									EVENT_TABLE_CLASS_NAME_COLUMN);
+							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow,
+									EVENT_TABLE_DATE_COLUMN);
 
 							if (selectedClassName != null) {
 								tablePopup.remove(showStudentInfoItem);
 								tablePopup.remove(showStudentAttendanceItem);
 								tablePopup.remove(updateGithubUserItem);
+								tablePopup.remove(graduateStudentItem);
 								tablePopup.add(showStudentClassItem);
-								tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+								tablePopup.add(graduateClassItem);
+								tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
 								tablePopup.show(mainTable, e.getX(), e.getY());
 							}
 						}
@@ -327,8 +354,8 @@ public class AttendanceTable extends JPanel {
 		} else {
 			try {
 				// Filter only on the 1st 2 columns
-				rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText, AttendanceTableModel.CLIENT_ID_COLUMN,
-						AttendanceTableModel.STUDENT_NAME_COLUMN));
+				rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText,
+						AttendanceTableModel.CLIENT_ID_COLUMN, AttendanceTableModel.STUDENT_NAME_COLUMN));
 
 			} catch (java.util.regex.PatternSyntaxException e) {
 				System.out.println(e.getMessage());

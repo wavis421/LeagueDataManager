@@ -95,7 +95,7 @@ public class MainFrame {
 	private JTextField searchField;
 	private String activeTableHeader;
 	private String githubToken, pike13Token;
-	ImageIcon icon;
+	private ImageIcon icon;
 	private static JFrame frame = new JFrame();
 
 	// Class and Help menu names
@@ -577,6 +577,18 @@ public class MainFrame {
 				// Get Github user name
 				new GithubUserDialog(clientID, name);
 			}
+			
+			@Override
+			public void graduateClass(String className) {
+				// Get class student list and open Graduation dialog
+				new GraduationDialog(className, controller.getAttendanceByClassName(className));
+			}
+			
+			@Override
+			public void graduateStudent(String clientID, String studentName) {
+				// Open Graduation dialog
+				new GraduationDialog(clientID, studentName);
+			}	
 		};
 
 		// Now provide this listener to each table

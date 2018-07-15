@@ -67,7 +67,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JComboBox<String> emailUserList;
 	private JPasswordField emailPwField;
 	private JComboBox<String> gradLevelList;
-	private ArrayList<GraduationModel> gradList;
+	private String[] gradLevels = new String[10];
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
 	private GradTableModel gradTableModel;
@@ -75,17 +75,32 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JButton submitButton;
 	private JButton doneButton;
 	private JLabel errorField;
-	private String gradClassName;
-	private String[] gradLevels = new String[10];
-	private int gradLevelNum;
 
 	// Temporary: for test only
 	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
 
+	public GraduationDialog(String clientID, String studentName) {
+		// Graduate by student: create list with 1 student
+		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
+		gradList.add(new GraduationModel(studentName));
+
+		createGui(0, gradList, "Graduate " + studentName);
+	}
+
 	public GraduationDialog(String gradClassName, ArrayList<AttendanceModel> attendanceList) {
+		// Graduate by class
+		int gradLevelNum = getLevelFromClassName(gradClassName);
+
+		// Create Grad List
+		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
+		for (AttendanceModel a : attendanceList)
+			gradList.add(new GraduationModel(a.getStudentName().toString()));
+
+		createGui(gradLevelNum, gradList, "Graduate class '" + gradClassName + "'");
+	}
+
+	private void createGui(int gradLevelNum, ArrayList<GraduationModel> gradList, String dialogTitle) {
 		setModal(true);
-		this.gradClassName = gradClassName;
-		gradLevelNum = getLevelFromClassName(gradClassName);
 		createGradLevelList();
 
 		// Create top level panels
@@ -122,9 +137,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		gradDatePicker = new DatePicker(new DateTime()).getDatePicker();
 
 		// Create table field
-		gradList = new ArrayList<GraduationModel>();
-		for (AttendanceModel a : attendanceList)
-			gradList.add(new GraduationModel(a.getStudentName().toString(), "", false));
 		gradTableModel = new GradTableModel(gradList);
 		gradTable = new JTable(gradTableModel);
 		gradTable.addMouseListener(new GradTableListener());
@@ -200,7 +212,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		// Configure dialog window
 		// TODO: Locate dialog relative to parent
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setTitle("Graduate class '" + gradClassName + "'");
+		setTitle(dialogTitle);
 		setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
 		setLocation(300, 300);
 		setResizable(false);
@@ -291,7 +303,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 			// Check that all fields are filled in, then create body and send email
 			if (!pw.equals("")) {
-				String body = "Test Graduation for class " + gradClassName;
+				String body = "Test Graduation: ";
 				for (int i = 0; i < gradTableModel.getRowCount(); i++) {
 					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
 							.getText();
@@ -305,7 +317,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 								return;
 							}
 							body += "\n\t" + gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN)
-									+ ", Score: " + scoreString + "%";
+									+ ", Score: " + scoreString + "%, Email Parents: " + emailParent;
 							countGrads++;
 
 						} catch (NumberFormatException e2) {
@@ -345,11 +357,11 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		private JTextField score = new JTextField();
 		private boolean emailParents;
 
-		public GraduationModel(String studentName, String score, boolean emailParents) {
+		public GraduationModel(String studentName) {
 			this.studentName = studentName;
-			this.score.setText(score);
-			this.emailParents = emailParents;
-			
+			this.score.setText("");
+			this.emailParents = false;
+
 			this.score.setFont(CustomFonts.TABLE_TEXT_FONT);
 			this.score.setHorizontalAlignment(JTextField.CENTER);
 		}

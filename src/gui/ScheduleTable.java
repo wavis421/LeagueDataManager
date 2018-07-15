@@ -31,7 +31,7 @@ import model.ScheduleModel;
 
 public class ScheduleTable extends JPanel {
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT = 30;
+	private static final int POPUP_HEIGHT_2ROWS = 50;
 	private static final int DAYS_IN_WEEK = 7;
 	private static final int ROW_GAP = 5;
 
@@ -168,12 +168,14 @@ public class ScheduleTable extends JPanel {
 	private void createScheduleTablePopups(JTable table) {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem scheduleViewByClass = new JMenuItem("View by Class ");
-		tablePopup.add(scheduleViewByClass);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
+		JMenuItem scheduleViewByClassItem = new JMenuItem("View by Class ");
+		JMenuItem graduateClassItem = new JMenuItem("Graduate Class ");
+		tablePopup.add(scheduleViewByClassItem);
+		tablePopup.add(graduateClassItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 
 		// POP UP action listeners
-		scheduleViewByClass.addActionListener(new ActionListener() {
+		scheduleViewByClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Retrieve class name from selected row
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
@@ -192,6 +194,19 @@ public class ScheduleTable extends JPanel {
 				if (date.toString("yyyy-MM-dd").compareTo(today.toString("yyyy-MM-dd")) < 0)
 					date = date.plusWeeks(1);
 				scheduleListener.viewAttendanceByClass(className, date.toString("yyyy-MM-dd"));
+			}
+		});
+		
+		graduateClassItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Retrieve class name from selected row
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
+				ScheduleTableModel model = (ScheduleTableModel) table.getModel();
+				String className = (String) model.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
+
+				// Display graduation dialog
+				table.clearSelection();
+				scheduleListener.graduateClass(className);
 			}
 		});
 
