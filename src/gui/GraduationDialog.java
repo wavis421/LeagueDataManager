@@ -41,7 +41,9 @@ import javax.swing.table.TableCellRenderer;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.joda.time.DateTime;
 
+import controller.Controller;
 import model.AttendanceModel;
+import model.GraduationModel;
 
 public class GraduationDialog extends JDialog implements ActionListener {
 	private final static int FRAME_WIDTH = 600;
@@ -77,29 +79,32 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private static String[] gradLevels = new String[10];
 
 	// Temporary: for test only
-	String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
+	private String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
+	private static Controller controller;
 
-	public GraduationDialog(String clientID, String studentName) {
+	public GraduationDialog(Controller newController, int clientID, String studentName) {
 		// Graduate by student: create list with 1 student
-		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
-		gradList.add(new GraduationModel(studentName));
+		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
+		gradList.add(new DialogGradModel(clientID, studentName));
 
+		controller = newController;
 		createGui(0, gradList, "Graduate " + studentName);
 	}
 
-	public GraduationDialog(String gradClassName, ArrayList<AttendanceModel> attendanceList) {
+	public GraduationDialog(Controller newController, String gradClassName, ArrayList<AttendanceModel> attendanceList) {
 		// Graduate by class
 		int gradLevelNum = getLevelFromClassName(gradClassName);
 
 		// Create Grad List
-		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
+		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
 		for (AttendanceModel a : attendanceList)
-			gradList.add(new GraduationModel(a.getStudentName().toString()));
+			gradList.add(new DialogGradModel(a.getClientID(), a.getStudentName().toString()));
 
+		controller = newController;
 		createGui(gradLevelNum, gradList, "Graduate class '" + gradClassName + "'");
 	}
 
-	private void createGui(int gradLevelNum, ArrayList<GraduationModel> gradList, String dialogTitle) {
+	private void createGui(int gradLevelNum, ArrayList<DialogGradModel> gradList, String dialogTitle) {
 		setModal(true);
 		createGradLevelList();
 
@@ -305,6 +310,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			if (!pw.equals("")) {
 				String body = "Test Graduation: ";
 				for (int i = 0; i < gradTableModel.getRowCount(); i++) {
+					int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
 					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
 							.getText();
 					boolean emailParent = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PARENT_EMAIL_COLUMN));
@@ -316,8 +322,19 @@ public class GraduationDialog extends JDialog implements ActionListener {
 								errorField.setText("Student must have a passing score (%) between 70 and 100");
 								return;
 							}
+
+							// Now we're finally good to go...
 							body += "\n\t" + gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN)
 									+ ", Score: " + scoreString + "%, Email Parents: " + emailParent;
+
+							// Add record to database
+							String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
+							String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
+							GraduationModel gradModel = new GraduationModel(clientID,
+									levelString, score, startDate,
+									gradDatePicker.getJFormattedTextField().getText());
+							controller.addGraduationRecord(gradModel);
+
 							countGrads++;
 
 						} catch (NumberFormatException e2) {
@@ -352,12 +369,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
-	private class GraduationModel {
+	private class DialogGradModel {
+		private int clientID;
 		private String studentName;
 		private JTextField score = new JTextField();
 		private boolean emailParents;
 
-		public GraduationModel(String studentName) {
+		public DialogGradModel(int clientID, String studentName) {
+			this.clientID = clientID;
 			this.studentName = studentName;
 			this.score.setText("");
 			this.emailParents = false;
@@ -366,12 +385,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			this.score.setHorizontalAlignment(JTextField.CENTER);
 		}
 
-		public String getStudentName() {
-			return studentName;
+		public int getClientID() {
+			return clientID;
 		}
 
-		public String getScoreString() {
-			return score.getText();
+		public String getStudentName() {
+			return studentName;
 		}
 
 		public JTextField getScoreTextField() {
@@ -387,17 +406,20 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		public static final int STUDENT_NAME_COLUMN = 0;
 		public static final int SCORE_COLUMN = 1;
 		public static final int PARENT_EMAIL_COLUMN = 2;
+		public static final int CLIENT_ID_COLUMN = 3; // Not actually a table column
+		public static final int NUM_COLUMNS = 4;
 
 		private final String[] colNames = { " Student Name ", " Score (%) ", " Email Parents " };
 		private Object[][] tableObjects;
 
-		public GradTableModel(ArrayList<GraduationModel> grads) {
-			tableObjects = new Object[grads.size()][colNames.length];
+		public GradTableModel(ArrayList<DialogGradModel> grads) {
+			tableObjects = new Object[grads.size()][NUM_COLUMNS];
 
 			for (int row = 0; row < grads.size(); row++) {
 				tableObjects[row][STUDENT_NAME_COLUMN] = grads.get(row).getStudentName();
 				tableObjects[row][SCORE_COLUMN] = grads.get(row).getScoreTextField();
 				tableObjects[row][PARENT_EMAIL_COLUMN] = grads.get(row).getEmailParents();
+				tableObjects[row][CLIENT_ID_COLUMN] = grads.get(row).getClientID();
 			}
 		}
 
@@ -544,7 +566,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	public static boolean isValidClassName(String className) {
 		if (className == null || className.length() < 2)
 			return false;
-		
+
 		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
 			return true;
 		else

@@ -105,5 +105,27 @@ BEGIN
 
 	) ENGINE=InnoDB;
 	
+	CREATE TABLE IF NOT EXISTS Graduation (
+		GradID int(11) NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY (GradID),
+		ClientID int(11),
+		
+		CONSTRAINT fk_graduation_student_id
+			FOREIGN KEY (ClientID) 
+			REFERENCES Students(ClientID) 
+			ON DELETE CASCADE,
+		
+		# Graduation data
+		GradLevel int(4) NOT NULL,
+		StartDate date DEFAULT NULL,
+		EndDate date DEFAULT NULL,
+		Score int(11) DEFAULT 0,
+		InSalesForce boolean DEFAULT 0,
+		Processed boolean DEFAULT 0,
+		
+		UNIQUE KEY(ClientID, GradLevel)
+		
+	) ENGINE=InnoDB;
+	
 END$$
 DELIMITER ;

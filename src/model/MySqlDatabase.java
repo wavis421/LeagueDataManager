@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 import javax.swing.JFrame;
 
@@ -983,6 +984,84 @@ public class MySqlDatabase {
 	}
 
 	/*
+	 * ------- Graduation Data used for GUI -------
+	 */
+	public String getStartDateByClientIdAndLevel(int clientID, String level) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT ServiceDate, EventName FROM Attendance WHERE ClientID = ? "
+								+ "AND State = 'completed' ORDER BY ServiceDate ASC;");
+				selectStmt.setInt(1, clientID);
+
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					String eventName = result.getString("EventName");
+					if (eventName.charAt(1) == '@' && eventName.startsWith(level)) {
+						String startDate = result.getDate("ServiceDate").toString();
+						if (startDate.compareTo("2017-09-30") < 0)
+							return "";
+						else
+							return startDate;
+					}
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return "";
+	}
+
+	public void addGraduationRecord(GraduationModel gradModel) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement addGrad = dbConnection
+						.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
+								+ "VALUES (?, ?, ?, ?, ?);");
+
+				int col = 1;
+				addGrad.setInt(col++, gradModel.getClientID());
+				addGrad.setString(col++, gradModel.getGradLevel());
+				addGrad.setString(col++, gradModel.getStartDate());
+				addGrad.setString(col++, gradModel.getEndDate());
+				addGrad.setDouble(col++, gradModel.getScore());
+
+				addGrad.executeUpdate();
+				addGrad.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						gradModel.getClientID(), ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	/*
 	 * ------- Location Data used for GUI -------
 	 */
 	public ArrayList<LocationModel> getLocationList() {
@@ -1017,5 +1096,16 @@ public class MySqlDatabase {
 			}
 		}
 		return locList;
+	}
+
+	public class CoursesCompareByDate implements Comparator<CoursesModel> {
+		@Override
+		public int compare(CoursesModel c1, CoursesModel c2) {
+			int comp = c1.getDate().compareTo(c2.getDate());
+			if (comp == 0) {
+				comp = c1.getEventName().compareTo(c2.getEventName());
+			}
+			return comp;
+		}
 	}
 }

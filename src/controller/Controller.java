@@ -11,6 +11,7 @@ import model.AttendanceModel;
 import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
+import model.GraduationModel;
 import model.InvoiceModel;
 import model.LocationModel;
 import model.LogDataModel;
@@ -181,6 +182,14 @@ public class Controller {
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;
+	}
+
+	public String getStartDateByClientIdAndLevel(int clientID, String level) {
+		return sqlDb.getStartDateByClientIdAndLevel(clientID, level);
+	}
+	
+	public void addGraduationRecord(GraduationModel gradModel) {
+		sqlDb.addGraduationRecord(gradModel);
 	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
