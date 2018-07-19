@@ -191,6 +191,10 @@ public class Controller {
 	public void addGraduationRecord(GraduationModel gradModel) {
 		sqlDb.addGraduationRecord(gradModel);
 	}
+	
+	public ArrayList<GraduationModel> getAllGradRecords() {
+		return sqlDb.getAllGradRecords();
+	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
 		// Set cursor to "wait" cursor

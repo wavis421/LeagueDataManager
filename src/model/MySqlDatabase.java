@@ -1061,6 +1061,44 @@ public class MySqlDatabase {
 		}
 	}
 
+	public ArrayList<GraduationModel> getAllGradRecords() {
+		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Graduation, Students WHERE Students.ClientID = Graduation.ClientID "
+								+ "ORDER BY FirstName, LastName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					gradList.add(new GraduationModel(result.getInt("ClientID"),
+							result.getString("FirstName") + " " + result.getString("LastName"),
+							result.getString("GradLevel"), result.getDouble("Score"), result.getString("StartDate"),
+							result.getString("EndDate")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return gradList;
+	}
+
 	/*
 	 * ------- Location Data used for GUI -------
 	 */

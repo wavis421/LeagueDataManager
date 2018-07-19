@@ -313,6 +313,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
 					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
 							.getText();
+					String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
 					boolean emailParent = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PARENT_EMAIL_COLUMN));
 
 					if (!scoreString.equals("")) {
@@ -330,9 +331,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 							// Add record to database
 							String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
 							String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
-							GraduationModel gradModel = new GraduationModel(clientID,
-									levelString, score, startDate,
-									gradDatePicker.getJFormattedTextField().getText());
+							GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score,
+									startDate, gradDatePicker.getJFormattedTextField().getText());
 							controller.addGraduationRecord(gradModel);
 
 							countGrads++;

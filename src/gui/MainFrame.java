@@ -49,6 +49,7 @@ import model.AttendanceModel;
 import model.CoursesModel;
 import model.DateRangeEvent;
 import model.GithubModel;
+import model.GraduationModel;
 import model.InvoiceModel;
 import model.LocationLookup;
 import model.LogDataModel;
@@ -69,6 +70,7 @@ public class MainFrame {
 	private static final String INVOICE_TITLE = "Course Invoices for ";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
+	private static final String GRADUATION_TITLE = "Student Graduations being Processed ";
 
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
@@ -91,6 +93,7 @@ public class MainFrame {
 	private InvoiceTable invoiceTable;
 	private GithubTable githubTable;
 	private CoursesTable coursesTable;
+	private GraduationTable gradTable;
 	private JTable activeTable;
 	private JTextField searchField;
 	private String activeTableHeader;
@@ -166,6 +169,7 @@ public class MainFrame {
 		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
 		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
 		coursesTable = new CoursesTable(tablePanel, new ArrayList<CoursesModel>());
+		gradTable = new GraduationTable(tablePanel, new ArrayList<GraduationModel>());
 		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
 
@@ -254,6 +258,8 @@ public class MainFrame {
 					githubTable.updateSearchField(searchField.getText());
 				else if (activeTable == scheduleTable.getTable())
 					scheduleTable.updateSearchField(searchField.getText());
+				else if (activeTable == gradTable.getTable())
+					gradTable.updateSearchField(searchField.getText());
 			}
 		});
 
@@ -335,26 +341,23 @@ public class MainFrame {
 	private void createStudentMenu(JMenu studentMenu) {
 		// Create sub-menus for the Students menu
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
-		JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
+		// JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students
+		// ");
 		JMenuItem studentNoRecentGitItem = new JMenuItem("View students without recent Github ");
+		JMenuItem studentViewPendingGrads = new JMenuItem("View pending graduates ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
 
 		// Add these sub-menus to the Student menu
 		studentMenu.add(studentNotInMasterMenu);
-		studentMenu.add(studentRemoveInactiveMenu);
+		// studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentNoRecentGitItem);
+		studentMenu.add(studentViewPendingGrads);
 		studentMenu.add(studentViewAllMenu);
 
 		// Set up listeners for the Student menu
 		studentNotInMasterMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Show all students not in master database
-				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
-			}
-		});
-		studentRemoveInactiveMenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				controller.removeInactiveStudents();
 				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
 			}
 		});
@@ -371,6 +374,11 @@ public class MainFrame {
 
 				activeTable = githubTable.getTable();
 				activeTableHeader = headerLabel.getText();
+			}
+		});
+		studentViewPendingGrads.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshGradTable();
 			}
 		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
@@ -577,18 +585,18 @@ public class MainFrame {
 				// Get Github user name
 				new GithubUserDialog(clientID, name);
 			}
-			
+
 			@Override
 			public void graduateClass(String className) {
 				// Get class student list and open Graduation dialog
 				new GraduationDialog(controller, className, controller.getAttendanceByClassName(className));
 			}
-			
+
 			@Override
 			public void graduateStudent(String clientID, String studentName) {
 				// Open Graduation dialog
 				new GraduationDialog(controller, Integer.parseInt(clientID), studentName);
-			}	
+			}
 		};
 
 		// Now provide this listener to each table
@@ -598,6 +606,7 @@ public class MainFrame {
 		logTable.setTableListener(listener);
 		githubTable.setTableListener(listener);
 		coursesTable.setTableListener(listener);
+		gradTable.setTableListener(listener);
 	}
 
 	private void refreshStudentTable(int tableType, int clientID) {
@@ -680,6 +689,20 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
+	private void refreshGradTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add log data table and header
+		gradTable.setData(tablePanel, controller.getAllGradRecords());
+		headerLabel.setText(GRADUATION_TITLE);
+		searchField.setText("");
+		gradTable.updateSearchField("");
+
+		activeTable = gradTable.getTable();
+		activeTableHeader = headerLabel.getText();
+	}
+
 	private void refreshInvoiceTable(DateRangeEvent dateRange) {
 		// Remove data being displayed
 		removeDataFromTables();
@@ -703,6 +726,8 @@ public class MainFrame {
 		invoiceTable.removeData();
 		githubTable.removeData();
 		coursesTable.removeData();
+		gradTable.removeData();
+		;
 	}
 
 	private String getPike13TokenFromFile() {

@@ -2,14 +2,15 @@ package model;
 
 public class GraduationModel {
 	private int clientID;
-	private String gradLevel;
+	private String studentName, gradLevel;
 	private double score;
-	private String startDate;
-	private String endDate;
+	private String startDate, endDate;
 	private boolean isSfUpdated, isProcessed;
 
-	public GraduationModel(int clientID, String gradLevel, double score, String startDate, String endDate) {
+	public GraduationModel(int clientID, String studentName, String gradLevel, double score, String startDate,
+			String endDate) {
 		this.clientID = clientID;
+		this.studentName = studentName;
 		this.gradLevel = gradLevel;
 		this.score = score;
 		this.startDate = startDate;
@@ -20,6 +21,10 @@ public class GraduationModel {
 
 	public int getClientID() {
 		return clientID;
+	}
+
+	public String getStudentName() {
+		return studentName;
 	}
 
 	public String getGradLevel() {
