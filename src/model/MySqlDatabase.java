@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
 public class MySqlDatabase {
@@ -1035,20 +1036,30 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement addGrad = dbConnection
-						.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
-								+ "VALUES (?, ?, ?, ?, ?);");
+				PreparedStatement addGrad;
+				if (gradModel.getStartDate().equals(""))
+					addGrad = dbConnection.prepareStatement(
+							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score) " + "VALUES (?, ?, ?, ?);");
+				else
+					addGrad = dbConnection
+							.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
+									+ "VALUES (?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addGrad.setInt(col++, gradModel.getClientID());
 				addGrad.setString(col++, gradModel.getGradLevel());
-				addGrad.setString(col++, gradModel.getStartDate());
-				addGrad.setString(col++, gradModel.getEndDate());
-				addGrad.setDouble(col++, gradModel.getScore());
+				if (!gradModel.getStartDate().equals(""))
+					addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getStartDate()));
+				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
+				addGrad.setDouble(col, gradModel.getScore());
 
 				addGrad.executeUpdate();
 				addGrad.close();
 				break;
+
+			} catch (MySQLIntegrityConstraintViolationException e0) {
+				// Record already exists in database, so update instead
+				updateGraduationRecord(gradModel);
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
 				if (i == 0) {
@@ -1058,7 +1069,79 @@ public class MySqlDatabase {
 
 			} catch (SQLException e2) {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
-						gradModel.getClientID(), ": " + e2.getMessage());
+						gradModel.getClientID(), " for Graduation: " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void updateGraduationRecord(GraduationModel gradModel) {
+		// Graduation records are uniquely identified by clientID & level pair.
+		// Update only end date & score. Set 'in SF' false to force update again.
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateGraduateStmt = dbConnection
+						.prepareStatement("UPDATE Graduation SET EndDate=?, Score=?, InSalesForce=0 "
+								+ "WHERE ClientID=? AND GradLevel=?;");
+
+				updateGraduateStmt.setDate(1, java.sql.Date.valueOf(gradModel.getEndDate()));
+				updateGraduateStmt.setDouble(2, gradModel.getScore());
+				updateGraduateStmt.setInt(3, gradModel.getClientID());
+				updateGraduateStmt.setString(4, gradModel.getGradLevel());
+
+				updateGraduateStmt.executeUpdate();
+				updateGraduateStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						gradModel.getClientID(), " for Graduation: " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
+			boolean newValue) {
+		// Only the InSalesForce and Processed fields may be updated.
+		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)) {
+			System.out.println("Graduation field name invalid: " + fieldName);
+			return;
+		}
+
+		// Graduation records are uniquely identified by clientID & level pair.
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateGraduateStmt = dbConnection.prepareStatement(
+						"UPDATE Graduation SET " + fieldName + "=? WHERE ClientID=? AND GradLevel=?;");
+
+				updateGraduateStmt.setInt(1, newValue ? 1 : 0);
+				updateGraduateStmt.setInt(2, clientID);
+				updateGraduateStmt.setString(3, gradLevel);
+
+				updateGraduateStmt.executeUpdate();
+				updateGraduateStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR,
+						new StudentNameModel(studentName, "", false), clientID, " for Graduation: " + e2.getMessage());
 				break;
 			}
 		}
@@ -1101,45 +1184,6 @@ public class MySqlDatabase {
 			}
 		}
 		return gradList;
-	}
-
-	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
-			boolean newValue) {
-		// Only the InSalesForce and Processed fields may be updated.
-		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)) {
-			System.out.println("Graduation field name invalid: " + fieldName);
-			return;
-		}
-
-		// Graduation records are uniquely identified by clientID & level pair.
-		for (int i = 0; i < 2; i++) {
-			try {
-				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateGraduateStmt = dbConnection.prepareStatement(
-						"UPDATE Graduation SET " + fieldName + "=? WHERE ClientID=? AND GradLevel=?;");
-
-				updateGraduateStmt.setInt(1, newValue ? 1 : 0);
-				updateGraduateStmt.setInt(2, clientID);
-				updateGraduateStmt.setString(3, gradLevel);
-
-				updateGraduateStmt.executeUpdate();
-				updateGraduateStmt.close();
-				break;
-
-			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				} else
-					connectError = true;
-
-			} catch (SQLException e2) {
-				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR,
-						new StudentNameModel(studentName, "", false), clientID,
-						" for Graduation DB: " + e2.getMessage());
-				break;
-			}
-		}
 	}
 
 	/*

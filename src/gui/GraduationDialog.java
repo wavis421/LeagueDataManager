@@ -250,7 +250,15 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		return scrollPane;
 	}
-
+	
+	private void addGradRecordToDb(int clientID, String studentName, Double score) {
+		String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
+		String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
+		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score,
+				startDate, gradDatePicker.getJFormattedTextField().getText(), false, false);
+		controller.addGraduationRecord(gradModel);
+	}
+	
 	// TODO: Make this a class to share with "github dialog"
 	private boolean generateAndSendEmail(String emailUser, String emailPassword, String emailBody) {
 		// Currently hard-coded to send using gmail SMTP
@@ -308,7 +316,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 			// Check that all fields are filled in, then create body and send email
 			if (!pw.equals("")) {
-				String body = "Test Graduation: ";
+				String body = "Test Graduating Level " + (Integer) gradLevelList.getSelectedIndex() + ": ";
 				for (int i = 0; i < gradTableModel.getRowCount(); i++) {
 					int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
 					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
@@ -319,7 +327,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					if (!scoreString.equals("")) {
 						try {
 							Double score = Double.parseDouble(scoreString);
-							if (score < 70 || score > 100) {
+							if (score < 70.0 || score > 100.0) {
 								errorField.setText("Student must have a passing score (%) between 70 and 100");
 								return;
 							}
@@ -329,12 +337,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 									+ ", Score: " + scoreString + "%, Email Parents: " + emailParent;
 
 							// Add record to database
-							String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
-							String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
-							GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score,
-									startDate, gradDatePicker.getJFormattedTextField().getText(), false, false);
-							controller.addGraduationRecord(gradModel);
-
+							addGradRecordToDb(clientID, studentName, score);
 							countGrads++;
 
 						} catch (NumberFormatException e2) {
