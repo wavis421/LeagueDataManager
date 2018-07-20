@@ -22,6 +22,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
+import controller.Controller;
 import model.GraduationModel;
 
 /**
@@ -35,8 +36,6 @@ public class GraduationTable extends JPanel {
 
 	private static final int POPUP_WIDTH = 240;
 	private static final int POPUP_HEIGHT = 30;
-
-	private static final String PROCESSED_FIELD_NAME = "Processed";
 
 	private JPanel tablePanel;
 	private JTable table;
@@ -157,7 +156,7 @@ public class GraduationTable extends JPanel {
 								(int) gradTableModel.getClientID(modelRow),
 								(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
 								(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
-								PROCESSED_FIELD_NAME, !checked);
+								Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
 					}
 				} else if (e.getButton() == MouseEvent.BUTTON3) {
 					// Show popup menu

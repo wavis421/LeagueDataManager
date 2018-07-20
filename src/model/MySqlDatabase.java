@@ -30,6 +30,9 @@ public class MySqlDatabase {
 	private static final int NUM_CLASS_LEVELS = 10;
 	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 30;
 
+	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
+	public static final String GRAD_MODEL_IN_SF_FIELD = "InSalesForce";
+
 	public Connection dbConnection = null;
 	private JFrame parent;
 	private String awsPassword;
@@ -1076,7 +1079,8 @@ public class MySqlDatabase {
 					gradList.add(new GraduationModel(result.getInt("ClientID"),
 							result.getString("FirstName") + " " + result.getString("LastName"),
 							result.getString("GradLevel"), result.getDouble("Score"), result.getString("StartDate"),
-							result.getString("EndDate"), result.getBoolean("InSalesForce"), result.getBoolean("Processed")));
+							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
+							result.getBoolean(GRAD_MODEL_PROCESSED_FIELD)));
 				}
 
 				result.close();
@@ -1098,20 +1102,21 @@ public class MySqlDatabase {
 		}
 		return gradList;
 	}
-	
-	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName, boolean newValue) {
+
+	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
+			boolean newValue) {
 		// Only the InSalesForce and Processed fields may be updated.
-		if (!fieldName.equals("InSalesForce") && !fieldName.equals("Processed")) {
+		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)) {
 			System.out.println("Graduation field name invalid: " + fieldName);
 			return;
 		}
-		
-		// Graduation records are uniquely identified by clientID & level pair. 
+
+		// Graduation records are uniquely identified by clientID & level pair.
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateGraduateStmt = dbConnection
-						.prepareStatement("UPDATE Graduation SET " + fieldName + "=? WHERE ClientID=? AND GradLevel=?;");
+				PreparedStatement updateGraduateStmt = dbConnection.prepareStatement(
+						"UPDATE Graduation SET " + fieldName + "=? WHERE ClientID=? AND GradLevel=?;");
 
 				updateGraduateStmt.setInt(1, newValue ? 1 : 0);
 				updateGraduateStmt.setInt(2, clientID);
@@ -1129,8 +1134,9 @@ public class MySqlDatabase {
 					connectError = true;
 
 			} catch (SQLException e2) {
-				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel(studentName, "", false),
-						clientID, " for Graduation DB: " + e2.getMessage());
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR,
+						new StudentNameModel(studentName, "", false), clientID,
+						" for Graduation DB: " + e2.getMessage());
 				break;
 			}
 		}
