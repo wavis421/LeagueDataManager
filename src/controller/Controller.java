@@ -187,13 +187,18 @@ public class Controller {
 	public String getStartDateByClientIdAndLevel(int clientID, String level) {
 		return sqlDb.getStartDateByClientIdAndLevel(clientID, level);
 	}
-	
+
 	public void addGraduationRecord(GraduationModel gradModel) {
 		sqlDb.addGraduationRecord(gradModel);
 	}
-	
+
 	public ArrayList<GraduationModel> getAllGradRecords() {
 		return sqlDb.getAllGradRecords();
+	}
+
+	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
+			boolean newValue) {
+		sqlDb.updateGradudationField(clientID, studentName, gradLevel, fieldName, newValue);
 	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {

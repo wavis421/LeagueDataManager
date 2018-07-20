@@ -15,13 +15,15 @@ import model.GraduationModel;
 public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
 	public static final int LEVEL_PASSED_COLUMN = 1;
-	public static final int PROCESSED_COLUMN = 2;
-	public static final int IN_SALESFORCE_COLUMN = 3;
-	public static final int CLIENT_ID_COLUMN = 4; // not a real column
-	public static final int NUM_COLUMNS = 5;
+	public static final int GRAD_DATE_COLUMN = 2;
+	public static final int PROCESSED_COLUMN = 3;
+	public static final int IN_SALESFORCE_COLUMN = 4;
+	public static final int NOTES_COLUMN = 5;
+	public static final int CLIENT_ID_COLUMN = 6; // not a real column
+	public static final int NUM_COLUMNS = 7;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Level Passed ", " Processed ", " In SalesForce " };
+	private final String colNames[] = { " Student Name ", " Level Passed ", " Grad Date ", " Processed ", " In SalesForce ", " Notes " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
 		this.gradList = gradList;
@@ -38,6 +40,10 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	public int getNumCourses() {
 		return gradList.size();
+	}
+
+	public int getClientID(int row) {
+		return gradList.get(row).getClientID();
 	}
 
 	public void setProcessed(int row, boolean checked) {
@@ -84,10 +90,14 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.getStudentName();
 		case LEVEL_PASSED_COLUMN:
 			return grad.getGradLevel();
+		case GRAD_DATE_COLUMN:
+			return grad.getEndDate();
 		case IN_SALESFORCE_COLUMN:
 			return grad.isSfUpdated();
 		case PROCESSED_COLUMN:
 			return grad.isProcessed();
+		case NOTES_COLUMN:
+			return "";   // TODO: Fill this in
 		}
 		return null;
 	}

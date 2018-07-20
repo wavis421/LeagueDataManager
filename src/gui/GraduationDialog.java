@@ -332,7 +332,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 							String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
 							String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
 							GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score,
-									startDate, gradDatePicker.getJFormattedTextField().getText());
+									startDate, gradDatePicker.getJFormattedTextField().getText(), false, false);
 							controller.addGraduationRecord(gradModel);
 
 							countGrads++;

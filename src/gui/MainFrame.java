@@ -70,7 +70,7 @@ public class MainFrame {
 	private static final String INVOICE_TITLE = "Course Invoices for ";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
-	private static final String GRADUATION_TITLE = "Student Graduations being Processed ";
+	private static final String GRADUATION_TITLE = "Pending Student Graduations ";
 
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
@@ -596,6 +596,13 @@ public class MainFrame {
 			public void graduateStudent(String clientID, String studentName) {
 				// Open Graduation dialog
 				new GraduationDialog(controller, Integer.parseInt(clientID), studentName);
+			}
+
+			@Override
+			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
+					boolean newValue) {
+				// Update field in Graduation database
+				controller.updateGradudationField(clientID, studentName, gradLevel, fieldName, newValue);
 			}
 		};
 

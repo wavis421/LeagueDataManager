@@ -8,4 +8,5 @@ public interface TableListeners {
 	public void updateGithubUser(String clientID, String name);
 	public void graduateClass(String className);
 	public void graduateStudent(String clientID, String studentName);
+	public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName, boolean newValue);
 }

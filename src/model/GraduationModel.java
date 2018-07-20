@@ -8,15 +8,15 @@ public class GraduationModel {
 	private boolean isSfUpdated, isProcessed;
 
 	public GraduationModel(int clientID, String studentName, String gradLevel, double score, String startDate,
-			String endDate) {
+			String endDate, boolean isSfUpdated, boolean isProcessed) {
 		this.clientID = clientID;
 		this.studentName = studentName;
-		this.gradLevel = gradLevel;
+		this.gradLevel = gradLevel.trim();
 		this.score = score;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		isSfUpdated = false;
-		isProcessed = false;
+		this.isSfUpdated = isSfUpdated;
+		this.isProcessed = isProcessed;
 	}
 
 	public int getClientID() {

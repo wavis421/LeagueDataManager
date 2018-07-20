@@ -1076,7 +1076,7 @@ public class MySqlDatabase {
 					gradList.add(new GraduationModel(result.getInt("ClientID"),
 							result.getString("FirstName") + " " + result.getString("LastName"),
 							result.getString("GradLevel"), result.getDouble("Score"), result.getString("StartDate"),
-							result.getString("EndDate")));
+							result.getString("EndDate"), result.getBoolean("InSalesForce"), result.getBoolean("Processed")));
 				}
 
 				result.close();
@@ -1097,6 +1097,43 @@ public class MySqlDatabase {
 			}
 		}
 		return gradList;
+	}
+	
+	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName, boolean newValue) {
+		// Only the InSalesForce and Processed fields may be updated.
+		if (!fieldName.equals("InSalesForce") && !fieldName.equals("Processed")) {
+			System.out.println("Graduation field name invalid: " + fieldName);
+			return;
+		}
+		
+		// Graduation records are uniquely identified by clientID & level pair. 
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateGraduateStmt = dbConnection
+						.prepareStatement("UPDATE Graduation SET " + fieldName + "=? WHERE ClientID=? AND GradLevel=?;");
+
+				updateGraduateStmt.setInt(1, newValue ? 1 : 0);
+				updateGraduateStmt.setInt(2, clientID);
+				updateGraduateStmt.setString(3, gradLevel);
+
+				updateGraduateStmt.executeUpdate();
+				updateGraduateStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel(studentName, "", false),
+						clientID, " for Graduation DB: " + e2.getMessage());
+				break;
+			}
+		}
 	}
 
 	/*
