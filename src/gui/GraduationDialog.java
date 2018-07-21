@@ -250,15 +250,15 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		return scrollPane;
 	}
-	
+
 	private void addGradRecordToDb(int clientID, String studentName, Double score) {
 		String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
-		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score,
-				startDate, gradDatePicker.getJFormattedTextField().getText(), false, false);
+		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score, startDate,
+				gradDatePicker.getJFormattedTextField().getText(), false, false);
 		controller.addGraduationRecord(gradModel);
 	}
-	
+
 	// TODO: Make this a class to share with "github dialog"
 	private boolean generateAndSendEmail(String emailUser, String emailPassword, String emailBody) {
 		// Currently hard-coded to send using gmail SMTP
@@ -306,6 +306,40 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		// Set cursor back to default
 		this.setCursor(Cursor.getDefaultCursor());
 		return false;
+	}
+
+	private int getLevelFromClassName(String className) {
+		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
+			return className.charAt(0) - '0';
+		else
+			return 0;
+	}
+
+	private void createGradLevelList() {
+		for (int i = 0; i < gradLevels.length; i++) {
+			gradLevels[i] = "Level " + i + "  ";
+		}
+	}
+
+	private void updateEmailParents() {
+		for (int i = 0; i < gradTable.getRowCount(); i++) {
+			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
+			if (score.equals(""))
+				gradTableModel.setEmailParents(i, false);
+			else
+				gradTableModel.setEmailParents(i, true);
+		}
+		gradTableModel.fireTableDataChanged();
+	}
+
+	public static boolean isValidClassName(String className) {
+		if (className == null || className.length() < 2)
+			return false;
+
+		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
+			return true;
+		else
+			return false;
 	}
 
 	@Override
@@ -372,6 +406,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
+	/***** DIALOG MODEL SUB-CLASS *****/
 	private class DialogGradModel {
 		private int clientID;
 		private String studentName;
@@ -405,6 +440,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
+	/***** TABLE MODEL SUB-CLASS *****/
 	private class GradTableModel extends AbstractTableModel {
 		public static final int STUDENT_NAME_COLUMN = 0;
 		public static final int SCORE_COLUMN = 1;
@@ -470,6 +506,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
+	/***** TABLE CELL EDITOR SUB-CLASS *****/
 	private class GradCellEditor extends AbstractCellEditor implements TableCellEditor {
 		JTextField textField;
 
@@ -486,6 +523,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
+	/***** TABLE RENDERER SUB-CLASS *****/
 	private class GradTableRenderer extends JLabel implements TableCellRenderer {
 		private GradTableRenderer() {
 			super();
@@ -523,6 +561,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 	}
 
+	/***** TABLE LISTENER SUB-CLASS *****/
 	private class GradTableListener extends MouseAdapter {
 		public void mousePressed(MouseEvent e) {
 			int row = gradTable.getSelectedRow();
@@ -540,39 +579,5 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				}
 			}
 		}
-	}
-
-	private int getLevelFromClassName(String className) {
-		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
-			return className.charAt(0) - '0';
-		else
-			return 0;
-	}
-
-	private void createGradLevelList() {
-		for (int i = 0; i < gradLevels.length; i++) {
-			gradLevels[i] = "Level " + i + "  ";
-		}
-	}
-
-	private void updateEmailParents() {
-		for (int i = 0; i < gradTable.getRowCount(); i++) {
-			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
-			if (score.equals(""))
-				gradTableModel.setEmailParents(i, false);
-			else
-				gradTableModel.setEmailParents(i, true);
-		}
-		gradTableModel.fireTableDataChanged();
-	}
-
-	public static boolean isValidClassName(String className) {
-		if (className == null || className.length() < 2)
-			return false;
-
-		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
-			return true;
-		else
-			return false;
 	}
 }
