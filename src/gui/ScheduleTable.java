@@ -217,8 +217,10 @@ public class ScheduleTable extends JPanel {
 					// Check if this is a valid class to graduate
 					String className = (String) table.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
 					if (GraduationDialog.isValidClassName(className)) { // OK
-						tablePopup.add(graduateClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+						// Temporarily BACK OUT GRADUATION
+						//tablePopup.add(graduateClassItem);
+						tablePopup.remove(graduateClassItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 					} else { // Not a valid graduation class
 						tablePopup.remove(graduateClassItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));

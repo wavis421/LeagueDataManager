@@ -19,7 +19,7 @@ public class MySqlConnection {
 	private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
 
 	// SSH/Database connect constants
-	private static final String SSH_HOST = "ec2-13-57-176-84.us-west-1.compute.amazonaws.com";
+	private static final String SSH_HOST = "ec2-52-53-60-28.us-west-1.compute.amazonaws.com";
 	private static final String SSH_USER = "ec2-user";
 	private static final String SSH_KEY_FILE_PATH = "./student_tracker_key.pem";
 	private static final String DATABASE = "StudentTracker";

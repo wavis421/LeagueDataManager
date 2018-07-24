@@ -351,7 +351,8 @@ public class MainFrame {
 		studentMenu.add(studentNotInMasterMenu);
 		// studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentNoRecentGitItem);
-		studentMenu.add(studentViewPendingGrads);
+		// Temporarily BACK OUT GRADUATION
+		//studentMenu.add(studentViewPendingGrads);
 		studentMenu.add(studentViewAllMenu);
 
 		// Set up listeners for the Student menu

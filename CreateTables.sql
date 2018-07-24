@@ -42,7 +42,10 @@ BEGIN
 		EventName varchar(100) DEFAULT NULL,
 		RepoName varchar(50) DEFAULT NULL,
 		Comments varchar(150) DEFAULT NULL,
+		VisitID int(11) DEFAULT NULL,
 		TeacherNames varchar(100) DEFAULT NULL,
+		SerivceCategory varchar(30) DEFAULT NULL,
+		State varchar(30) DEFAULT NULL
 		
 		UNIQUE KEY(ClientID, EventName, ServiceDate)
 				

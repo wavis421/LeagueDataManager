@@ -34,6 +34,7 @@ public class AttendanceTable extends JPanel {
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
 	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
+	private static final int POPUP_MENU_HEIGHT_3ROWS = 70;
 	private static final int POPUP_MENU_HEIGHT_4ROWS = 90;
 
 	// Columns for embedded event table
@@ -144,7 +145,7 @@ public class AttendanceTable extends JPanel {
 	private int getEventRow(int selectedRow, int yPos) {
 		// Compute row based on Y-position in event table
 		JTable table = githubEventTableList.get(selectedRow);
-		int row = (yPos - (selectedRow * ROW_HEIGHT)) / TEXT_HEIGHT;
+		int row = (yPos - (selectedRow * ROW_HEIGHT)) / (TEXT_HEIGHT - 1);
 		if (row < table.getModel().getRowCount())
 			return row;
 		else
@@ -276,8 +277,10 @@ public class AttendanceTable extends JPanel {
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
 						tablePopup.add(updateGithubUserItem);
-						tablePopup.add(graduateStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_4ROWS));
+						// Temporarily BACK OUT GRADUATION
+						//tablePopup.add(graduateStudentItem);
+						tablePopup.remove(graduateStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_3ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
@@ -297,8 +300,10 @@ public class AttendanceTable extends JPanel {
 
 								// Check if this is a valid class to graduate
 								if (GraduationDialog.isValidClassName(selectedClassName)) { // OK
-									tablePopup.add(graduateClassItem);
-									tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
+									// Temporarily BACK OUT GRADUATION
+									//tablePopup.add(graduateClassItem);
+									tablePopup.remove(graduateClassItem);
+									tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
 								} else { // Not a valid graduation class
 									tablePopup.remove(graduateClassItem);
 									tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
