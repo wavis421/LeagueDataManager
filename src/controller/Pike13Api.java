@@ -17,6 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
+import model.CoursesModel;
 import model.DateRangeEvent;
 import model.InvoiceModel;
 import model.LogDataModel;
@@ -29,7 +30,6 @@ import model.StaffMemberModel;
 import model.StudentImportModel;
 import model.StudentModel;
 import model.StudentNameModel;
-import model.CoursesModel;
 
 public class Pike13Api {
 	private final String USER_AGENT = "Mozilla/5.0";
