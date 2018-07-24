@@ -72,7 +72,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
 	private GradTableModel gradTableModel;
-	private JButton emailAllButton;
+	private JButton emailAllButton, printAllButton;
 	private JButton submitButton;
 	private JButton doneButton;
 	private JLabel errorField;
@@ -155,6 +155,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		errorField.setHorizontalTextPosition(JLabel.CENTER);
 		errorField.setHorizontalAlignment(JLabel.CENTER);
 		emailAllButton = new JButton("Select all 'Email Parents'");
+		printAllButton = new JButton("Select all 'Print Certs'");
 		submitButton = new JButton("Submit Scores");
 		doneButton = new JButton("Done");
 
@@ -192,6 +193,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		tablePanel.add(gradScrollPane);
 		errorPanel.add(errorField, JPanel.CENTER_ALIGNMENT);
+		okCancelPanel.add(printAllButton);
 		okCancelPanel.add(emailAllButton);
 		okCancelPanel.add(submitButton);
 		okCancelPanel.add(doneButton);
@@ -205,6 +207,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		add(buttonPanel, BorderLayout.SOUTH);
 
 		// Add listener to buttons
+		printAllButton.addActionListener(this);
 		emailAllButton.addActionListener(this);
 		submitButton.addActionListener(this);
 		doneButton.addActionListener(this);
@@ -326,6 +329,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private void updateEmailParents() {
+		// User selected Email Parents button: set true for rows with valid score
 		for (int i = 0; i < gradTable.getRowCount(); i++) {
 			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
 			if (score.equals(""))
@@ -334,16 +338,24 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				gradTableModel.setEmailParents(i, true);
 		}
 		updateCheckBoxes();
-		gradTableModel.fireTableDataChanged();
+	}
+
+	private void updatePrintCerts() {
+		// User selected Print Certs button: set true for rows with valid score
+		for (int i = 0; i < gradTable.getRowCount(); i++) {
+			String score = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
+			if (score.equals(""))
+				gradTableModel.setPrintCertificates(i, false);
+			else
+				gradTableModel.setPrintCertificates(i, true);
+		}
+		updateCheckBoxes();
 	}
 
 	private void updateCheckBoxes() {
-		// Clear error field before starting
-		errorField.setText("");
-		
 		for (int i = 0; i < gradTable.getRowCount(); i++) {
 			String scoreString = ((JTextField) (gradTable.getValueAt(i, GradTableModel.SCORE_COLUMN))).getText();
-			
+
 			if (scoreString.equals("")) {
 				clearClassPassedFlags(i);
 				continue;
@@ -354,10 +366,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				Double score = Double.parseDouble(scoreString);
 				if (score > 100.0) {
 					clearClassPassedFlags(i);
-					((JTextField) (gradTable.getValueAt(i,  GradTableModel.SCORE_COLUMN))).setText("");
 					errorField.setText("Student score cannot be greater than 100%");
-				}
-				else if (score < 70.0) {
+				} else if (score < 70.0) {
 					clearClassPassedFlags(i);
 
 				} else {
@@ -404,22 +414,31 @@ public class GraduationDialog extends JDialog implements ActionListener {
 							.getText();
 					String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
 					boolean emailParent = ((boolean) gradTableModel.getValueAt(i, GradTableModel.EMAIL_PARENT_COLUMN));
-					boolean passedTest = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PASSED_COLUMN));
 					boolean printCerts = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PRINT_CERTS_COLUMN));
+					boolean passedTest = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PASSED_COLUMN));
 
 					if (!scoreString.equals("")) {
 						try {
 							Double score = Double.parseDouble(scoreString);
 							if (score > 100.0) {
-								errorField.setText("Student score cannot be greater than 100%");
+								updateCheckBoxes();
 								return;
 							}
 							if (score < 70.0) {
-								gradTableModel.setPassedTest(i, false);
+								if (passedTest) {
+									gradTableModel.setPassedTest(i, false);
+									gradTableModel.fireTableDataChanged();
+								}
+								if (emailParent) {
+									errorField.setText("Cannot email parent without a passing grade");
+									return;
+								} else if (printCerts) {
+									errorField.setText("Cannot print certificates without a passing grade");
+									return;
+								}
 							} else {
 								gradTableModel.setPassedTest(i, true);
 							}
-							gradTableModel.fireTableDataChanged();
 
 							// Now we're finally good to go...
 							body += "\n\t" + gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN)
@@ -430,6 +449,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 							countGrads++;
 
 						} catch (NumberFormatException e2) {
+							updateCheckBoxes();
 							errorField.setText("Student score (%) must be a number");
 							return;
 						}
@@ -437,8 +457,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					} else if (emailParent) {
 						errorField.setText("Cannot send parent email without a valid score");
 						return;
+					} else if (printCerts) {
+						errorField.setText("Cannot print certificates without a valid score");
+						return;
 					}
 				}
+				// Update all checkboxes that have changed
+				updateCheckBoxes();
+
 				if (countGrads == 0) {
 					errorField.setText("No student grades entered");
 					return;
@@ -454,6 +480,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		} else if (e.getSource() == emailAllButton) {
 			updateEmailParents();
+
+		} else if (e.getSource() == printAllButton) {
+			updatePrintCerts();
 
 		} else { // Done button
 			setVisible(false);
@@ -660,16 +689,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					if (score.equals("")) {
 						gradTableModel.setEmailParents(row, false);
 						gradTableModel.setPrintCertificates(row, false);
-					}
-					else {
+					} else {
 						boolean checked = (boolean) gradTable.getValueAt(row, col);
 						if (col == GradTableModel.EMAIL_PARENT_COLUMN)
 							gradTableModel.setEmailParents(row, !checked);
 						else
 							gradTableModel.setPrintCertificates(row, !checked);
-						updateCheckBoxes();
 					}
-					gradTableModel.fireTableDataChanged();
+					updateCheckBoxes();
 				}
 			}
 		}

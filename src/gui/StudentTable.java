@@ -30,7 +30,6 @@ public class StudentTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_2ROWS = 50;
 	private static final int POPUP_HEIGHT_3ROWS = 70;
 
 	private JPanel tablePanel;
@@ -120,9 +119,8 @@ public class StudentTable extends JPanel {
 		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(updateGithubUserItem);
-		// Temporarily BACK OUT GRADUATION
-		//tablePopup.add(graduateStudentItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+		tablePopup.add(graduateStudentItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_3ROWS));
 
 		// POP UP action listeners
 		updateGithubUserItem.addActionListener(new ActionListener() {
@@ -161,7 +159,7 @@ public class StudentTable extends JPanel {
 				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 						StudentTableModel.STUDENT_NAME_COLUMN);
-				
+
 				table.clearSelection();
 				studentListener.graduateStudent(clientID, studentName.toString());
 			}

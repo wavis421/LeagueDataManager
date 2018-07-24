@@ -34,7 +34,6 @@ public class AttendanceTable extends JPanel {
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
 	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
-	private static final int POPUP_MENU_HEIGHT_3ROWS = 70;
 	private static final int POPUP_MENU_HEIGHT_4ROWS = 90;
 
 	// Columns for embedded event table
@@ -120,26 +119,6 @@ public class AttendanceTable extends JPanel {
 	public void setSelectedEventRow(int selectedRow, int yPos) {
 		eventSelectedRow = getEventRow(selectedRow, yPos);
 		mainTable.repaint();
-	}
-
-	private String getClassNameByRow(int selectedRow, int modelRow, int yPos) {
-		JTable table = githubEventTableList.get(modelRow);
-		int eventRow = getEventRow(selectedRow, yPos);
-
-		if (eventRow > -1) {
-			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_CLASS_NAME_COLUMN);
-		} else
-			return null;
-	}
-
-	private String getClassDateByRow(int selectedRow, int modelRow, int yPos) {
-		JTable table = githubEventTableList.get(modelRow);
-		int eventRow = getEventRow(selectedRow, yPos);
-
-		if (eventRow > -1) {
-			return (String) ((EventTableModel) table.getModel()).getValueAt(eventRow, EVENT_TABLE_DATE_COLUMN);
-		} else
-			return null;
 	}
 
 	private int getEventRow(int selectedRow, int yPos) {
@@ -277,19 +256,20 @@ public class AttendanceTable extends JPanel {
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
 						tablePopup.add(updateGithubUserItem);
-						// Temporarily BACK OUT GRADUATION
-						//tablePopup.add(graduateStudentItem);
-						tablePopup.remove(graduateStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_3ROWS));
+						tablePopup.add(graduateStudentItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_4ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
 						// Show students by class name
 						if (eventSelectedRow > -1) {
 							int modelRow = mainTable.convertRowIndexToModel(row);
-							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow).getModel();
-							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
-							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
+							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow)
+									.getModel();
+							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow,
+									EVENT_TABLE_CLASS_NAME_COLUMN);
+							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow,
+									EVENT_TABLE_DATE_COLUMN);
 
 							if (selectedClassName != null) {
 								tablePopup.remove(showStudentInfoItem);
@@ -300,13 +280,13 @@ public class AttendanceTable extends JPanel {
 
 								// Check if this is a valid class to graduate
 								if (GraduationDialog.isValidClassName(selectedClassName)) { // OK
-									// Temporarily BACK OUT GRADUATION
-									//tablePopup.add(graduateClassItem);
-									tablePopup.remove(graduateClassItem);
-									tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+									tablePopup.add(graduateClassItem);
+									tablePopup
+											.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
 								} else { // Not a valid graduation class
 									tablePopup.remove(graduateClassItem);
-									tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+									tablePopup
+											.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
 								}
 
 								tablePopup.show(mainTable, e.getX(), e.getY());

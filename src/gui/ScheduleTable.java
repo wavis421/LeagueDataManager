@@ -196,7 +196,7 @@ public class ScheduleTable extends JPanel {
 				scheduleListener.viewAttendanceByClass(className, date.toString("yyyy-MM-dd"));
 			}
 		});
-		
+
 		graduateClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Retrieve class name from selected row
@@ -217,15 +217,13 @@ public class ScheduleTable extends JPanel {
 					// Check if this is a valid class to graduate
 					String className = (String) table.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
 					if (GraduationDialog.isValidClassName(className)) { // OK
-						// Temporarily BACK OUT GRADUATION
-						//tablePopup.add(graduateClassItem);
-						tablePopup.remove(graduateClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
+						tablePopup.add(graduateClassItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
 					} else { // Not a valid graduation class
 						tablePopup.remove(graduateClassItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 					}
-					
+
 					// Show the popup menu
 					tablePopup.show(table, e.getX(), e.getY());
 				}
