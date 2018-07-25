@@ -258,11 +258,11 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		return scrollPane;
 	}
 
-	private void addGradRecordToDb(int clientID, String studentName, Double score) {
+	private void addGradRecordToDb(int clientID, String studentName, Double score, boolean printCerts) {
 		String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
 		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score, startDate,
-				gradDatePicker.getJFormattedTextField().getText(), false, false);
+				gradDatePicker.getJFormattedTextField().getText(), false, !printCerts, false);
 		controller.addGraduationRecord(gradModel);
 	}
 
@@ -445,7 +445,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 									+ ", Score: " + scoreString + "%, Email Parents: " + emailParent;
 
 							// Add record to database
-							addGradRecordToDb(clientID, studentName, score);
+							addGradRecordToDb(clientID, studentName, score, printCerts);
 							countGrads++;
 
 						} catch (NumberFormatException e2) {

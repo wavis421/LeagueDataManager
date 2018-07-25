@@ -31,7 +31,8 @@ public class MySqlDatabase {
 	private static final int NUM_CLASS_LEVELS = 10;
 	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 30;
 
-	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
+	public static final String GRAD_MODEL_CERTS_PRINTED_FIELD = "CertsPrinted";
+	public static final String GRAD_MODEL_NEW_CLASS_FIELD = "NewClass";
 	public static final String GRAD_MODEL_IN_SF_FIELD = "InSalesForce";
 
 	public Connection dbConnection = null;
@@ -1039,11 +1040,12 @@ public class MySqlDatabase {
 				PreparedStatement addGrad;
 				if (gradModel.getStartDate().equals(""))
 					addGrad = dbConnection.prepareStatement(
-							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score) " + "VALUES (?, ?, ?, ?);");
-				else
-					addGrad = dbConnection
-							.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
+							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score, CertsPrinted) "
 									+ "VALUES (?, ?, ?, ?, ?);");
+				else
+					addGrad = dbConnection.prepareStatement(
+							"INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score, CertsPrinted) "
+									+ "VALUES (?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addGrad.setInt(col++, gradModel.getClientID());
@@ -1051,7 +1053,8 @@ public class MySqlDatabase {
 				if (!gradModel.getStartDate().equals(""))
 					addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getStartDate()));
 				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
-				addGrad.setDouble(col, gradModel.getScore());
+				addGrad.setDouble(col++, gradModel.getScore());
+				addGrad.setBoolean(col, gradModel.isCertsPrinted());
 
 				addGrad.executeUpdate();
 				addGrad.close();
@@ -1111,8 +1114,9 @@ public class MySqlDatabase {
 
 	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
 			boolean newValue) {
-		// Only the InSalesForce and Processed fields may be updated.
-		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)) {
+		// Only the boolean flags may be updated (InSalesForce, CertsPrinted, NewClass)
+		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_CERTS_PRINTED_FIELD)
+				&& !fieldName.equals(GRAD_MODEL_NEW_CLASS_FIELD)) {
 			System.out.println("Graduation field name invalid: " + fieldName);
 			return;
 		}
@@ -1163,7 +1167,8 @@ public class MySqlDatabase {
 							result.getString("FirstName") + " " + result.getString("LastName"),
 							result.getString("GradLevel"), result.getDouble("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
-							result.getBoolean(GRAD_MODEL_PROCESSED_FIELD)));
+							result.getBoolean(GRAD_MODEL_CERTS_PRINTED_FIELD),
+							result.getBoolean(GRAD_MODEL_NEW_CLASS_FIELD)));
 				}
 
 				result.close();

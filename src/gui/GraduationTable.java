@@ -87,8 +87,10 @@ public class GraduationTable extends JPanel {
 		// Configure column widths
 		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setPreferredWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setMaxWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.CERTS_PRINTED_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.CERTS_PRINTED_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.NEW_CLASS_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.NEW_CLASS_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setMaxWidth(130);
@@ -119,17 +121,28 @@ public class GraduationTable extends JPanel {
 					return;
 
 				if (e.getButton() == MouseEvent.BUTTON1) {
-					if (col == GraduationTableModel.PROCESSED_COLUMN) {
-						int modelRow = table.convertRowIndexToModel(row);
+					int modelRow = table.convertRowIndexToModel(row);
+
+					if (col == GraduationTableModel.CERTS_PRINTED_COLUMN) {
 						boolean checked = (boolean) table.getValueAt(row, col);
-						gradTableModel.setProcessed(modelRow, !checked);
+						gradTableModel.setCertsPrinted(modelRow, !checked);
 						gradTableModel.fireTableDataChanged();
 
 						// Update changes to database
 						gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
 								(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
 								(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
-								Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
+								Controller.GRAD_MODEL_CERTS_PRINTED_FIELD, !checked);
+					} else if (col == GraduationTableModel.NEW_CLASS_COLUMN) {
+						boolean checked = (boolean) table.getValueAt(row, col);
+						gradTableModel.setNewClass(modelRow, !checked);
+						gradTableModel.fireTableDataChanged();
+
+						// Update changes to database
+						gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
+								(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
+								(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
+								Controller.GRAD_MODEL_NEW_CLASS_FIELD, !checked);
 					}
 				}
 			}

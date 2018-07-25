@@ -124,7 +124,8 @@ BEGIN
 		EndDate date DEFAULT NULL,
 		Score int(11) DEFAULT 0,
 		InSalesForce boolean DEFAULT 0,
-		Processed boolean DEFAULT 0,
+		PrintCerts boolean DEFAULT 0,
+		NewClass boolean DEFAULT 0,
 		
 		UNIQUE KEY(ClientID, GradLevel)
 		
