@@ -4,17 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
@@ -34,9 +30,6 @@ import model.GraduationModel;
 public class GraduationTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
-	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT = 30;
-
 	private JPanel tablePanel;
 	private JTable table;
 	private GraduationTableModel gradTableModel;
@@ -52,7 +45,7 @@ public class GraduationTable extends JPanel {
 		table = new JTable(gradTableModel);
 
 		createTablePanel();
-		createGradTablePopups();
+		createMouseListeners();
 
 		rowSorter = new TableRowSorter<GraduationTableModel>((GraduationTableModel) table.getModel());
 	}
@@ -117,26 +110,7 @@ public class GraduationTable extends JPanel {
 		tablePanel.add(scrollPane, BorderLayout.CENTER);
 	}
 
-	private void createGradTablePopups() {
-		// Table panel POP UP menu
-		JPopupMenu tablePopup = new JPopupMenu();
-		JMenuItem removeItem = new JMenuItem("Remove table entry  ");
-		tablePopup.add(removeItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
-
-		// POP UP action listeners
-		removeItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Retrieve clientID from selected row
-				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				GraduationTableModel model = (GraduationTableModel) table.getModel();
-				String clientID = ((String) model.getValueAt(row, GraduationTableModel.CLIENT_ID_COLUMN)).trim();
-
-				// Display attendance table for selected class
-				table.clearSelection();
-				// TODO: show a table
-			}
-		});
+	private void createMouseListeners() {
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = table.getSelectedRow();
@@ -152,15 +126,11 @@ public class GraduationTable extends JPanel {
 						gradTableModel.fireTableDataChanged();
 
 						// Update changes to database
-						gradListener.updateGradField(
-								(int) gradTableModel.getClientID(modelRow),
+						gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
 								(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
 								(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
 								Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
 					}
-				} else if (e.getButton() == MouseEvent.BUTTON3) {
-					// Show popup menu
-					tablePopup.show(table, e.getX(), e.getY());
 				}
 			}
 
