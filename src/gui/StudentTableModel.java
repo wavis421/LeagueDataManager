@@ -17,10 +17,11 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int HOME_LOCATION_COLUMN = 4;
 	public static final int START_DATE_COLUMN = 5;
 	public static final int GRAD_YEAR_COLUMN = 6;
+	public static final int CURR_CLASS_COLUMN = 7;
 
 	private ArrayList<StudentModel> studentList;
 	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
-			" Grad Yr " };
+			" Grad Yr ", " Curr Class " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;
@@ -91,6 +92,11 @@ public class StudentTableModel extends AbstractTableModel {
 				return "";
 			else
 				return String.valueOf(student.getGradYear());
+		case CURR_CLASS_COLUMN:
+			if (student.getCurrentClass() == null)
+				return "";
+			else
+				return student.getCurrentClass();
 		}
 		return null;
 	}

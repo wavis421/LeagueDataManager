@@ -4,14 +4,14 @@ import java.sql.Date;
 
 public class StudentModel implements Comparable<StudentModel> {
 	private int clientID;
-	private String githubName;
+	private String githubName, currentClass;
 	private int homeLocation, gender, gradYear;
 	private Date startDate;
 	private StudentNameModel nameModel;
 	private boolean missingData;
 
 	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender, Date startDate,
-			int homeLocation, int gradYear) {
+			int homeLocation, int gradYear, String currClass) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.githubName = githubName;
@@ -19,6 +19,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.gender = gender;
 		this.gradYear = gradYear;
 		this.startDate = startDate;
+		this.currentClass = currClass;
 
 		if (nameModel.getIsInMasterDb()
 				&& (homeLocation == LocationModel.CLASS_LOCATION_UNKNOWN || gender == GenderModel.getGenderUnknown()
@@ -70,6 +71,14 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public int getHomeLocation() {
 		return homeLocation;
+	}
+
+	public String getCurrentClass() {
+		return currentClass;
+	}
+
+	public void setCurrentClass(String currentClass) {
+		this.currentClass = currentClass;
 	}
 
 	@Override

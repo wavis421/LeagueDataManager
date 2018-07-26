@@ -114,7 +114,7 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
 				}
 
 				result.close();
@@ -180,7 +180,7 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
 				}
 
 				result.close();
@@ -256,7 +256,7 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
 				}
 
 				result.close();
@@ -294,7 +294,7 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
 				}
 
 				result.close();
@@ -325,6 +325,35 @@ public class MySqlDatabase {
 						.prepareStatement("UPDATE Students SET " + flagName + "=? WHERE ClientID=?;");
 
 				updateStudentStmt.setInt(1, newFlagState);
+				updateStudentStmt.setInt(2, student.getClientID());
+
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, student.getNameModel(),
+						student.getClientID(), ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+	
+	public void updateLastEventName(StudentModel student, String eventName) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateStudentStmt = dbConnection
+						.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
+
+				updateStudentStmt.setString(1, eventName);
 				updateStudentStmt.setInt(2, student.getClientID());
 
 				updateStudentStmt.executeUpdate();
