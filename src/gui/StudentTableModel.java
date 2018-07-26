@@ -21,7 +21,7 @@ public class StudentTableModel extends AbstractTableModel {
 
 	private ArrayList<StudentModel> studentList;
 	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
-			" Grad Yr ", " Curr Class " };
+			" Grad Yr ", " Current Class " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;

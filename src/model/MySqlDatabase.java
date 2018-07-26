@@ -346,7 +346,7 @@ public class MySqlDatabase {
 		}
 	}
 	
-	public void updateLastEventName(StudentModel student, String eventName) {
+	public void updateLastEventName(int clientID, String eventName) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
@@ -354,7 +354,7 @@ public class MySqlDatabase {
 						.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
 
 				updateStudentStmt.setString(1, eventName);
-				updateStudentStmt.setInt(2, student.getClientID());
+				updateStudentStmt.setInt(2, clientID);
 
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
@@ -368,8 +368,8 @@ public class MySqlDatabase {
 					connectError = true;
 
 			} catch (SQLException e2) {
-				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, student.getNameModel(),
-						student.getClientID(), ": " + e2.getMessage());
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						clientID, ": " + e2.getMessage());
 				break;
 			}
 		}
