@@ -346,7 +346,7 @@ public class MySqlDatabase {
 		}
 	}
 	
-	public void updateLastEventName(int clientID, String eventName) {
+	public void updateLastEventNameByStudent(int clientID, String eventName) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
