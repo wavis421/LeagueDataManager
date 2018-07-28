@@ -200,9 +200,9 @@ public class Controller {
 		return sqlDb.getAllGradRecords();
 	}
 
-	public void updateGradudationField(int clientID, String studentName, String gradLevel, String fieldName,
+	public void updateGraduationField(int clientID, String studentName, String gradLevel, String fieldName,
 			boolean newValue) {
-		sqlDb.updateGradudationField(clientID, studentName, gradLevel, fieldName, newValue);
+		sqlDb.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
 	}
 
 	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {

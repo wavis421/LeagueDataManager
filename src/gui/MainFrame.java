@@ -602,7 +602,7 @@ public class MainFrame {
 			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
 					boolean newValue) {
 				// Update field in Graduation database
-				controller.updateGradudationField(clientID, studentName, gradLevel, fieldName, newValue);
+				controller.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
 			}
 		};
 

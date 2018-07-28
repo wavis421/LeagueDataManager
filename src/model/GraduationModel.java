@@ -3,11 +3,11 @@ package model;
 public class GraduationModel {
 	private int clientID;
 	private String studentName, gradLevel;
-	private double score;
+	private int score;
 	private String startDate, endDate;
 	private boolean isSfUpdated, isCertsPrinted, isNewClass;
 
-	public GraduationModel(int clientID, String studentName, String gradLevel, double score, String startDate,
+	public GraduationModel(int clientID, String studentName, String gradLevel, int score, String startDate,
 			String endDate, boolean isSfUpdated, boolean isCertsPrinted, boolean isNewClass) {
 		this.clientID = clientID;
 		this.studentName = studentName;
@@ -32,7 +32,7 @@ public class GraduationModel {
 		return gradLevel;
 	}
 
-	public double getScore() {
+	public int getScore() {
 		return score;
 	}
 

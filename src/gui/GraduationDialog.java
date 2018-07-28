@@ -258,7 +258,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		return scrollPane;
 	}
 
-	private void addGradRecordToDb(int clientID, String studentName, Double score, boolean printCerts) {
+	private void addGradRecordToDb(int clientID, String studentName, int score, boolean printCerts) {
 		String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
 		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score, startDate,
@@ -361,13 +361,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				continue;
 			}
 
-			// There is data in the score field, so try to convert to double
+			// There is data in the score field, so try to convert to int
 			try {
-				Double score = Double.parseDouble(scoreString);
-				if (score > 100.0) {
+				Integer score = Integer.parseInt(scoreString);
+				if (score > 100) {
 					clearClassPassedFlags(i);
 					errorField.setText("Student score cannot be greater than 100%");
-				} else if (score < 70.0) {
+				} else if (score < 70) {
 					clearClassPassedFlags(i);
 
 				} else {
@@ -376,7 +376,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				}
 
 			} catch (NumberFormatException e2) {
-				errorField.setText("Student score (%) must be a number");
+				errorField.setText("Student score (%) must be an integer from 0 - 100%");
 				clearClassPassedFlags(i);
 			}
 		}
@@ -403,6 +403,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
 			String pw = emailPwField.getText();
+			errorField.setText("");
 			int countGrads = 0;
 
 			// Check that all fields are filled in, then create body and send email
@@ -419,12 +420,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 					if (!scoreString.equals("")) {
 						try {
-							Double score = Double.parseDouble(scoreString);
-							if (score > 100.0) {
+							Integer score = Integer.parseInt(scoreString);
+							if (score > 100) {
 								updateCheckBoxes();
 								return;
 							}
-							if (score < 70.0) {
+							if (score < 70) {
 								if (passedTest) {
 									gradTableModel.setPassedTest(i, false);
 									gradTableModel.fireTableDataChanged();
@@ -450,7 +451,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 						} catch (NumberFormatException e2) {
 							updateCheckBoxes();
-							errorField.setText("Student score (%) must be a number");
+							errorField.setText("Student score (%) must be an integer from 0 - 100%");
 							return;
 						}
 
