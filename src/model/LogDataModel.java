@@ -88,9 +88,10 @@ public class LogDataModel {
 	public static final int COURSE_ATTENDANCE_IMPORT_COMPLETE = 77;
 	public static final int MISSING_SF_CONTACT_FOR_GRADUATION = 78;
 	public static final int SALES_FORCE_UPSERT_DIARY_ERROR = 79;
+	public static final int STUDENT_GRADUATION = 80;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 80;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 81;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -121,11 +122,10 @@ public class LogDataModel {
 			"Missing Pike13 Staff Member",
 
 			// 50
-			"SalesForce Attendance import error", "SalesForce Staff Hours Import error",
-			"Missing github comments", "Create SalesForce account",
-			"Warning: Duplicate SalesForce account name", "Missing Pike13 Acct Manager for client",
-			"Deleted SalesForce Contact record", "SalesForce Contact import error", "SalesForce Account import error",
-			"SalesForce Upsert Clients error",
+			"SalesForce Attendance import error", "SalesForce Staff Hours Import error", "Missing github comments",
+			"Create SalesForce account", "Warning: Duplicate SalesForce account name",
+			"Missing Pike13 Acct Manager for client", "Deleted SalesForce Contact record",
+			"SalesForce Contact import error", "SalesForce Account import error", "SalesForce Upsert Clients error",
 
 			// 60
 			"SalesForce Upsert Account error", "SalesForce Contacts updated",
@@ -136,8 +136,12 @@ public class LogDataModel {
 
 			// 70
 			"*** COURSES IMPORT COMPLETE", "Courses Database error", "Add courses to schedule",
-			"Remove Courses from schedule", "Update Courses info", "Update Attendance state", "*** BEGIN COURSE ATTENDANCE IMPORT",
-			"*** COURSE ATTENDANCE IMPORT COMPLETE", "Missing SF contact for Graduation", "SalesForce Upsert Diary error" };
+			"Remove Courses from schedule", "Update Courses info", "Update Attendance state",
+			"*** BEGIN COURSE ATTENDANCE IMPORT", "*** COURSE ATTENDANCE IMPORT COMPLETE",
+			"Missing SF contact for Graduation", "SalesForce Upsert Diary error",
+
+			// 80
+			"Graduated" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
