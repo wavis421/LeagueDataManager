@@ -126,7 +126,7 @@ BEGIN
 		CertsPrinted boolean DEFAULT 0,
 		NewClass boolean DEFAULT 0,
 		
-		UNIQUE KEY(ClientID, GradLevel, Score, EndDate)
+		UNIQUE KEY(ClientID, GradLevel)
 		
 	) ENGINE=InnoDB;
 	

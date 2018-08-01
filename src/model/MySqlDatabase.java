@@ -1090,7 +1090,41 @@ public class MySqlDatabase {
 				break;
 
 			} catch (MySQLIntegrityConstraintViolationException e0) {
-				// Record already exists in database, so ignore
+				// Record already exists in database, so update instead
+				updateGraduationRecord(gradModel);
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						gradModel.getClientID(), " for Graduation: " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void updateGraduationRecord(GraduationModel gradModel) {
+		// Graduation records are uniquely identified by clientID & level pair.
+		// Update only end date & score. Set 'in SF' false to force update again.
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateGraduateStmt = dbConnection
+						.prepareStatement("UPDATE Graduation SET EndDate=?, Score=?, " + GRAD_MODEL_IN_SF_FIELD + "=0 "
+								+ "WHERE ClientID=? AND GradLevel=?;");
+
+				updateGraduateStmt.setDate(1, java.sql.Date.valueOf(gradModel.getEndDate()));
+				updateGraduateStmt.setInt(2, gradModel.getScore());
+				updateGraduateStmt.setInt(3, gradModel.getClientID());
+				updateGraduateStmt.setString(4, gradModel.getGradLevel());
+
+				updateGraduateStmt.executeUpdate();
+				updateGraduateStmt.close();
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

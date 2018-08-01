@@ -26,7 +26,7 @@ public class Controller {
 	public static final String GRAD_MODEL_CERTS_PRINTED_FIELD = MySqlDatabase.GRAD_MODEL_CERTS_PRINTED_FIELD;
 	public static final String GRAD_MODEL_NEW_CLASS_FIELD = MySqlDatabase.GRAD_MODEL_NEW_CLASS_FIELD;
 	public static final String GRAD_MODEL_IN_SF_FIELD = MySqlDatabase.GRAD_MODEL_IN_SF_FIELD;
-	
+
 	private MySqlDatabase sqlDb;
 	private Pike13Api pike13Api;
 	private JFrame parent;
