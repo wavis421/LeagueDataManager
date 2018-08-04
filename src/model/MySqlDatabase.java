@@ -1181,6 +1181,51 @@ public class MySqlDatabase {
 		}
 	}
 
+	public void removeProcessedGraduations() {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * FROM Graduation;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					// When all 3 flags are true, record can be removed
+					boolean inSf = result.getBoolean(GRAD_MODEL_IN_SF_FIELD);
+					boolean printed = result.getBoolean(GRAD_MODEL_CERTS_PRINTED_FIELD);
+					boolean newClass = result.getBoolean(GRAD_MODEL_NEW_CLASS_FIELD);
+					
+					if (inSf && printed && newClass) {
+						// Graduation record has been processed, so remove from DB
+						PreparedStatement deleteGradStmt = dbConnection
+								.prepareStatement("DELETE FROM Graduation WHERE ClientID=? AND GradLevel=?;");
+
+						// Delete student
+						deleteGradStmt.setInt(1, result.getInt("ClientID"));
+						deleteGradStmt.setString(2,  result.getString("GradLevel"));
+						deleteGradStmt.executeUpdate();
+						deleteGradStmt.close();
+					}
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						" for Graduation: " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
 	public ArrayList<GraduationModel> getAllGradRecords() {
 		ArrayList<GraduationModel> gradList = new ArrayList<GraduationModel>();
 
