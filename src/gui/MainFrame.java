@@ -599,6 +599,12 @@ public class MainFrame {
 			}
 
 			@Override
+			public void graduateStudent(String clientID, String studentName, String className) {
+				// Open Graduation dialog
+				new GraduationDialog(controller, Integer.parseInt(clientID), studentName, className);
+			}
+			
+			@Override
 			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
 					boolean newValue) {
 				// Update field in Graduation database

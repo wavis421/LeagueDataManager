@@ -161,9 +161,10 @@ public class StudentTable extends JPanel {
 				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
 				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
 						StudentTableModel.STUDENT_NAME_COLUMN);
+				String className = (String) model.getValueAt(modelRow,  StudentTableModel.CURR_CLASS_COLUMN);
 
 				table.clearSelection();
-				studentListener.graduateStudent(clientID, studentName.toString());
+				studentListener.graduateStudent(clientID, studentName.toString(), className);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {

@@ -74,6 +74,16 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		createGui(0, gradList, "Graduate " + studentName);
 	}
 
+	public GraduationDialog(Controller newController, int clientID, String studentName, String className) {
+		// Graduate by student: create list with 1 student
+		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
+		gradList.add(new DialogGradModel(clientID, studentName));
+
+		controller = newController;
+		int gradLevelNum = getLevelFromClassName(className);
+		createGui(gradLevelNum, gradList, "Graduate " + studentName);
+	}
+	
 	public GraduationDialog(Controller newController, String gradClassName, ArrayList<AttendanceModel> attendanceList) {
 		// Graduate by class
 		int gradLevelNum = getLevelFromClassName(gradClassName);
@@ -275,7 +285,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				}
 
 			} catch (NumberFormatException e2) {
-				errorField.setText("Student score (%) must be an integer from 0 - 100% (student #" + (i + 1) + ")");
+				errorField.setText("Student score must be an integer from 0 - 100% (student #" + (i + 1) + ")");
 				clearClassPassedFlags(i);
 			}
 		}
@@ -339,7 +349,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					} catch (NumberFormatException e2) {
 						updateCheckBoxes();
 						errorField.setText(
-								"Student score (%) must be an integer from 0 - 100% (student #" + (i + 1) + ")");
+								"Student score must be an integer from 0 - 100% (student #" + (i + 1) + ")");
 						return;
 					}
 
@@ -568,7 +578,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 						} catch (NumberFormatException e2) {
 							errorField.setText(
-									"Student score (%) must be an integer from 0 - 100% (student #" + (row + 1) + ")");
+									"Student score must be an integer from 0 - 100% (student #" + (row + 1) + ")");
 						}
 					}
 					updateCheckBoxes();
