@@ -3,23 +3,13 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Properties;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -28,7 +18,6 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -47,10 +36,10 @@ import model.GraduationModel;
 
 public class GraduationDialog extends JDialog implements ActionListener {
 	private final static int FRAME_WIDTH = 620;
-	private final static int FRAME_HEIGHT = 460;
+	private final static int FRAME_HEIGHT = 390;
 
 	// Main panel heights
-	private final static int CONTROL_PANEL_HEIGHT = 185;
+	private final static int CONTROL_PANEL_HEIGHT = 115;
 	private final static int TABLE_PANEL_HEIGHT = 150;
 	private final static int BUTTON_PANEL_HEIGHT = 80;
 
@@ -59,15 +48,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 	// Panel widths
 	private final static int PANEL_WIDTH = FRAME_WIDTH - 10;
-	private final static int PASSWORD_FIELD_WIDTH = 20;
 
 	// Table width/height
 	private final static int GRAD_TABLE_WIDTH = PANEL_WIDTH - 20;
 	private final static int GRAD_TABLE_HEIGHT = TABLE_PANEL_HEIGHT - 10;
 
 	// GUI components
-	private JComboBox<String> emailUserList;
-	private JPasswordField emailPwField;
 	private JComboBox<String> gradLevelList;
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
@@ -77,9 +63,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JButton doneButton;
 	private JLabel errorField;
 	private static String[] gradLevels = new String[10];
-
-	// Temporary: for test only
-	private String[] teacherEmails = { "wendy.avis@jointheleague.org", "jackie.a@jointheleague.org" };
 	private static Controller controller;
 
 	public GraduationDialog(Controller newController, int clientID, String studentName) {
@@ -114,8 +97,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		JPanel buttonPanel = new JPanel();
 
 		// Create sub-panels inside of control panel
-		JPanel emailPanel = new JPanel();
-		JPanel passwordPanel = new JPanel();
 		JPanel levelPanel = new JPanel();
 		JPanel gradDatePanel = new JPanel();
 
@@ -124,19 +105,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		JPanel okCancelPanel = new JPanel();
 
 		// Create labels and right justify
-		JLabel emailUserLabel = new JLabel("Teacher email: ");
-		JLabel emailPwLabel = new JLabel(" Password: ");
 		JLabel levelLabel = new JLabel("Level passed: ");
 		JLabel gradDateLabel = new JLabel("Graduation date: ");
 
-		emailUserLabel.setHorizontalAlignment(JLabel.RIGHT);
-		emailPwLabel.setHorizontalAlignment(JLabel.RIGHT);
 		levelLabel.setHorizontalAlignment(JLabel.RIGHT);
 		gradDateLabel.setHorizontalAlignment(JLabel.RIGHT);
 
 		// Create input fields
-		emailUserList = new JComboBox<String>(teacherEmails);
-		emailPwField = new JPasswordField(PASSWORD_FIELD_WIDTH);
 		gradLevelList = new JComboBox<String>(gradLevels);
 		gradLevelList.setSelectedIndex(gradLevelNum);
 		gradDatePicker = new DatePicker(new DateTime()).getDatePicker();
@@ -160,8 +135,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		// Set panel height/width
 		controlPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_PANEL_HEIGHT));
-		emailPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
-		passwordPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
 		levelPanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT));
 		gradDatePanel.setPreferredSize(new Dimension(PANEL_WIDTH, CONTROL_SUB_PANEL_HEIGHT + 5));
 		buttonPanel.setPreferredSize(new Dimension(PANEL_WIDTH, BUTTON_PANEL_HEIGHT));
@@ -169,24 +142,16 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		// Add orange borders for all input fields
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
-		emailUserList.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-		emailPwField.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradLevelList.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradDatePicker.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		gradScrollPane.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 
 		// Add all of the above to the panels
-		emailPanel.add(emailUserLabel);
-		emailPanel.add(emailUserList);
-		passwordPanel.add(emailPwLabel);
-		passwordPanel.add(emailPwField);
 		levelPanel.add(levelLabel);
 		levelPanel.add(gradLevelList);
 		gradDatePanel.add(gradDateLabel);
 		gradDatePanel.add(gradDatePicker);
 
-		controlPanel.add(emailPanel);
-		controlPanel.add(passwordPanel);
 		controlPanel.add(levelPanel);
 		controlPanel.add(gradDatePanel);
 
@@ -261,55 +226,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		controller.addGraduationRecord(gradModel);
 	}
 
-	// TODO: Make this a class to share with "github dialog"
-	private boolean generateAndSendEmail(String emailUser, String emailPassword, String emailBody) {
-		// Currently hard-coded to send using gmail SMTP
-		Properties properties = System.getProperties();
-		properties.put("mail.smtp.auth", "true");
-		properties.put("mail.smtp.host", "smtp.gmail.com");
-		properties.put("mail.smtp.socketFactory.port", "465");
-		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		properties.put("mail.smtp.port", "465");
-		properties.put("mail.smtp.connectiontimeout", 10000); // 10 seconds
-
-		Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(emailUser, new String(emailPassword));
-			}
-		});
-
-		// Set cursor to "wait" cursor
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		try {
-			// Set message fields
-			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(emailUser));
-			message.setSubject("Graduate class");
-			message.setText(emailBody, "utf-8");
-			message.setSentDate(new Date());
-
-			// Set email recipient
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailUser));
-
-			// Send email
-			Transport.send(message);
-
-			// Set cursor back to default
-			this.setCursor(Cursor.getDefaultCursor());
-
-			return true;
-
-		} catch (MessagingException e) {
-			System.out.println(e.getMessage());
-			errorField.setText("Failure sending email to " + emailUser);
-		}
-
-		// Set cursor back to default
-		this.setCursor(Cursor.getDefaultCursor());
-		return false;
-	}
-
 	private int getLevelFromClassName(String className) {
 		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
 			return className.charAt(0) - '0';
@@ -349,7 +265,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				Integer score = Integer.parseInt(scoreString);
 				if (score > 100) {
 					clearClassPassedFlags(i);
-					errorField.setText("Student score cannot be greater than 100%");
+					errorField.setText("Student score cannot be greater than 100% (student #" + (i + 1) + ")");
 				} else if (score < 70) {
 					clearClassPassedFlags(i);
 
@@ -359,7 +275,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				}
 
 			} catch (NumberFormatException e2) {
-				errorField.setText("Student score (%) must be an integer from 0 - 100%");
+				errorField.setText("Student score (%) must be an integer from 0 - 100% (student #" + (i + 1) + ")");
 				clearClassPassedFlags(i);
 			}
 		}
@@ -384,75 +300,63 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
-			String pw = emailPwField.getText();
 			errorField.setText("");
 			int countGrads = 0;
 
-			// Check that all fields are filled in, then create body and send email
-			if (!pw.equals("")) {
-				String body = "Test Graduating Level " + (Integer) gradLevelList.getSelectedIndex() + ": ";
-				for (int i = 0; i < gradTableModel.getRowCount(); i++) {
-					int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
-					String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN))
-							.getText();
-					String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
-					boolean printCerts = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PRINT_CERTS_COLUMN));
-					boolean passedTest = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PASSED_COLUMN));
+			// Check that all fields are filled in
+			for (int i = 0; i < gradTableModel.getRowCount(); i++) {
+				int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
+				String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN)).getText();
+				String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
+				boolean printCerts = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PRINT_CERTS_COLUMN));
+				boolean passedTest = ((boolean) gradTableModel.getValueAt(i, GradTableModel.PASSED_COLUMN));
 
-					if (!scoreString.equals("")) {
-						try {
-							Integer score = Integer.parseInt(scoreString);
-							if (score > 100) {
-								updateCheckBoxes();
-								return;
-							}
-							if (score < 70) {
-								if (passedTest) {
-									gradTableModel.setPassedTest(i, false);
-									gradTableModel.fireTableDataChanged();
-								}
-								if (printCerts) {
-									errorField.setText("Cannot print certificates without a passing grade");
-									return;
-								}
-							} else {
-								gradTableModel.setPassedTest(i, true);
-							}
-
-							// Now we're finally good to go...
-							body += "\n\t" + gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN)
-									+ ", Score: " + scoreString + "%";
-
-							// Add record to database
-							addGradRecordToDb(clientID, studentName, score, printCerts);
-							countGrads++;
-
-						} catch (NumberFormatException e2) {
+				if (!scoreString.equals("")) {
+					try {
+						Integer score = Integer.parseInt(scoreString);
+						if (score > 100) {
 							updateCheckBoxes();
-							errorField.setText("Student score (%) must be an integer from 0 - 100%");
 							return;
 						}
+						if (score < 70) {
+							if (passedTest) {
+								gradTableModel.setPassedTest(i, false);
+								gradTableModel.fireTableDataChanged();
+							}
+							if (printCerts) {
+								errorField.setText(
+										"Cannot print certificates without a passing grade (student #" + (i + 1) + ")");
+								return;
+							}
+						} else {
+							gradTableModel.setPassedTest(i, true);
+						}
 
-					} else if (printCerts) {
-						errorField.setText("Cannot print certificates without a passing grade");
+						// Add record to database
+						addGradRecordToDb(clientID, studentName, score, printCerts);
+						countGrads++;
+
+					} catch (NumberFormatException e2) {
+						updateCheckBoxes();
+						errorField.setText(
+								"Student score (%) must be an integer from 0 - 100% (student #" + (i + 1) + ")");
 						return;
 					}
-				}
-				// Update all checkboxes that have changed
-				updateCheckBoxes();
 
-				if (countGrads == 0) {
-					errorField.setText("No student grades entered");
+				} else if (printCerts) {
+					errorField.setText("Cannot print certificates without a passing grade (student #" + (i + 1) + ")");
 					return;
 				}
-
-				// Send email. If error occurs, generateAndSendEmail method will report error
-				if (generateAndSendEmail(emailUserList.getSelectedItem().toString(), pw, body))
-					errorField.setText("Email sent successfully");
-
-			} else {
-				errorField.setText("Teacher email password required");
 			}
+			// Update all checkboxes that have changed
+			updateCheckBoxes();
+
+			if (countGrads == 0)
+				// No grades entered
+				errorField.setText("No student scores entered");
+			else
+				// Successfully added records
+				errorField.setText(countGrads + " graduation record(s) successfully added to database");
 
 		} else if (e.getSource() == printAllButton) {
 			updatePrintCerts();
@@ -491,10 +395,6 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		}
 
 		public JTextField getScoreTextField() {
-			return score;
-		}
-
-		public JTextField getScore() {
 			return score;
 		}
 
@@ -650,7 +550,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 					if (score.equals("")) {
 						if (checked)
-							errorField.setText("Cannot print certificates without a valid grade");
+							errorField.setText(
+									"Cannot print certificates without a valid grade (student #" + (row + 1) + ")");
 						gradTableModel.setPrintCertificates(row, false);
 
 					} else { // There is data in the score field
@@ -658,14 +559,16 @@ public class GraduationDialog extends JDialog implements ActionListener {
 							// Don't allow printing certs if not a passing grade
 							Integer scoreNum = Integer.parseInt(score);
 							if (!checked && (scoreNum < 70 || scoreNum > 100))
-								errorField.setText("Cannot print certificates without a passing grade");
+								errorField.setText("Cannot print certificates without a passing grade (student #"
+										+ (row + 1) + ")");
 							else {
 								errorField.setText("");
 								gradTableModel.setPrintCertificates(row, !checked);
 							}
 
 						} catch (NumberFormatException e2) {
-							errorField.setText("Student score (%) must be an integer from 0 - 100%");
+							errorField.setText(
+									"Student score (%) must be an integer from 0 - 100% (student #" + (row + 1) + ")");
 						}
 					}
 					updateCheckBoxes();
