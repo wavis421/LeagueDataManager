@@ -17,7 +17,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		this.serviceDate = serviceDate;
 
 		// Parse long event names for workshops
-		eventName = event;
+		eventName = event.trim();
 		if (eventName.charAt(1) != '@' && eventName.charAt(2) != '@') {
 			if (eventName.contains("Intro to Java Work"))
 				eventName = "Intro to Java WShop";
@@ -29,7 +29,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			eventName = eventName.substring(0, idx).trim();
 
 		this.teacherNames = "";
-		this.serviceCategory = serviceCategory;
+		this.serviceCategory = serviceCategory.trim();
 		this.state = state;
 		this.githubName = githubName;
 		if (githubName != null)
