@@ -297,7 +297,7 @@ public class Pike13Api {
 			+ "                              [\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]]]],"
 			+ "                    [\"and\",[[\"eq\",\"state\",\"registered\"],"
 			+ "                              [\"btw\",\"service_date\",[\"2222-22-22\",\"3333-33-33\"]],"
-			+ "                              [\"contains\",\"service_category\",\"jlab\"]]]]]}}}";
+			+ "                              [\"starts\",\"service_category\",\"class\"]]]]]}}}";
 
 	private final String getEnrollmentStudentTracker2WithName = "},"
 			// Filter on State completed, since date and student name

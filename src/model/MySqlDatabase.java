@@ -416,7 +416,7 @@ public class MySqlDatabase {
 
 		for (int i = 0; i < 2; i++) {
 			try {
-				// Get attendance data from the DB for all students that have a github user name
+				// Get attendance data from the DB for all students
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') "
@@ -454,17 +454,20 @@ public class MySqlDatabase {
 	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 		ArrayList<AttendanceModel> listByClient;
-		String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
-				.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		String sinceDate = today.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
+		String endDate = today.plusDays(7).toString("yyyy-MM-dd");
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' AND EventName=? AND ServiceDate > ? GROUP BY Students.ClientID;");
+								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
+								+ "AND ServiceDate > ? AND ServiceDate < ? GROUP BY Students.ClientID;");
 				selectStmt.setString(1, className);
 				selectStmt.setString(2, sinceDate);
+				selectStmt.setString(3, endDate);
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
@@ -1193,7 +1196,7 @@ public class MySqlDatabase {
 					boolean inSf = result.getBoolean(GRAD_MODEL_IN_SF_FIELD);
 					boolean printed = result.getBoolean(GRAD_MODEL_CERTS_PRINTED_FIELD);
 					boolean newClass = result.getBoolean(GRAD_MODEL_NEW_CLASS_FIELD);
-					
+
 					if (inSf && printed && newClass) {
 						// Graduation record has been processed, so remove from DB
 						PreparedStatement deleteGradStmt = dbConnection
@@ -1201,7 +1204,7 @@ public class MySqlDatabase {
 
 						// Delete student
 						deleteGradStmt.setInt(1, result.getInt("ClientID"));
-						deleteGradStmt.setString(2,  result.getString("GradLevel"));
+						deleteGradStmt.setString(2, result.getString("GradLevel"));
 						deleteGradStmt.executeUpdate();
 						deleteGradStmt.close();
 					}
