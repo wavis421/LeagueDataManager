@@ -237,6 +237,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private int getLevelFromClassName(String className) {
+		if (className == null || className.length() < 2)
+			return 0;
+		
 		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
 			return className.charAt(0) - '0';
 		else
