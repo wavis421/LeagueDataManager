@@ -5,10 +5,10 @@ public class GraduationModel {
 	private String studentName, gradLevel;
 	private int score;
 	private String startDate, endDate;
-	private boolean isSfUpdated, isCertsPrinted, isNewClass;
+	private boolean isSfUpdated, isNewClass;
 
 	public GraduationModel(int clientID, String studentName, String gradLevel, int score, String startDate,
-			String endDate, boolean isSfUpdated, boolean isCertsPrinted, boolean isNewClass) {
+			String endDate, boolean isSfUpdated, boolean isNewClass) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.gradLevel = gradLevel.trim();
@@ -16,7 +16,6 @@ public class GraduationModel {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.isSfUpdated = isSfUpdated;
-		this.isCertsPrinted = isCertsPrinted;
 		this.isNewClass = isNewClass;
 	}
 
@@ -48,20 +47,12 @@ public class GraduationModel {
 		return isSfUpdated;
 	}
 
-	public boolean isCertsPrinted() {
-		return isCertsPrinted;
-	}
-
 	public boolean isNewClass() {
 		return isNewClass;
 	}
 
 	public void setSfUpdated(boolean isSfUpdated) {
 		this.isSfUpdated = isSfUpdated;
-	}
-
-	public void setCertsPrinted(boolean isCertsPrinted) {
-		this.isCertsPrinted = isCertsPrinted;
 	}
 
 	public void setNewClass(boolean isNewClass) {

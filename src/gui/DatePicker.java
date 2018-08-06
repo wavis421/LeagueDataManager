@@ -35,7 +35,7 @@ public class DatePicker {
 
 		datePanel = new JDatePanelImpl(dateModel, prop);
 		datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-		datePicker.setPreferredSize(new Dimension(130, 32));
+		datePicker.setPreferredSize(new Dimension(150, 32));
 		
 		JFormattedTextField textField = datePicker.getJFormattedTextField();
 		textField.setFont(CustomFonts.TABLE_TEXT_FONT);

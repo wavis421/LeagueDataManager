@@ -16,15 +16,14 @@ public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
 	public static final int LEVEL_PASSED_COLUMN = 1;
 	public static final int GRAD_DATE_COLUMN = 2;
-	public static final int CERTS_PRINTED_COLUMN = 3;
-	public static final int NEW_CLASS_COLUMN = 4;
-	public static final int IN_SALESFORCE_COLUMN = 5;
-	public static final int NOTES_COLUMN = 6;
-	public static final int CLIENT_ID_COLUMN = 7; // not a real column
-	public static final int NUM_COLUMNS = 8;
+	public static final int NEW_CLASS_COLUMN = 3;
+	public static final int IN_SALESFORCE_COLUMN = 4;
+	public static final int NOTES_COLUMN = 5;
+	public static final int CLIENT_ID_COLUMN = 6; // not a real column
+	public static final int NUM_COLUMNS = 7;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Level Passed ", " Grad Date ", " Certs Printed ",
+	private final String colNames[] = { " Student Name ", " Level Passed ", " Grad Date ",
 			" New Class ", " In SalesForce ", " Notes/Errors " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
@@ -46,10 +45,6 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	public int getClientID(int row) {
 		return gradList.get(row).getClientID();
-	}
-
-	public void setCertsPrinted(int row, boolean checked) {
-		gradList.get(row).setCertsPrinted(checked);
 	}
 
 	public void setNewClass(int row, boolean checked) {
@@ -75,7 +70,6 @@ public class GraduationTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 		case IN_SALESFORCE_COLUMN:
-		case CERTS_PRINTED_COLUMN:
 		case NEW_CLASS_COLUMN:
 			return Boolean.class;
 		}
@@ -85,7 +79,7 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		if (col == CERTS_PRINTED_COLUMN || col == NEW_CLASS_COLUMN) // Check-box
+		if (col == NEW_CLASS_COLUMN) // Check-box
 			return true;
 		else
 			return false;
@@ -101,8 +95,6 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.getEndDate();
 		case IN_SALESFORCE_COLUMN:
 			return grad.isSfUpdated();
-		case CERTS_PRINTED_COLUMN:
-			return grad.isCertsPrinted();
 		case NEW_CLASS_COLUMN:
 			return grad.isNewClass();
 		case NOTES_COLUMN:
