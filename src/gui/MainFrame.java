@@ -589,19 +589,19 @@ public class MainFrame {
 			@Override
 			public void graduateClass(String className) {
 				// Get class student list and open Graduation dialog
-				new GraduationDialog(controller, className, controller.getAttendanceByClassName(className));
+				new GraduationDialog(frame, controller, className, controller.getAttendanceByClassName(className), icon);
 			}
 
 			@Override
 			public void graduateStudent(String clientID, String studentName) {
 				// Open Graduation dialog
-				new GraduationDialog(controller, Integer.parseInt(clientID), studentName);
+				new GraduationDialog(frame, controller, Integer.parseInt(clientID), studentName, icon);
 			}
 
 			@Override
 			public void graduateStudent(String clientID, String studentName, String className) {
 				// Open Graduation dialog
-				new GraduationDialog(controller, Integer.parseInt(clientID), studentName, className);
+				new GraduationDialog(frame, controller, Integer.parseInt(clientID), studentName, className, icon);
 			}
 			
 			@Override

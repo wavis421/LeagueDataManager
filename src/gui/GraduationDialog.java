@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -52,6 +53,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private final static int GRAD_TABLE_HEIGHT = TABLE_PANEL_HEIGHT - 10;
 
 	// GUI components
+	private JFrame parent;
 	private JComboBox<String> gradLevelList;
 	private JDatePickerImpl gradDatePicker;
 	private JTable gradTable;
@@ -59,29 +61,36 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JButton submitButton;
 	private JButton exitButton;
 	private JLabel errorField;
+	private ImageIcon icon;
 	private static String[] gradLevels = new String[10];
 	private static Controller controller;
 
-	public GraduationDialog(Controller newController, int clientID, String studentName) {
+	public GraduationDialog(JFrame parent, Controller newController, int clientID, String studentName, ImageIcon icon) {
 		// Graduate by student: create list with 1 student
 		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
 		gradList.add(new DialogGradModel(clientID, studentName));
 
 		controller = newController;
+		this.parent = parent;
+		this.icon = icon;
 		createGui(0, gradList, "Graduate " + studentName);
 	}
 
-	public GraduationDialog(Controller newController, int clientID, String studentName, String className) {
+	public GraduationDialog(JFrame parent, Controller newController, int clientID, String studentName, String className,
+			ImageIcon icon) {
 		// Graduate by student: create list with 1 student
 		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
 		gradList.add(new DialogGradModel(clientID, studentName));
 
 		controller = newController;
+		this.parent = parent;
+		this.icon = icon;
 		int gradLevelNum = getLevelFromClassName(className);
 		createGui(gradLevelNum, gradList, "Graduate " + studentName);
 	}
 
-	public GraduationDialog(Controller newController, String gradClassName, ArrayList<AttendanceModel> attendanceList) {
+	public GraduationDialog(JFrame parent, Controller newController, String gradClassName,
+			ArrayList<AttendanceModel> attendanceList, ImageIcon icon) {
 		// Graduate by class
 		int gradLevelNum = getLevelFromClassName(gradClassName);
 
@@ -91,6 +100,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			gradList.add(new DialogGradModel(a.getClientID(), a.getStudentName().toString()));
 
 		controller = newController;
+		this.parent = parent;
+		this.icon = icon;
 		createGui(gradLevelNum, gradList, "Graduate class '" + gradClassName + "'");
 	}
 
@@ -178,16 +189,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		exitButton.addActionListener(this);
 
 		// Set icon
-		// TODO: Don't hard-code file name
-		ImageIcon icon = new ImageIcon(getClass().getResource("PPicon24_Color_F16412.png"));
 		setIconImage(icon.getImage());
 
 		// Configure dialog window
-		// TODO: Locate dialog relative to parent
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setTitle(dialogTitle);
 		setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
-		setLocation(300, 300);
+		setLocation(parent.getX() + 200, parent.getY() + 200);
 		setResizable(false);
 		pack();
 		setVisible(true);
