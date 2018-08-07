@@ -15,15 +15,16 @@ import model.GraduationModel;
 public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
 	public static final int LEVEL_PASSED_COLUMN = 1;
-	public static final int GRAD_DATE_COLUMN = 2;
-	public static final int NEW_CLASS_COLUMN = 3;
-	public static final int IN_SALESFORCE_COLUMN = 4;
-	public static final int NOTES_COLUMN = 5;
-	public static final int CLIENT_ID_COLUMN = 6; // not a real column
-	public static final int NUM_COLUMNS = 7;
+	public static final int START_DATE_COLUMN = 2;
+	public static final int GRAD_DATE_COLUMN = 3;
+	public static final int NEW_CLASS_COLUMN = 4;
+	public static final int IN_SALESFORCE_COLUMN = 5;
+	public static final int NOTES_COLUMN = 6;
+	public static final int CLIENT_ID_COLUMN = 7; // not a real column
+	public static final int NUM_COLUMNS = 8;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Level Passed ", " Grad Date ",
+	private final String colNames[] = { " Student Name ", " Level Passed ", " Start Date ", " Grad Date ",
 			" New Class ", " In SalesForce ", " Notes/Errors " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
@@ -91,6 +92,8 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.getStudentName();
 		case LEVEL_PASSED_COLUMN:
 			return grad.getGradLevel();
+		case START_DATE_COLUMN:
+			return grad.getStartDate();
 		case GRAD_DATE_COLUMN:
 			return grad.getEndDate();
 		case IN_SALESFORCE_COLUMN:

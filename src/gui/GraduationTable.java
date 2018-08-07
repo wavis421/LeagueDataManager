@@ -91,6 +91,8 @@ public class GraduationTable extends JPanel {
 		table.getColumnModel().getColumn(GraduationTableModel.NEW_CLASS_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.STUDENT_NAME_COLUMN).setMaxWidth(250);
