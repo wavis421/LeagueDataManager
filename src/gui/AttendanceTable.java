@@ -39,9 +39,10 @@ public class AttendanceTable extends JPanel {
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
 	private static final int EVENT_TABLE_CLASS_NAME_COLUMN = 1;
-	private static final int EVENT_TABLE_REPO_NAME_COLUMN = 2;
-	private static final int EVENT_TABLE_COMMENTS_COLUMN = 3;
-	private static final int EVENT_TABLE_NUM_COLUMNS = 4;
+	private static final int EVENT_TABLE_TEACHER_NAME_COLUMN = 2;
+	private static final int EVENT_TABLE_REPO_NAME_COLUMN = 3;
+	private static final int EVENT_TABLE_COMMENTS_COLUMN = 4;
+	private static final int EVENT_TABLE_NUM_COLUMNS = 5;
 
 	private JPanel parentTablePanel;
 	private JTable mainTable;
@@ -140,9 +141,9 @@ public class AttendanceTable extends JPanel {
 
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
-		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
-		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
+		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(72);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(200);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(160);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new AttendanceTableRenderer(eventList));
@@ -326,10 +327,12 @@ public class AttendanceTable extends JPanel {
 
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(90);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setPreferredWidth(90);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(204);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(204);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setMaxWidth(300);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(275);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(220); //204);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(175); //204);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setMaxWidth(500);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(250); //275);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setMaxWidth(500);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setPreferredWidth(250);
 
 			// Add renderer
 			eventTable.setDefaultRenderer(Object.class, new AttendanceTableRenderer(null));
@@ -452,6 +455,8 @@ public class AttendanceTable extends JPanel {
 				return attendance.getServiceDateString();
 			else if (col == EVENT_TABLE_CLASS_NAME_COLUMN)
 				return attendance.getEventName();
+			else if (col == EVENT_TABLE_TEACHER_NAME_COLUMN)
+				return attendance.getTeacherNames();
 			else if (col == EVENT_TABLE_REPO_NAME_COLUMN) {
 				if (attendance.getRepoName() == null)
 					return "";

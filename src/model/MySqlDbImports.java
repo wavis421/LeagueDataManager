@@ -387,7 +387,8 @@ public class MySqlDbImports {
 			if (dbListIdx < dbListSize) {
 				dbAttendance = dbList.get(dbListIdx);
 				compare = dbAttendance.compareTo(importEvent);
-				if (compare == 0 && !dbAttendance.getState().equals(importEvent.getState()))
+				if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState()) ||
+						!dbAttendance.getTeacherNames().equals(teachers)))
 					compare = 2;
 			}
 
@@ -406,7 +407,8 @@ public class MySqlDbImports {
 				if (dbListIdx < dbListSize) {
 					dbAttendance = dbList.get(dbListIdx);
 					compare = dbAttendance.compareTo(importEvent);
-					if (compare == 0 && !dbAttendance.getState().equals(importEvent.getState()))
+					if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState()) ||
+							!dbAttendance.getTeacherNames().equals(teachers)))
 						compare = 2;
 				}
 
@@ -424,7 +426,7 @@ public class MySqlDbImports {
 						else // state field has changed, so update
 							updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
 									importEvent.getServiceDateString(), importEvent.getEventName(),
-									importEvent.getState());
+									importEvent.getState(), teachers);
 
 					} else
 						MySqlDbLogging.insertLogData(LogDataModel.STUDENT_NOT_FOUND,
@@ -446,7 +448,8 @@ public class MySqlDbImports {
 								importEvent.getState());
 					else // state field has changed, so update
 						updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
-								importEvent.getServiceDateString(), importEvent.getEventName(), importEvent.getState());
+								importEvent.getServiceDateString(), importEvent.getEventName(), importEvent.getState(),
+								teachers);
 
 				} else {
 					// Student not found
@@ -505,16 +508,17 @@ public class MySqlDbImports {
 	}
 
 	private void updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String eventName,
-			String state) {
+			String state, String teachers) {
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
 				// The only fields that should be updated are the comments and repo name
 				updateAttendanceStmt = sqlDb.dbConnection
-						.prepareStatement("UPDATE Attendance SET State=? WHERE ClientID=? AND ServiceDate=?;");
+						.prepareStatement("UPDATE Attendance SET State=?, TeacherNames=? WHERE ClientID=? AND ServiceDate=?;");
 
 				int col = 1;
 				updateAttendanceStmt.setString(col++, state);
+				updateAttendanceStmt.setString(col++, teachers);
 				updateAttendanceStmt.setInt(col++, clientID);
 				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 
@@ -547,8 +551,10 @@ public class MySqlDbImports {
 		String teachers = "";
 		String[] values = origTeachers.split("\\s*,\\s*");
 		for (int i = 0; i < values.length; i++) {
-			if (values[i].startsWith("TA-") || values[i].startsWith("Open Lab") || values[i].startsWith("Sub Teacher")
-					|| values[i].startsWith("Padres Game") || values[i].startsWith("Make-Up"))
+			String valueLC = values[i].toLowerCase();
+			if (values[i].startsWith("TA-") || valueLC.startsWith("open lab") || valueLC.startsWith("sub teacher")
+					|| valueLC.startsWith("padres game") || valueLC.startsWith("make-up") || valueLC.startsWith("intro to java")
+					|| valueLC.startsWith("league admin") || valueLC.startsWith("summer prog"))
 				continue;
 
 			if (!teachers.equals(""))

@@ -11,10 +11,14 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private StudentNameModel nameModel;
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String event, String githubName,
-			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state) {
+			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state,
+			String teacherNames) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
+		this.teacherNames = teacherNames;
+		if (teacherNames == null)
+			this.teacherNames = "";
 
 		// Parse long event names for workshops
 		eventName = event.trim();
@@ -28,7 +32,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		if (idx > 0)
 			eventName = eventName.substring(0, idx).trim();
 
-		this.teacherNames = "";
+		idx = eventName.indexOf(",");
+		if (idx > 0)
+			eventName = eventName.substring(0, idx);
+
 		this.serviceCategory = serviceCategory.trim();
 		this.state = state;
 		this.githubName = githubName;

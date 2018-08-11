@@ -16,7 +16,7 @@ public class AttendanceTableModel extends AbstractTableModel {
 
 	private Object[][] tableObjects;
 	private final String[] colNames = { " ID ", " Student Name ",
-			" Class Date / Class Name / Repository Name / Github Comments " };
+			" Class Date / Class Name / Teacher Name(s) / Repository Name / Github Comments " };
 
 	public AttendanceTableModel(ArrayList<AttendanceModel> attendance) {
 		initializeTableData(attendance);

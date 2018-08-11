@@ -427,7 +427,8 @@ public class MySqlDatabase {
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("ServiceCategory"), result.getString("State")));
+							result.getString("ServiceCategory"), result.getString("State"),
+							result.getString("TeacherNames")));
 				}
 
 				result.close();
@@ -552,7 +553,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
-								+ "ServiceCategory FROM Attendance, Students "
+								+ "ServiceCategory, TeacherNames FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -568,7 +569,8 @@ public class MySqlDatabase {
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name, result.getString("GithubName"),
 								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
-										"", "", name, result.getString("ServiceCategory"), result.getString("State"))));
+										"", "", name, result.getString("ServiceCategory"), result.getString("State"),
+										result.getString("TeacherNames"))));
 					else
 						attendanceList.addAll(listByClient);
 				}
@@ -737,7 +739,8 @@ public class MySqlDatabase {
 							result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("ServiceCategory"), result.getString("State")));
+							result.getString("ServiceCategory"), result.getString("State"),
+							result.getString("TeacherNames")));
 				}
 
 				result.close();
@@ -782,7 +785,8 @@ public class MySqlDatabase {
 							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("ServiceCategory"), result.getString("State")));
+							result.getString("ServiceCategory"), result.getString("State"),
+							result.getString("TeacherNames")));
 
 				} else {
 					lastClientID = thisClientID;
@@ -803,9 +807,11 @@ public class MySqlDatabase {
 							new AttendanceEventModel(result.getInt("CLientID"), result.getInt("VisitID"),
 									result.getDate("ServiceDate"), result.getString("EventName"),
 									result.getString("GithubName"), result.getString("RepoName"),
-									result.getString("Comments"), new StudentNameModel(result.getString("FirstName"),
-											result.getString("LastName"), true),
-									result.getString("ServiceCategory"), result.getString("State")));
+									result.getString("Comments"),
+									new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+											true),
+									result.getString("ServiceCategory"), result.getString("State"),
+									result.getString("TeacherNames")));
 					attendanceList.add(lastAttendanceModel);
 				}
 			}
