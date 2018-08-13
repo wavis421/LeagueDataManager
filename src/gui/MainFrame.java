@@ -56,7 +56,7 @@ import model.LogDataModel;
 
 public class MainFrame {
 	/* Private constants */
-	private static final int PREF_FRAME_WIDTH = 1300;
+	private static final int PREF_FRAME_WIDTH = 1340;
 	private static final int PREF_FRAME_HEIGHT = 700;
 
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;

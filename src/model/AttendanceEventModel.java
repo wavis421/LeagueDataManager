@@ -27,6 +27,8 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 				eventName = "Intro to Java WShop";
 			else if (eventName.contains("Electrical Engineering Intro Work"))
 				eventName = "Electrical Eng WShop";
+			else if (eventName.contains("Contest: Cyber Security"))
+				eventName = "Contest: Cyber Security";
 		}
 		int idx = eventName.indexOf('(');
 		if (idx > 0)

@@ -28,7 +28,7 @@ import model.AttendanceModel;
 import model.StudentNameModel;
 
 public class AttendanceTable extends JPanel {
-	private static final int TEXT_HEIGHT = 17;
+	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
 
 	private static final int POPUP_MENU_WIDTH = 240;
@@ -321,16 +321,17 @@ public class AttendanceTable extends JPanel {
 
 			// Set table properties
 			eventTable.setFont(CustomFonts.TABLE_TEXT_FONT);
-			eventTable.setGridColor(Color.white);
-			eventTable.setShowGrid(true);
+			eventTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+			eventTable.setShowHorizontalLines(false);
+			eventTable.setShowVerticalLines(true);
 			eventTable.setTableHeader(null);
 
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(90);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setPreferredWidth(90);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(220); //204);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(175); //204);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(220);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(175);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setMaxWidth(500);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(250); //275);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(250);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setMaxWidth(500);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setPreferredWidth(250);
 

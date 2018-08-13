@@ -15,8 +15,12 @@ public class AttendanceTableModel extends AbstractTableModel {
 	private static final int TABLE_NUM_COLUMNS = 4;
 
 	private Object[][] tableObjects;
+
+	// 3rd column represents a sub-table with multiple sub-columns: MAC left-shifts,
+	// PC centers title, so added spaces to make it look good on both platforms!
 	private final String[] colNames = { " ID ", " Student Name ",
-			" Class Date / Class Name / Teacher Name(s) / Repository Name / Github Comments " };
+			" Class Date        Class Name                   Teacher Name(s)                       "
+					+ "Repository Name                Github Comments                " };
 
 	public AttendanceTableModel(ArrayList<AttendanceModel> attendance) {
 		initializeTableData(attendance);
