@@ -138,6 +138,8 @@ public class AttendanceTable extends JPanel {
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		table.setShowGrid(true);
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		table.getColumnModel().getColumn(AttendanceTableModel.GITHUB_COMMENTS_COLUMN)
+				.setHeaderRenderer(new AttendanceHeaderRenderer());
 
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
@@ -427,6 +429,20 @@ public class AttendanceTable extends JPanel {
 				}
 				return eventTable.get(modelRow);
 			}
+		}
+	}
+
+	// ===== NESTED Class: Header Renderer for main table ===== //
+	public class AttendanceHeaderRenderer extends JLabel implements TableCellRenderer {
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			
+			// Header renderer is only used for GITHUB column to left justify
+			super.setHorizontalAlignment(LEFT);
+			super.setFont(CustomFonts.TABLE_HEADER_FONT);
+			super.setText(((String) value));
+			super.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, CustomFonts.TABLE_GRID_COLOR));
+			return (this);
 		}
 	}
 
