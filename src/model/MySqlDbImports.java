@@ -10,11 +10,13 @@ import java.util.Collections;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
-/** MySqlDbImports
+/**
+ * MySqlDbImports
  * 
  * @author wavis
  *
- * This file imports data from Pike13 and updates the Student Trackr AWS Database.
+ *         This file imports data from Pike13 and updates the Student Trackr AWS
+ *         Database.
  * 
  */
 public class MySqlDbImports {
@@ -387,8 +389,8 @@ public class MySqlDbImports {
 			if (dbListIdx < dbListSize) {
 				dbAttendance = dbList.get(dbListIdx);
 				compare = dbAttendance.compareTo(importEvent);
-				if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState()) ||
-						!dbAttendance.getTeacherNames().equals(teachers)))
+				if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
+						|| !dbAttendance.getTeacherNames().equals(teachers)))
 					compare = 2;
 			}
 
@@ -407,8 +409,8 @@ public class MySqlDbImports {
 				if (dbListIdx < dbListSize) {
 					dbAttendance = dbList.get(dbListIdx);
 					compare = dbAttendance.compareTo(importEvent);
-					if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState()) ||
-							!dbAttendance.getTeacherNames().equals(teachers)))
+					if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
+							|| !dbAttendance.getTeacherNames().equals(teachers)))
 						compare = 2;
 				}
 
@@ -458,6 +460,36 @@ public class MySqlDbImports {
 							importEvent.getClientID(),
 							": " + importEvent.getEventName() + " on " + importEvent.getServiceDateString());
 				}
+			}
+		}
+	}
+
+	public void createSortedAttendanceList() {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Empty the sorted list
+				PreparedStatement truncateStmt = sqlDb.dbConnection
+						.prepareStatement("TRUNCATE TABLE SortedAttendance;");
+				truncateStmt.executeUpdate();
+				truncateStmt.close();
+
+				// Now re-sort in descending date order
+				PreparedStatement insertStmt = sqlDb.dbConnection.prepareStatement("INSERT INTO SortedAttendance "
+						+ "SELECT * FROM Attendance ORDER BY ClientID, ServiceDate DESC, EventName;");
+				insertStmt.executeUpdate();
+				insertStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						" sorting: " + e2.getMessage());
+				break;
 			}
 		}
 	}
@@ -513,8 +545,8 @@ public class MySqlDbImports {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// The only fields that should be updated are the comments and repo name
-				updateAttendanceStmt = sqlDb.dbConnection
-						.prepareStatement("UPDATE Attendance SET State=?, TeacherNames=? WHERE ClientID=? AND ServiceDate=?;");
+				updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
+						"UPDATE Attendance SET State=?, TeacherNames=? WHERE ClientID=? AND ServiceDate=?;");
 
 				int col = 1;
 				updateAttendanceStmt.setString(col++, state);
@@ -553,8 +585,9 @@ public class MySqlDbImports {
 		for (int i = 0; i < values.length; i++) {
 			String valueLC = values[i].toLowerCase();
 			if (values[i].startsWith("TA-") || valueLC.startsWith("open lab") || valueLC.startsWith("sub teacher")
-					|| valueLC.startsWith("padres game") || valueLC.startsWith("make-up") || valueLC.startsWith("intro to java")
-					|| valueLC.startsWith("league admin") || valueLC.startsWith("summer prog"))
+					|| valueLC.startsWith("padres game") || valueLC.startsWith("make-up")
+					|| valueLC.startsWith("intro to java") || valueLC.startsWith("league admin")
+					|| valueLC.startsWith("summer prog"))
 				continue;
 
 			if (!teachers.equals(""))

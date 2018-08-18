@@ -380,14 +380,22 @@ public class MySqlDatabase {
 	public ArrayList<AttendanceModel> getAllAttendance() {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 
+		// Try twice: if DB no longer connected, the exception code will re-connect
 		for (int i = 0; i < 2; i++) {
 			try {
-				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+				// Get 1st 4 attendance records for each client; use sorted attendance table
+				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * "
+						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, EventName, VisitID, "
+						+ "         ServiceCategory, State, FirstName, LastName, isInMasterDb, GithubName, "
+						+ "         RepoName, Comments, TeacherNames, "
+						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
+						+ "      FROM SortedAttendance, Students "
+						+ "      WHERE isInMasterDb AND SortedAttendance.ClientID = Students.ClientID "
+						+ "            AND State = 'completed' "
+						+ "      ORDER BY Students.ClientID, ServiceDate DESC, EventName) AS Base "
+						+ "WHERE row <= 4;");
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result, false);
+				getAttendanceList(attendanceList, result, "StudID", false);
 				Collections.sort(attendanceList);
 
 				result.close();
@@ -608,7 +616,7 @@ public class MySqlDatabase {
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();
-				getAttendanceList(attendanceList, result, false);
+				getAttendanceList(attendanceList, result, "Students.ClientID", false);
 				Collections.sort(attendanceList);
 
 				result.close();
@@ -763,7 +771,8 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	private void getAttendanceList(ArrayList<AttendanceModel> attendanceList, ResultSet result, boolean filterOnDate) {
+	private void getAttendanceList(ArrayList<AttendanceModel> attendanceList, ResultSet result, String clientIdString,
+			boolean filterOnDate) {
 		int lastClientID = -1;
 		AttendanceModel lastAttendanceModel = null;
 		boolean removeAttendance = false;
@@ -774,14 +783,14 @@ public class MySqlDatabase {
 		// student and then adding the resulting Attendance Model to the attendanceList.
 		try {
 			while (result.next()) {
-				int thisClientID = result.getInt("Students.ClientID");
+				int thisClientID = result.getInt(clientIdString);
 				if (lastClientID == thisClientID) {
 					if (filterOnDate && removeAttendance) {
 						// Don't use attendance if too far back
 						continue;
 					}
 					// Add more data to existing client
-					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(result.getInt("ClientID"),
+					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(thisClientID,
 							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
@@ -800,11 +809,11 @@ public class MySqlDatabase {
 						removeAttendance = false;
 
 					// Create student model for new client
-					lastAttendanceModel = new AttendanceModel(thisClientID,
-							new StudentNameModel(result.getString("Students.FirstName"),
-									result.getString("Students.LastName"), result.getBoolean("isInMasterDb")),
+					lastAttendanceModel = new AttendanceModel(
+							thisClientID, new StudentNameModel(result.getString("FirstName"),
+									result.getString("LastName"), result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"),
-							new AttendanceEventModel(result.getInt("CLientID"), result.getInt("VisitID"),
+							new AttendanceEventModel(thisClientID, result.getInt("VisitID"),
 									result.getDate("ServiceDate"), result.getString("EventName"),
 									result.getString("GithubName"), result.getString("RepoName"),
 									result.getString("Comments"),
