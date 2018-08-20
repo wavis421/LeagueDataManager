@@ -51,6 +51,10 @@ public class GraduationTableModel extends AbstractTableModel {
 	public void setNewClass(int row, boolean checked) {
 		gradList.get(row).setNewClass(checked);
 	}
+	
+	public void setNotes(int row, String note) {
+		gradList.get(row).setNotes(note);
+	}
 
 	@Override
 	public int getColumnCount() {
@@ -91,7 +95,7 @@ public class GraduationTableModel extends AbstractTableModel {
 		case STUDENT_NAME_COLUMN:
 			return grad.getStudentName();
 		case LEVEL_PASSED_COLUMN:
-			return grad.getGradLevel();
+			return grad.getGradLevelString();
 		case START_DATE_COLUMN:
 			return grad.getStartDate();
 		case GRAD_DATE_COLUMN:
@@ -101,7 +105,7 @@ public class GraduationTableModel extends AbstractTableModel {
 		case NEW_CLASS_COLUMN:
 			return grad.isNewClass();
 		case NOTES_COLUMN:
-			return ""; // TODO: Fill this in
+			return grad.getNotes();
 		}
 		return null;
 	}

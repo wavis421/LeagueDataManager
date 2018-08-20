@@ -118,7 +118,7 @@ BEGIN
 			ON DELETE CASCADE,
 		
 		# Graduation data
-		GradLevel varchar(20) NOT NULL,
+		GradLevel int(4) NOT NULL,
 		StartDate date DEFAULT NULL,
 		EndDate date DEFAULT NULL,
 		Score varchar(40) DEFAULT NULL,

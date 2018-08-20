@@ -1,17 +1,25 @@
 package model;
 
+/**
+ * 
+ * This is the Graduation Model to track graduation information by student.
+ * 
+ * @author wavis
+ *
+ */
 public class GraduationModel {
 	private int clientID;
-	private String studentName, gradLevel;
-	private String score;
+	private String studentName, score;
+	private Integer gradLevel;
 	private String startDate, endDate;
 	private boolean isSfUpdated, isNewClass;
+	private String notes = "";
 
-	public GraduationModel(int clientID, String studentName, String gradLevel, String score, String startDate,
+	public GraduationModel(int clientID, String studentName, int gradLevel, String score, String startDate,
 			String endDate, boolean isSfUpdated, boolean isNewClass) {
 		this.clientID = clientID;
 		this.studentName = studentName;
-		this.gradLevel = gradLevel.trim();
+		this.gradLevel = gradLevel;
 		this.score = score;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -27,8 +35,12 @@ public class GraduationModel {
 		return studentName;
 	}
 
-	public String getGradLevel() {
+	public int getGradLevel() {
 		return gradLevel;
+	}
+
+	public String getGradLevelString() {
+		return gradLevel.toString();
 	}
 
 	public String getScore() {
@@ -41,6 +53,10 @@ public class GraduationModel {
 
 	public String getEndDate() {
 		return endDate;
+	}
+
+	public String getNotes() {
+		return notes;
 	}
 
 	public boolean isSfUpdated() {
@@ -57,5 +73,9 @@ public class GraduationModel {
 
 	public void setNewClass(boolean isNewClass) {
 		this.isNewClass = isNewClass;
+	}
+
+	public void setNotes(String note) {
+		this.notes = note;
 	}
 }

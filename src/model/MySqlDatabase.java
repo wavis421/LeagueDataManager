@@ -1037,11 +1037,9 @@ public class MySqlDatabase {
 	/*
 	 * ------- Graduation Data used for GUI -------
 	 */
-	public String getStartDateByClientIdAndLevel(int clientID, String level) {
-		// Only get start date for class levels 0 - 9
-		if (level.charAt(0) < '0' || level.charAt(0) > '9')
-			return "";
-
+	public String getStartDateByClientIdAndLevel(int clientID, int level) {
+		String levelString = ((Integer) level).toString();
+		
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
@@ -1054,7 +1052,7 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					String eventName = result.getString("EventName");
-					if (eventName.charAt(1) == '@' && eventName.startsWith(level)) {
+					if (eventName.charAt(1) == '@' && eventName.startsWith(levelString)) {
 						String startDate = result.getDate("ServiceDate").toString();
 						if (startDate.compareTo("2017-09-30") < 0)
 							return "";
@@ -1088,21 +1086,30 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addGrad;
-				if (gradModel.getStartDate().equals(""))
+
+				// Don't update start date or score if no data
+				if (gradModel.getStartDate().equals("") && gradModel.getScore().equals(""))
+					addGrad = dbConnection.prepareStatement(
+							"INSERT INTO Graduation (ClientID, GradLevel, EndDate) VALUES (?, ?, ?);");
+				else if (gradModel.getStartDate().equals(""))
 					addGrad = dbConnection.prepareStatement(
 							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score) VALUES (?, ?, ?, ?);");
+				else if (gradModel.getScore().equals(""))
+					addGrad = dbConnection.prepareStatement(
+							"INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate) VALUES (?, ?, ?, ?);");
 				else
 					addGrad = dbConnection
-							.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
-									+ "VALUES (?, ?, ?, ?, ?);");
+							.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, "
+									+ "Score) VALUES (?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addGrad.setInt(col++, gradModel.getClientID());
-				addGrad.setString(col++, gradModel.getGradLevel());
+				addGrad.setInt(col++, gradModel.getGradLevel());
 				if (!gradModel.getStartDate().equals(""))
 					addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getStartDate()));
 				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
-				addGrad.setString(col++, gradModel.getScore());
+				if (!gradModel.getScore().equals(""))
+					addGrad.setString(col++, gradModel.getScore());
 
 				addGrad.executeUpdate();
 				addGrad.close();
@@ -1133,14 +1140,20 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateGraduateStmt = dbConnection
-						.prepareStatement("UPDATE Graduation SET EndDate=?, Score=?, " + GRAD_MODEL_IN_SF_FIELD + "=0 "
-								+ "WHERE ClientID=? AND GradLevel=?;");
+				PreparedStatement updateGraduateStmt;
+
+				if (gradModel.getScore().equals(""))
+					updateGraduateStmt = dbConnection.prepareStatement("UPDATE Graduation SET EndDate=?, "
+							+ GRAD_MODEL_IN_SF_FIELD + "=0 " + "WHERE ClientID=? AND GradLevel=?;");
+				else
+					updateGraduateStmt = dbConnection.prepareStatement("UPDATE Graduation SET EndDate=?, Score=?, "
+							+ GRAD_MODEL_IN_SF_FIELD + "=0 " + "WHERE ClientID=? AND GradLevel=?;");
 
 				updateGraduateStmt.setDate(1, java.sql.Date.valueOf(gradModel.getEndDate()));
-				updateGraduateStmt.setString(2, gradModel.getScore());
+				if (!gradModel.getScore().equals(""))
+					updateGraduateStmt.setString(2, gradModel.getScore());
 				updateGraduateStmt.setInt(3, gradModel.getClientID());
-				updateGraduateStmt.setString(4, gradModel.getGradLevel());
+				updateGraduateStmt.setInt(4, gradModel.getGradLevel());
 
 				updateGraduateStmt.executeUpdate();
 				updateGraduateStmt.close();
@@ -1178,7 +1191,7 @@ public class MySqlDatabase {
 
 				updateGraduateStmt.setInt(1, newValue ? 1 : 0);
 				updateGraduateStmt.setInt(2, clientID);
-				updateGraduateStmt.setString(3, gradLevel);
+				updateGraduateStmt.setInt(3, Integer.parseInt(gradLevel));
 
 				updateGraduateStmt.executeUpdate();
 				updateGraduateStmt.close();
@@ -1218,7 +1231,7 @@ public class MySqlDatabase {
 
 						// Delete student
 						deleteGradStmt.setInt(1, result.getInt("ClientID"));
-						deleteGradStmt.setString(2, result.getString("GradLevel"));
+						deleteGradStmt.setInt(2, result.getInt("GradLevel"));
 						deleteGradStmt.executeUpdate();
 						deleteGradStmt.close();
 					}
@@ -1257,7 +1270,7 @@ public class MySqlDatabase {
 				while (result.next()) {
 					gradList.add(new GraduationModel(result.getInt("ClientID"),
 							result.getString("FirstName") + " " + result.getString("LastName"),
-							result.getString("GradLevel"), result.getString("Score"), result.getString("StartDate"),
+							result.getInt("GradLevel"), result.getString("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
 							result.getBoolean(GRAD_MODEL_NEW_CLASS_FIELD)));
 				}

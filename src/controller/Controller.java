@@ -187,7 +187,7 @@ public class Controller {
 		return result;
 	}
 
-	public String getStartDateByClientIdAndLevel(int clientID, String level) {
+	public String getStartDateByClientIdAndLevel(int clientID, int level) {
 		return sqlDb.getStartDateByClientIdAndLevel(clientID, level);
 	}
 
