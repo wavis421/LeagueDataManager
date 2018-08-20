@@ -62,8 +62,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	private JButton exitButton;
 	private JLabel errorField;
 	private ImageIcon icon;
-	private static String[] gradLevels = new String[10];
 	private static Controller controller;
+
+	// 10 levels + Placement Exam
+	private static final int NUM_GRAD_LEVELS = 10; // Levels 0 - 9
+	private static final int PLACEMENT_EXAM_IDX = 10;
+	private static final String PLACEMENT_EXAM_STRING = "Placement Exam";
+	private static String[] gradLevels = new String[PLACEMENT_EXAM_IDX + 1];
 
 	public GraduationDialog(JFrame parent, Controller newController, int clientID, String studentName, ImageIcon icon) {
 		// Graduate by student: create list with 1 student
@@ -209,8 +214,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(100);
-		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(150);
+		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(150);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
@@ -225,8 +230,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		return scrollPane;
 	}
 
-	private void addGradRecordToDb(int clientID, String studentName, int score) {
-		String levelString = ((Integer) gradLevelList.getSelectedIndex()).toString();
+	private void addGradRecordToDb(int clientID, String studentName, String score) {
+		Integer gradLevelIdx = (Integer) gradLevelList.getSelectedIndex();
+		String levelString;
+
+		if (gradLevelIdx == PLACEMENT_EXAM_IDX)
+			levelString = PLACEMENT_EXAM_STRING;
+		else
+			levelString = gradLevelIdx.toString();
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, levelString);
 		GraduationModel gradModel = new GraduationModel(clientID, studentName, levelString, score, startDate,
 				gradDatePicker.getJFormattedTextField().getText(), false, false);
@@ -244,9 +255,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private void createGradLevelList() {
-		for (int i = 0; i < gradLevels.length; i++) {
+		for (int i = 0; i < NUM_GRAD_LEVELS; i++) {
 			gradLevels[i] = "Level " + i + "  ";
 		}
+		gradLevels[PLACEMENT_EXAM_IDX] = PLACEMENT_EXAM_STRING;
 	}
 
 	public static boolean isValidClassName(String className) {
@@ -264,6 +276,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		if (e.getSource() == submitButton) {
 			errorField.setText("");
 			int countGrads = 0;
+			Integer gradLevelIdx = (Integer) gradLevelList.getSelectedIndex();
 
 			// Check that all fields are filled in
 			for (int i = 0; i < gradTableModel.getRowCount(); i++) {
@@ -272,21 +285,25 @@ public class GraduationDialog extends JDialog implements ActionListener {
 				String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
 
 				if (!scoreString.equals("")) {
-					try {
-						Integer score = Integer.parseInt(scoreString);
-						if (score > 100) {
-							errorField.setText("Student score cannot be greater than 100% (student #" + (i + 1) + ")");
+					// Only validate score field for Levels 0-9
+					if (gradLevelIdx < NUM_GRAD_LEVELS) {
+						try {
+							Integer score = Integer.parseInt(scoreString);
+							if (score > 100) {
+								errorField.setText(
+										"Student score cannot be greater than 100% (student #" + (i + 1) + ")");
+								return;
+							}
+
+						} catch (NumberFormatException e2) {
+							errorField.setText(
+									"Student score must be an integer from 0 - 100% (student #" + (i + 1) + ")");
 							return;
 						}
-
-						// Add record to database
-						addGradRecordToDb(clientID, studentName, score);
-						countGrads++;
-
-					} catch (NumberFormatException e2) {
-						errorField.setText("Student score must be an integer from 0 - 100% (student #" + (i + 1) + ")");
-						return;
 					}
+					// Add record to database
+					addGradRecordToDb(clientID, studentName, scoreString);
+					countGrads++;
 				}
 			}
 

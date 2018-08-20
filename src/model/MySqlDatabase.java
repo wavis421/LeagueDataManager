@@ -1038,6 +1038,10 @@ public class MySqlDatabase {
 	 * ------- Graduation Data used for GUI -------
 	 */
 	public String getStartDateByClientIdAndLevel(int clientID, String level) {
+		// Only get start date for class levels 0 - 9
+		if (level.charAt(0) < '0' || level.charAt(0) > '9')
+			return "";
+
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
@@ -1086,7 +1090,7 @@ public class MySqlDatabase {
 				PreparedStatement addGrad;
 				if (gradModel.getStartDate().equals(""))
 					addGrad = dbConnection.prepareStatement(
-							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score) " + "VALUES (?, ?, ?, ?);");
+							"INSERT INTO Graduation (ClientID, GradLevel, EndDate, Score) VALUES (?, ?, ?, ?);");
 				else
 					addGrad = dbConnection
 							.prepareStatement("INSERT INTO Graduation (ClientID, GradLevel, StartDate, EndDate, Score) "
@@ -1098,7 +1102,7 @@ public class MySqlDatabase {
 				if (!gradModel.getStartDate().equals(""))
 					addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getStartDate()));
 				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
-				addGrad.setInt(col++, gradModel.getScore());
+				addGrad.setString(col++, gradModel.getScore());
 
 				addGrad.executeUpdate();
 				addGrad.close();
@@ -1134,7 +1138,7 @@ public class MySqlDatabase {
 								+ "WHERE ClientID=? AND GradLevel=?;");
 
 				updateGraduateStmt.setDate(1, java.sql.Date.valueOf(gradModel.getEndDate()));
-				updateGraduateStmt.setInt(2, gradModel.getScore());
+				updateGraduateStmt.setString(2, gradModel.getScore());
 				updateGraduateStmt.setInt(3, gradModel.getClientID());
 				updateGraduateStmt.setString(4, gradModel.getGradLevel());
 
@@ -1253,7 +1257,7 @@ public class MySqlDatabase {
 				while (result.next()) {
 					gradList.add(new GraduationModel(result.getInt("ClientID"),
 							result.getString("FirstName") + " " + result.getString("LastName"),
-							result.getString("GradLevel"), result.getInt("Score"), result.getString("StartDate"),
+							result.getString("GradLevel"), result.getString("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
 							result.getBoolean(GRAD_MODEL_NEW_CLASS_FIELD)));
 				}
