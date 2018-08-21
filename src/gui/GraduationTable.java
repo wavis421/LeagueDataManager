@@ -85,19 +85,22 @@ public class GraduationTable extends JPanel {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setMaxWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setPreferredWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.NEW_CLASS_COLUMN).setMaxWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.NEW_CLASS_COLUMN).setPreferredWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setMaxWidth(130);
-		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.TESTED_OUT_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.TESTED_OUT_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setMaxWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.STUDENT_NAME_COLUMN).setMaxWidth(250);
 		table.getColumnModel().getColumn(GraduationTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(250);
-		table.getColumnModel().getColumn(GraduationTableModel.NOTES_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(GraduationTableModel.SCORE_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GraduationTableModel.SCORE_COLUMN).setPreferredWidth(100);
 
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
 		table.setAutoCreateRowSorter(true);
@@ -120,17 +123,17 @@ public class GraduationTable extends JPanel {
 				if (row < 0)
 					return;
 
-				if (e.getButton() == MouseEvent.BUTTON1 && col == GraduationTableModel.NEW_CLASS_COLUMN) {
+				if (e.getButton() == MouseEvent.BUTTON1 && col == GraduationTableModel.PROCESSED_COLUMN) {
 					int modelRow = table.convertRowIndexToModel(row);
 					boolean checked = (boolean) table.getValueAt(row, col);
-					gradTableModel.setNewClass(modelRow, !checked);
+					gradTableModel.setProcessed(modelRow, !checked);
 					gradTableModel.fireTableDataChanged();
 
 					// Update changes to database
 					gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
 							(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
 							(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
-							Controller.GRAD_MODEL_NEW_CLASS_FIELD, !checked);
+							Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
 				}
 			}
 

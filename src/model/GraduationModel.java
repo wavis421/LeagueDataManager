@@ -12,11 +12,11 @@ public class GraduationModel {
 	private String studentName, score;
 	private Integer gradLevel;
 	private String startDate, endDate;
-	private boolean isSfUpdated, isNewClass;
-	private String notes = "";
+	private boolean isSfUpdated, isProcessed, isTestedOut;
 
 	public GraduationModel(int clientID, String studentName, int gradLevel, String score, String startDate,
-			String endDate, boolean isSfUpdated, boolean isNewClass) {
+			String endDate, boolean isSfUpdated, boolean isProcessed, boolean isTestedOut) {
+		// Graduation record with score and start date
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.gradLevel = gradLevel;
@@ -24,7 +24,8 @@ public class GraduationModel {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.isSfUpdated = isSfUpdated;
-		this.isNewClass = isNewClass;
+		this.isProcessed = isProcessed;
+		this.isTestedOut = isTestedOut;
 	}
 
 	public int getClientID() {
@@ -55,27 +56,27 @@ public class GraduationModel {
 		return endDate;
 	}
 
-	public String getNotes() {
-		return notes;
-	}
-
 	public boolean isSfUpdated() {
 		return isSfUpdated;
 	}
 
-	public boolean isNewClass() {
-		return isNewClass;
+	public boolean isProcessed() {
+		return isProcessed;
+	}
+
+	public boolean isTestedOut() {
+		return isTestedOut;
+	}
+
+	public void setScore(String score) {
+		this.score = score;
 	}
 
 	public void setSfUpdated(boolean isSfUpdated) {
 		this.isSfUpdated = isSfUpdated;
 	}
 
-	public void setNewClass(boolean isNewClass) {
-		this.isNewClass = isNewClass;
-	}
-
-	public void setNotes(String note) {
-		this.notes = note;
+	public void setProcessed(boolean isProcessed) {
+		this.isProcessed = isProcessed;
 	}
 }

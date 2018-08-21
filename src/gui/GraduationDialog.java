@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.AbstractCellEditor;
@@ -34,7 +36,7 @@ import model.AttendanceModel;
 import model.GraduationModel;
 
 public class GraduationDialog extends JDialog implements ActionListener {
-	private final static int FRAME_WIDTH = 400;
+	private final static int FRAME_WIDTH = 450;
 	private final static int FRAME_HEIGHT = 390;
 
 	// Main panel heights
@@ -78,7 +80,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 	public GraduationDialog(JFrame parent, Controller newController, int clientID, String studentName, String className,
 			ImageIcon icon) {
-		// Graduate by student: create list with 1 student
+		// Graduate by student: create list with 1 student for indicated class
 		ArrayList<DialogGradModel> gradList = new ArrayList<DialogGradModel>();
 		gradList.add(new DialogGradModel(clientID, studentName));
 
@@ -134,11 +136,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		gradLevelList.setSelectedIndex(gradLevelNum);
 		gradDatePicker = new DatePicker(new DateTime()).getDatePicker();
 
-		// Create table field
+		// Create table field and add listeners to table
 		gradTableModel = new GradTableModel(gradList);
 		gradTable = new JTable(gradTableModel);
 		JScrollPane gradScrollPane = createTablePanel(gradTable);
 		gradScrollPane.setPreferredSize(new Dimension(GRAD_TABLE_WIDTH, GRAD_TABLE_HEIGHT));
+		createMouseListener(gradTable);
 
 		// Create error field and OK/Cancel buttons
 		errorField = new JLabel(" ");
@@ -209,8 +212,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(150);
-		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(150);
+		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.TESTED_OUT_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.TESTED_OUT_COLUMN).setMaxWidth(100);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
@@ -225,11 +230,37 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		return scrollPane;
 	}
 
+	private void createMouseListener(JTable table) {
+		// Add mouse listener for Tested-Out column: toggle check-box
+		table.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = table.getSelectedRow();
+				if (row < 0)
+					return;
+
+				int col = table.getSelectedColumn();
+				if (e.getButton() == MouseEvent.BUTTON1 && col == GradTableModel.TESTED_OUT_COLUMN) {
+					boolean checked = (boolean) table.getValueAt(row, col);
+					gradTableModel.setTestedOut(row, !checked);
+					gradTableModel.fireTableDataChanged();
+				}
+			}
+		});
+	}
+
 	private void addGradRecordToDb(int clientID, String studentName, int level, String score) {
+		// Add grad record with SCORE to database
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, level);
 
 		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, startDate,
-				gradDatePicker.getJFormattedTextField().getText(), false, false);
+				gradDatePicker.getJFormattedTextField().getText(), false, false, false);
+		controller.addGraduationRecord(gradModel);
+	}
+
+	private void addGradRecordToDbNoDate(int clientID, String studentName, int level, String score) {
+		// Add tested-out grad record with no start or end date
+		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, "",
+				gradDatePicker.getJFormattedTextField().getText(), false, false, true);
 		controller.addGraduationRecord(gradModel);
 	}
 
@@ -245,7 +276,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 	private void createGradLevelList() {
 		for (int i = 0; i < gradLevels.length; i++) {
-			gradLevels[i] = "Level " + i + " ";
+			gradLevels[i] = "Level " + i + "  ";
 		}
 	}
 
@@ -259,6 +290,21 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			return false;
 	}
 
+	private boolean isScoreValid(String scoreString, int studentIdx) {
+		try {
+			Double score = Double.parseDouble(scoreString);
+			if (score > 100.0) {
+				errorField.setText("Student score cannot be greater than 100% (student #" + (studentIdx + 1) + ")");
+				return false;
+			}
+
+		} catch (NumberFormatException e2) {
+			errorField.setText("Student score must be a number from 0 - 100% (student #" + (studentIdx + 1) + ")");
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
@@ -269,26 +315,22 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			// Check that all fields are filled in
 			for (int i = 0; i < gradTableModel.getRowCount(); i++) {
 				int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
+				boolean testedOut = (boolean) gradTableModel.getValueAt(i, GradTableModel.TESTED_OUT_COLUMN);
 				String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN)).getText();
 				String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
 
-				if (!scoreString.equals("")) {
-					// Validate score field
-					try {
-						Double score = Double.parseDouble(scoreString);
-						if (score > 100.0) {
-							errorField.setText("Student score cannot be greater than 100% (student #" + (i + 1) + ")");
-							return;
-						}
+				if (!scoreString.equals("") && !isScoreValid(scoreString, i))
+					return;
 
-						// Add record to database
-						addGradRecordToDb(clientID, studentName, gradLevelIdx, scoreString);
-						countGrads++;
+				if (testedOut) {
+					// Add record to database for tested-out, no date fields, score optional
+					addGradRecordToDbNoDate(clientID, studentName, gradLevelIdx, scoreString);
+					countGrads++;
 
-					} catch (NumberFormatException e2) {
-						errorField.setText("Student score must be a number from 0 - 100% (student #" + (i + 1) + ")");
-						return;
-					}
+				} else if (!scoreString.equals("")) {
+					// Add record to database, score mandatory
+					addGradRecordToDb(clientID, studentName, gradLevelIdx, scoreString);
+					countGrads++;
 				}
 			}
 
@@ -308,11 +350,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	/***** DIALOG MODEL SUB-CLASS *****/
 	private class DialogGradModel {
 		private int clientID;
+		private boolean testedOut;
 		private String studentName;
 		private JTextField score = new JTextField();
 
 		public DialogGradModel(int clientID, String studentName) {
 			this.clientID = clientID;
+			this.testedOut = false;
 			this.studentName = studentName;
 			this.score.setText("");
 
@@ -322,6 +366,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		public int getClientID() {
 			return clientID;
+		}
+
+		public boolean getTestedOut() {
+			return testedOut;
 		}
 
 		public String getStudentName() {
@@ -336,11 +384,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	/***** TABLE MODEL SUB-CLASS *****/
 	private class GradTableModel extends AbstractTableModel {
 		public static final int STUDENT_NAME_COLUMN = 0;
-		public static final int SCORE_COLUMN = 1;
-		public static final int CLIENT_ID_COLUMN = 2; // Not actually a table column
-		public static final int NUM_COLUMNS = 3;
+		public static final int TESTED_OUT_COLUMN = 1;
+		public static final int SCORE_COLUMN = 2;
+		public static final int CLIENT_ID_COLUMN = 3; // Not actually a table column
+		public static final int NUM_COLUMNS = 4;
 
-		private final String[] colNames = { " Student Name ", " Score (%) " };
+		private final String[] colNames = { " Student Name ", " Tested Out ", " Score (%) " };
 		private Object[][] tableObjects;
 
 		public GradTableModel(ArrayList<DialogGradModel> grads) {
@@ -348,9 +397,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 			for (int row = 0; row < grads.size(); row++) {
 				tableObjects[row][STUDENT_NAME_COLUMN] = grads.get(row).getStudentName();
+				tableObjects[row][TESTED_OUT_COLUMN] = grads.get(row).getTestedOut();
 				tableObjects[row][SCORE_COLUMN] = grads.get(row).getScoreTextField();
 				tableObjects[row][CLIENT_ID_COLUMN] = grads.get(row).getClientID();
 			}
+		}
+
+		public void setTestedOut(int row, boolean testedOut) {
+			tableObjects[row][TESTED_OUT_COLUMN] = testedOut;
 		}
 
 		@Override

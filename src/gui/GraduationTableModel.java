@@ -14,18 +14,20 @@ import model.GraduationModel;
  */
 public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
-	public static final int LEVEL_PASSED_COLUMN = 1;
-	public static final int START_DATE_COLUMN = 2;
-	public static final int GRAD_DATE_COLUMN = 3;
-	public static final int NEW_CLASS_COLUMN = 4;
-	public static final int IN_SALESFORCE_COLUMN = 5;
-	public static final int NOTES_COLUMN = 6;
-	public static final int CLIENT_ID_COLUMN = 7; // not a real column
-	public static final int NUM_COLUMNS = 8;
+	public static final int TESTED_OUT_COLUMN = 1;
+	public static final int LEVEL_PASSED_COLUMN = 2;
+	public static final int PROCESSED_COLUMN = 3;
+	public static final int IN_SALESFORCE_COLUMN = 4;
+	public static final int START_DATE_COLUMN = 5;
+	public static final int GRAD_DATE_COLUMN = 6;
+	public static final int SCORE_COLUMN = 7;
+	public static final int NOTES_COLUMN = 8;
+	public static final int CLIENT_ID_COLUMN = 9; // not a real column
+	public static final int NUM_COLUMNS = 10;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Level Passed ", " Start Date ", " Grad Date ",
-			" New Class ", " In SalesForce ", " Notes/Errors " };
+	private final String colNames[] = { " Student Name ", " Tested Out ", " Level Passed ", " Processed ",
+			" In SalesForce ", " Start Date ", " Grad Date ", " Score ", " Notes/Errors " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
 		this.gradList = gradList;
@@ -48,12 +50,12 @@ public class GraduationTableModel extends AbstractTableModel {
 		return gradList.get(row).getClientID();
 	}
 
-	public void setNewClass(int row, boolean checked) {
-		gradList.get(row).setNewClass(checked);
+	public void setProcessed(int row, boolean checked) {
+		gradList.get(row).setProcessed(checked);
 	}
-	
-	public void setNotes(int row, String note) {
-		gradList.get(row).setNotes(note);
+
+	public void setScore(int row, String score) {
+		gradList.get(row).setScore(score);
 	}
 
 	@Override
@@ -74,8 +76,9 @@ public class GraduationTableModel extends AbstractTableModel {
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
+		case TESTED_OUT_COLUMN:
 		case IN_SALESFORCE_COLUMN:
-		case NEW_CLASS_COLUMN:
+		case PROCESSED_COLUMN:
 			return Boolean.class;
 		}
 		// All remaining columns are Strings
@@ -84,7 +87,7 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		if (col == NEW_CLASS_COLUMN) // Check-box
+		if (col == PROCESSED_COLUMN) // Check-box
 			return true;
 		else
 			return false;
@@ -94,6 +97,8 @@ public class GraduationTableModel extends AbstractTableModel {
 		switch (col) {
 		case STUDENT_NAME_COLUMN:
 			return grad.getStudentName();
+		case TESTED_OUT_COLUMN:
+			return grad.isTestedOut();
 		case LEVEL_PASSED_COLUMN:
 			return grad.getGradLevelString();
 		case START_DATE_COLUMN:
@@ -102,10 +107,12 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.getEndDate();
 		case IN_SALESFORCE_COLUMN:
 			return grad.isSfUpdated();
-		case NEW_CLASS_COLUMN:
-			return grad.isNewClass();
+		case PROCESSED_COLUMN:
+			return grad.isProcessed();
+		case SCORE_COLUMN:
+			return grad.getScore();
 		case NOTES_COLUMN:
-			return grad.getNotes();
+			return "";
 		}
 		return null;
 	}

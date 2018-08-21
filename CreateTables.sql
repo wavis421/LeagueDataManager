@@ -124,6 +124,7 @@ BEGIN
 		Score varchar(40) DEFAULT NULL,
 		InSalesForce boolean DEFAULT 0,
 		NewClass boolean DEFAULT 0,
+		TestedOut boolean DEFAULT 0,
 		
 		UNIQUE KEY(ClientID, GradLevel)
 		
