@@ -144,7 +144,7 @@ public class ScheduleTable extends JPanel {
 		dowTable.setFont(CustomFonts.TABLE_TEXT_FONT);
 		dowTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		dowTable.setShowGrid(true);
-		dowTable.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		dowTable.getTableHeader().setDefaultRenderer(new SchedTableHeaderRenderer());
 		int origRowHeight = dowTable.getRowHeight();
 		dowTable.setRowHeight(origRowHeight + ROW_GAP);
 
@@ -277,6 +277,7 @@ public class ScheduleTable extends JPanel {
 		}
 	}
 
+	// ===== NESTED Class: Renderer for table ===== //
 	public class ScheduleTableRenderer extends JLabel implements TableCellRenderer {
 		private ScheduleTableRenderer() {
 			super();
@@ -306,6 +307,29 @@ public class ScheduleTable extends JPanel {
 					super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
 			}
 			return this;
+		}
+	}
+
+	// ===== NESTED Class: Renderer for table header ===== //
+	public class SchedTableHeaderRenderer extends JLabel implements TableCellRenderer {
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+		private SchedTableHeaderRenderer() {
+			super();
+			super.setOpaque(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			super.setHorizontalAlignment(CENTER);
+			super.setFont(CustomFonts.TABLE_HEADER_FONT);
+			super.setForeground(Color.black);
+			setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+
+			super.setText(((String) value));
+			return (this);
 		}
 	}
 }

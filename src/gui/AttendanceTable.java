@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
@@ -137,9 +138,7 @@ public class AttendanceTable extends JPanel {
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		table.setShowGrid(true);
-		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
-		table.getColumnModel().getColumn(AttendanceTableModel.GITHUB_COMMENTS_COLUMN)
-				.setHeaderRenderer(new AttendanceHeaderRenderer());
+		table.getTableHeader().setDefaultRenderer(new AttendanceHeaderRenderer());
 
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
@@ -434,14 +433,27 @@ public class AttendanceTable extends JPanel {
 
 	// ===== NESTED Class: Header Renderer for main table ===== //
 	public class AttendanceHeaderRenderer extends JLabel implements TableCellRenderer {
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+		private AttendanceHeaderRenderer() {
+			super();
+			super.setOpaque(true);
+		}
+
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			
-			// Header renderer is only used for GITHUB column to left justify
-			super.setHorizontalAlignment(LEFT);
+			// GITHUB column is left justified, all others are centered
+			if (column == attendanceTableModel.GITHUB_COMMENTS_COLUMN)
+				super.setHorizontalAlignment(LEFT);
+			else
+				super.setHorizontalAlignment(CENTER);
 			super.setFont(CustomFonts.TABLE_HEADER_FONT);
+			super.setForeground(Color.black);
+			setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+
 			super.setText(((String) value));
-			super.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, CustomFonts.TABLE_GRID_COLOR));
 			return (this);
 		}
 	}

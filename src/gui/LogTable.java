@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
@@ -81,7 +82,7 @@ public class LogTable extends JPanel {
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		table.setShowGrid(true);
-		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
+		table.getTableHeader().setDefaultRenderer(new LogTableHeaderRenderer());
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
@@ -190,7 +191,7 @@ public class LogTable extends JPanel {
 		table.setRowSorter(rowSorter);
 	}
 
-	// TODO: share/merge this table renderer
+	// ===== NESTED Class: Renderer for table ===== //
 	public class LogTableRenderer extends JLabel implements TableCellRenderer {
 		private LogTableRenderer() {
 			super();
@@ -226,11 +227,36 @@ public class LogTable extends JPanel {
 				if (column == LogTableModel.STATUS_COLUMN) {
 					super.setHorizontalAlignment(LEFT);
 					super.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0)); // left pad
-				}
-				else
+				} else
 					super.setHorizontalAlignment(CENTER);
 			}
 			return this;
+		}
+	}
+
+	// ===== NESTED Class: Renderer for table header ===== //
+	public class LogTableHeaderRenderer extends JLabel implements TableCellRenderer {
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+		private LogTableHeaderRenderer() {
+			super();
+			super.setOpaque(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			if (column == LogTableModel.STATUS_COLUMN)
+				super.setHorizontalAlignment(LEFT);
+			else
+				super.setHorizontalAlignment(CENTER);
+			super.setFont(CustomFonts.TABLE_HEADER_FONT);
+			super.setForeground(Color.black);
+			setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+
+			super.setText(((String) value));
+			return (this);
 		}
 	}
 }
