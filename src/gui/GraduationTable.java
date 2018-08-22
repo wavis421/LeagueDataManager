@@ -205,6 +205,7 @@ public class GraduationTable extends JPanel {
 	private class GradTableHdrRenderer extends JLabel implements TableCellRenderer {
 		// Render the table header
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
+		Border innerColoredBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
 		private GradTableHdrRenderer() {
@@ -219,14 +220,15 @@ public class GraduationTable extends JPanel {
 			setText(text);
 
 			if (column != -1) {
-				setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 				super.setHorizontalAlignment(CENTER);
 				setFont(CustomFonts.TABLE_HEADER_FONT);
-				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
-				if (column == GraduationTableModel.PROCESSED_COLUMN)
+				if (column == GraduationTableModel.PROCESSED_COLUMN) {
 					setForeground(CustomFonts.TITLE_COLOR);
-				else
+					setBorder(BorderFactory.createCompoundBorder(outerBorder, innerColoredBorder));
+				} else {
 					super.setForeground(Color.black);
+					setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+				}
 			}
 			return this;
 		}
