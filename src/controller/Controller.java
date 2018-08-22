@@ -1,6 +1,5 @@
 package controller;
 
-import java.awt.Cursor;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -9,10 +8,8 @@ import javax.swing.JOptionPane;
 
 import model.AttendanceModel;
 import model.CoursesModel;
-import model.DateRangeEvent;
 import model.GithubModel;
 import model.GraduationModel;
-import model.InvoiceModel;
 import model.LocationModel;
 import model.LogDataModel;
 import model.MySqlConnection;
@@ -202,21 +199,6 @@ public class Controller {
 	public void updateGraduationField(int clientID, String studentName, String gradLevel, String fieldName,
 			boolean newValue) {
 		sqlDb.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
-	}
-
-	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
-		// Set cursor to "wait" cursor
-		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-		// Get invoice data from Pike13
-		ArrayList<InvoiceModel> invoiceList = pike13Api.getInvoices(dateRange);
-
-		// Set cursor back to default
-		parent.setCursor(Cursor.getDefaultCursor());
-
-		if (sqlDb.getConnectError())
-			reportConnectError();
-		return invoiceList;
 	}
 
 	private void reportConnectError() {

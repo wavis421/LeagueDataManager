@@ -11,15 +11,12 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonValue;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import model.AttendanceEventModel;
 import model.CoursesModel;
-import model.DateRangeEvent;
-import model.InvoiceModel;
 import model.LogDataModel;
 import model.MySqlDatabase;
 import model.MySqlDbLogging;
@@ -156,28 +153,6 @@ public class Pike13Api {
 	private final int COURSES_SCHEDULE_ID_IDX = 0;
 	private final int COURSES_EVENT_NAME_IDX = 1;
 	private final int COURSE_ENROLLMENT_IDX = 2;
-
-	// Indices for transaction data
-	private final int TRANS_PLAN_ID_IDX = 0;
-	private final int TRANS_PAYMENT_METHOD_IDX = 1;
-	private final int TRANS_TRANSACTION_ID_IDX = 2;
-
-	// Indices for invoice data
-	private final int INVOICE_ISSUED_DATE_IDX = 0;
-	private final int INVOICE_GROSS_AMOUNT_IDX = 1;
-	private final int INVOICE_PRODUCT_NAME_IDX = 2;
-	private final int INVOICE_PLAN_ID_IDX = 3;
-	private final int INVOICE_COUPON_CODE_IDX = 4;
-	private final int INVOICE_RECIPIENT_NAME_IDX = 5;
-	private final int INVOICE_PAYER_NAME_IDX = 6;
-
-	// Indices for Person Plans data
-	private final int PLAN_CLIENT_ID_IDX = 0;
-	private final int PLAN_START_DATE_IDX = 1;
-	private final int PLAN_END_DATE_IDX = 2;
-	private final int PLAN_IS_CANCELED_IDX = 3;
-	private final int PLAN_NAME_IDX = 4;
-	private final int PLAN_PRODUCT_ID_IDX = 5;
 
 	// Indices for Person Plans by Product ID
 	private final int PLAN2_IS_CANCELED_IDX = 0;
@@ -334,18 +309,6 @@ public class Pike13Api {
 			+ "                    [\"and\",[[\"gt\",\"service_date\",\"2222-22-22\"],"
 			+ "                              [\"eq\",\"service_category\",\"leave\"]]]]]}}}";
 
-	private final String getEnrollmentDataByService = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\","
-			+ "            \"service_category\",\"state\"],"
-			// Page limit max is 10 (only need first entry)
-			+ "\"page\":{\"limit\":500},"
-			// Filter on client ID and service name
-			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",1111],"
-			+ "                     [\"starts\",\"service_name\",\"NNNN\"]]]}}}";
-
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -371,42 +334,6 @@ public class Pike13Api {
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"starts\",\"service_type\",\"course\"]]]}}}";
-
-	// Get invoice data
-	private final String getInvoiceData = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit and filters
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"issued_date\",\"gross_amount\",\"product_name\",\"plan_id\",\"coupon_code\","
-			+ "            \"recipient_names\",\"invoice_payer_name\"],"
-			// Page limit max is 500
-			+ "\"page\":{\"limit\":500},"
-			// Filter on hard-coded month for now
-			+ "\"filter\":[\"and\",[[\"btw\",\"issued_date\",[\"0000-00-00\",\"1111-11-11\"]],"
-			+ "                     [\"eq\",\"revenue_category\",\"Courses\"],"
-			+ "                     [\"gt\",\"gross_amount\",0]]]}}}";
-
-	// Get transaction data
-	private final String getTransactionData = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit and filters
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"plan_id\",\"payment_method\",\"processor_transaction_id\"],"
-			// Page limit max is 500
-			+ "\"page\":{\"limit\":500},"
-			// Filter on hard-coded month for now
-			+ "\"filter\":[\"btw\",\"transaction_date\",[\"0000-00-00\",\"1111-11-11\"]]}}}";
-
-	// Get person plan data
-	private final String getPersonPlanData = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit and filters
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"person_id\",\"start_date\",\"end_date\",\"is_canceled\",\"plan_name\",\"product_id\"],"
-			// Page limit max is 25
-			+ "\"page\":{\"limit\":25},"
-			// Filter on plan_id which is filled in at run-time
-			+ "\"filter\":[\"eq\",\"plan_id\",PPPP]}}}";
 
 	// Get person plan data by product ID
 	private final String getPersonPlanDataByProductId = "{\"data\":{\"type\":\"queries\","
@@ -890,177 +817,6 @@ public class Pike13Api {
 
 		conn.disconnect();
 		return coursesList;
-	}
-
-	public ArrayList<InvoiceModel> getInvoices(DateRangeEvent dateRange) {
-		ArrayList<InvoiceModel> invoiceList = new ArrayList<InvoiceModel>();
-
-		// Get URL connection and send the query
-		String invoiceCmd = getInvoiceData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
-		invoiceCmd = invoiceCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
-		HttpURLConnection conn = sendQueryToUrl("invoice_items", invoiceCmd);
-
-		if (conn == null)
-			return invoiceList;
-
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return invoiceList;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-		for (int i = 0; i < jsonArray.size(); i++) {
-			// Get fields for each invoice in the list
-			JsonArray invoiceArray = (JsonArray) jsonArray.get(i);
-
-			// Get invoice date/amount, student name, product name
-			int planID = invoiceArray.getInt(INVOICE_PLAN_ID_IDX);
-			InvoiceModel model = new InvoiceModel(stripQuotes(invoiceArray.get(INVOICE_ISSUED_DATE_IDX).toString()),
-					invoiceArray.getString(INVOICE_PRODUCT_NAME_IDX).toString(), "", "", 0,
-					invoiceArray.getString(INVOICE_RECIPIENT_NAME_IDX),
-					invoiceArray.getString(INVOICE_PAYER_NAME_IDX), planID, "", "",
-					invoiceArray.getInt(INVOICE_GROSS_AMOUNT_IDX));
-
-			JsonValue couponCode = invoiceArray.get(INVOICE_COUPON_CODE_IDX);
-			if (couponCode != null)
-				model.setPayMethod(stripQuotes(couponCode.toString()));
-
-			// Fill in remaining person plan data: client ID, start/end date, plan name, is-canceled
-			// 1) PersonPlans: fills in clientID, start/end dates, and the event name from the basic
-			//    service name in case that's all we get (due to Pike 13 bug, these are not always correct)
-			// 2) Enrollments-by-Service: gets enrollment record by Client ID and the basic service name,
-			//    then updates start/end dates and verbose event name.
-			getPersonPlans(model, planID);
-			getEnrollmentsByServiceName(model);
-
-			// Add invoice to list
-			invoiceList.add(model);
-		}
-		conn.disconnect();
-
-		// Fill in payment method and transaction ID
-		getPaymentInfo(invoiceList, dateRange);
-
-		for (int i = invoiceList.size() - 1; i >= 0; i--) {
-			InvoiceModel invoice = invoiceList.get(i);
-			int clientID = invoice.getClientID();
-
-			// Clear out all start/end date fields except the final one
-			if (invoice.getItemStartDate() == null)
-				continue;
-
-			for (int j = i - 1; j >= 0; j--) {
-				if (invoiceList.get(j).getClientID() == clientID) {
-					invoiceList.get(j).setItemStartDate(null);
-					invoiceList.get(j).setItemEndDate(null);
-				}
-			}
-		}
-
-		return invoiceList;
-	}
-
-	private void getPaymentInfo(ArrayList<InvoiceModel> invoiceList, DateRangeEvent dateRange) {
-		// Get URL connection and send query
-		String transCmd = getTransactionData.replaceFirst("0000-00-00", dateRange.getStartDate().toString("yyyy-MM-dd"));
-		transCmd = transCmd.replaceFirst("1111-11-11", dateRange.getEndDate().toString("yyyy-MM-dd"));
-		HttpURLConnection conn = sendQueryToUrl("invoice_item_transactions", transCmd);
-
-		if (conn == null)
-			return;
-
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-		for (int i = 0; i < jsonArray.size(); i++) {
-			// Get fields for each invoice in the list
-			JsonArray transactionArray = (JsonArray) jsonArray.get(i);
-
-			for (int j = 0; j < invoiceList.size(); j++) {
-				InvoiceModel invoice = invoiceList.get(j);
-				if (transactionArray.getInt(TRANS_PLAN_ID_IDX) == invoice.getPlanID()) {
-					// Plan ID match, update transaction ID and payment method
-					invoice.setPayMethod(stripQuotes(transactionArray.get(TRANS_PAYMENT_METHOD_IDX).toString()));
-					invoice.setTransactionID(stripQuotes(transactionArray.get(TRANS_TRANSACTION_ID_IDX).toString()));
-					break;
-				}
-			}
-		}
-		conn.disconnect();
-	}
-
-	private void getPersonPlans(InvoiceModel invoice, Integer planID) {
-		// Fill in plan_id field and send the query
-		String planString = getPersonPlanData.replace("PPPP", planID.toString());
-		HttpURLConnection conn = sendQueryToUrl("person_plans", planString);
-
-		if (conn == null)
-			return;
-
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-		if (jsonArray.size() > 0) {
-			// Get fields for first plan in the list
-			JsonArray invoiceArray = (JsonArray) jsonArray.get(0);
-
-			// Add person plans fields to invoice model
-			invoice.setClientID(invoiceArray.getInt(PLAN_CLIENT_ID_IDX));
-			invoice.setItemName(stripQuotes(invoiceArray.get(PLAN_NAME_IDX).toString()));
-			invoice.setProductID(invoiceArray.getInt(PLAN_PRODUCT_ID_IDX));
-
-			boolean isCanceled = invoiceArray.getString(PLAN_IS_CANCELED_IDX).equals("t");
-			invoice.setIsCanceled(isCanceled);
-			if (!isCanceled) {
-				// Only set start/end dates if plan is active
-				invoice.setItemStartDate(stripQuotes(invoiceArray.get(PLAN_START_DATE_IDX).toString()));
-				invoice.setItemEndDate(stripQuotes(invoiceArray.get(PLAN_END_DATE_IDX).toString()));
-			} else {
-				// Clear canceled flag if this client has other active records for this product
-				invoice.setIsCanceled(getCanceledFlagsByProductId(invoice.getClientID(), invoice.getProductID()));
-			}
-		}
-		conn.disconnect();
-	}
-
-	private void getEnrollmentsByServiceName(InvoiceModel model) {
-		String enroll = getEnrollmentDataByService.replace("1111", model.getClientID().toString());
-
-		// Get enrollment command string using item name
-		String itemName = model.getItemName();
-		int idx = itemName.indexOf('@');
-		if (idx > 0)
-			itemName = itemName.substring(0, idx);
-		enroll = enroll.replace("NNNN", itemName);
-
-		// Get attendance for this clientID and service name pair
-		ArrayList<AttendanceEventModel> modelList = getEnrollmentByCmdString(enroll, "");
-
-		if (modelList.size() > 0) {
-			model.setItemName(modelList.get(0).getEventName());
-
-			if (!model.getIsCanceled()) {
-				model.setItemStartDate(modelList.get(0).getServiceDateString());
-				model.setItemEndDate(modelList.get(modelList.size() - 1).getServiceDateString());
-			}
-
-		} else if (!model.getIsCanceled()) {
-			MySqlDbLogging.insertLogData(LogDataModel.INVOICE_REPORT_ENROLL_RECORD_NOT_FOUND,
-					new StudentNameModel(model.getStudentName(), "", true), model.getClientID(),
-					" for '" + model.getItemName() + "'");
-		}
 	}
 
 	public ArrayList<AttendanceEventModel> getCourseAttendance(String startDate, String endDate) {

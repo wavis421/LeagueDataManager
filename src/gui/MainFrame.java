@@ -47,10 +47,8 @@ import org.joda.time.DateTimeZone;
 import controller.Controller;
 import model.AttendanceModel;
 import model.CoursesModel;
-import model.DateRangeEvent;
 import model.GithubModel;
 import model.GraduationModel;
-import model.InvoiceModel;
 import model.LocationLookup;
 import model.LogDataModel;
 
@@ -67,7 +65,6 @@ public class MainFrame {
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
 	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
-	private static final String INVOICE_TITLE = "Course Invoices for ";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
 	private static final String GRADUATION_TITLE = "Pending Student Graduations ";
@@ -90,7 +87,6 @@ public class MainFrame {
 	private AttendanceTable attendanceTable;
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
-	private InvoiceTable invoiceTable;
 	private GithubTable githubTable;
 	private CoursesTable coursesTable;
 	private GraduationTable gradTable;
@@ -102,9 +98,8 @@ public class MainFrame {
 	private static JFrame frame = new JFrame();
 
 	// Class and Help menu names
-	private final int fileMenuIdx = 0, studentMenuIdx = 1, attendMenuIdx = 2, schedMenuIdx = 3, reportMenuIdx = 4;
-	private String[] menuDescripNames = { "File Menu ", "Student Menu ", "Attendance Menu ", "Schedule Menu ",
-			"Reports Menu " };
+	private final int fileMenuIdx = 0, studentMenuIdx = 1, attendMenuIdx = 2, schedMenuIdx = 3;
+	private String[] menuDescripNames = { "File Menu ", "Student Menu ", "Attendance Menu ", "Schedule Menu " };
 	private static String[] classMenuNames = { "Level 0 ", "Level 1 ", "Level 2 ", "Level 3 ", "Level 4 ", "Level 5 ",
 			"Level 6 ", "Level 7 ", "Level 8 ", "Level 9 ", "Labs " };
 
@@ -166,7 +161,6 @@ public class MainFrame {
 		attendanceTable = new AttendanceTable(tablePanel, new ArrayList<AttendanceModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
-		invoiceTable = new InvoiceTable(tablePanel, new ArrayList<InvoiceModel>());
 		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
 		coursesTable = new CoursesTable(tablePanel, new ArrayList<CoursesModel>());
 		gradTable = new GraduationTable(tablePanel, new ArrayList<GraduationModel>());
@@ -220,13 +214,6 @@ public class MainFrame {
 		menuBar.add(scheduleMenu);
 		createScheduleMenu(scheduleMenu);
 
-		// Add Reports menu to menu bar
-		if (!pike13Token.equals("")) {
-			JMenu reportsMenu = new JMenu("Reports");
-			menuBar.add(reportsMenu);
-			createReportsMenu(reportsMenu);
-		}
-
 		// Add help menu to menu bar
 		JMenu helpMenu = new JMenu("Help");
 		menuBar.add(helpMenu);
@@ -252,8 +239,6 @@ public class MainFrame {
 					coursesTable.updateSearchField(searchField.getText());
 				else if (activeTable == logTable.getTable())
 					logTable.updateSearchField(searchField.getText());
-				else if (activeTable == invoiceTable.getTable())
-					invoiceTable.updateSearchField(searchField.getText());
 				else if (activeTable == githubTable.getTable())
 					githubTable.updateSearchField(searchField.getText());
 				else if (activeTable == scheduleTable.getTable())
@@ -436,23 +421,6 @@ public class MainFrame {
 		});
 	}
 
-	private void createReportsMenu(JMenu reportsMenu) {
-		// Create sub-menu for the Reports menu
-		JMenuItem invoiceMenu = new JMenuItem("Course Invoices ");
-		reportsMenu.add(invoiceMenu);
-
-		// Set up listeners for Reports menu
-		invoiceMenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				SelectDateRangeDialog dateSelector = new SelectDateRangeDialog(frame);
-				DateRangeEvent dateRange = dateSelector.getDialogResponse();
-				if (dateRange != null) {
-					refreshInvoiceTable(dateRange);
-				}
-			}
-		});
-	}
-
 	private void createHelpMenu(JMenu helpMenu) {
 		// Create sub-menus for the Help menu
 		JMenu menuDescription = new JMenu("Menu Descriptions ");
@@ -487,8 +455,6 @@ public class MainFrame {
 						new NotesWindow(NotesWindow.ATTENDANCE_MENU);
 					else if (menuFilter == schedMenuIdx)
 						new NotesWindow(NotesWindow.SCHEDULE_MENU);
-					else if (menuFilter == reportMenuIdx)
-						new NotesWindow(NotesWindow.REPORTS_MENU);
 				}
 			});
 		}
@@ -716,27 +682,12 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 	}
 
-	private void refreshInvoiceTable(DateRangeEvent dateRange) {
-		// Remove data being displayed
-		removeDataFromTables();
-
-		// Add invoice data table and header
-		invoiceTable.setData(tablePanel, controller.getInvoices(dateRange));
-		headerLabel.setText(INVOICE_TITLE + dateRange.toString());
-		searchField.setText("");
-		invoiceTable.updateSearchField("");
-
-		activeTable = invoiceTable.getTable();
-		activeTableHeader = headerLabel.getText();
-	}
-
 	private void removeDataFromTables() {
 		// Remove data from Student table and Attendance table
 		studentTable.removeData();
 		attendanceTable.removeData();
 		logTable.removeData();
 		scheduleTable.removeData();
-		invoiceTable.removeData();
 		githubTable.removeData();
 		coursesTable.removeData();
 		gradTable.removeData();

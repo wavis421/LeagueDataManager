@@ -17,12 +17,11 @@ public class NotesWindow {
 	public static final int STUDENT_MENU = 1;
 	public static final int ATTENDANCE_MENU = 2;
 	public static final int SCHEDULE_MENU = 3;
-	public static final int REPORTS_MENU = 4;
-	public static final int EXAMPLES = 5;
-	public static final int SEARCH_COPY = 6;
-	public static final int LOCATION_CODES = 7;
-	public static final int FEEDBACK = 8;
-	public static final int ABOUT = 9;
+	public static final int EXAMPLES = 4;
+	public static final int SEARCH_COPY = 5;
+	public static final int LOCATION_CODES = 6;
+	public static final int FEEDBACK = 7;
+	public static final int ABOUT = 8;
 
 	private static final String[] notes = { "\n"
 			// File Menu
@@ -33,8 +32,7 @@ public class NotesWindow {
 			+ "            auto-fit width, so if you're printing attendance data then landscape will be your best option.\n"
 			+ "      => The Export Data to CSV file option allows you to export the currently displayed table to\n"
 			+ "            a CSV file, which can then be imported to an Excel spreadsheet. The tables that can\n"
-			+ "            be exported include the Student, Courses, Log Data and Report tables.\n"
-			+ "            Note: Reports are visible only to admin users.",
+			+ "            be exported include the Student, Courses, Graduation, Missing Github and Log Data tables.",
 			
 			// Student Menu
 			"     Student Menu:\n\n"
@@ -43,6 +41,8 @@ public class NotesWindow {
 			+ "      => 'View students without recent Github' shows students who have attended at least 3 out of the\n"
 			+ "            last 4 weeks of classes without any Github commits. This indicates that either the student's\n"
 			+ "            Github user name is incorrect or that the student is not committing his/her work.\n"
+			+ "      => 'View pending graduates' shows a list of students who have recently been graduated. They are\n"
+			+ "            then removed from the list once they have been assigned to a new class/level.\n"
 			+ "      => From the Student tables, select a student and then use the Right Mouse button to viewthe student's\n"
 			+ "            attendance data. Refer to the Attendance menu description for more details regarding attendance.",
 			
@@ -62,12 +62,6 @@ public class NotesWindow {
 			+ "            Note that you can filter the Schedule data using the search box, e.g. all 'Make-Up' classes.\n"
 			+ "      => Viewing Workshops and Summer Slam shows all the courses available. From there, select\n"
 			+ "            and then right-click a course to view the students enrolled in the course.",
-			
-			// Reports Menu
-			"     Reports Menu:\n\n"
-			+ "      => There is currently only one active report in the report menu, which provides Course Invoices for\n"
-			+ "             a specified date interval. This report provides payer information and detailed transaction data.\n"
-			+ "      => Only admin users have access to the Reports menu. Request admin rights from Vickie.",
 
 			// Examples
 			"\n   YOU ARE A SUB FOR A CLASS:\n"
@@ -111,7 +105,6 @@ public class NotesWindow {
 			+ "         => Pike13 client database\n"
 			+ "         => Pike13 attendance database\n" 
 			+ "         => Pike13 schedule database\n"
-			+ "         => Pike13 invoice database\n" 
 			+ "         => Github \n\n"
 			+ "      This data is then merged into a single database. \n"
 			+ "      This merged database is a slave to all of the above databases, and does not create any new data on its own.\n"
@@ -124,12 +117,12 @@ public class NotesWindow {
 			+ "          if the recipe is still In Progress. Please also add comments about written tests and worksheets (WS).\n" };
 
 	private static final String[] titles = { "File Menu Description ", "Student Menu Description ", "Attendance Menu Description ", 
-			"Schedule Menu Description ", "Reports Menu Description ", "Examples ", "Search, Filter and Copy Features", 
+			"Schedule Menu Description ", "Examples ", "Search, Filter and Copy Features", 
 			"Location Codes ", "Provide Feedback ",	"About League Student Tracker " };
 
-	private static final Dimension[] sizes = { new Dimension(820, 275), new Dimension(820, 275), new Dimension(820, 275), 
-			new Dimension(820, 275), new Dimension(820, 275), new Dimension(630, 440), new Dimension(820, 300), 
-			new Dimension(680, 720), new Dimension(720, 270), new Dimension(825, 520) };
+	private static final Dimension[] sizes = { new Dimension(820, 275), new Dimension(820, 300), new Dimension(820, 275), 
+			new Dimension(820, 275), new Dimension(630, 440), new Dimension(820, 300), new Dimension(680, 720), 
+			new Dimension(720, 270), new Dimension(825, 520) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);
