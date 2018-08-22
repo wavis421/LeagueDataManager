@@ -33,7 +33,7 @@ public class MySqlDatabase {
 
 	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
 	public static final String GRAD_MODEL_IN_SF_FIELD = "InSalesForce";
-	public static final String GRAD_MODEL_TESTED_OUT_FIELD = "TestedOut";
+	public static final String GRAD_MODEL_SKIP_LEVEL_FIELD = "SkipLevel";
 
 	public Connection dbConnection = null;
 	private JFrame parent;
@@ -1086,7 +1086,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Insert graduation record into database
-				String cmdString = "INSERT INTO Graduation (ClientID, GradLevel, TestedOut, EndDate";
+				String cmdString = "INSERT INTO Graduation (ClientID, GradLevel, SkipLevel, EndDate";
 				String values = ") VALUES (?, ?, ?, ?";
 
 				// Don't update dates or score if no data
@@ -1106,7 +1106,7 @@ public class MySqlDatabase {
 				int col = 1;
 				addGrad.setInt(col++, gradModel.getClientID());
 				addGrad.setInt(col++, gradModel.getGradLevel());
-				addGrad.setBoolean(col++, gradModel.isTestedOut());
+				addGrad.setBoolean(col++, gradModel.isSkipLevel());
 				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
 				if (!gradModel.getStartDate().equals(""))
 					addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getStartDate()));
@@ -1140,7 +1140,7 @@ public class MySqlDatabase {
 
 	private void updateGraduationRecord(GraduationModel gradModel) {
 		// Graduation records are uniquely identified by clientID & level pair.
-		// Update only EndDate, Score, TestedOut. Set 'in SF' false to forces update.
+		// Update only EndDate, Score, SkipLevel. Set 'in SF' false to forces update.
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Update graduation record in database
@@ -1149,18 +1149,19 @@ public class MySqlDatabase {
 				// Only update fields if valid
 				if (!gradModel.getScore().equals(""))
 					cmdString += ", Score=?";
-				if (gradModel.isTestedOut())
-					cmdString += ", TestedOut=?";
-				
+				if (gradModel.isSkipLevel())
+					cmdString += ", SkipLevel=?";
+
 				// Update database
-				PreparedStatement updateGraduateStmt = dbConnection.prepareStatement(cmdString + " WHERE ClientID=? AND GradLevel=?;");
+				PreparedStatement updateGraduateStmt = dbConnection
+						.prepareStatement(cmdString + " WHERE ClientID=? AND GradLevel=?;");
 
 				// Fill in the input fields
 				int col = 1;
 				updateGraduateStmt.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
 				if (!gradModel.getScore().equals(""))
 					updateGraduateStmt.setString(col++, gradModel.getScore());
-				if (gradModel.isTestedOut())
+				if (gradModel.isSkipLevel())
 					updateGraduateStmt.setBoolean(col++, true);
 				updateGraduateStmt.setInt(col++, gradModel.getClientID());
 				updateGraduateStmt.setInt(col++, gradModel.getGradLevel());
@@ -1284,7 +1285,7 @@ public class MySqlDatabase {
 							result.getInt("GradLevel"), result.getString("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
 							result.getBoolean(GRAD_MODEL_PROCESSED_FIELD),
-							result.getBoolean(GRAD_MODEL_TESTED_OUT_FIELD)));
+							result.getBoolean(GRAD_MODEL_SKIP_LEVEL_FIELD)));
 				}
 
 				result.close();

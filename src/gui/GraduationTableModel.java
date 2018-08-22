@@ -14,7 +14,7 @@ import model.GraduationModel;
  */
 public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
-	public static final int TESTED_OUT_COLUMN = 1;
+	public static final int SKIP_LEVEL_COLUMN = 1;
 	public static final int LEVEL_PASSED_COLUMN = 2;
 	public static final int PROCESSED_COLUMN = 3;
 	public static final int IN_SALESFORCE_COLUMN = 4;
@@ -26,7 +26,7 @@ public class GraduationTableModel extends AbstractTableModel {
 	public static final int NUM_COLUMNS = 10;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Tested Out ", " Level Passed ", " Processed ",
+	private final String colNames[] = { " Student Name ", " Skip Level ", " Level ", " Processed ",
 			" In SalesForce ", " Start Date ", " Grad Date ", " Score ", " Notes/Errors " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
@@ -76,7 +76,7 @@ public class GraduationTableModel extends AbstractTableModel {
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
-		case TESTED_OUT_COLUMN:
+		case SKIP_LEVEL_COLUMN:
 		case IN_SALESFORCE_COLUMN:
 		case PROCESSED_COLUMN:
 			return Boolean.class;
@@ -97,8 +97,8 @@ public class GraduationTableModel extends AbstractTableModel {
 		switch (col) {
 		case STUDENT_NAME_COLUMN:
 			return grad.getStudentName();
-		case TESTED_OUT_COLUMN:
-			return grad.isTestedOut();
+		case SKIP_LEVEL_COLUMN:
+			return grad.isSkipLevel();
 		case LEVEL_PASSED_COLUMN:
 			return grad.getGradLevelString();
 		case START_DATE_COLUMN:

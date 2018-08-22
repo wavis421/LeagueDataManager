@@ -12,10 +12,10 @@ public class GraduationModel {
 	private String studentName, score;
 	private Integer gradLevel;
 	private String startDate, endDate;
-	private boolean isSfUpdated, isProcessed, isTestedOut;
+	private boolean isSfUpdated, isProcessed, isSkipLevel;
 
 	public GraduationModel(int clientID, String studentName, int gradLevel, String score, String startDate,
-			String endDate, boolean isSfUpdated, boolean isProcessed, boolean isTestedOut) {
+			String endDate, boolean isSfUpdated, boolean isProcessed, boolean skipLevel) {
 		// Graduation record with score and start date
 		this.clientID = clientID;
 		this.studentName = studentName;
@@ -25,7 +25,7 @@ public class GraduationModel {
 		this.endDate = endDate;
 		this.isSfUpdated = isSfUpdated;
 		this.isProcessed = isProcessed;
-		this.isTestedOut = isTestedOut;
+		this.isSkipLevel = skipLevel;
 	}
 
 	public int getClientID() {
@@ -67,8 +67,8 @@ public class GraduationModel {
 		return isProcessed;
 	}
 
-	public boolean isTestedOut() {
-		return isTestedOut;
+	public boolean isSkipLevel() {
+		return isSkipLevel;
 	}
 
 	public void setScore(String score) {

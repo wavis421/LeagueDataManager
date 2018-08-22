@@ -214,8 +214,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		// Configure column widths
 		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setPreferredWidth(100);
 		table.getColumnModel().getColumn(GradTableModel.SCORE_COLUMN).setMaxWidth(100);
-		table.getColumnModel().getColumn(GradTableModel.TESTED_OUT_COLUMN).setPreferredWidth(100);
-		table.getColumnModel().getColumn(GradTableModel.TESTED_OUT_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.SKIP_LEVEL_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(GradTableModel.SKIP_LEVEL_COLUMN).setMaxWidth(100);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
@@ -231,7 +231,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private void createMouseListener(JTable table) {
-		// Add mouse listener for Tested-Out column: toggle check-box
+		// Add mouse listener for Skip Level column: toggle check-box
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = table.getSelectedRow();
@@ -239,9 +239,9 @@ public class GraduationDialog extends JDialog implements ActionListener {
 					return;
 
 				int col = table.getSelectedColumn();
-				if (e.getButton() == MouseEvent.BUTTON1 && col == GradTableModel.TESTED_OUT_COLUMN) {
+				if (e.getButton() == MouseEvent.BUTTON1 && col == GradTableModel.SKIP_LEVEL_COLUMN) {
 					boolean checked = (boolean) table.getValueAt(row, col);
-					gradTableModel.setTestedOut(row, !checked);
+					gradTableModel.setSkipLevel(row, !checked);
 					gradTableModel.fireTableDataChanged();
 				}
 			}
@@ -258,7 +258,7 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	}
 
 	private void addGradRecordToDbNoDate(int clientID, String studentName, int level, String score) {
-		// Add tested-out grad record with no start or end date
+		// Add skip-level grad record with no start or end date
 		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, "",
 				gradDatePicker.getJFormattedTextField().getText(), false, false, true);
 		controller.addGraduationRecord(gradModel);
@@ -315,15 +315,15 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			// Check that all fields are filled in
 			for (int i = 0; i < gradTableModel.getRowCount(); i++) {
 				int clientID = ((int) gradTableModel.getValueAt(i, GradTableModel.CLIENT_ID_COLUMN));
-				boolean testedOut = (boolean) gradTableModel.getValueAt(i, GradTableModel.TESTED_OUT_COLUMN);
+				boolean skip = (boolean) gradTableModel.getValueAt(i, GradTableModel.SKIP_LEVEL_COLUMN);
 				String scoreString = ((JTextField) gradTableModel.getValueAt(i, GradTableModel.SCORE_COLUMN)).getText();
 				String studentName = (String) gradTableModel.getValueAt(i, GradTableModel.STUDENT_NAME_COLUMN);
 
 				if (!scoreString.equals("") && !isScoreValid(scoreString, i))
 					return;
 
-				if (testedOut) {
-					// Add record to database for tested-out, no date fields, score optional
+				if (skip) {
+					// Add record to database for skip-level, no date fields, score optional
 					addGradRecordToDbNoDate(clientID, studentName, gradLevelIdx, scoreString);
 					countGrads++;
 
@@ -350,13 +350,13 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	/***** DIALOG MODEL SUB-CLASS *****/
 	private class DialogGradModel {
 		private int clientID;
-		private boolean testedOut;
+		private boolean skip;
 		private String studentName;
 		private JTextField score = new JTextField();
 
 		public DialogGradModel(int clientID, String studentName) {
 			this.clientID = clientID;
-			this.testedOut = false;
+			this.skip = false;
 			this.studentName = studentName;
 			this.score.setText("");
 
@@ -368,8 +368,8 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			return clientID;
 		}
 
-		public boolean getTestedOut() {
-			return testedOut;
+		public boolean getSkipLevel() {
+			return skip;
 		}
 
 		public String getStudentName() {
@@ -384,12 +384,12 @@ public class GraduationDialog extends JDialog implements ActionListener {
 	/***** TABLE MODEL SUB-CLASS *****/
 	private class GradTableModel extends AbstractTableModel {
 		public static final int STUDENT_NAME_COLUMN = 0;
-		public static final int TESTED_OUT_COLUMN = 1;
+		public static final int SKIP_LEVEL_COLUMN = 1;
 		public static final int SCORE_COLUMN = 2;
 		public static final int CLIENT_ID_COLUMN = 3; // Not actually a table column
 		public static final int NUM_COLUMNS = 4;
 
-		private final String[] colNames = { " Student Name ", " Tested Out ", " Score (%) " };
+		private final String[] colNames = { " Student Name ", " Skip Level ", " Score (%) " };
 		private Object[][] tableObjects;
 
 		public GradTableModel(ArrayList<DialogGradModel> grads) {
@@ -397,14 +397,14 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 			for (int row = 0; row < grads.size(); row++) {
 				tableObjects[row][STUDENT_NAME_COLUMN] = grads.get(row).getStudentName();
-				tableObjects[row][TESTED_OUT_COLUMN] = grads.get(row).getTestedOut();
+				tableObjects[row][SKIP_LEVEL_COLUMN] = grads.get(row).getSkipLevel();
 				tableObjects[row][SCORE_COLUMN] = grads.get(row).getScoreTextField();
 				tableObjects[row][CLIENT_ID_COLUMN] = grads.get(row).getClientID();
 			}
 		}
 
-		public void setTestedOut(int row, boolean testedOut) {
-			tableObjects[row][TESTED_OUT_COLUMN] = testedOut;
+		public void setSkipLevel(int row, boolean skip) {
+			tableObjects[row][SKIP_LEVEL_COLUMN] = skip;
 		}
 
 		@Override
