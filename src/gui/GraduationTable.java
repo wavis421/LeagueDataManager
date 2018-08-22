@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
@@ -80,7 +81,6 @@ public class GraduationTable extends JPanel {
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		table.setShowGrid(true);
-		table.getTableHeader().setFont(CustomFonts.TABLE_HEADER_FONT);
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
@@ -103,6 +103,7 @@ public class GraduationTable extends JPanel {
 		table.getColumnModel().getColumn(GraduationTableModel.SCORE_COLUMN).setPreferredWidth(100);
 
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
+		table.getTableHeader().setDefaultRenderer(new GradTableHdrRenderer());
 		table.setAutoCreateRowSorter(true);
 		table.setCellSelectionEnabled(true);
 		new TableKeystrokeHandler(table);
@@ -195,6 +196,37 @@ public class GraduationTable extends JPanel {
 					super.setBorder(BorderFactory.createEmptyBorder());
 					super.setHorizontalAlignment(CENTER);
 				}
+			}
+			return this;
+		}
+	}
+
+	/**** Table header renderer sub-class ***/
+	private class GradTableHdrRenderer extends JLabel implements TableCellRenderer {
+		// Render the table header
+		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
+		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+		private GradTableHdrRenderer() {
+			super();
+			super.setOpaque(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			String text = ((String) value);
+			setText(text);
+
+			if (column != -1) {
+				setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+				super.setHorizontalAlignment(CENTER);
+				setFont(CustomFonts.TABLE_HEADER_FONT);
+				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
+				if (column == GraduationTableModel.PROCESSED_COLUMN)
+					setForeground(CustomFonts.TITLE_COLOR);
+				else
+					super.setForeground(Color.black);
 			}
 			return this;
 		}

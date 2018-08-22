@@ -45,7 +45,10 @@ public class GraduationModel {
 	}
 
 	public String getScore() {
-		return score;
+		if (score == null || score.equals("0"))
+			return "";
+		else
+			return score;
 	}
 
 	public String getStartDate() {
