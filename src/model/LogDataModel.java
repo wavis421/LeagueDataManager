@@ -109,7 +109,7 @@ public class LogDataModel {
 			// 20
 			"Attendance Database error", "Logging Database error", "Schedule Database error", "Pike13 Connection error",
 			"Pike13 Import error", "Failure getting Module Repo", "*** BEGIN STUDENT IMPORT",
-			"*** STUDENT IMPORT COMPLETE", "*** BEGIN ATTENDANCE IMPORT", "*** ATTENDANCE IMPORT COMPLETE",
+			"*** STUDENT IMPORT COMPLETE", "*** BEGIN CLASS ATTENDANCE IMPORT", "*** CLASS ATTENDANCE IMPORT COMPLETE",
 
 			// 30
 			"*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE", "*** GITHUB IMPORT ABORTED",
@@ -138,7 +138,7 @@ public class LogDataModel {
 
 			// 70
 			"*** COURSES IMPORT COMPLETE", "Courses Database error", "Add courses to schedule",
-			"Remove Courses from schedule", "Update Courses info", "Update Attendance state",
+			"Remove Courses from schedule", "Update Courses info", "Updated Attendance state/teacher(s)",
 			"*** BEGIN COURSE ATTENDANCE IMPORT", "*** COURSE ATTENDANCE IMPORT COMPLETE",
 			"Missing SF contact for Graduation", "SalesForce Upsert Diary error",
 
