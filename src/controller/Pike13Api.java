@@ -635,7 +635,7 @@ public class Pike13Api {
 							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName,
 							stripQuotes(eventArray.get(ENROLL_TEACHER_NAMES_IDX).toString()),
 							stripQuotes(eventArray.get(ENROLL_SERVICE_CATEGORY_IDX).toString()),
-							stripQuotes(eventArray.get(ENROLL_STATE_IDX).toString())));
+							stripQuotes(eventArray.get(ENROLL_STATE_IDX).toString()), null));
 				}
 			}
 

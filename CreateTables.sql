@@ -44,7 +44,8 @@ BEGIN
 		VisitID int(11) DEFAULT NULL,
 		TeacherNames varchar(100) DEFAULT NULL,
 		SerivceCategory varchar(30) DEFAULT NULL,
-		State varchar(30) DEFAULT NULL
+		State varchar(30) DEFAULT NULL,
+		LastSFState varchar(30) DEFAULT NULL,
 		
 		UNIQUE KEY(ClientID, EventName, ServiceDate)
 				

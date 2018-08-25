@@ -387,8 +387,8 @@ public class MySqlDatabase {
 				// Get 1st 4 attendance records for each client; use sorted attendance table
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * "
 						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, EventName, VisitID, "
-						+ "         ServiceCategory, State, FirstName, LastName, isInMasterDb, GithubName, "
-						+ "         RepoName, Comments, TeacherNames, "
+						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, isInMasterDb, "
+						+ "         GithubName, RepoName, Comments, TeacherNames, "
 						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
 						+ "      FROM SortedAttendance, Students "
 						+ "      WHERE isInMasterDb AND SortedAttendance.ClientID = Students.ClientID "
@@ -428,7 +428,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') "
-								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, EventName;");
+								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, VisitID ASC;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -437,7 +437,7 @@ public class MySqlDatabase {
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("TeacherNames")));
+							result.getString("LastSFState"), result.getString("TeacherNames")));
 				}
 
 				result.close();
@@ -562,7 +562,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
-								+ "ServiceCategory, TeacherNames FROM Attendance, Students "
+								+ "LastSFState, ServiceCategory, TeacherNames FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -579,7 +579,7 @@ public class MySqlDatabase {
 						attendanceList.add(new AttendanceModel(thisClientID, name, result.getString("GithubName"),
 								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
 										"", "", name, result.getString("ServiceCategory"), result.getString("State"),
-										result.getString("TeacherNames"))));
+										result.getString("LastSFState"), result.getString("TeacherNames"))));
 					else
 						attendanceList.addAll(listByClient);
 				}
@@ -749,7 +749,7 @@ public class MySqlDatabase {
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("TeacherNames")));
+							result.getString("LastSFState"), result.getString("TeacherNames")));
 				}
 
 				result.close();
@@ -796,7 +796,7 @@ public class MySqlDatabase {
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("TeacherNames")));
+							result.getString("LastSFState"), result.getString("TeacherNames")));
 
 				} else {
 					lastClientID = thisClientID;
@@ -821,7 +821,7 @@ public class MySqlDatabase {
 									new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 											true),
 									result.getString("ServiceCategory"), result.getString("State"),
-									result.getString("TeacherNames")));
+									result.getString("LastSFState"), result.getString("TeacherNames")));
 					attendanceList.add(lastAttendanceModel);
 				}
 			}
@@ -954,6 +954,34 @@ public class MySqlDatabase {
 						nameModel.getIsInMasterDb());
 				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID,
 						": " + e.getMessage());
+			}
+		}
+	}
+	
+	public void updateAttendLevelChanges(int visitID, String state) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateAttendanceStmt = dbConnection.prepareStatement(
+						"UPDATE Attendance SET LastSFState = ? WHERE VisitID = ?;");
+
+				updateAttendanceStmt.setString(1, state);
+				updateAttendanceStmt.setInt(2, visitID);
+
+				updateAttendanceStmt.executeUpdate();
+				updateAttendanceStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						" updating LastSFState: " + e2.getMessage());
+				break;
 			}
 		}
 	}

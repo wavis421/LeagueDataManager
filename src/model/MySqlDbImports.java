@@ -372,6 +372,7 @@ public class MySqlDbImports {
 	 * ------- Attendance Import Database Queries -------
 	 */
 	public void importAttendance(ArrayList<AttendanceEventModel> importList) {
+		// Import attendance from Pike13 to the Tracker database
 		ArrayList<AttendanceEventModel> dbList = sqlDb.getAllEvents();
 		ArrayList<StudentModel> studentList = sqlDb.getActiveStudents();
 		int dbListIdx = 0;
@@ -389,6 +390,8 @@ public class MySqlDbImports {
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
 				dbAttendance = dbList.get(dbListIdx);
+
+				// Compare attendance; if matched, also check state & teachers
 				compare = dbAttendance.compareTo(importEvent);
 				if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
 						|| !dbAttendance.getTeacherNames().equals(teachers)))
@@ -409,6 +412,8 @@ public class MySqlDbImports {
 				compare = 1;
 				if (dbListIdx < dbListSize) {
 					dbAttendance = dbList.get(dbListIdx);
+
+					// Compare attendance; if matched, also check state & teachers
 					compare = dbAttendance.compareTo(importEvent);
 					if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
 							|| !dbAttendance.getTeacherNames().equals(teachers)))
@@ -552,7 +557,7 @@ public class MySqlDbImports {
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
-				// The only fields that should be updated are the comments and repo name
+				// The only fields that should be updated are the State & Teacher fields
 				updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
 						"UPDATE Attendance SET State=?, TeacherNames=? WHERE ClientID=? AND ServiceDate=?;");
 

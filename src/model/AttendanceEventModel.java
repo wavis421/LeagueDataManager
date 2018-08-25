@@ -4,7 +4,7 @@ import java.sql.Date;
 
 public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private int clientID, visitID;
-	private String eventName, teacherNames, serviceCategory, state;
+	private String eventName, teacherNames, serviceCategory, state, lastSFState;
 	private Date serviceDate;
 	private String serviceDateString;
 	private String githubName, githubComments, repoName;
@@ -12,7 +12,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String event, String githubName,
 			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state,
-			String teacherNames) {
+			String lastSFState, String teacherNames) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
@@ -40,6 +40,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 		this.serviceCategory = serviceCategory.trim();
 		this.state = state;
+		this.lastSFState = lastSFState;
 		this.githubName = githubName;
 		if (githubName != null)
 			this.githubName = githubName.trim();
@@ -52,7 +53,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	}
 
 	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String eventName,
-			String teacherNames, String serviceCategory, String state) {
+			String teacherNames, String serviceCategory, String state, String lastSFState) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.nameModel = new StudentNameModel(studentName, "", false);
@@ -61,6 +62,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		this.teacherNames = teacherNames;
 		this.serviceCategory = serviceCategory;
 		this.state = state;
+		this.lastSFState = lastSFState;
 	}
 
 	public int getClientID() {
@@ -98,6 +100,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public String getState() {
 		return state;
+	}
+
+	public String getLastSFState() {
+		return lastSFState;
 	}
 
 	public String getGithubName() {
@@ -140,6 +146,12 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 				return 1;
 			else if (comp > 0)
 				return -1;
+
+			// Client ID and service date match, sort visit ID
+			else if (this.visitID < other.getVisitID())
+				return -1;
+			else if (this.visitID > other.getVisitID())
+				return 1;
 			else
 				return 0;
 		}
