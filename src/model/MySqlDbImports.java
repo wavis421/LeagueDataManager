@@ -600,7 +600,7 @@ public class MySqlDbImports {
 			if (values[i].startsWith("TA-") || valueLC.startsWith("open lab") || valueLC.startsWith("sub teacher")
 					|| valueLC.startsWith("padres game") || valueLC.startsWith("make-up")
 					|| valueLC.startsWith("intro to java") || valueLC.startsWith("league admin")
-					|| valueLC.startsWith("summer prog"))
+					|| valueLC.startsWith("summer prog") || valueLC.startsWith("need assist"))
 				continue;
 
 			if (!teachers.equals(""))
