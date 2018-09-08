@@ -16,6 +16,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String accountID, accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
 	private int completedVisits, futureVisits;
 	private boolean signedWaiver, stopEmail, financialAid;
+	private Object sfContact;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear) {
@@ -298,6 +299,14 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public String getDependentNames() {
 		return dependentNames;
+	}
+
+	public Object getSfContact() {
+		return sfContact;
+	}
+
+	public void setSfContact(Object sfContact) {
+		this.sfContact = sfContact;
 	}
 
 	@Override
