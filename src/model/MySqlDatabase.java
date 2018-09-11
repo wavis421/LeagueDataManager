@@ -33,6 +33,7 @@ public class MySqlDatabase {
 
 	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
 	public static final String GRAD_MODEL_IN_SF_FIELD = "InSalesForce";
+	public static final String GRAD_MODEL_VERIFIED_FIELD = "VerifiedSF";
 	public static final String GRAD_MODEL_SKIP_LEVEL_FIELD = "SkipLevel";
 
 	public Connection dbConnection = null;
@@ -1172,7 +1173,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Update graduation record in database
-				String cmdString = "UPDATE Graduation SET EndDate=?, " + GRAD_MODEL_IN_SF_FIELD + "=0";
+				String cmdString = "UPDATE Graduation SET EndDate=?, " + GRAD_MODEL_IN_SF_FIELD + "=0, "
+						+ GRAD_MODEL_VERIFIED_FIELD + "=0";
 
 				// Only update fields if valid
 				if (!gradModel.getScore().equals(""))
@@ -1216,8 +1218,9 @@ public class MySqlDatabase {
 
 	public void updateGraduationField(int clientID, String studentName, String gradLevel, String fieldName,
 			boolean newValue) {
-		// Only the boolean flags may be updated (InSalesForce, Processed)
-		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)) {
+		// Only the boolean flags may be updated (InSalesForce, Processed, Verified)
+		if (!fieldName.equals(GRAD_MODEL_IN_SF_FIELD) && !fieldName.equals(GRAD_MODEL_PROCESSED_FIELD)
+				&& !fieldName.equals(GRAD_MODEL_VERIFIED_FIELD)) {
 			System.out.println("Graduation field name invalid: " + fieldName);
 			return;
 		}
@@ -1263,8 +1266,9 @@ public class MySqlDatabase {
 					// When all 3 flags are true, record can be removed
 					boolean inSf = result.getBoolean(GRAD_MODEL_IN_SF_FIELD);
 					boolean processed = result.getBoolean(GRAD_MODEL_PROCESSED_FIELD);
+					boolean verified = result.getBoolean(GRAD_MODEL_VERIFIED_FIELD);
 
-					if (inSf && processed) {
+					if (inSf && processed && verified) {
 						// Graduation record has been processed, so remove from DB
 						PreparedStatement deleteGradStmt = dbConnection
 								.prepareStatement("DELETE FROM Graduation WHERE ClientID=? AND GradLevel=?;");
@@ -1312,6 +1316,7 @@ public class MySqlDatabase {
 							result.getString("FirstName") + " " + result.getString("LastName"),
 							result.getInt("GradLevel"), result.getString("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
+							result.getBoolean(GRAD_MODEL_VERIFIED_FIELD),
 							result.getBoolean(GRAD_MODEL_PROCESSED_FIELD),
 							result.getBoolean(GRAD_MODEL_SKIP_LEVEL_FIELD)));
 				}

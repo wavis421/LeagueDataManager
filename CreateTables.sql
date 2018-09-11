@@ -126,6 +126,7 @@ BEGIN
 		InSalesForce boolean DEFAULT 0,
 		NewClass boolean DEFAULT 0,
 		TestedOut boolean DEFAULT 0,
+		VerifiedSF boolean DEFAULT 0,
 		
 		UNIQUE KEY(ClientID, GradLevel)
 		

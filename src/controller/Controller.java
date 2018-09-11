@@ -22,6 +22,7 @@ import model.StudentNameModel;
 public class Controller {
 	public static final String GRAD_MODEL_PROCESSED_FIELD = MySqlDatabase.GRAD_MODEL_PROCESSED_FIELD;
 	public static final String GRAD_MODEL_IN_SF_FIELD = MySqlDatabase.GRAD_MODEL_IN_SF_FIELD;
+	public static final String GRAD_MODEL_VERIFIED_FIELD = MySqlDatabase.GRAD_MODEL_VERIFIED_FIELD;
 
 	private MySqlDatabase sqlDb;
 	private Pike13Api pike13Api;
