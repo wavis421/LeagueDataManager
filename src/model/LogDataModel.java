@@ -93,7 +93,7 @@ public class LogDataModel {
 	public static final int SF_DIARY_UPDATED = 81;
 	public static final int SF_DIARY_IMPORT_ERROR = 82;
 	public static final int MISSING_VISIT_ID_FOR_SF_IMPORT = 83;
-	public static final int REPO_NAME_LEVEL_MISMATCH = 84;
+	public static final int CLASS_LEVEL_MISMATCH = 84;
 
 	// This should always be last
 	private static final int LOG_TYPE_OUT_OF_BOUNDS = 85;
@@ -147,7 +147,7 @@ public class LogDataModel {
 
 			// 80
 			"Graduated", "SalesForce Diary updated", "SalesForce Diary Import error", "Missing Visit ID for SF Import",
-			"Repo Level Mismatch" };
+			"Class Level Mismatch" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
