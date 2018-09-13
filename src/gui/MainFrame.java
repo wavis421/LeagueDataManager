@@ -569,7 +569,7 @@ public class MainFrame {
 				// Open Graduation dialog
 				new GraduationDialog(frame, controller, Integer.parseInt(clientID), studentName, className, icon);
 			}
-			
+
 			@Override
 			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
 					boolean newValue) {
