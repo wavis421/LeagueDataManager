@@ -147,7 +147,7 @@ public class LogDataModel {
 
 			// 80
 			"Graduated", "SalesForce Diary updated", "SalesForce Diary Import error", "Missing Visit ID for SF Import",
-			"Repo Name Level Mismatch" };
+			"Repo Level Mismatch" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
