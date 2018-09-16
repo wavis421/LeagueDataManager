@@ -141,7 +141,8 @@ public class MySqlDbImports {
 							result.getString("FirstName"), result.getString("GithubName"), result.getInt("Gender"),
 							startDateString, result.getInt("Location"), result.getInt("GradYear"),
 							result.getInt("isInMasterDb"), result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail")));
+							result.getString("EmergencyEmail"), result.getString("Phone"), result.getString("AcctMgrPhone"),
+							result.getString("HomePhone"), result.getString("EmergencyPhone")));
 				}
 
 				result.close();
@@ -170,7 +171,8 @@ public class MySqlDbImports {
 				PreparedStatement addStudentStmt = sqlDb.dbConnection.prepareStatement(
 						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent, "
 								+ "Gender, StartDate, Location, GradYear, isInMasterDb, Email, EmergencyEmail, "
-								+ "AcctMgrEmail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?);");
+								+ "AcctMgrEmail, Phone, AcctMgrPhone, HomePhone, EmergencyPhone) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
@@ -194,6 +196,10 @@ public class MySqlDbImports {
 				addStudentStmt.setString(col++, student.getEmail());
 				addStudentStmt.setString(col++, student.getEmergContactEmail());
 				addStudentStmt.setString(col++, student.getAccountMgrEmails());
+				addStudentStmt.setString(col++,  student.getMobilePhone());
+				addStudentStmt.setString(col++,  student.getAccountMgrPhones());
+				addStudentStmt.setString(col++,  student.getHomePhone());
+				addStudentStmt.setString(col++,  student.getEmergContactPhone());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
@@ -242,7 +248,8 @@ public class MySqlDbImports {
 				PreparedStatement updateStudentStmt = sqlDb.dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
 								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=?, Email=?,"
-								+ "EmergencyEmail=?, AcctMgrEmail=? WHERE ClientID=?;");
+								+ "EmergencyEmail=?, AcctMgrEmail=?, Phone=?, AcctMgrPhone=?, HomePhone=?, EmergencyPhone=? "
+								+ "WHERE ClientID=?;");
 
 				int col = 1;
 				updateStudentStmt.setString(col++, importStudent.getLastName());
@@ -265,6 +272,10 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getEmail());
 				updateStudentStmt.setString(col++, importStudent.getEmergContactEmail());
 				updateStudentStmt.setString(col++, importStudent.getAccountMgrEmails());
+				updateStudentStmt.setString(col++,  importStudent.getMobilePhone());
+				updateStudentStmt.setString(col++,  importStudent.getAccountMgrPhones());
+				updateStudentStmt.setString(col++,  importStudent.getHomePhone());
+				updateStudentStmt.setString(col++,  importStudent.getEmergContactPhone());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();

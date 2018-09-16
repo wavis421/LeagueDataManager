@@ -20,7 +20,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear, String email, String acctMgrEmail,
-			String emergEmail) {
+			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone) {
 
 		// Pike13 import data
 		this.clientID = clientID;
@@ -51,12 +51,21 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		if (emergEmail != null)
 			this.emergContactEmail = emergEmail.trim().replaceAll("[\t\n\r]", "");
 
+		if (mobilePhone != null)
+			this.mobilePhone = parsePhone(mobilePhone);
+		if (acctMgrPhones != null)
+			this.accountMgrPhones = parsePhone(acctMgrPhones);
+		if (homePhone != null)
+			this.homePhone = parsePhone(homePhone);
+		if (emergContactPhone != null)
+			this.emergContactPhone = parsePhone(emergContactPhone);
+
 		isInMasterDb = 1;
 	}
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
-			String emergEmail) {
+			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -68,12 +77,14 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.homeLocation = homeLocation;
 		this.gradYear = gradYear;
 		this.isInMasterDb = isInMasterDb;
-		if (email != null)
-			this.email = email.trim().replaceAll("[\t\n\r]", "");
-		if (acctMgrEmail != null)
-			this.accountMgrEmails = acctMgrEmail.trim().replaceAll("[\t\n\r]", "");
-		if (emergEmail != null)
-			this.emergContactEmail = emergEmail.trim().replaceAll("[\t\n\r]", "");
+
+		this.email = email;
+		this.accountMgrEmails = acctMgrEmail;
+		this.emergContactEmail = emergEmail;
+		this.mobilePhone = mobilePhone;
+		this.accountMgrPhones = acctMgrPhones;
+		this.homePhone = homePhone;
+		this.emergContactPhone = emergContactPhone;
 	}
 
 	public StudentImportModel(int clientID, String firstName, String lastName, String gender, String birthDate,
@@ -338,7 +349,9 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 				&& homeLocation == other.getHomeLocation() && gender == other.getGender()
 				&& gradYear == other.getGradYear() && isInMasterDb == other.getIsInMasterDb()
 				&& email.equals(other.getEmail()) && emergContactEmail.equals(other.getEmergContactEmail())
-				&& accountMgrEmails.equals(other.getAccountMgrEmails())) {
+				&& accountMgrEmails.equals(other.getAccountMgrEmails()) && mobilePhone.equals(other.getMobilePhone())
+				&& accountMgrPhones.equals(other.getAccountMgrPhones()) && homePhone.equals(other.getHomePhone())
+				&& emergContactPhone.equals(other.getEmergContactPhone())) {
 			return 0;
 		}
 
@@ -351,5 +364,36 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public String displayAll() {
 		return (clientID + ": " + firstName + " " + lastName + " (" + gender + "), github: " + githubName + ", home: "
 				+ homeLocString + ", start: " + startDate + ", grad: " + gradYear + ", " + isInMasterDb);
+	}
+
+	private static String parsePhone(String origPhone) {
+		String phoneList = origPhone.trim();
+		if (phoneList.length() < 10)
+			return origPhone;
+
+		String phone = "", resultPhone = "";
+		String[] values = phoneList.split("\\s*,\\s*");
+
+		for (int i = 0; i < values.length; i++) {
+			phone = values[i].trim();
+
+			if (phone.length() == 10 && phone.indexOf('(') == -1 && phone.indexOf('-') == -1)
+				phone = "(" + phone.substring(0, 3) + ") " + phone.substring(3, 6) + "-" + phone.substring(6);
+			else if (phone.length() == 12
+					&& (phone.charAt(3) == '-' || phone.charAt(3) == '.' || phone.charAt(3) == ' ')
+					&& (phone.charAt(7) == '-' || phone.charAt(7) == '.' || phone.charAt(7) == ' '))
+				phone = "(" + phone.substring(0, 3) + ") " + phone.substring(4, 7) + "-" + phone.substring(8);
+			else if (phone.length() == 13 && phone.charAt(0) == '(' && phone.charAt(4) == ')' && phone.charAt(8) == '-')
+				phone = phone.substring(0, 5) + " " + phone.substring(5);
+			else if (phone.length() == 11 && phone.charAt(3) == ' ')
+				phone = "(" + phone.substring(0,3) + ") " + phone.substring(4, 7) + "-" + phone.substring(7);
+			else if (phone.length() == 11 && phone.charAt(0) == '1')
+				phone = "(" + phone.substring(1,4) + ") " + phone.substring(4,7) + "-" + phone.substring(7);
+
+			if (!resultPhone.equals(""))
+				resultPhone += ", ";
+			resultPhone += phone;
+		}
+		return resultPhone;
 	}
 }

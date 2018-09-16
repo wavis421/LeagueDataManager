@@ -84,6 +84,10 @@ public class Pike13Api {
 	private final int EMAIL_IDX = 10;
 	private final int ACCT_MGR_EMAIL_IDX = 11;
 	private final int EMERG_EMAIL_IDX = 12;
+	private final int MOBILE_PHONE_IDX = 13;
+	private final int ACCT_MGR_PHONE_IDX = 14;
+	private final int HOME_PHONE_IDX = 15;
+	private final int EMERG_PHONE_IDX = 16;
 
 	// Indices for client data import to SF
 	private final int CLIENT_SF_ID_IDX = 0;
@@ -216,7 +220,8 @@ public class Pike13Api {
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_FIELD + "\",\"" + GRAD_YEAR_FIELD + "\","
 			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
 			+ "            \"future_visits\",\"completed_visits\",\"email\",\"account_manager_emails\","
-			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\"],"
+			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"phone\",\"account_manager_phones\","
+			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
@@ -443,7 +448,11 @@ public class Pike13Api {
 							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()),
 							stripQuotes(personArray.get(EMAIL_IDX).toString()),
 							stripQuotes(personArray.get(ACCT_MGR_EMAIL_IDX).toString()),
-							stripQuotes(personArray.get(EMERG_EMAIL_IDX).toString()));
+							stripQuotes(personArray.get(EMERG_EMAIL_IDX).toString()),
+							stripQuotes(personArray.get(MOBILE_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(ACCT_MGR_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(HOME_PHONE_IDX).toString()),
+							stripQuotes(personArray.get(EMERG_PHONE_IDX).toString()));
 					studentList.add(model);
 				}
 			}
