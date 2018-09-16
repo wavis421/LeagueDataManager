@@ -19,7 +19,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private Object sfContact;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
-			String startDate, String homeLocation, String gradYear) {
+			String startDate, String homeLocation, String gradYear, String email, String acctMgrEmail,
+			String emergEmail) {
 
 		// Pike13 import data
 		this.clientID = clientID;
@@ -43,11 +44,19 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 			}
 		}
 
+		if (email != null)
+			this.email = email.trim().replaceAll("[\t\n\r]", "");
+		if (acctMgrEmail != null)
+			this.accountMgrEmails = acctMgrEmail.trim().replaceAll("[\t\n\r]", "");
+		if (emergEmail != null)
+			this.emergContactEmail = emergEmail.trim().replaceAll("[\t\n\r]", "");
+
 		isInMasterDb = 1;
 	}
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
-			String startDate, int homeLocation, int gradYear, int isInMasterDb) {
+			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
+			String emergEmail) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -59,6 +68,12 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.homeLocation = homeLocation;
 		this.gradYear = gradYear;
 		this.isInMasterDb = isInMasterDb;
+		if (email != null)
+			this.email = email.trim().replaceAll("[\t\n\r]", "");
+		if (acctMgrEmail != null)
+			this.accountMgrEmails = acctMgrEmail.trim().replaceAll("[\t\n\r]", "");
+		if (emergEmail != null)
+			this.emergContactEmail = emergEmail.trim().replaceAll("[\t\n\r]", "");
 	}
 
 	public StudentImportModel(int clientID, String firstName, String lastName, String gender, String birthDate,
@@ -321,12 +336,15 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		else if (lastName.equals(other.getLastName()) && firstName.equals(other.getFirstName())
 				&& githubName.equals(other.getGithubName()) && startDate.equals(other.getStartDate())
 				&& homeLocation == other.getHomeLocation() && gender == other.getGender()
-				&& gradYear == other.getGradYear() && isInMasterDb == other.getIsInMasterDb())
+				&& gradYear == other.getGradYear() && isInMasterDb == other.getIsInMasterDb()
+				&& email.equals(other.getEmail()) && emergContactEmail.equals(other.getEmergContactEmail())
+				&& accountMgrEmails.equals(other.getAccountMgrEmails())) {
 			return 0;
+		}
 
 		else {
 			// Client ID matches but data does not
-			return -2;
+			return 2;
 		}
 	}
 

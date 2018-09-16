@@ -81,6 +81,9 @@ public class Pike13Api {
 	private final int GENDER_IDX = 5;
 	private final int HOME_LOC_IDX = 6;
 	private final int FIRST_VISIT_IDX = 7;
+	private final int EMAIL_IDX = 10;
+	private final int ACCT_MGR_EMAIL_IDX = 11;
+	private final int EMERG_EMAIL_IDX = 12;
 
 	// Indices for client data import to SF
 	private final int CLIENT_SF_ID_IDX = 0;
@@ -212,7 +215,8 @@ public class Pike13Api {
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\",\"" + GITHUB_FIELD + "\",\"" + GRAD_YEAR_FIELD + "\","
 			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
-			+ "            \"future_visits\",\"completed_visits\"],"
+			+ "            \"future_visits\",\"completed_visits\",\"email\",\"account_manager_emails\","
+			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
@@ -245,16 +249,6 @@ public class Pike13Api {
 			// Filter on Dependents NULL or not NULL ("MMM" filled in at run-time)
 			+ "\"filter\":[\"and\",[[\"MMM\",\"dependent_names\"],"
 			+ "                     [\"eq\",\"person_state\",\"active\"]]]}}}";
-
-	private final String getClientDataByAcctMgr = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit and filters
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"person_id\",\"first_name\",\"last_name\"],"
-			// Page limit max is 25
-			+ "\"page\":{\"limit\":25},"
-			// Filter on account manager name
-			+ "\"filter\":[\"eq\",\"full_name\",\"NNNN\"]}}}";
 
 	// Getting enrollment data is in 2 parts since page info gets inserted in middle.
 	private final String getEnrollmentStudentTracker = "{\"data\":{\"type\":\"queries\","
@@ -446,7 +440,10 @@ public class Pike13Api {
 							stripQuotes(personArray.get(GENDER_IDX).toString()),
 							stripQuotes(personArray.get(FIRST_VISIT_IDX).toString()),
 							stripQuotes(personArray.get(HOME_LOC_IDX).toString()),
-							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()));
+							stripQuotes(personArray.get(GRAD_YEAR_IDX).toString()),
+							stripQuotes(personArray.get(EMAIL_IDX).toString()),
+							stripQuotes(personArray.get(ACCT_MGR_EMAIL_IDX).toString()),
+							stripQuotes(personArray.get(EMERG_EMAIL_IDX).toString()));
 					studentList.add(model);
 				}
 			}
@@ -549,41 +546,6 @@ public class Pike13Api {
 		} while (hasMore);
 
 		return studentList;
-	}
-
-	// Currently not being used
-	public StudentImportModel getClientByAcctMgr(String accountMgrName) {
-		StudentImportModel student = null;
-
-		// Get URL connection and send the query
-		String nameCmd = getClientDataByAcctMgr.replace("NNNN", accountMgrName);
-		HttpURLConnection conn = sendQueryToUrl("clients", nameCmd);
-
-		if (conn == null)
-			return null;
-
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return null;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-		// Get fields for this person
-		if (jsonArray.size() == 0) {
-			conn.disconnect();
-			return null;
-		}
-
-		// Get fields for 1st Json array entry
-		JsonArray personArray = (JsonArray) jsonArray.get(0);
-		student = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
-				stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
-				stripQuotes(personArray.get(FIRST_NAME_IDX).toString()), "", "", "", "", "");
-
-		conn.disconnect();
-		return student;
 	}
 
 	public ArrayList<AttendanceEventModel> getAttendance(String startDate) {

@@ -102,6 +102,9 @@ public class MySqlDbImports {
 						// Import student is new, insert into DB
 						insertStudent(importStudent);
 					}
+				} else {
+					// Import student is new, insert into DB
+					insertStudent(importStudent);
 				}
 
 			} else if (compare == 1) {
@@ -137,7 +140,8 @@ public class MySqlDbImports {
 					nameList.add(new StudentImportModel(result.getInt("ClientID"), result.getString("LastName"),
 							result.getString("FirstName"), result.getString("GithubName"), result.getInt("Gender"),
 							startDateString, result.getInt("Location"), result.getInt("GradYear"),
-							result.getInt("isInMasterDb")));
+							result.getInt("isInMasterDb"), result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail")));
 				}
 
 				result.close();
@@ -164,9 +168,9 @@ public class MySqlDbImports {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addStudentStmt = sqlDb.dbConnection.prepareStatement(
-						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent,"
-								+ "Gender, StartDate, Location, GradYear, isInMasterDb) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1);");
+						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent, "
+								+ "Gender, StartDate, Location, GradYear, isInMasterDb, Email, EmergencyEmail, "
+								+ "AcctMgrEmail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
@@ -187,6 +191,9 @@ public class MySqlDbImports {
 					addStudentStmt.setDate(col++, null);
 				addStudentStmt.setInt(col++, student.getHomeLocation());
 				addStudentStmt.setInt(col++, student.getGradYear());
+				addStudentStmt.setString(col++, student.getEmail());
+				addStudentStmt.setString(col++, student.getEmergContactEmail());
+				addStudentStmt.setString(col++, student.getAccountMgrEmails());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
@@ -234,8 +241,8 @@ public class MySqlDbImports {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = sqlDb.dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
-								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=? "
-								+ "WHERE ClientID=?;");
+								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=?, Email=?,"
+								+ "EmergencyEmail=?, AcctMgrEmail=? WHERE ClientID=?;");
 
 				int col = 1;
 				updateStudentStmt.setString(col++, importStudent.getLastName());
@@ -255,6 +262,9 @@ public class MySqlDbImports {
 				updateStudentStmt.setInt(col++, importStudent.getHomeLocation());
 				updateStudentStmt.setInt(col++, importStudent.getGradYear());
 				updateStudentStmt.setInt(col++, 1); // is in master DB
+				updateStudentStmt.setString(col++, importStudent.getEmail());
+				updateStudentStmt.setString(col++, importStudent.getEmergContactEmail());
+				updateStudentStmt.setString(col++, importStudent.getAccountMgrEmails());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
