@@ -115,7 +115,11 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
+							result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
 				}
 
 				result.close();
@@ -181,7 +185,11 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
+							result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
 				}
 
 				result.close();
@@ -257,7 +265,11 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
+							result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
 				}
 
 				result.close();
@@ -295,7 +307,11 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass")));
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
+							result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
 				}
 
 				result.close();

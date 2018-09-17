@@ -61,6 +61,8 @@ public class MainFrame {
 	private static final int PREF_TABLE_PANEL_HEIGHT = PREF_FRAME_HEIGHT - 58;
 
 	private static final String STUDENT_TITLE = "League Student Info";
+	private static final String STUDENT_EMAIL_TITLE = "League Student Emails";
+	private static final String STUDENT_PHONE_TITLE = "League Student Phone Numbers";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
@@ -72,6 +74,8 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
+	private static final int STUDENT_TABLE_EMAIL = 3;
+	private static final int STUDENT_TABLE_PHONE = 4;
 
 	// Report missing github if 3 or more classes with no github in the last 35 days
 	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
@@ -326,17 +330,20 @@ public class MainFrame {
 	private void createStudentMenu(JMenu studentMenu) {
 		// Create sub-menus for the Students menu
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
-		// JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students
-		// ");
+		// JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
 		JMenuItem studentNoRecentGitItem = new JMenuItem("View students without recent Github ");
 		JMenuItem studentViewPendingGrads = new JMenuItem("View pending graduates ");
-		JMenuItem studentViewAllMenu = new JMenuItem("View all students ");
+		JMenuItem studentViewEmailMenu = new JMenuItem("View Student Email ");
+		JMenuItem studentViewPhoneMenu = new JMenuItem("View Student Phone ");
+		JMenuItem studentViewAllMenu = new JMenuItem("View all active students ");
 
 		// Add these sub-menus to the Student menu
 		studentMenu.add(studentNotInMasterMenu);
 		// studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentNoRecentGitItem);
 		studentMenu.add(studentViewPendingGrads);
+		studentMenu.add(studentViewEmailMenu);
+		studentMenu.add(studentViewPhoneMenu);
 		studentMenu.add(studentViewAllMenu);
 
 		// Set up listeners for the Student menu
@@ -364,6 +371,16 @@ public class MainFrame {
 		studentViewPendingGrads.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshGradTable();
+			}
+		});
+		studentViewEmailMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshStudentTable(STUDENT_TABLE_EMAIL, 0);
+			}
+		});
+		studentViewPhoneMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshStudentTable(STUDENT_TABLE_PHONE, 0);
 			}
 		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
@@ -555,7 +572,8 @@ public class MainFrame {
 			@Override
 			public void graduateClass(String className) {
 				// Get class student list and open Graduation dialog
-				new GraduationDialog(frame, controller, className, controller.getAttendanceByClassName(className), icon);
+				new GraduationDialog(frame, controller, className, controller.getAttendanceByClassName(className),
+						icon);
 			}
 
 			@Override
@@ -595,13 +613,21 @@ public class MainFrame {
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
 			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel, controller.getActiveStudents());
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.STANDARD_STUDENT_TABLE_TYPE);
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
-			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB());
-		} else { // STUDENT_TABLE_BY_STUDENT
+			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB(),
+					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+		} else if (tableType == STUDENT_TABLE_BY_STUDENT) {
 			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID));
+			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
+					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+		} else if (tableType == STUDENT_TABLE_EMAIL) {
+			headerLabel.setText(STUDENT_EMAIL_TITLE);
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.EMAIL_STUDENT_TABLE_TYPE);
+		} else {// STUDENT_TABLE_PHONE
+			headerLabel.setText(STUDENT_PHONE_TITLE);
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.PHONE_STUDENT_TABLE_TYPE);
 		}
 		searchField.setText("");
 		studentTable.updateSearchField("");
@@ -691,7 +717,6 @@ public class MainFrame {
 		githubTable.removeData();
 		coursesTable.removeData();
 		gradTable.removeData();
-		;
 	}
 
 	private String getPike13TokenFromFile() {

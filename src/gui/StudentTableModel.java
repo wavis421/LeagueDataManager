@@ -12,6 +12,8 @@ import model.StudentNameModel;
 public class StudentTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
+
+	// For student info table
 	public static final int GENDER_COLUMN = 2;
 	public static final int GITHUB_NAME_COLUMN = 3;
 	public static final int HOME_LOCATION_COLUMN = 4;
@@ -19,16 +21,48 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int GRAD_YEAR_COLUMN = 6;
 	public static final int CURR_CLASS_COLUMN = 7;
 
+	// For student email table
+	public static final int STUDENT_EMAIL_COLUMN = 2;
+	public static final int ACCT_MGR_EMAIL_COLUMN = 3;
+	public static final int EMERGENCY_EMAIL_COLUMN = 4;
+	public static final int CURR_CLASS_EMAIL_COLUMN = 5;
+
+	// For student phone table
+	public static final int STUDENT_PHONE_COLUMN = 2;
+	public static final int ACCT_MGR_PHONE_COLUMN = 3;
+	public static final int HOME_PHONE_COLUMN = 4;
+	public static final int EMERGENCY_PHONE_COLUMN = 5;
+	public static final int CURR_CLASS_PHONE_COLUMN = 6;
+
 	private ArrayList<StudentModel> studentList;
-	private final String colNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
+	private int tableType;
+	private String colNames[];
+
+	// Table column names for each table type
+	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
 			" Grad Yr ", " Current Class " };
+	private final String colEmailNames[] = { " ID ", " Student Name ", " Student Email ", " Acct Mgr Email ",
+			" Emerg Email ", " Current Class " };
+	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
+			" Home Phone ", " Emerg Phone ", " Current Class " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;
+		this.tableType = StudentTable.STANDARD_STUDENT_TABLE_TYPE;
+		colNames = colStdNames;
+
 		System.out.println("Num Students: " + studentList.size());
 	}
 
-	public void setData(ArrayList<StudentModel> db) {
+	public void setData(ArrayList<StudentModel> db, int tableType) {
+		this.tableType = tableType;
+		if (tableType == StudentTable.STANDARD_STUDENT_TABLE_TYPE)
+			colNames = colStdNames;
+		else if (tableType == StudentTable.EMAIL_STUDENT_TABLE_TYPE)
+			colNames = colEmailNames;
+		else
+			colNames = colPhoneNames;
+
 		studentList.clear();
 		studentList = db;
 		System.out.println("Num Students: " + studentList.size());
@@ -71,32 +105,72 @@ public class StudentTableModel extends AbstractTableModel {
 	}
 
 	public Object getValueByColumn(StudentModel student, int col) {
-		switch (col) {
-		case CLIENT_ID_COLUMN:
-			return String.valueOf(student.getClientID());
-		case STUDENT_NAME_COLUMN:
-			return student.getNameModel();
-		case GENDER_COLUMN:
-			return GenderModel.convertGenderToString(student.getGender());
-		case GITHUB_NAME_COLUMN:
-			return student.getGithubName();
-		case HOME_LOCATION_COLUMN:
-			return LocationLookup.convertLocationToString(student.getHomeLocation());
-		case START_DATE_COLUMN:
-			if (student.getStartDate() == null)
-				return "";
-			else
-				return student.getStartDate().toString();
-		case GRAD_YEAR_COLUMN:
-			if (student.getGradYear() == 0)
-				return "";
-			else
-				return String.valueOf(student.getGradYear());
-		case CURR_CLASS_COLUMN:
-			if (student.getCurrentClass() == null)
-				return "";
-			else
-				return student.getCurrentClass();
+		if (tableType == StudentTable.STANDARD_STUDENT_TABLE_TYPE) {
+			switch (col) {
+			case CLIENT_ID_COLUMN:
+				return String.valueOf(student.getClientID());
+			case STUDENT_NAME_COLUMN:
+				return student.getNameModel();
+			case GENDER_COLUMN:
+				return GenderModel.convertGenderToString(student.getGender());
+			case GITHUB_NAME_COLUMN:
+				return student.getGithubName();
+			case HOME_LOCATION_COLUMN:
+				return LocationLookup.convertLocationToString(student.getHomeLocation());
+			case START_DATE_COLUMN:
+				if (student.getStartDate() == null)
+					return "";
+				else
+					return student.getStartDate().toString();
+			case GRAD_YEAR_COLUMN:
+				if (student.getGradYear() == 0)
+					return "";
+				else
+					return String.valueOf(student.getGradYear());
+			case CURR_CLASS_COLUMN:
+				if (student.getCurrentClass() == null)
+					return "";
+				else
+					return student.getCurrentClass();
+			}
+		} else if (tableType == StudentTable.EMAIL_STUDENT_TABLE_TYPE) {
+			switch (col) {
+			case CLIENT_ID_COLUMN:
+				return String.valueOf(student.getClientID());
+			case STUDENT_NAME_COLUMN:
+				return student.getNameModel();
+			case STUDENT_EMAIL_COLUMN:
+				return student.getEmail();
+			case ACCT_MGR_EMAIL_COLUMN:
+				return student.getAcctMgrEmail();
+			case EMERGENCY_EMAIL_COLUMN:
+				return student.getEmergEmail();
+			case CURR_CLASS_EMAIL_COLUMN:
+				if (student.getCurrentClass() == null)
+					return "";
+				else
+					return student.getCurrentClass();
+			}
+		} else {
+			switch (col) {
+			case CLIENT_ID_COLUMN:
+				return String.valueOf(student.getClientID());
+			case STUDENT_NAME_COLUMN:
+				return student.getNameModel();
+			case STUDENT_PHONE_COLUMN:
+				return student.getPhone();
+			case ACCT_MGR_PHONE_COLUMN:
+				return student.getAcctMgrPhone();
+			case HOME_PHONE_COLUMN:
+				return student.getHomePhone();
+			case EMERGENCY_PHONE_COLUMN:
+				return student.getEmergPhone();
+			case CURR_CLASS_PHONE_COLUMN:
+				if (student.getCurrentClass() == null)
+					return "";
+				else
+					return student.getCurrentClass();
+			}
 		}
 		return null;
 	}

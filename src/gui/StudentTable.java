@@ -28,11 +28,17 @@ import model.StudentModel;
 import model.StudentNameModel;
 
 public class StudentTable extends JPanel {
+	// Table types: standard format, emails, phone #'s
+	public static final int STANDARD_STUDENT_TABLE_TYPE = 0;
+	public static final int EMAIL_STUDENT_TABLE_TYPE = 1;
+	public static final int PHONE_STUDENT_TABLE_TYPE = 2;
+
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
 	private static final int POPUP_HEIGHT_3ROWS = 70;
 
+	private int tableType;
 	private JPanel tablePanel;
 	private JTable table;
 	private StudentTableModel studentTableModel;
@@ -43,6 +49,7 @@ public class StudentTable extends JPanel {
 
 	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
 		this.tablePanel = tablePanel;
+		this.tableType = STANDARD_STUDENT_TABLE_TYPE;
 
 		studentTableModel = new StudentTableModel(studentList);
 		table = new JTable(studentTableModel);
@@ -61,12 +68,15 @@ public class StudentTable extends JPanel {
 		return table;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList) {
+	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList, int tableType) {
+		this.tableType = tableType;
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
 
-		studentTableModel.setData(studentList);
+		studentTableModel.setData(studentList, tableType);
+		studentTableModel.fireTableStructureChanged();
+		configureColumnWidths();
 		studentTableModel.fireTableDataChanged();
 	}
 
@@ -87,18 +97,7 @@ public class StudentTable extends JPanel {
 		int origRowHeight = table.getRowHeight();
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
-		// Configure column widths
-		table.getColumnModel().getColumn(StudentTableModel.GENDER_COLUMN).setMaxWidth(35);
-		table.getColumnModel().getColumn(StudentTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setMaxWidth(105);
-		table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setMaxWidth(95);
-		table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setMaxWidth(165);
-		table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_COLUMN).setMaxWidth(280);
-
-		table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setPreferredWidth(100);
-		table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setPreferredWidth(90);
-		table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setPreferredWidth(160);
-		table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_COLUMN).setPreferredWidth(240);
+		configureColumnWidths();
 
 		// Table renderer, sorter and key handler
 		table.setDefaultRenderer(Object.class, new StudentTableRenderer());
@@ -112,6 +111,46 @@ public class StudentTable extends JPanel {
 		scrollPane.setPreferredSize(new Dimension(0, tablePanel.getPreferredSize().height - 70));
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
+	}
+
+	private void configureColumnWidths() {
+		// Configure column widths
+		table.getColumnModel().getColumn(StudentTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
+
+		if (tableType == STANDARD_STUDENT_TABLE_TYPE) {
+			table.getColumnModel().getColumn(StudentTableModel.GENDER_COLUMN).setMaxWidth(35);
+			table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setMaxWidth(105);
+			table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setMaxWidth(95);
+			table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setMaxWidth(165);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_COLUMN).setMaxWidth(280);
+
+			table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setPreferredWidth(100);
+			table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setPreferredWidth(90);
+			table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setPreferredWidth(160);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_COLUMN).setPreferredWidth(240);
+
+		} else if (tableType == EMAIL_STUDENT_TABLE_TYPE) {
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setMaxWidth(240);
+			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_EMAIL_COLUMN).setMaxWidth(300);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_EMAIL_COLUMN).setMaxWidth(200);
+
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(210);
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_EMAIL_COLUMN).setPreferredWidth(240);
+			table.getColumnModel().getColumn(StudentTableModel.ACCT_MGR_EMAIL_COLUMN).setPreferredWidth(310);
+			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_EMAIL_COLUMN).setPreferredWidth(240);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_EMAIL_COLUMN).setPreferredWidth(160);
+
+		} else { // PHONE_STUDENT_TABLE_TYPE
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setMaxWidth(240);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_PHONE_COLUMN).setMaxWidth(200);
+
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(210);
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_PHONE_COLUMN).setPreferredWidth(100);
+			table.getColumnModel().getColumn(StudentTableModel.ACCT_MGR_PHONE_COLUMN).setPreferredWidth(200);
+			table.getColumnModel().getColumn(StudentTableModel.HOME_PHONE_COLUMN).setPreferredWidth(100);
+			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_PHONE_COLUMN).setPreferredWidth(100);
+			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_PHONE_COLUMN).setPreferredWidth(180);
+		}
 	}
 
 	private void createStudentTablePopups() {
@@ -243,9 +282,11 @@ public class StudentTable extends JPanel {
 					if (column == StudentTableModel.STUDENT_NAME_COLUMN)
 						super.setForeground(CustomFonts.TITLE_COLOR);
 
-					// Border ORANGE for cells with missing data
-					if (text == null || text.equals("") && column != StudentTableModel.CURR_CLASS_COLUMN)
-						super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, CustomFonts.TITLE_COLOR));
+					if (tableType == STANDARD_STUDENT_TABLE_TYPE) {
+						// Border ORANGE for cells with missing data
+						if (text == null || text.equals("") && column != StudentTableModel.CURR_CLASS_COLUMN)
+							super.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, CustomFonts.TITLE_COLOR));
+					}
 				}
 
 				if (isSelected)
@@ -263,12 +304,12 @@ public class StudentTable extends JPanel {
 	public class StudentTableHeaderRenderer extends JLabel implements TableCellRenderer {
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
-		
+
 		private StudentTableHeaderRenderer() {
 			super();
 			super.setOpaque(true);
 		}
-		
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {

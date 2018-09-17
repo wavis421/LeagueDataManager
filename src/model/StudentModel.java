@@ -9,9 +9,11 @@ public class StudentModel implements Comparable<StudentModel> {
 	private Date startDate;
 	private StudentNameModel nameModel;
 	private boolean missingData;
+	private String email, acctMgrEmail, emergEmail, phone, acctMgrPhone, homePhone, emergPhone;
 
 	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender, Date startDate,
-			int homeLocation, int gradYear, String currClass) {
+			int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail, String emergEmail,
+			String phone, String acctMgrPhone, String homePhone, String emergPhone) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.githubName = githubName;
@@ -20,6 +22,14 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.gradYear = gradYear;
 		this.startDate = startDate;
 		this.currentClass = currClass;
+		
+		this.email = email;
+		this.acctMgrEmail = acctMgrEmail;
+		this.emergEmail = emergEmail;
+		this.phone = phone;
+		this.acctMgrPhone = acctMgrPhone;
+		this.homePhone = homePhone;
+		this.emergPhone = emergPhone;
 
 		if (nameModel.getIsInMasterDb()
 				&& (homeLocation == LocationModel.CLASS_LOCATION_UNKNOWN || gender == GenderModel.getGenderUnknown()
@@ -79,6 +89,35 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public void setCurrentClass(String currentClass) {
 		this.currentClass = currentClass;
+	}
+
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public String getAcctMgrEmail() {
+		return acctMgrEmail;
+	}
+
+	public String getEmergEmail() {
+		return emergEmail;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public String getAcctMgrPhone() {
+		return acctMgrPhone;
+	}
+
+	public String getHomePhone() {
+		return homePhone;
+	}
+
+	public String getEmergPhone() {
+		return emergPhone;
 	}
 
 	@Override
