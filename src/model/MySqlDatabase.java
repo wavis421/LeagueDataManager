@@ -1324,7 +1324,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Graduation, Students WHERE Students.ClientID = Graduation.ClientID "
-								+ "ORDER BY FirstName, LastName;");
+								+ "ORDER BY FirstName, LastName, GradLevel;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
