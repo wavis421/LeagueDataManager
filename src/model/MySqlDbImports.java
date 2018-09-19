@@ -346,6 +346,48 @@ public class MySqlDbImports {
 			else
 				changes += ", Start Date";
 		}
+		if (!importStudent.getMobilePhone().equals(dbStudent.getMobilePhone())) {
+			if (changes.equals(""))
+				changes += " (Mobile phone";
+			else
+				changes += ", Mobile phone";
+		}
+		if (!importStudent.getAccountMgrPhones().equals(dbStudent.getAccountMgrPhones())) {
+			if (changes.equals(""))
+				changes += " (Acct mgr phone";
+			else
+				changes += ", Acct mgr phone";
+		}
+		if (!importStudent.getHomePhone().equals(dbStudent.getHomePhone())) {
+			if (changes.equals(""))
+				changes += " (Home phone";
+			else
+				changes += ", Home phone";
+		}
+		if (!importStudent.getEmergContactPhone().equals(dbStudent.getEmergContactPhone())) {
+			if (changes.equals(""))
+				changes += " (Emerg phone";
+			else
+				changes += ", Emerg phone";
+		}
+		if (!importStudent.getEmail().equals(dbStudent.getEmail())) {
+			if (changes.equals(""))
+				changes += " (Student email";
+			else
+				changes += ", Student email";
+		}
+		if (!importStudent.getAccountMgrEmails().equals(dbStudent.getAccountMgrEmails())) {
+			if (changes.equals(""))
+				changes += " (Acct Mgr email";
+			else
+				changes += ", Acct Mgr email";
+		}
+		if (!importStudent.getEmergContactEmail().equals(dbStudent.getEmergContactEmail())) {
+			if (changes.equals(""))
+				changes += " (Emerg email";
+			else
+				changes += ", Emerg email";
+		}
 		if (importStudent.getIsInMasterDb() != dbStudent.getIsInMasterDb()) {
 			if (changes.equals(""))
 				changes += " (Added back to Master DB";

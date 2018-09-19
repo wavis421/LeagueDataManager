@@ -142,6 +142,7 @@ public class Pike13Api {
 	private final int STATS_COMPLETED_IDX = 1;
 	private final int STATS_REGISTERED_IDX = 2;
 	private final int STATS_CANCELED_IDX = 3;
+	private final int STATS_NO_SHOW_IDX = 4;
 	
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
@@ -320,7 +321,8 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"completed_enrollment_count\",\"registered_enrollment_count\",\"late_canceled_enrollment_count\"],"
+			+ "\"fields\":[\"completed_enrollment_count\",\"registered_enrollment_count\","
+			+ "            \"late_canceled_enrollment_count\",\"noshowed_enrollment_count\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -329,7 +331,8 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"or\",[[\"eq\",\"state\",\"completed\"],"
 			+ "                              [\"eq\",\"state\",\"registered\"],"
-			+ "                              [\"eq\",\"state\",\"late_canceled\"]]],"
+			+ "                              [\"eq\",\"state\",\"late_canceled\"],"
+			+ "                              [\"eq\",\"state\",\"noshowed\"]]],"
 			+ "                     [\"or\",[[\"eq\",\"service_category\",\"class java\"],"
 			+ "                              [\"eq\",\"service_category\",\"class jslam\"],"
 			+ "                              [\"starts\",\"service_category\",\"works\"]]]]],"
@@ -744,7 +747,7 @@ public class Pike13Api {
 
 				// Calculate stats and add event to list
 				int stats = eventArray.getInt(STATS_COMPLETED_IDX) + eventArray.getInt(STATS_REGISTERED_IDX) 
-					+ eventArray.getInt(STATS_CANCELED_IDX);
+					+ eventArray.getInt(STATS_CANCELED_IDX) + eventArray.getInt(STATS_NO_SHOW_IDX);
 				eventList.add(new SalesForceEnrollStatsModel(eventArray.getInt(STATS_CLIENT_ID_IDX), stats));
 			}
 
