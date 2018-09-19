@@ -21,6 +21,7 @@ import model.LogDataModel;
 import model.MySqlDatabase;
 import model.MySqlDbLogging;
 import model.SalesForceAttendanceModel;
+import model.SalesForceEnrollStatsModel;
 import model.SalesForceStaffHoursModel;
 import model.ScheduleModel;
 import model.StaffMemberModel;
@@ -136,6 +137,12 @@ public class Pike13Api {
 	private final int ENROLL_SERVICE_CATEGORY_IDX = 6;
 	private final int ENROLL_STATE_IDX = 7;
 
+	// Indices for enrollment stats data
+	private final int STATS_CLIENT_ID_IDX = 0;
+	private final int STATS_COMPLETED_IDX = 1;
+	private final int STATS_REGISTERED_IDX = 2;
+	private final int STATS_CANCELED_IDX = 3;
+	
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
 	private final int SF_SERVICE_DATE_IDX = 1;
@@ -307,6 +314,26 @@ public class Pike13Api {
 			+ "                              [\"starts\",\"service_category\",\"works\"]]],"
 			+ "                    [\"and\",[[\"gt\",\"service_date\",\"2222-22-22\"],"
 			+ "                              [\"eq\",\"service_category\",\"leave\"]]]]]}}}";
+
+	// This query is used to get enrollment stats for each student
+	private final String getEnrollStatsSalesForce = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"completed_enrollment_count\",\"registered_enrollment_count\",\"late_canceled_enrollment_count\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500";
+
+	private final String getEnrollStatsSalesForce2 = "},"
+			// Filter on between start/end dates OR all future summer slam, workshops and leave
+			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
+			+ "                     [\"or\",[[\"eq\",\"state\",\"completed\"],"
+			+ "                              [\"eq\",\"state\",\"registered\"],"
+			+ "                              [\"eq\",\"state\",\"late_canceled\"]]],"
+			+ "                     [\"or\",[[\"eq\",\"service_category\",\"class java\"],"
+			+ "                              [\"eq\",\"service_category\",\"class jslam\"],"
+			+ "                              [\"starts\",\"service_category\",\"works\"]]]]],"
+			+ "\"group\":\"person_id\"}}}";
 
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
@@ -669,6 +696,56 @@ public class Pike13Api {
 						eventArray.get(SF_EVENT_OCCURRENCE_ID_IDX).toString(),
 						stripQuotes(eventArray.get(SF_LOCATION_NAME_IDX).toString()),
 						stripQuotes(eventArray.get(SF_INSTRUCTOR_NAMES_IDX).toString())));
+			}
+
+			// Check to see if there are more pages
+			hasMore = jsonObj.getBoolean("has_more");
+			if (hasMore)
+				lastKey = jsonObj.getString("last_key");
+
+			conn.disconnect();
+
+		} while (hasMore);
+
+		return eventList;
+	}
+
+	public ArrayList<SalesForceEnrollStatsModel> getSalesForceEnrollStats(String startDate, String endDate) {
+		// Get enrollment stats between +/- 20 days
+		ArrayList<SalesForceEnrollStatsModel> eventList = new ArrayList<SalesForceEnrollStatsModel>();
+		boolean hasMore = false;
+		String lastKey = "";
+
+		// Insert start date and end date into enrollment command string
+		String enroll2 = getEnrollStatsSalesForce2.replaceFirst("0000-00-00", startDate);
+		enroll2 = enroll2.replaceFirst("1111-11-11", endDate);
+		do {
+			// Get URL connection and send the query; add page info if necessary
+			HttpURLConnection conn;
+			if (hasMore)
+				conn = sendQueryToUrl("enrollments", getEnrollStatsSalesForce + ",\"starting_after\":\"" + lastKey + "\"" + enroll2);
+			else
+				conn = sendQueryToUrl("enrollments", getEnrollStatsSalesForce + enroll2);
+
+			if (conn == null)
+				return null;
+
+			// Get input stream and read data
+			JsonObject jsonObj = readInputStream(conn);
+			if (jsonObj == null) {
+				conn.disconnect();
+				return null;
+			}
+			JsonArray jsonArray = jsonObj.getJsonArray("rows");
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// Get enrollment stats for each student
+				JsonArray eventArray = (JsonArray) jsonArray.get(i);
+
+				// Calculate stats and add event to list
+				int stats = eventArray.getInt(STATS_COMPLETED_IDX) + eventArray.getInt(STATS_REGISTERED_IDX) 
+					+ eventArray.getInt(STATS_CANCELED_IDX);
+				eventList.add(new SalesForceEnrollStatsModel(eventArray.getInt(STATS_CLIENT_ID_IDX), stats));
 			}
 
 			// Check to see if there are more pages
