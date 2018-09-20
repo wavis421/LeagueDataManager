@@ -699,7 +699,7 @@ public class MySqlDatabase {
 						String eventName = result.getString("EventName");
 						count++;
 
-						if (eventName.charAt(0) >= '0' && eventName.charAt(0) <= '3') {
+						if (eventName.charAt(0) >= '0' && eventName.charAt(0) <= '4') {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							lastGithubModel = new GithubModel(thisClientID,

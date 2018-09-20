@@ -134,6 +134,7 @@ public class GithubApi {
 		List<Repository> repoListLevel1 = getRepoListByLevel(1);
 		List<Repository> repoListLevel2 = getRepoListByLevel(2);
 		List<Repository> repoListLevel3 = getRepoListByLevel(3);
+		List<Repository> repoListLevel4 = getRepoListByLevel(4);
 		List<Repository> repoListLevel5 = getRepoListByLevel(5);
 		String earliestDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusMonths(4)
 				.toString("yyyy-MM-dd");
@@ -155,6 +156,7 @@ public class GithubApi {
 				importGithubCommentsByLevel(1, catchupStartDate, repoListLevel1, eventList);
 				importGithubCommentsByLevel(2, catchupStartDate, repoListLevel2, eventList);
 				importGithubCommentsByLevel(3, catchupStartDate, repoListLevel3, eventList);
+				importGithubCommentsByLevel(4, catchupStartDate, repoListLevel4, eventList);
 				importGithubCommentsByLevel(5, catchupStartDate, repoListLevel5, eventList);
 
 				// Set student 'new github' flag back to false
