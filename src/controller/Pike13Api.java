@@ -169,9 +169,6 @@ public class Pike13Api {
 	private final int COURSES_EVENT_NAME_IDX = 1;
 	private final int COURSE_ENROLLMENT_IDX = 2;
 
-	// Indices for Person Plans by Product ID
-	private final int PLAN2_IS_CANCELED_IDX = 0;
-
 	// Indices for Staff Member data
 	private final int TEACHER_CLIENT_ID_IDX = 0;
 	private final int TEACHER_FIRST_NAME_IDX = 1;
@@ -363,18 +360,6 @@ public class Pike13Api {
 			// Filter on 'this week' and 'starts with Class' and event name not null
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"starts\",\"service_type\",\"course\"]]]}}}";
-
-	// Get person plan data by product ID
-	private final String getPersonPlanDataByProductId = "{\"data\":{\"type\":\"queries\","
-			// Get attributes: fields, page limit and filters
-			+ "\"attributes\":{"
-			// Select fields
-			+ "\"fields\":[\"is_canceled\"],"
-			// Page limit max is 500
-			+ "\"page\":{\"limit\":500},"
-			// Filter on Product ID for this client
-			+ "\"filter\":[\"and\",[[\"eq\",\"person_id\",IIII],"
-			+ "                     [\"eq\",\"product_id\",PPPP]]]}}}";
 
 	// Get staff member data
 	private final String getStaffMemberData = "{\"data\":{\"type\":\"queries\","
@@ -877,36 +862,6 @@ public class Pike13Api {
 
 		// Get attendance for all students
 		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);
-	}
-
-	public boolean getCanceledFlagsByProductId(Integer clientID, Integer productID) {
-		// Get URL connection and send the query
-		String planCmd = getPersonPlanDataByProductId.replace("IIII", clientID.toString());
-		planCmd = planCmd.replace("PPPP", productID.toString());
-		HttpURLConnection conn = sendQueryToUrl("person_plans", planCmd);
-
-		if (conn == null)
-			return true;
-
-		// Get input stream and read data
-		JsonObject jsonObj = readInputStream(conn);
-		if (jsonObj == null) {
-			conn.disconnect();
-			return true;
-		}
-		JsonArray jsonArray = jsonObj.getJsonArray("rows");
-
-		for (int i = 0; i < jsonArray.size(); i++) {
-			// Get fields for each plan in the list
-			JsonArray planArray = (JsonArray) jsonArray.get(i);
-
-			if (planArray.getString(PLAN2_IS_CANCELED_IDX).equals("f")) {
-				conn.disconnect();
-				return false;
-			}
-		}
-		conn.disconnect();
-		return true;
 	}
 
 	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
