@@ -768,7 +768,7 @@ public class MySqlDbImports {
 		}
 	}
 
-	public void addClassToSchedule(ScheduleModel importEvent) {
+	private void addClassToSchedule(ScheduleModel importEvent) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect

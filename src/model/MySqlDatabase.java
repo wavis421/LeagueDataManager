@@ -490,7 +490,8 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
-								+ "AND ServiceDate > ? AND ServiceDate < ? GROUP BY Students.ClientID;");
+								+ "AND EventName = CurrentClass AND ServiceDate > ? AND ServiceDate < ? "
+								+ "GROUP BY Students.ClientID;");
 				selectStmt.setString(1, className);
 				selectStmt.setString(2, sinceDate);
 				selectStmt.setString(3, endDate);
@@ -974,13 +975,13 @@ public class MySqlDatabase {
 			}
 		}
 	}
-	
+
 	public void updateAttendLevelChanges(int visitID, String state) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateAttendanceStmt = dbConnection.prepareStatement(
-						"UPDATE Attendance SET LastSFState = ? WHERE VisitID = ?;");
+				PreparedStatement updateAttendanceStmt = dbConnection
+						.prepareStatement("UPDATE Attendance SET LastSFState = ? WHERE VisitID = ?;");
 
 				updateAttendanceStmt.setString(1, state);
 				updateAttendanceStmt.setInt(2, visitID);
@@ -1332,8 +1333,7 @@ public class MySqlDatabase {
 							result.getString("FirstName") + " " + result.getString("LastName"),
 							result.getInt("GradLevel"), result.getString("Score"), result.getString("StartDate"),
 							result.getString("EndDate"), result.getBoolean(GRAD_MODEL_IN_SF_FIELD),
-							result.getBoolean(GRAD_MODEL_VERIFIED_FIELD),
-							result.getBoolean(GRAD_MODEL_PROCESSED_FIELD),
+							result.getBoolean(GRAD_MODEL_VERIFIED_FIELD), result.getBoolean(GRAD_MODEL_PROCESSED_FIELD),
 							result.getBoolean(GRAD_MODEL_SKIP_LEVEL_FIELD)));
 				}
 
