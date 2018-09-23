@@ -436,16 +436,20 @@ public class MySqlDatabase {
 		return attendanceList;
 	}
 
-	public ArrayList<AttendanceEventModel> getAllEvents() {
+	public ArrayList<AttendanceEventModel> getAllEvents(String startDate) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
 
+		String dateCommand = "";
+		if (startDate != null)
+			dateCommand = "AND ServiceDate >= " + startDate + " ";
+		
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get attendance data from the DB for all students
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
-								+ "AND (State = 'completed' OR State = 'registered') "
-								+ "ORDER BY Attendance.ClientID, ServiceDate DESC, VisitID ASC;");
+								+ "AND (State = 'completed' OR State = 'registered') " + dateCommand
+								+ "ORDER BY Attendance.ClientID ASC, ServiceDate DESC, VisitID ASC;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -489,9 +493,8 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
-								+ "AND EventName = CurrentClass AND ServiceDate > ? AND ServiceDate < ? "
-								+ "GROUP BY Students.ClientID;");
+								+ "AND ((State = 'completed' AND EventName = CurrentClass) OR State = 'registered') "
+								+ "AND EventName=? AND ServiceDate > ? AND ServiceDate < ? GROUP BY Students.ClientID;");
 				selectStmt.setString(1, className);
 				selectStmt.setString(2, sinceDate);
 				selectStmt.setString(3, endDate);

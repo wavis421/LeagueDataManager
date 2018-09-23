@@ -141,8 +141,9 @@ public class MySqlDbImports {
 							result.getString("FirstName"), result.getString("GithubName"), result.getInt("Gender"),
 							startDateString, result.getInt("Location"), result.getInt("GradYear"),
 							result.getInt("isInMasterDb"), result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"), result.getString("AcctMgrPhone"),
-							result.getString("HomePhone"), result.getString("EmergencyPhone")));
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
 				}
 
 				result.close();
@@ -196,10 +197,10 @@ public class MySqlDbImports {
 				addStudentStmt.setString(col++, student.getEmail());
 				addStudentStmt.setString(col++, student.getEmergContactEmail());
 				addStudentStmt.setString(col++, student.getAccountMgrEmails());
-				addStudentStmt.setString(col++,  student.getMobilePhone());
-				addStudentStmt.setString(col++,  student.getAccountMgrPhones());
-				addStudentStmt.setString(col++,  student.getHomePhone());
-				addStudentStmt.setString(col++,  student.getEmergContactPhone());
+				addStudentStmt.setString(col++, student.getMobilePhone());
+				addStudentStmt.setString(col++, student.getAccountMgrPhones());
+				addStudentStmt.setString(col++, student.getHomePhone());
+				addStudentStmt.setString(col++, student.getEmergContactPhone());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
@@ -272,10 +273,10 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getEmail());
 				updateStudentStmt.setString(col++, importStudent.getEmergContactEmail());
 				updateStudentStmt.setString(col++, importStudent.getAccountMgrEmails());
-				updateStudentStmt.setString(col++,  importStudent.getMobilePhone());
-				updateStudentStmt.setString(col++,  importStudent.getAccountMgrPhones());
-				updateStudentStmt.setString(col++,  importStudent.getHomePhone());
-				updateStudentStmt.setString(col++,  importStudent.getEmergContactPhone());
+				updateStudentStmt.setString(col++, importStudent.getMobilePhone());
+				updateStudentStmt.setString(col++, importStudent.getAccountMgrPhones());
+				updateStudentStmt.setString(col++, importStudent.getHomePhone());
+				updateStudentStmt.setString(col++, importStudent.getEmergContactPhone());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
@@ -434,9 +435,9 @@ public class MySqlDbImports {
 	/*
 	 * ------- Attendance Import Database Queries -------
 	 */
-	public void importAttendance(ArrayList<AttendanceEventModel> importList) {
+	public void importAttendance(String startDate, ArrayList<AttendanceEventModel> importList) {
 		// Import attendance from Pike13 to the Tracker database
-		ArrayList<AttendanceEventModel> dbList = sqlDb.getAllEvents();
+		ArrayList<AttendanceEventModel> dbList = sqlDb.getAllEvents(startDate);
 		ArrayList<StudentModel> studentList = sqlDb.getActiveStudents();
 		int dbListIdx = 0;
 		int dbListSize = dbList.size();
@@ -468,8 +469,14 @@ public class MySqlDbImports {
 
 			} else if (compare == -1) {
 				// Extra events in DB; toss data until caught up with import list
-				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0)
+				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0) {
+					// Delete registered events that were cancelled
+					if (startDate != null && dbList.get(dbListIdx).getState().equals("registered")) {
+						deleteFromAttendance(dbList.get(dbListIdx).getClientID(), dbList.get(dbListIdx).getVisitID(),
+								dbList.get(dbListIdx).getStudentNameModel());
+					}
 					dbListIdx++;
+				}
 
 				// Caught up, now compare again and process
 				compare = 1;
@@ -650,6 +657,33 @@ public class MySqlDbImports {
 			}
 		}
 		return 0;
+	}
+
+	private void deleteFromAttendance(int clientID, int visitID, StudentNameModel studentModel) {
+		PreparedStatement deleteAttendanceStmt;
+		for (int i = 0; i < 2; i++) {
+			try {
+				deleteAttendanceStmt = sqlDb.dbConnection
+						.prepareStatement("DELETE FROM Attendance WHERE ClientID=? AND VisitID=?;");
+
+				deleteAttendanceStmt.setInt(1, clientID);
+				deleteAttendanceStmt.setInt(2, visitID);
+
+				deleteAttendanceStmt.executeUpdate();
+				deleteAttendanceStmt.close();
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e) {
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID,
+						" removing registered attendance record: " + e.getMessage());
+				break;
+			}
+		}
 	}
 
 	private String parseTeacherNames(String origTeachers) {
