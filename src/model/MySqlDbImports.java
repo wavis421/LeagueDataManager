@@ -7,6 +7,9 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
@@ -435,7 +438,7 @@ public class MySqlDbImports {
 	/*
 	 * ------- Attendance Import Database Queries -------
 	 */
-	public void importAttendance(String startDate, ArrayList<AttendanceEventModel> importList) {
+	public void importAttendance(String startDate, ArrayList<AttendanceEventModel> importList, boolean fullList) {
 		// Import attendance from Pike13 to the Tracker database
 		ArrayList<AttendanceEventModel> dbList = sqlDb.getAllEvents(startDate);
 		ArrayList<StudentModel> studentList = sqlDb.getActiveStudents();
@@ -470,11 +473,11 @@ public class MySqlDbImports {
 			} else if (compare == -1) {
 				// Extra events in DB; toss data until caught up with import list
 				while (dbListIdx < dbListSize && dbList.get(dbListIdx).compareTo(importEvent) < 0) {
-					// Delete registered events that were cancelled
-					if (startDate != null && dbList.get(dbListIdx).getState().equals("registered")) {
-						deleteFromAttendance(dbList.get(dbListIdx).getClientID(), dbList.get(dbListIdx).getVisitID(),
-								dbList.get(dbListIdx).getStudentNameModel());
-					}
+					// Delete registered events that were canceled
+					if (fullList && dbList.get(dbListIdx).getState().equals("registered")
+							&& dbList.get(dbListIdx).getServiceCategory().startsWith("class"))
+						dbList.get(dbListIdx).setMarkForDeletion(true);
+
 					dbListIdx++;
 				}
 
@@ -546,6 +549,16 @@ public class MySqlDbImports {
 		if (updatedAttCount > 0)
 			MySqlDbLogging.insertLogData(LogDataModel.UPDATE_ATTENDANCE_STATE, new StudentNameModel("", "", false), 0,
 					": " + updatedAttCount + " records changed");
+
+		if (fullList) {
+			// Delete registered classes that were canceled
+			String today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd");
+			for (AttendanceEventModel m : dbList) {
+				if (m.isMarkForDeletion() && m.getServiceDateString().compareTo(today) >= 0) {
+					deleteFromAttendance(m.getClientID(), m.getVisitID(), m.getStudentNameModel());
+				}
+			}
+		}
 	}
 
 	public void createSortedAttendanceList() {

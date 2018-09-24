@@ -9,6 +9,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private String serviceDateString;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
+	private boolean markForDeletion;
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String event, String githubName,
 			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state,
@@ -128,6 +129,14 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public StudentNameModel getStudentNameModel() {
 		return nameModel;
+	}
+
+	public boolean isMarkForDeletion() {
+		return markForDeletion;
+	}
+
+	public void setMarkForDeletion(boolean markForDeletion) {
+		this.markForDeletion = markForDeletion;
 	}
 
 	@Override

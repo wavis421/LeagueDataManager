@@ -438,18 +438,15 @@ public class MySqlDatabase {
 
 	public ArrayList<AttendanceEventModel> getAllEvents(String startDate) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
-
-		String dateCommand = "";
-		if (startDate != null)
-			dateCommand = "AND ServiceDate >= " + startDate + " ";
 		
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get attendance data from the DB for all students
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
-								+ "AND (State = 'completed' OR State = 'registered') " + dateCommand
+								+ "AND (State = 'completed' OR State = 'registered') AND ServiceDate >= ? "
 								+ "ORDER BY Attendance.ClientID ASC, ServiceDate DESC, VisitID ASC;");
+				selectStmt.setString(1, startDate);
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
