@@ -139,10 +139,6 @@ public class Pike13Api {
 
 	// Indices for enrollment stats data
 	private final int STATS_CLIENT_ID_IDX = 0;
-	private final int STATS_COMPLETED_IDX = 1;
-	private final int STATS_REGISTERED_IDX = 2;
-	private final int STATS_CANCELED_IDX = 3;
-	private final int STATS_NO_SHOW_IDX = 4;
 	
 	// Indices for SalesForce enrollment data
 	private final int SF_PERSON_ID_IDX = 0;
@@ -318,8 +314,7 @@ public class Pike13Api {
 			// Get attributes: fields, page limit
 			+ "\"attributes\":{"
 			// Select fields
-			+ "\"fields\":[\"completed_enrollment_count\",\"registered_enrollment_count\","
-			+ "            \"late_canceled_enrollment_count\",\"noshowed_enrollment_count\"],"
+			+ "\"fields\":[\"person_id\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -331,9 +326,7 @@ public class Pike13Api {
 			+ "                              [\"eq\",\"state\",\"late_canceled\"],"
 			+ "                              [\"eq\",\"state\",\"noshowed\"]]],"
 			+ "                     [\"or\",[[\"eq\",\"service_category\",\"class java\"],"
-			+ "                              [\"eq\",\"service_category\",\"class jslam\"],"
-			+ "                              [\"starts\",\"service_category\",\"works\"]]]]],"
-			+ "\"group\":\"person_id\"}}}";
+			+ "                              [\"eq\",\"service_category\",\"class jslam\"]]]]]}}}";
 
 	// Get schedule data
 	private final String getScheduleData = "{\"data\":{\"type\":\"queries\","
@@ -727,16 +720,12 @@ public class Pike13Api {
 			JsonArray jsonArray = jsonObj.getJsonArray("rows");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
-				// Get enrollment stats for each student
+				// Get enrollments for each student, add to list
 				JsonArray eventArray = (JsonArray) jsonArray.get(i);
-
-				// Calculate stats and add event to list
-				int stats = eventArray.getInt(STATS_COMPLETED_IDX) + eventArray.getInt(STATS_REGISTERED_IDX) 
-					+ eventArray.getInt(STATS_CANCELED_IDX) + eventArray.getInt(STATS_NO_SHOW_IDX);
-				eventList.add(new SalesForceEnrollStatsModel(eventArray.getInt(STATS_CLIENT_ID_IDX), stats));
+				eventList.add(new SalesForceEnrollStatsModel(eventArray.getInt(STATS_CLIENT_ID_IDX), 0));
 			}
 
-			// Check to see if there are more pages
+			// Check to see if there are more pages	
 			hasMore = jsonObj.getBoolean("has_more");
 			if (hasMore)
 				lastKey = jsonObj.getString("last_key");

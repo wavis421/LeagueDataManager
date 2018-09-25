@@ -15,7 +15,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String emergContactName, emergContactPhone, emergContactEmail;
 	private String accountID, accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
 	private int completedVisits, futureVisits;
-	private boolean signedWaiver, stopEmail, financialAid;
+	private boolean signedWaiver, stopEmail, financialAid, statsUpdated = false;
 	private Object sfContact;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
@@ -335,6 +335,14 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.sfContact = sfContact;
 	}
 
+	public boolean isStatsUpdated() {
+		return statsUpdated;
+	}
+
+	public void setStatsUpdated(boolean statsUpdated) {
+		this.statsUpdated = statsUpdated;
+	}
+
 	@Override
 	public int compareTo(StudentImportModel other) {
 		if (clientID < other.getClientID())
@@ -386,9 +394,9 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 			else if (phone.length() == 13 && phone.charAt(0) == '(' && phone.charAt(4) == ')' && phone.charAt(8) == '-')
 				phone = phone.substring(0, 5) + " " + phone.substring(5);
 			else if (phone.length() == 11 && phone.charAt(3) == ' ')
-				phone = "(" + phone.substring(0,3) + ") " + phone.substring(4, 7) + "-" + phone.substring(7);
+				phone = "(" + phone.substring(0, 3) + ") " + phone.substring(4, 7) + "-" + phone.substring(7);
 			else if (phone.length() == 11 && phone.charAt(0) == '1')
-				phone = "(" + phone.substring(1,4) + ") " + phone.substring(4,7) + "-" + phone.substring(7);
+				phone = "(" + phone.substring(1, 4) + ") " + phone.substring(4, 7) + "-" + phone.substring(7);
 
 			if (!resultPhone.equals(""))
 				resultPhone += ", ";
