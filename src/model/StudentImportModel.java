@@ -15,7 +15,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String emergContactName, emergContactPhone, emergContactEmail;
 	private String accountID, accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
 	private int completedVisits, futureVisits;
-	private boolean signedWaiver, stopEmail, financialAid, statsUpdated = false;
+	private boolean signedWaiver, stopEmail, financialAid;
 	private Object sfContact;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
@@ -333,14 +333,6 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public void setSfContact(Object sfContact) {
 		this.sfContact = sfContact;
-	}
-
-	public boolean isStatsUpdated() {
-		return statsUpdated;
-	}
-
-	public void setStatsUpdated(boolean statsUpdated) {
-		this.statsUpdated = statsUpdated;
 	}
 
 	@Override
