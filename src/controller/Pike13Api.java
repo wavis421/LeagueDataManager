@@ -775,7 +775,7 @@ public class Pike13Api {
 		// Insert start date and end date into schedule command string.
 		String scheduleString = getScheduleData.replaceFirst("0000-00-00", startDate);
 		scheduleString = scheduleString.replaceFirst("1111-11-11",
-				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"));
+				new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).plusDays(6).toString("yyyy-MM-dd"));
 
 		// Get URL connection with authorization and send query
 		HttpURLConnection conn = sendQueryToUrl("event_occurrences", scheduleString);
