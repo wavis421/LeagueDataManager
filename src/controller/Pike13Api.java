@@ -231,8 +231,7 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
 			+ "                     [\"emp\",\"dependent_names\"],"
 			+ "                     [\"or\",[[\"gt\",\"future_visits\",0],"
-			+ "                              [\"gt\",\"last_visit_date\",\"0000-00-00\"],"
-			+ "                              [\"eq\",\"has_membership\",\"t\"]]]]]}}}";
+			+ "                              [\"gt\",\"last_visit_date\",\"0000-00-00\"]]]]]}}}";
 
 	private final String getClientDataForSF = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
