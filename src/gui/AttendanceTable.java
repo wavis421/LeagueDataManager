@@ -35,7 +35,7 @@ public class AttendanceTable extends JPanel {
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
 	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
-	private static final int POPUP_MENU_HEIGHT_4ROWS = 90;
+	private static final int POPUP_MENU_HEIGHT_6ROWS = 130;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -167,12 +167,16 @@ public class AttendanceTable extends JPanel {
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show student attendance ");
+		JMenuItem showStudentEmailItem = new JMenuItem("Show student email ");
+		JMenuItem showStudentPhoneItem = new JMenuItem("Show student phone ");
 		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
 		JMenuItem graduateClassItem = new JMenuItem("Graduate class ");
 		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
 		tablePopup.add(showStudentAttendanceItem);
+		tablePopup.add(showStudentEmailItem);
+		tablePopup.add(showStudentPhoneItem);
 		tablePopup.add(updateGithubUserItem);
 		tablePopup.add(graduateClassItem);
 		tablePopup.add(graduateStudentItem);
@@ -208,6 +212,30 @@ public class AttendanceTable extends JPanel {
 				// Display attendance table for selected student
 				mainTable.clearSelection();
 				attendanceListener.viewAttendanceByStudent(clientID, studentName.toString());
+			}
+		});
+		showStudentEmailItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name & Client ID for selected row/column
+				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
+				AttendanceTableModel model = (AttendanceTableModel) mainTable.getModel();
+				String clientID = (String) model.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
+
+				// Display email table for selected student
+				mainTable.clearSelection();
+				attendanceListener.viewEmailByStudent(Integer.parseInt(clientID));
+			}
+		});
+		showStudentPhoneItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name & Client ID for selected row/column
+				int row = mainTable.convertRowIndexToModel(mainTable.getSelectedRow());
+				AttendanceTableModel model = (AttendanceTableModel) mainTable.getModel();
+				String clientID = (String) model.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
+
+				// Display phone number table for selected student
+				mainTable.clearSelection();
+				attendanceListener.viewPhoneByStudent(Integer.parseInt(clientID));
 			}
 		});
 		updateGithubUserItem.addActionListener(new ActionListener() {
@@ -257,9 +285,11 @@ public class AttendanceTable extends JPanel {
 						tablePopup.remove(graduateClassItem);
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
+						tablePopup.add(showStudentEmailItem);
+						tablePopup.add(showStudentPhoneItem);
 						tablePopup.add(updateGithubUserItem);
 						tablePopup.add(graduateStudentItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_4ROWS));
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_6ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
@@ -276,6 +306,8 @@ public class AttendanceTable extends JPanel {
 							if (selectedClassName != null) {
 								tablePopup.remove(showStudentInfoItem);
 								tablePopup.remove(showStudentAttendanceItem);
+								tablePopup.remove(showStudentEmailItem);
+								tablePopup.remove(showStudentPhoneItem);
 								tablePopup.remove(updateGithubUserItem);
 								tablePopup.remove(graduateStudentItem);
 								tablePopup.add(showStudentClassItem);

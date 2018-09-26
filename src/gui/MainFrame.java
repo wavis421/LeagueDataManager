@@ -74,8 +74,10 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
 	private static final int STUDENT_TABLE_BY_STUDENT = 2;
-	private static final int STUDENT_TABLE_EMAIL = 3;
-	private static final int STUDENT_TABLE_PHONE = 4;
+	private static final int STUDENT_TABLE_EMAIL_ALL = 3;
+	private static final int STUDENT_TABLE_PHONE_ALL = 4;
+	private static final int STUDENT_TABLE_EMAIL_BY_STUDENT = 5;
+	private static final int STUDENT_TABLE_PHONE_BY_STUDENT = 6;
 
 	// Report missing github if 3 or more classes with no github in the last 35 days
 	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
@@ -375,12 +377,12 @@ public class MainFrame {
 		});
 		studentViewEmailMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_EMAIL, 0);
+				refreshStudentTable(STUDENT_TABLE_EMAIL_ALL, 0);
 			}
 		});
 		studentViewPhoneMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_PHONE, 0);
+				refreshStudentTable(STUDENT_TABLE_PHONE_ALL, 0);
 			}
 		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
@@ -594,6 +596,18 @@ public class MainFrame {
 				// Update field in Graduation database
 				controller.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
 			}
+
+			@Override
+			public void viewEmailByStudent(int clientID) {
+				// Get student's email info
+				refreshStudentTable(STUDENT_TABLE_EMAIL_BY_STUDENT, clientID);
+			}
+
+			@Override
+			public void viewPhoneByStudent(int clientID) {
+				// Get student's phone numbers
+				refreshStudentTable(STUDENT_TABLE_PHONE_BY_STUDENT, clientID);
+			}
 		};
 
 		// Now provide this listener to each table
@@ -614,21 +628,38 @@ public class MainFrame {
 		if (tableType == STUDENT_TABLE_ALL) {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB(),
 					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+
 		} else if (tableType == STUDENT_TABLE_BY_STUDENT) {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
 					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
-		} else if (tableType == STUDENT_TABLE_EMAIL) {
+
+		} else if (tableType == STUDENT_TABLE_EMAIL_ALL) {
 			headerLabel.setText(STUDENT_EMAIL_TITLE);
 			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.EMAIL_STUDENT_TABLE_TYPE);
-		} else {// STUDENT_TABLE_PHONE
+
+		} else if (tableType == STUDENT_TABLE_PHONE_ALL) {
 			headerLabel.setText(STUDENT_PHONE_TITLE);
 			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.PHONE_STUDENT_TABLE_TYPE);
 		}
+
+		else if (tableType == STUDENT_TABLE_EMAIL_BY_STUDENT) {
+			headerLabel.setText(STUDENT_EMAIL_TITLE);
+			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
+					StudentTable.EMAIL_STUDENT_TABLE_TYPE);
+		}
+
+		else { // STUDENT_TABLE_PHONE_BY_STUDENT
+			headerLabel.setText(STUDENT_PHONE_TITLE);
+			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
+					StudentTable.PHONE_STUDENT_TABLE_TYPE);
+		}
+
 		searchField.setText("");
 		studentTable.updateSearchField("");
 

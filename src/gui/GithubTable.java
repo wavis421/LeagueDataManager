@@ -29,7 +29,7 @@ public class GithubTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_2ROWS = 50;
+	private static final int POPUP_HEIGHT_5ROWS = 110;
 
 	private JPanel tablePanel;
 	private JTable table;
@@ -109,10 +109,16 @@ public class GithubTable extends JPanel {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show attendance ");
+		JMenuItem showStudentEmailItem = new JMenuItem("Show student email ");
+		JMenuItem showStudentPhoneItem = new JMenuItem("Show student phone ");
 		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
+		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentAttendanceItem);
+		tablePopup.add(showStudentEmailItem);
+		tablePopup.add(showStudentPhoneItem);
 		tablePopup.add(updateGithubUserItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+		tablePopup.add(graduateStudentItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_5ROWS));
 
 		// POP UP action listeners
 		updateGithubUserItem.addActionListener(new ActionListener() {
@@ -139,6 +145,43 @@ public class GithubTable extends JPanel {
 				// Display attendance table for selected student
 				table.clearSelection();
 				githubListener.viewAttendanceByStudent(clientID, studentName);
+			}
+		});
+		showStudentEmailItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student ClientID for selected row/column
+				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
+				GithubTableModel model = (GithubTableModel) table.getModel();
+				String clientID = (String) model.getValueAt(modelRow, GithubTableModel.CLIENT_ID_COLUMN);
+
+				// Display email table for selected student
+				table.clearSelection();
+				githubListener.viewEmailByStudent(Integer.parseInt(clientID));
+			}
+		});
+		showStudentPhoneItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student ClientID for selected row/column
+				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
+				GithubTableModel model = (GithubTableModel) table.getModel();
+				String clientID = (String) model.getValueAt(modelRow, GithubTableModel.CLIENT_ID_COLUMN);
+
+				// Display phone number table for selected student
+				table.clearSelection();
+				githubListener.viewPhoneByStudent(Integer.parseInt(clientID));
+			}
+		});
+		graduateStudentItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get student name for selected row/column
+				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
+				GithubTableModel model = (GithubTableModel) table.getModel();
+				String clientID = (String) model.getValueAt(modelRow, GithubTableModel.CLIENT_ID_COLUMN);
+				String studentName = (String) model.getValueAt(modelRow, GithubTableModel.STUDENT_NAME_COLUMN);
+				
+				// Show graduation dialog
+				table.clearSelection();
+				githubListener.graduateStudent(clientID, clientID);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {
