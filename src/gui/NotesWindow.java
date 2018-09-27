@@ -99,7 +99,7 @@ public class NotesWindow {
 			+ "      *** Please send any feedback, suggestions or bug reports to wendy.avis@jointheleague.org *** \n",
 			
 			// About League Student Tracker
-			"\n   VERSION 4.8G (G = includes Graduation Dialog, Limited Distribution) \n\n"
+			"\n   VERSION 4.9G (G = includes Graduation Dialog, Limited Distribution) \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
@@ -111,8 +111,7 @@ public class NotesWindow {
 			+ "      Once every 24 hours, the application searches for all completed attendance for that day, which triggers a search \n"
 			+ "          in Github for the related student comments and updates the database accordingly. \n\n"
 			+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \n"
-			+ "          students that they need to write descriptive comments  when they sync to Github!!\n"
-			+ "      If it helps, show them this Application, and have them realize that their comments are viewable by the teachers!!\n\n"
+			+ "          students that they need to write descriptive comments  when they sync to Github!!\n\n"
 			+ "      Naming conventions are to write each recipe that the student worked on separated by commas, and followed by (IP) \n"
 			+ "          if the recipe is still In Progress. Please also add comments about written tests and worksheets (WS).\n" };
 
