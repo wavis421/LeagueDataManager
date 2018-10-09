@@ -20,6 +20,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 public class MySqlDatabase {
 	// Use different port for Tracker App and Import to allow simultaneous connects
 	public static final int TRACKER_APP_SSH_PORT = 5000;
+	public static final int MINI_TRACKER_SSH_PORT = 5050;
 	public static final int STUDENT_IMPORT_SSH_PORT = 6000;
 	public static final int SALES_FORCE_SYNC_SSH_PORT = 7000;
 	public static final int STUDENT_IMPORT_NO_SSH = 0;
@@ -82,6 +83,7 @@ public class MySqlDatabase {
 
 			} catch (SQLException e) {
 				// TODO: How to handle this exception?
+				System.out.println("Connect DB failed: " + e.getMessage());
 			}
 
 			if (dbConnection != null)
