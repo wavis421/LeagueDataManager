@@ -144,6 +144,49 @@ public class MySqlDatabase {
 		return nameList;
 	}
 
+	public ArrayList<StudentModel> getActiveStudentsWithClass() {
+		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE isInMasterDb AND CurrentClass != '' "
+								+ "ORDER BY FirstName, LastName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					nameList.add(new StudentModel(result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
+							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
+							result.getString("Email"), result.getString("AcctMgrEmail"),
+							result.getString("EmergencyEmail"), result.getString("Phone"),
+							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							result.getString("EmergencyPhone")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return nameList;
+	}
+
 	public void removeStudentByClientID(int clientID) {
 		for (int i = 0; i < 2; i++) {
 			try {
