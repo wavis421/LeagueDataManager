@@ -146,7 +146,8 @@ public class MySqlDbImports {
 							result.getInt("isInMasterDb"), result.getString("Email"), result.getString("AcctMgrEmail"),
 							result.getString("EmergencyEmail"), result.getString("Phone"),
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("Birthdate"), 
+							result.getString("TASinceDate"), result.getInt("TAPastEvents")));
 				}
 
 				result.close();
@@ -175,8 +176,9 @@ public class MySqlDbImports {
 				PreparedStatement addStudentStmt = sqlDb.dbConnection.prepareStatement(
 						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent, "
 								+ "Gender, StartDate, Location, GradYear, isInMasterDb, Email, EmergencyEmail, "
-								+ "AcctMgrEmail, Phone, AcctMgrPhone, HomePhone, EmergencyPhone) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?);");
+								+ "AcctMgrEmail, Phone, AcctMgrPhone, HomePhone, EmergencyPhone, Birthdate, "
+								+ "TASinceDate, TAPastEvents) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
@@ -204,6 +206,9 @@ public class MySqlDbImports {
 				addStudentStmt.setString(col++, student.getAccountMgrPhones());
 				addStudentStmt.setString(col++, student.getHomePhone());
 				addStudentStmt.setString(col++, student.getEmergContactPhone());
+				addStudentStmt.setString(col++, student.getBirthDate());
+				addStudentStmt.setString(col++, student.getStaffSinceDate());
+				addStudentStmt.setInt(col++, student.getStaffPastEvents());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
@@ -252,7 +257,8 @@ public class MySqlDbImports {
 				PreparedStatement updateStudentStmt = sqlDb.dbConnection.prepareStatement(
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
 								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=?, Email=?,"
-								+ "EmergencyEmail=?, AcctMgrEmail=?, Phone=?, AcctMgrPhone=?, HomePhone=?, EmergencyPhone=? "
+								+ "EmergencyEmail=?, AcctMgrEmail=?, Phone=?, AcctMgrPhone=?, HomePhone=?, "
+								+ "EmergencyPhone=?, Birthdate=?, TASinceDate=?, TAPastEvents=? "
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
@@ -280,6 +286,9 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getAccountMgrPhones());
 				updateStudentStmt.setString(col++, importStudent.getHomePhone());
 				updateStudentStmt.setString(col++, importStudent.getEmergContactPhone());
+				updateStudentStmt.setString(col++, importStudent.getBirthDate());
+				updateStudentStmt.setString(col++, importStudent.getStaffSinceDate());
+				updateStudentStmt.setInt(col++, importStudent.getStaffPastEvents());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
@@ -397,6 +406,24 @@ public class MySqlDbImports {
 				changes += " (Added back to Master DB";
 			else
 				changes += ", Added back to Master DB";
+		}
+		if (!importStudent.getBirthDate().equals(dbStudent.getBirthDate())) {
+			if (changes.equals(""))
+				changes += " (Birthdate";
+			else
+				changes += ", Birthdate";
+		}
+		if (!importStudent.getStaffSinceDate().equals(dbStudent.getStaffSinceDate())) {
+			if (changes.equals(""))
+				changes += " (TA since date";
+			else
+				changes += ", TA since date";
+		}
+		if (importStudent.getStaffPastEvents() != dbStudent.getStaffPastEvents()) {
+			if (changes.equals(""))
+				changes += " (TA # events";
+			else
+				changes += ", TA # events";
 		}
 
 		if (!changes.equals(""))
@@ -710,7 +737,8 @@ public class MySqlDbImports {
 			if (values[i].startsWith("TA-") || valueLC.startsWith("open lab") || valueLC.startsWith("sub teacher")
 					|| valueLC.startsWith("padres game") || valueLC.startsWith("make-up")
 					|| valueLC.startsWith("intro to java") || valueLC.startsWith("league admin")
-					|| valueLC.startsWith("summer prog") || valueLC.startsWith("need assist") || valueLC.startsWith("league workshop"))
+					|| valueLC.startsWith("summer prog") || valueLC.startsWith("need assist")
+					|| valueLC.startsWith("league workshop"))
 				continue;
 
 			if (!teachers.equals(""))

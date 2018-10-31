@@ -89,6 +89,7 @@ public class Pike13Api {
 	private final int ACCT_MGR_PHONE_IDX = 14;
 	private final int HOME_PHONE_IDX = 15;
 	private final int EMERG_PHONE_IDX = 16;
+	private final int BIRTHDATE_IDX = 17;
 
 	// Indices for client data import to SF
 	private final int CLIENT_SF_ID_IDX = 0;
@@ -165,6 +166,11 @@ public class Pike13Api {
 	private final int COURSES_EVENT_NAME_IDX = 1;
 	private final int COURSE_ENROLLMENT_IDX = 2;
 
+	// Indices for Student TA data
+	private final static int STUDENT_TA_CLIENT_ID_IDX = 0;
+	private final static int STUDENT_TA_STAFF_SINCE_DATE_IDX = 1;
+	private final static int STUDENT_TA_NUM_PAST_EVENTS_IDX = 2;
+
 	// Indices for Staff Member data
 	private final int TEACHER_CLIENT_ID_IDX = 0;
 	private final int TEACHER_FIRST_NAME_IDX = 1;
@@ -222,7 +228,7 @@ public class Pike13Api {
 			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
 			+ "            \"future_visits\",\"completed_visits\",\"email\",\"account_manager_emails\","
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"phone\",\"account_manager_phones\","
-			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\"],"
+			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\",\"birthdate\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
@@ -353,6 +359,19 @@ public class Pike13Api {
 			+ "\"filter\":[\"and\",[[\"btw\",\"service_date\",[\"0000-00-00\",\"1111-11-11\"]],"
 			+ "                     [\"starts\",\"service_type\",\"course\"]]]}}}";
 
+	// Get Student TA data
+	private final String getStudentTAData = "{\"data\":{\"type\":\"queries\","
+			// Get attributes: fields, page limit and filters
+			+ "\"attributes\":{"
+			// Select fields
+			+ "\"fields\":[\"" + STAFF_SF_CLIENT_ID_FIELD + "\",\"staff_since_date\",\"past_events\"],"
+			// Page limit max is 500
+			+ "\"page\":{\"limit\":500},"
+			// Filter on Staff Category and staff member active
+			+ "\"filter\":[\"and\",[[\"eq\",\"person_state\",\"active\"],"
+			+ "                     [\"eq\",\"" + STAFF_CATEGORY_FIELD + "\",\"Student TA\"],"
+			+ "                     [\"starts\",\"full_name\",\"TA-\"]]]}}}";
+
 	// Get staff member data
 	private final String getStaffMemberData = "{\"data\":{\"type\":\"queries\","
 			// Get attributes: fields, page limit and filters
@@ -442,6 +461,10 @@ public class Pike13Api {
 				// Get fields for each person
 				JsonArray personArray = (JsonArray) jsonArray.get(i);
 				String firstName = stripQuotes(personArray.get(FIRST_NAME_IDX).toString());
+				
+				String birthday = null;
+				if (personArray.get(BIRTHDATE_IDX) != null)
+					birthday = stripQuotes(personArray.get(BIRTHDATE_IDX).toString());
 
 				if (!firstName.startsWith("Guest")) {
 					// Get fields for this Json array entry
@@ -459,7 +482,8 @@ public class Pike13Api {
 							stripQuotes(personArray.get(MOBILE_PHONE_IDX).toString()),
 							stripQuotes(personArray.get(ACCT_MGR_PHONE_IDX).toString()),
 							stripQuotes(personArray.get(HOME_PHONE_IDX).toString()),
-							stripQuotes(personArray.get(EMERG_PHONE_IDX).toString()));
+							stripQuotes(personArray.get(EMERG_PHONE_IDX).toString()),
+							birthday);
 					studentList.add(model);
 				}
 			}
@@ -852,6 +876,41 @@ public class Pike13Api {
 		return getEnrollmentByCmdString(getEnrollmentStudentTracker, enroll2);
 	}
 
+	public void updateStudentTAData(ArrayList<StudentImportModel> students) {
+		// Get URL connection and send the query
+		HttpURLConnection conn = sendQueryToUrl("staff_members", getStudentTAData);
+		if (conn == null)
+			return;
+
+		// Get input stream and read data
+		JsonObject jsonObj = readInputStream(conn);
+		if (jsonObj == null) {
+			conn.disconnect();
+			return;
+		}
+		JsonArray jsonArray = jsonObj.getJsonArray("rows");
+		int taCount = 0;
+
+		for (int i = 0; i < jsonArray.size(); i++) {
+			// Get fields for each TA. Ignore all TA's without Client ID or not in student list
+			JsonArray staffArray = (JsonArray) jsonArray.get(i);
+			if (staffArray.get(STUDENT_TA_CLIENT_ID_IDX) == null)
+				continue;
+			
+			String clientID = stripQuotes(staffArray.get(STUDENT_TA_CLIENT_ID_IDX).toString());
+			StudentImportModel ta = findClientID(clientID, students);
+			if (ta == null)
+				continue;
+			
+			ta.setStaffData(stripQuotes(staffArray.get(STUDENT_TA_STAFF_SINCE_DATE_IDX).toString()), 
+					staffArray.getInt(STUDENT_TA_NUM_PAST_EVENTS_IDX));
+			taCount++;
+		}
+
+		conn.disconnect();
+		System.out.println("Num Student TA's: " + jsonArray.size() + " (" + taCount + ")");
+	}
+
 	public ArrayList<StaffMemberModel> getSalesForceStaffMembers() {
 		ArrayList<StaffMemberModel> staffList = new ArrayList<StaffMemberModel>();
 
@@ -973,6 +1032,21 @@ public class Pike13Api {
 		} while (hasMore);
 
 		return eventList;
+	}
+
+	private StudentImportModel findClientID(String clientID, ArrayList<StudentImportModel> students) {
+		if (!clientID.matches("\\d+"))
+			// Old client ID's were not numbers!
+			return null;
+		
+		int s_id = Integer.parseInt(clientID);
+		
+		for (StudentImportModel s : students) {
+			if (s_id == s.getClientID()) {
+				return s;
+			}
+		}
+		return null;
 	}
 
 	private HttpURLConnection connectUrl(String endPoint) {

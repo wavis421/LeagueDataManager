@@ -8,19 +8,21 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	// Additional fields for importing contacts to SalesForce
 	private String gradYearString;
 	private String genderString;
-	private String birthDate;
+	private String birthDate = "";
 	private String currGrade;
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
 	private String accountID, accountMgrNames, accountMgrPhones, accountMgrEmails, dependentNames;
-	private int completedVisits, futureVisits;
+	private String staffSinceDate = "";
+	private int completedVisits, futureVisits, staffPastEvents;
 	private boolean signedWaiver, stopEmail, financialAid;
 	private Object sfContact;
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear, String email, String acctMgrEmail,
-			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone) {
+			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
+			String birthDate) {
 
 		// Pike13 import data
 		this.clientID = clientID;
@@ -29,6 +31,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.githubName = parseGithubName(githubName);
 		this.gender = GenderModel.convertStringToGender(gender);
 		this.startDate = startDate;
+		this.birthDate = birthDate;
 
 		this.homeLocation = LocationLookup.convertStringToLocation(homeLocation);
 		this.homeLocString = LocationLookup.convertLocationToString(this.homeLocation);
@@ -65,7 +68,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
-			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone) {
+			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
+			String birthdate, String staffSinceDate, int staffPastEvents) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -77,6 +81,9 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.homeLocation = homeLocation;
 		this.gradYear = gradYear;
 		this.isInMasterDb = isInMasterDb;
+		this.birthDate = birthdate;
+		this.staffSinceDate = staffSinceDate;
+		this.staffPastEvents = staffPastEvents;
 
 		this.email = email;
 		this.accountMgrEmails = acctMgrEmail;
@@ -331,6 +338,20 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		return sfContact;
 	}
 
+	public String getStaffSinceDate() {
+		return staffSinceDate;
+	}
+
+	public int getStaffPastEvents() {
+		return staffPastEvents;
+	}
+
+	public void setStaffData(String staffSinceDate, int staffPastEvents) {
+		// Set data for students who are TA's
+		this.staffSinceDate = staffSinceDate;
+		this.staffPastEvents = staffPastEvents;
+	}
+
 	public void setSfContact(Object sfContact) {
 		this.sfContact = sfContact;
 	}
@@ -351,7 +372,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 				&& email.equals(other.getEmail()) && emergContactEmail.equals(other.getEmergContactEmail())
 				&& accountMgrEmails.equals(other.getAccountMgrEmails()) && mobilePhone.equals(other.getMobilePhone())
 				&& accountMgrPhones.equals(other.getAccountMgrPhones()) && homePhone.equals(other.getHomePhone())
-				&& emergContactPhone.equals(other.getEmergContactPhone())) {
+				&& emergContactPhone.equals(other.getEmergContactPhone()) && birthDate.equals(other.getBirthDate())
+				&& staffSinceDate.equals(other.getStaffSinceDate()) && staffPastEvents == other.getStaffPastEvents()) {
 			return 0;
 		}
 
