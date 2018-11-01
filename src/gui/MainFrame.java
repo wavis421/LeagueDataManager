@@ -63,6 +63,7 @@ public class MainFrame {
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENT_EMAIL_TITLE = "League Student Emails";
 	private static final String STUDENT_PHONE_TITLE = "League Student Phone Numbers";
+	private static final String STUDENT_TA_TITLE = "League Student TA's";
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
@@ -78,6 +79,7 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_PHONE_ALL = 4;
 	private static final int STUDENT_TABLE_EMAIL_BY_STUDENT = 5;
 	private static final int STUDENT_TABLE_PHONE_BY_STUDENT = 6;
+	private static final int STUDENT_TABLE_FOR_TA = 7;
 
 	// Report missing github if 3 or more classes with no github in the last 35 days
 	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
@@ -337,6 +339,7 @@ public class MainFrame {
 		JMenuItem studentViewPendingGrads = new JMenuItem("View pending graduates ");
 		JMenuItem studentViewEmailMenu = new JMenuItem("View Student Email ");
 		JMenuItem studentViewPhoneMenu = new JMenuItem("View Student Phone ");
+		JMenuItem studentViewTAMenu = new JMenuItem("View Student TA's ");
 		JMenuItem studentViewAllMenu = new JMenuItem("View all active students ");
 
 		// Add these sub-menus to the Student menu
@@ -346,6 +349,7 @@ public class MainFrame {
 		studentMenu.add(studentViewPendingGrads);
 		studentMenu.add(studentViewEmailMenu);
 		studentMenu.add(studentViewPhoneMenu);
+		studentMenu.add(studentViewTAMenu);
 		studentMenu.add(studentViewAllMenu);
 
 		// Set up listeners for the Student menu
@@ -383,6 +387,11 @@ public class MainFrame {
 		studentViewPhoneMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshStudentTable(STUDENT_TABLE_PHONE_ALL, 0);
+			}
+		});
+		studentViewTAMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0);
 			}
 		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
@@ -654,10 +663,15 @@ public class MainFrame {
 					StudentTable.EMAIL_STUDENT_TABLE_TYPE);
 		}
 
-		else { // STUDENT_TABLE_PHONE_BY_STUDENT
+		else if (tableType == STUDENT_TABLE_PHONE_BY_STUDENT) {
 			headerLabel.setText(STUDENT_PHONE_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
 					StudentTable.PHONE_STUDENT_TABLE_TYPE);
+		}
+
+		else { // STUDENT_TABLE_FOR_TA
+			headerLabel.setText(STUDENT_TA_TITLE);
+			studentTable.setData(tablePanel, controller.getActiveTAs(), StudentTable.TA_STUDENT_TABLE_TYPE);
 		}
 
 		searchField.setText("");

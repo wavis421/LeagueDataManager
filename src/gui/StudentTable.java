@@ -32,6 +32,7 @@ public class StudentTable extends JPanel {
 	public static final int STANDARD_STUDENT_TABLE_TYPE = 0;
 	public static final int EMAIL_STUDENT_TABLE_TYPE = 1;
 	public static final int PHONE_STUDENT_TABLE_TYPE = 2;
+	public static final int TA_STUDENT_TABLE_TYPE = 3;
 
 	private static final int ROW_GAP = 5;
 
@@ -140,7 +141,7 @@ public class StudentTable extends JPanel {
 			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_EMAIL_COLUMN).setPreferredWidth(240);
 			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_EMAIL_COLUMN).setPreferredWidth(180);
 
-		} else { // PHONE_STUDENT_TABLE_TYPE
+		} else if (tableType == PHONE_STUDENT_TABLE_TYPE) {
 			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setMaxWidth(240);
 			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_PHONE_COLUMN).setMaxWidth(200);
 
@@ -150,6 +151,20 @@ public class StudentTable extends JPanel {
 			table.getColumnModel().getColumn(StudentTableModel.HOME_PHONE_COLUMN).setPreferredWidth(100);
 			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_PHONE_COLUMN).setPreferredWidth(100);
 			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_PHONE_COLUMN).setPreferredWidth(180);
+			
+		} else { // TA_STUDENT_TABLE_TYPE
+			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(220);
+			table.getColumnModel().getColumn(StudentTableModel.TA_SINCE_COLUMN).setPreferredWidth(140);
+			table.getColumnModel().getColumn(StudentTableModel.TA_SINCE_COLUMN).setMaxWidth(140);
+			table.getColumnModel().getColumn(StudentTableModel.TA_PAST_EVENTS).setPreferredWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_PAST_EVENTS).setMaxWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_AGE_COLUMN).setPreferredWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_AGE_COLUMN).setMaxWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_CURR_LEVEL_COLUMN).setPreferredWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_CURR_LEVEL_COLUMN).setMaxWidth(120);
+			table.getColumnModel().getColumn(StudentTableModel.TA_PHONE_COLUMN).setPreferredWidth(160);
+			table.getColumnModel().getColumn(StudentTableModel.TA_PHONE_COLUMN).setMaxWidth(160);
+			table.getColumnModel().getColumn(StudentTableModel.TA_EMAIL_COLUMN).setPreferredWidth(300);
 		}
 	}
 
@@ -299,7 +314,7 @@ public class StudentTable extends JPanel {
 				int row, int column) {
 			String text;
 			if (value instanceof Integer)
-				text = (String.valueOf(value));
+				text = String.valueOf(value);
 			else if (value instanceof Date)
 				text = (((Date) value).toString());
 			else if (value instanceof StudentNameModel)

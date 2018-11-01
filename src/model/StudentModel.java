@@ -4,8 +4,8 @@ import java.sql.Date;
 
 public class StudentModel implements Comparable<StudentModel> {
 	private int clientID;
-	private String githubName, currentClass;
-	private int homeLocation, gender, gradYear;
+	private String githubName, currentClass, staffSinceDate;
+	private int homeLocation, gender, gradYear, age, staffPastEvents;
 	private Date startDate;
 	private StudentNameModel nameModel;
 	private boolean missingData;
@@ -22,7 +22,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.gradYear = gradYear;
 		this.startDate = startDate;
 		this.currentClass = currClass;
-		
+
 		this.email = email;
 		this.acctMgrEmail = acctMgrEmail;
 		this.emergEmail = emergEmail;
@@ -37,6 +37,19 @@ public class StudentModel implements Comparable<StudentModel> {
 			missingData = true;
 		else
 			missingData = false;
+	}
+
+	public StudentModel(int clientID, StudentNameModel nameModel, int age, String currClass,
+			String staffSinceDate, int staffPastEvents, String email, String phone) {
+		// Student model for student TA's
+		this.clientID = clientID;
+		this.nameModel = nameModel;
+		this.age = age;
+		this.currentClass = currClass;
+		this.staffSinceDate = staffSinceDate;
+		this.staffPastEvents = staffPastEvents;
+		this.email = email;
+		this.phone = phone;
 	}
 
 	public String toString() {
@@ -91,7 +104,6 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.currentClass = currentClass;
 	}
 
-	
 	public String getEmail() {
 		return email;
 	}
@@ -118,6 +130,18 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public String getEmergPhone() {
 		return emergPhone;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public String getStaffSinceDate() {
+		return staffSinceDate;
+	}
+
+	public int getStaffPastEvents() {
+		return staffPastEvents;
 	}
 
 	@Override

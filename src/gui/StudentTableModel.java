@@ -34,6 +34,14 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int EMERGENCY_PHONE_COLUMN = 5;
 	public static final int CURR_CLASS_PHONE_COLUMN = 6;
 
+	// For student TA table
+	public static final int TA_SINCE_COLUMN = 2;
+	public static final int TA_PAST_EVENTS = 3;
+	public static final int TA_AGE_COLUMN = 4;
+	public static final int TA_CURR_LEVEL_COLUMN = 5;
+	public static final int TA_EMAIL_COLUMN = 6;
+	public static final int TA_PHONE_COLUMN = 7;
+
 	private ArrayList<StudentModel> studentList;
 	private int tableType;
 	private String colNames[];
@@ -45,6 +53,8 @@ public class StudentTableModel extends AbstractTableModel {
 			" Emerg Email ", " Current Class " };
 	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
 			" Home Phone ", " Emerg Phone ", " Current Class " };
+	private final String colTANames[] = { " ID ", " Student Name ", " TA Start Date ", " # Classes ", " Curr Age ",
+			" Curr Level ", " Student Email ", " Student Phone " };
 
 	public StudentTableModel(ArrayList<StudentModel> students) {
 		this.studentList = students;
@@ -60,8 +70,10 @@ public class StudentTableModel extends AbstractTableModel {
 			colNames = colStdNames;
 		else if (tableType == StudentTable.EMAIL_STUDENT_TABLE_TYPE)
 			colNames = colEmailNames;
-		else
+		else if (tableType == StudentTable.PHONE_STUDENT_TABLE_TYPE)
 			colNames = colPhoneNames;
+		else
+			colNames = colTANames;
 
 		studentList.clear();
 		studentList = db;
@@ -95,6 +107,8 @@ public class StudentTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		if (columnIndex == STUDENT_NAME_COLUMN)
 			return StudentNameModel.class;
+		else if (tableType == StudentTable.TA_STUDENT_TABLE_TYPE && columnIndex == TA_PAST_EVENTS)
+			return Integer.class;
 		else
 			return String.class;
 	}
@@ -151,7 +165,7 @@ public class StudentTableModel extends AbstractTableModel {
 				else
 					return student.getCurrentClass();
 			}
-		} else {
+		} else if (tableType == StudentTable.PHONE_STUDENT_TABLE_TYPE) {
 			switch (col) {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
@@ -170,6 +184,31 @@ public class StudentTableModel extends AbstractTableModel {
 					return "";
 				else
 					return student.getCurrentClass();
+			}
+		} else {
+			switch (col) {
+			case CLIENT_ID_COLUMN:
+				return String.valueOf(student.getClientID());
+			case STUDENT_NAME_COLUMN:
+				return student.getNameModel();
+			case TA_SINCE_COLUMN:
+				return student.getStaffSinceDate();
+			case TA_PAST_EVENTS:
+				return (Integer) student.getStaffPastEvents();
+			case TA_AGE_COLUMN:
+				if (student.getAge() == 0)
+					return "";
+				else
+					return String.valueOf(student.getAge());
+			case TA_CURR_LEVEL_COLUMN:
+				if (student.getCurrentClass() == null || student.getCurrentClass().length() < 1)
+					return "";
+				else
+					return student.getCurrentClass().substring(0, 1);
+			case TA_EMAIL_COLUMN:
+				return student.getEmail();
+			case TA_PHONE_COLUMN:
+				return student.getPhone();
 			}
 		}
 		return null;

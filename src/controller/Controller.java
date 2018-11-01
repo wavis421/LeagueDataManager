@@ -89,6 +89,13 @@ public class Controller {
 		return result;
 	}
 
+	public ArrayList<StudentModel> getActiveTAs() {
+		ArrayList<StudentModel> result = sqlDb.getActiveTAs();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
+	}
+
 	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
 		ArrayList<StudentModel> result = sqlDb.getStudentByClientID(clientID);
 		if (sqlDb.getConnectError())

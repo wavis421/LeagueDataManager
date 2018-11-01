@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Years;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -165,6 +166,51 @@ public class MySqlDatabase {
 							result.getString("EmergencyEmail"), result.getString("Phone"),
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return nameList;
+	}
+
+	public ArrayList<StudentModel> getActiveTAs() {
+		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection
+						.prepareStatement("SELECT * FROM Students WHERE isInMasterDb AND TASinceDate != '' "
+								+ "ORDER BY FirstName, LastName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					int age = 0;
+					String birthdate = result.getString("Birthdate");
+					if (birthdate != null && !birthdate.equals(""))
+						age = Years.yearsBetween(new DateTime(birthdate), today).getYears();
+
+					nameList.add(new StudentModel(result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							age, result.getString("CurrentClass"), result.getString("TASinceDate"),
+							result.getInt("TAPastEvents"), result.getString("Email"), result.getString("Phone")));
 				}
 
 				result.close();
@@ -483,7 +529,7 @@ public class MySqlDatabase {
 
 	public ArrayList<AttendanceEventModel> getAllEvents(String startDate) {
 		ArrayList<AttendanceEventModel> eventList = new ArrayList<AttendanceEventModel>();
-		
+
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get attendance data from the DB for all students
