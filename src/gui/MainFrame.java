@@ -157,7 +157,8 @@ public class MainFrame {
 		headerLabel.setFont(CustomFonts.TITLE_FONT);
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-		mainPanel.add(headerLabel, BorderLayout.NORTH);
+		new TableHeaderBox(headerLabel);
+		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD), BorderLayout.NORTH);
 
 		// Default tables to display all data
 		headerLabel.setText(STUDENT_TITLE);
@@ -632,6 +633,7 @@ public class MainFrame {
 	private void refreshStudentTable(int tableType, int clientID) {
 		// Remove data being displayed
 		removeDataFromTables();
+		int state = TableHeaderBox.STANDARD;
 
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
@@ -671,6 +673,7 @@ public class MainFrame {
 
 		else { // STUDENT_TABLE_FOR_TA
 			headerLabel.setText(STUDENT_TA_TITLE);
+			state = TableHeaderBox.EXTRA;
 			studentTable.setData(tablePanel, controller.getActiveTAs(), StudentTable.TA_STUDENT_TABLE_TYPE);
 		}
 
@@ -680,6 +683,7 @@ public class MainFrame {
 		// Update current table type
 		activeTable = studentTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(state);
 	}
 
 	private void refreshAttendanceTable(ArrayList<AttendanceModel> list, String titleExtension,
@@ -695,6 +699,7 @@ public class MainFrame {
 
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
 	private void refreshLogTable() {
@@ -709,6 +714,7 @@ public class MainFrame {
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
 	private void refreshScheduleTable() {
@@ -723,6 +729,7 @@ public class MainFrame {
 
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
 	private void refreshCoursesTable() {
@@ -737,6 +744,7 @@ public class MainFrame {
 
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
 	private void refreshGradTable() {
@@ -751,6 +759,7 @@ public class MainFrame {
 
 		activeTable = gradTable.getTable();
 		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
 	private void removeDataFromTables() {
