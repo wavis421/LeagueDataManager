@@ -89,8 +89,8 @@ public class Controller {
 		return result;
 	}
 
-	public ArrayList<StudentModel> getActiveTAs() {
-		ArrayList<StudentModel> result = sqlDb.getActiveTAs();
+	public ArrayList<StudentModel> getActiveTAs(String minNumClasses, int minAge, int minLevel) {
+		ArrayList<StudentModel> result = sqlDb.getActiveTAs(minNumClasses, minAge, minLevel);
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;

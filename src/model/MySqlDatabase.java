@@ -188,16 +188,18 @@ public class MySqlDatabase {
 		return nameList;
 	}
 
-	public ArrayList<StudentModel> getActiveTAs() {
+	public ArrayList<StudentModel> getActiveTAs(String minNumClasses, int minAge, int minLevel) {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
 		DateTime today = new DateTime();
+		String latestBirthdate = today.minusYears(minAge).toString("yyyy-MM-dd");
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE isInMasterDb AND TASinceDate != '' "
-								+ "ORDER BY FirstName, LastName;");
+								+ "AND TAPastEvents >= " + minNumClasses + " AND LEFT(CurrentClass,1) >= " + minLevel
+								+ " AND Birthdate <= '" + latestBirthdate + "' ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {

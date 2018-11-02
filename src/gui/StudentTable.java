@@ -151,7 +151,7 @@ public class StudentTable extends JPanel {
 			table.getColumnModel().getColumn(StudentTableModel.HOME_PHONE_COLUMN).setPreferredWidth(100);
 			table.getColumnModel().getColumn(StudentTableModel.EMERGENCY_PHONE_COLUMN).setPreferredWidth(100);
 			table.getColumnModel().getColumn(StudentTableModel.CURR_CLASS_PHONE_COLUMN).setPreferredWidth(180);
-			
+
 		} else { // TA_STUDENT_TABLE_TYPE
 			table.getColumnModel().getColumn(StudentTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(220);
 			table.getColumnModel().getColumn(StudentTableModel.TA_SINCE_COLUMN).setPreferredWidth(140);

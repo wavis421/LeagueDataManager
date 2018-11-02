@@ -618,6 +618,12 @@ public class MainFrame {
 				// Get student's phone numbers
 				refreshStudentTable(STUDENT_TABLE_PHONE_BY_STUDENT, clientID);
 			}
+
+			@Override
+			public void viewActiveTAs() {
+				// View active TA's using TA table filters
+				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0);
+			}
 		};
 
 		// Now provide this listener to each table
@@ -628,6 +634,7 @@ public class MainFrame {
 		githubTable.setTableListener(listener);
 		coursesTable.setTableListener(listener);
 		gradTable.setTableListener(listener);
+		TableHeaderBox.setTableListener(listener);
 	}
 
 	private void refreshStudentTable(int tableType, int clientID) {
@@ -674,7 +681,9 @@ public class MainFrame {
 		else { // STUDENT_TABLE_FOR_TA
 			headerLabel.setText(STUDENT_TA_TITLE);
 			state = TableHeaderBox.EXTRA;
-			studentTable.setData(tablePanel, controller.getActiveTAs(), StudentTable.TA_STUDENT_TABLE_TYPE);
+			TableHeaderBox.refreshHeader(state);
+			studentTable.setData(tablePanel, controller.getActiveTAs(TableHeaderBox.getMinClasses(),
+					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE);
 		}
 
 		searchField.setText("");

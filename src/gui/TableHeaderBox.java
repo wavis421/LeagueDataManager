@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -19,11 +21,13 @@ import javax.swing.JTextField;
  * 
  */
 
-public class TableHeaderBox {
+public class TableHeaderBox implements ActionListener {
 	// Header states
 	public static final int UNINIT = 0;
 	public static final int STANDARD = 1;
 	public static final int EXTRA = 2;
+
+	private static TableListeners filterListener;
 
 	// Panel containing the header label plus filter components
 	private static JPanel hdrPanel;
@@ -76,9 +80,19 @@ public class TableHeaderBox {
 		classesField.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
 		ageBox.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
 		lvlBox.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
+
+		// Create listeners for clear button, # classes, aga & level boxes
+		clearButton.addActionListener(this);
+		classesField.addActionListener(this);
+		ageBox.addActionListener(this);
+		lvlBox.addActionListener(this);
 	}
 
 	public static JPanel refreshHeader(int state) {
+		// Fix classes field if it contains garbage!!
+		if (!classesField.getText().matches("\\d+"))
+			classesField.setText("0");
+		
 		// Nothing to do if state unchanged
 		if (hdrState == state)
 			return hdrPanel;
@@ -107,5 +121,40 @@ public class TableHeaderBox {
 		}
 		hdrPanel.add(hdrBox);
 		return hdrPanel;
+	}
+
+	public static void setTableListener(TableListeners listener) {
+		filterListener = listener;
+	}
+
+	public static String getMinClasses() {
+		return classesField.getText();
+	}
+
+	public static int getMinAge() {
+		return (int) ageBox.getSelectedItem();
+	}
+
+	public static int getMinLevel() {
+		return (int) lvlBox.getSelectedItem();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		if (event.getSource() == clearButton) {
+			// Clear all filter fields
+			classesField.setText("0");
+			ageBox.setSelectedIndex(0);
+			lvlBox.setSelectedIndex(0);
+
+			clearButton.setSelected(true);
+
+		} else if (!classesField.getText().matches("\\d+")) {
+			// Make sure classes field is an Integer!!
+			classesField.setText("0");
+		}
+
+		// Now force a data update based on filter values
+		filterListener.viewActiveTAs();
 	}
 }
