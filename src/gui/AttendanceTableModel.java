@@ -10,15 +10,16 @@ import model.AttendanceModel;
 public class AttendanceTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
-	public static final int GITHUB_COMMENTS_COLUMN = 2;
-	public static final int GITHUB_NAME_COLUMN = 3; // Not actually a column
-	private static final int TABLE_NUM_COLUMNS = 4;
+	public static final int STUDENT_AGE_COLUMN = 2;
+	public static final int GITHUB_COMMENTS_COLUMN = 3;
+	public static final int GITHUB_NAME_COLUMN = 4; // Not actually a column
+	private static final int TABLE_NUM_COLUMNS = 5;
 
 	private Object[][] tableObjects;
 
 	// 3rd column represents a sub-table with multiple sub-columns: MAC left-shifts,
 	// PC centers title, so added spaces to make it look good on both platforms!
-	private final String[] colNames = { " ID ", " Student Name ",
+	private final String[] colNames = { " ID ", " Student Name ", " Age ",
 			" Class Date        Class Name                    Teacher Name(s)                        "
 					+ "Repository Name                         Github Comments " };
 
@@ -36,6 +37,10 @@ public class AttendanceTableModel extends AbstractTableModel {
 		for (int row = 0; row < db.size(); row++) {
 			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
 			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
+			if (db.get(row).getAge() == 0)
+				tableObjects[row][STUDENT_AGE_COLUMN] = "";
+			else
+				tableObjects[row][STUDENT_AGE_COLUMN] = db.get(row).getAge().toString().substring(0, 4);
 			tableObjects[row][GITHUB_COMMENTS_COLUMN] = db.get(row).getAttendanceEventList().toArray();
 
 			// Github name is not actually a column in table, just a placeholder

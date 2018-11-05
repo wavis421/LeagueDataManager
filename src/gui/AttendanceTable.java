@@ -142,9 +142,10 @@ public class AttendanceTable extends JPanel {
 
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
-		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(72);
+		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(66);
 		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(160);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(150);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_AGE_COLUMN).setMaxWidth(48);
 
 		// Set table properties
 		table.setDefaultRenderer(Object.class, new AttendanceTableRenderer(eventList));
@@ -360,13 +361,14 @@ public class AttendanceTable extends JPanel {
 			eventTable.setTableHeader(null);
 
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(90);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setPreferredWidth(90);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setPreferredWidth(85);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(220);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(175);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(170);
 			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setMaxWidth(500);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(250);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setMaxWidth(500);
-			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setPreferredWidth(250);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(245);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setMaxWidth(480);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setPreferredWidth(245);
+			eventTable.getColumnModel().getColumn(EVENT_TABLE_COMMENTS_COLUMN).setPreferredWidth(245);
 
 			// Add renderer
 			eventTable.setDefaultRenderer(Object.class, new AttendanceTableRenderer(null));

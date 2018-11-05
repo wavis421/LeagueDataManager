@@ -15,11 +15,12 @@ public class StudentTableModel extends AbstractTableModel {
 
 	// For student info table
 	public static final int GENDER_COLUMN = 2;
-	public static final int GITHUB_NAME_COLUMN = 3;
-	public static final int HOME_LOCATION_COLUMN = 4;
-	public static final int START_DATE_COLUMN = 5;
-	public static final int GRAD_YEAR_COLUMN = 6;
-	public static final int CURR_CLASS_COLUMN = 7;
+	public static final int AGE_COLUMN = 3;
+	public static final int GITHUB_NAME_COLUMN = 4;
+	public static final int HOME_LOCATION_COLUMN = 5;
+	public static final int START_DATE_COLUMN = 6;
+	public static final int GRAD_YEAR_COLUMN = 7;
+	public static final int CURR_CLASS_COLUMN = 8;
 
 	// For student email table
 	public static final int STUDENT_EMAIL_COLUMN = 2;
@@ -47,8 +48,8 @@ public class StudentTableModel extends AbstractTableModel {
 	private String colNames[];
 
 	// Table column names for each table type
-	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Github ", " Home Loc ", " Start Date ",
-			" Grad Yr ", " Current Class " };
+	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Age ", " Github ", " Home Loc ",
+			" Start Date ", " Grad Yr ", " Current Class " };
 	private final String colEmailNames[] = { " ID ", " Student Name ", " Student Email ", " Acct Mgr Email ",
 			" Emerg Email ", " Current Class " };
 	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
@@ -127,6 +128,11 @@ public class StudentTableModel extends AbstractTableModel {
 				return student.getNameModel();
 			case GENDER_COLUMN:
 				return GenderModel.convertGenderToString(student.getGender());
+			case AGE_COLUMN:
+				if (student.getAge() == 0)
+					return "";
+				else
+					return student.getAge().toString().substring(0, 4);
 			case GITHUB_NAME_COLUMN:
 				return student.getGithubName();
 			case HOME_LOCATION_COLUMN:
@@ -199,7 +205,7 @@ public class StudentTableModel extends AbstractTableModel {
 				if (student.getAge() == 0)
 					return "";
 				else
-					return String.valueOf(student.getAge());
+					return student.getAge().toString().substring(0, 4);
 			case TA_CURR_LEVEL_COLUMN:
 				if (student.getCurrentClass() == null || student.getCurrentClass().length() < 1)
 					return "";

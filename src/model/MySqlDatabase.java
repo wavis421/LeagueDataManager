@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Years;
+import org.joda.time.Days;
 
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -105,6 +105,7 @@ public class MySqlDatabase {
 	 */
 	public ArrayList<StudentModel> getActiveStudents() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -117,11 +118,11 @@ public class MySqlDatabase {
 					nameList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
-							result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"),
-							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
+							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
+							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
 				}
 
@@ -147,6 +148,7 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getActiveStudentsWithClass() {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -160,11 +162,11 @@ public class MySqlDatabase {
 					nameList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
-							result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"),
-							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
+							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
+							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
 				}
 
@@ -190,7 +192,7 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getActiveTAs(String minNumClasses, int minAge, int minLevel) {
 		ArrayList<StudentModel> nameList = new ArrayList<StudentModel>();
-		DateTime today = new DateTime();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		String latestBirthdate = today.minusYears(minAge).toString("yyyy-MM-dd");
 
 		for (int i = 0; i < 2; i++) {
@@ -203,16 +205,12 @@ public class MySqlDatabase {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					int age = 0;
-					String birthdate = result.getString("Birthdate");
-					if (birthdate != null && !birthdate.equals(""))
-						age = Years.yearsBetween(new DateTime(birthdate), today).getYears();
-
 					nameList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							age, result.getString("CurrentClass"), result.getString("TASinceDate"),
-							result.getInt("TAPastEvents"), result.getString("Email"), result.getString("Phone")));
+							getAge(today, result.getString("Birthdate")), result.getString("CurrentClass"),
+							result.getString("TASinceDate"), result.getInt("TAPastEvents"), result.getString("Email"),
+							result.getString("Phone")));
 				}
 
 				result.close();
@@ -265,6 +263,7 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getStudentsNotInMasterDB() {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -277,11 +276,11 @@ public class MySqlDatabase {
 					studentList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
-							result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"),
-							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
+							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
+							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
 				}
 
@@ -344,6 +343,7 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getStudentByClientID(int clientID) {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -357,11 +357,11 @@ public class MySqlDatabase {
 					studentList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
-							result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"),
-							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
+							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
+							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
 				}
 
@@ -387,6 +387,7 @@ public class MySqlDatabase {
 
 	public ArrayList<StudentModel> getStudentsUsingFlag(String flagName) {
 		ArrayList<StudentModel> studentList = new ArrayList<StudentModel>();
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -399,11 +400,11 @@ public class MySqlDatabase {
 					studentList.add(new StudentModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"), result.getInt("Gender"), result.getDate("StartDate"),
-							result.getInt("Location"), result.getInt("GradYear"), result.getString("CurrentClass"),
-							result.getString("Email"), result.getString("AcctMgrEmail"),
-							result.getString("EmergencyEmail"), result.getString("Phone"),
-							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							result.getInt("Gender"), result.getDate("StartDate"), result.getInt("Location"),
+							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
+							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
+							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone")));
 				}
 
@@ -485,6 +486,16 @@ public class MySqlDatabase {
 		}
 	}
 
+	private Double getAge(DateTime today, String birthdate) {
+		Double days = 0.0;
+
+		if (birthdate != null && !birthdate.equals("")) {
+			days = (Double) (Days.daysBetween(new DateTime(birthdate), today).getDays() / 365.25);
+		}
+
+		return days;
+	}
+
 	/*
 	 * ------- Attendance Database Queries used for GUI -------
 	 */
@@ -498,7 +509,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * "
 						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, EventName, VisitID, "
 						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, isInMasterDb, "
-						+ "         GithubName, RepoName, Comments, TeacherNames, "
+						+ "         GithubName, Birthdate, RepoName, Comments, TeacherNames, "
 						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
 						+ "      FROM SortedAttendance, Students "
 						+ "      WHERE isInMasterDb AND SortedAttendance.ClientID = Students.ClientID "
@@ -667,13 +678,14 @@ public class MySqlDatabase {
 	public ArrayList<AttendanceModel> getAttendanceByCourseName(String courseName) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 		ArrayList<AttendanceModel> listByClient;
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
-								+ "LastSFState, ServiceCategory, TeacherNames FROM Attendance, Students "
+								+ "LastSFState, ServiceCategory, TeacherNames, Birthdate FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -687,7 +699,8 @@ public class MySqlDatabase {
 
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					if (listByClient.size() == 0)
-						attendanceList.add(new AttendanceModel(thisClientID, name, result.getString("GithubName"),
+						attendanceList.add(new AttendanceModel(thisClientID, name,
+								getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
 								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
 										"", "", name, result.getString("ServiceCategory"), result.getString("State"),
 										result.getString("LastSFState"), result.getString("TeacherNames"))));
@@ -888,8 +901,8 @@ public class MySqlDatabase {
 		int lastClientID = -1;
 		AttendanceModel lastAttendanceModel = null;
 		boolean removeAttendance = false;
-		String beginDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
-				.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		String beginDate = today.minusDays(CLASS_ATTEND_NUM_DAYS_TO_KEEP).toString("yyyy-MM-dd");
 
 		// Process DB query result containing attendance by grouping the attendance by
 		// student and then adding the resulting Attendance Model to the attendanceList.
@@ -921,10 +934,10 @@ public class MySqlDatabase {
 						removeAttendance = false;
 
 					// Create student model for new client
-					lastAttendanceModel = new AttendanceModel(
-							thisClientID, new StudentNameModel(result.getString("FirstName"),
-									result.getString("LastName"), result.getBoolean("isInMasterDb")),
-							result.getString("GithubName"),
+					lastAttendanceModel = new AttendanceModel(thisClientID,
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
+									result.getBoolean("isInMasterDb")),
+							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
 							new AttendanceEventModel(thisClientID, result.getInt("VisitID"),
 									result.getDate("ServiceDate"), result.getString("EventName"),
 									result.getString("GithubName"), result.getString("RepoName"),

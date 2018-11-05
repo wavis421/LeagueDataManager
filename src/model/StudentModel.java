@@ -5,17 +5,19 @@ import java.sql.Date;
 public class StudentModel implements Comparable<StudentModel> {
 	private int clientID;
 	private String githubName, currentClass, staffSinceDate;
-	private int homeLocation, gender, gradYear, age, staffPastEvents;
+	private int homeLocation, gender, gradYear, staffPastEvents;
+	private Double age;
 	private Date startDate;
 	private StudentNameModel nameModel;
 	private boolean missingData;
 	private String email, acctMgrEmail, emergEmail, phone, acctMgrPhone, homePhone, emergPhone;
 
-	public StudentModel(int clientID, StudentNameModel nameModel, String githubName, int gender, Date startDate,
+	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String githubName, int gender, Date startDate,
 			int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail, String emergEmail,
 			String phone, String acctMgrPhone, String homePhone, String emergPhone) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
+		this.age = age;
 		this.githubName = githubName;
 		this.homeLocation = homeLocation;
 		this.gender = gender;
@@ -39,7 +41,7 @@ public class StudentModel implements Comparable<StudentModel> {
 			missingData = false;
 	}
 
-	public StudentModel(int clientID, StudentNameModel nameModel, int age, String currClass,
+	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String currClass,
 			String staffSinceDate, int staffPastEvents, String email, String phone) {
 		// Student model for student TA's
 		this.clientID = clientID;
@@ -132,7 +134,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		return emergPhone;
 	}
 
-	public int getAge() {
+	public Double getAge() {
 		return age;
 	}
 

@@ -69,12 +69,12 @@ public class TableHeaderBox implements ActionListener {
 		lvlBox = new JComboBox<Integer>(lvlArray);
 
 		// Configure sizes
-		classesField.setPreferredSize(new Dimension(60, classesField.getPreferredSize().height));
-		classesField.setMaximumSize(new Dimension(60, classesField.getPreferredSize().height));
-		ageBox.setPreferredSize(new Dimension(60, ageBox.getPreferredSize().height));
-		ageBox.setMaximumSize(new Dimension(60, ageBox.getPreferredSize().height));
-		lvlBox.setPreferredSize(new Dimension(60, lvlBox.getPreferredSize().height));
-		lvlBox.setMaximumSize(new Dimension(60, lvlBox.getPreferredSize().height));
+		classesField.setPreferredSize(new Dimension(65, classesField.getPreferredSize().height));
+		classesField.setMaximumSize(new Dimension(65, classesField.getPreferredSize().height));
+		ageBox.setPreferredSize(new Dimension(70, ageBox.getPreferredSize().height));
+		ageBox.setMaximumSize(new Dimension(70, ageBox.getPreferredSize().height));
+		lvlBox.setPreferredSize(new Dimension(65, lvlBox.getPreferredSize().height));
+		lvlBox.setMaximumSize(new Dimension(65, lvlBox.getPreferredSize().height));
 
 		// Border and colors
 		classesField.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));

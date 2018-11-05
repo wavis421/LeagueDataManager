@@ -120,6 +120,7 @@ public class StudentTable extends JPanel {
 
 		if (tableType == STANDARD_STUDENT_TABLE_TYPE) {
 			table.getColumnModel().getColumn(StudentTableModel.GENDER_COLUMN).setMaxWidth(35);
+			table.getColumnModel().getColumn(StudentTableModel.AGE_COLUMN).setMaxWidth(48);
 			table.getColumnModel().getColumn(StudentTableModel.START_DATE_COLUMN).setMaxWidth(105);
 			table.getColumnModel().getColumn(StudentTableModel.GRAD_YEAR_COLUMN).setMaxWidth(95);
 			table.getColumnModel().getColumn(StudentTableModel.HOME_LOCATION_COLUMN).setMaxWidth(165);

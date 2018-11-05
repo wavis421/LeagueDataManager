@@ -4,13 +4,16 @@ import java.util.ArrayList;
 
 public class AttendanceModel implements Comparable<AttendanceModel> {
 	private int clientID;
+	private Double age;
 	private StudentNameModel studentName;
 	private String githubName;
 	private ArrayList<AttendanceEventModel> attendanceEventList = new ArrayList<AttendanceEventModel>();
 
-	public AttendanceModel(int clientID, StudentNameModel studentName, String githubName, AttendanceEventModel event) {
+	public AttendanceModel(int clientID, StudentNameModel studentName, Double age, String githubName,
+			AttendanceEventModel event) {
 		this.clientID = clientID;
 		this.studentName = studentName;
+		this.age = age;
 		this.githubName = githubName;
 		this.attendanceEventList.add(event);
 	}
@@ -25,6 +28,10 @@ public class AttendanceModel implements Comparable<AttendanceModel> {
 
 	public int getClientID() {
 		return clientID;
+	}
+
+	public Double getAge() {
+		return age;
 	}
 
 	public StudentNameModel getStudentName() {
