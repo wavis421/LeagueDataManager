@@ -18,14 +18,14 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 	public static final int TIME_COLUMN = 2;
 	public static final int MODULE_RANGE_COLUMN = 3;
 	public static final int NUM_STUDENTS_COLUMN = 4;
-	public static final int MIN_AGE_COLUMN = 5;
-	public static final int MAX_AGE_COLUMN = 6;
-	public static final int AVG_AGE_COLUMN = 7;
+	public static final int AVG_AGE_COLUMN = 5;
+	public static final int MIN_AGE_COLUMN = 6;
+	public static final int MAX_AGE_COLUMN = 7;
 	public static final int NUM_COLUMNS = 8;
 
 	private ArrayList<ScheduleModel> schedList;
 	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " Current Module Range ", " # Students ",
-			" Min Age ", " Max Age ", " Avg Age " };
+			" Avg Age ", " Min Age ", " Max Age " };
 
 	public SchedDetailsTableModel(ArrayList<ScheduleModel> schedList) {
 		this.schedList = schedList;

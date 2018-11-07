@@ -618,6 +618,50 @@ public class MySqlDbImports {
 		}
 	}
 
+	public void updateMissingCurrentClass() {
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		DateTime endDate = today.plusDays(7);
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get next registered class for student
+				PreparedStatement selectStmt = sqlDb.dbConnection
+						.prepareStatement("SELECT Students.ClientID, EventName "
+								+ "FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
+								+ "AND CurrentClass = '' AND State = 'registered' AND ServiceDate >= ? AND ServiceDate <= ? "
+								+ "ORDER BY Students.ClientID, ServiceDate ASC;");
+				selectStmt.setString(1, today.toString("yyyy-MM-dd"));
+				selectStmt.setString(2, endDate.toString("yyyy-MM-dd"));
+				ResultSet result = selectStmt.executeQuery();
+
+				String lastClientID = "";
+				while (result.next()) {
+					String thisClientID = result.getString("Students.ClientID");
+					if (thisClientID.equals(lastClientID))
+						continue;
+
+					lastClientID = thisClientID;
+					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				StudentNameModel model = new StudentNameModel("", "", false);
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, model, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
 	private int addAttendance(int clientID, int visitID, String serviceDate, String eventName,
 			StudentNameModel nameModel, String teacherNames, String serviceCategory, String state) {
 		for (int i = 0; i < 2; i++) {
@@ -912,10 +956,10 @@ public class MySqlDbImports {
 
 				updateScheduleStmt.executeUpdate();
 				updateScheduleStmt.close();
-				
+
 				String countChanged = "";
 				if (dbEvent.getAttCount() != pike13Event.getAttCount())
-					countChanged = " (" + dbEvent.getAttCount() + " -> " + pike13Event.getAttCount() + ")";
+					countChanged = " (" + dbEvent.getAttCount() + " => " + pike13Event.getAttCount() + ")";
 
 				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
 						" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()] + " at "
