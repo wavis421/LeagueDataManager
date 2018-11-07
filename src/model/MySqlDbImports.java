@@ -146,7 +146,7 @@ public class MySqlDbImports {
 							result.getInt("isInMasterDb"), result.getString("Email"), result.getString("AcctMgrEmail"),
 							result.getString("EmergencyEmail"), result.getString("Phone"),
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("Birthdate"), 
+							result.getString("EmergencyPhone"), result.getString("Birthdate"),
 							result.getString("TASinceDate"), result.getInt("TAPastEvents")));
 				}
 
@@ -775,7 +775,9 @@ public class MySqlDbImports {
 				compare = dbList.get(dbListIdx).compareTo(importEvent);
 
 			if (compare == 0) {
-				// All data matches
+				// Class data matches, check misc fields
+				if (!dbList.get(dbListIdx).miscSchedFieldsMatch(importEvent))
+					updateClassInSchedule(dbList.get(dbListIdx).getScheduleID(), importEvent);
 				dbListIdx++;
 
 			} else if (compare > 0) {
@@ -797,8 +799,11 @@ public class MySqlDbImports {
 				}
 				// One final check to get in sync with importEvent
 				if (compare == 0) {
-					// Match, so continue incrementing through list
-					dbListIdx++;
+					// Match, so check misc fields then continue through list
+					if (!dbList.get(dbListIdx).miscSchedFieldsMatch(importEvent))
+						updateClassInSchedule(dbList.get(dbListIdx).getScheduleID(), importEvent);
+					dbListIdx++;					
+					
 				} else {
 					// Insert new event into DB
 					addClassToSchedule(importEvent);
@@ -848,7 +853,8 @@ public class MySqlDbImports {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addScheduleStmt = sqlDb.dbConnection.prepareStatement(
-						"INSERT INTO Schedule (DayOfWeek, StartTime, Duration, ClassName) VALUES (?, ?, ?, ?);");
+						"INSERT INTO Schedule (DayOfWeek, StartTime, Duration, ClassName, NumStudents, "
+								+ "MinAge, MaxAge, AverageAge) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				String className = importEvent.getClassName();
@@ -858,7 +864,11 @@ public class MySqlDbImports {
 				addScheduleStmt.setInt(col++, importEvent.getDuration());
 				if (className.length() >= CLASS_NAME_WIDTH)
 					className = className.substring(0, CLASS_NAME_WIDTH);
-				addScheduleStmt.setString(col, className);
+				addScheduleStmt.setString(col++, className);
+				addScheduleStmt.setInt(col++, importEvent.getAttCount());
+				addScheduleStmt.setString(col++, importEvent.getAgeMin());
+				addScheduleStmt.setString(col++, importEvent.getAgeMax());
+				addScheduleStmt.setString(col++, importEvent.getAgeAvg());
 
 				addScheduleStmt.executeUpdate();
 				addScheduleStmt.close();
@@ -877,6 +887,42 @@ public class MySqlDbImports {
 			} catch (SQLIntegrityConstraintViolationException e2) {
 				// Schedule data already exists, do nothing
 				break;
+
+			} catch (SQLException e3) {
+				MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e3.getMessage());
+				break;
+			}
+		}
+	}
+
+	private void updateClassInSchedule(int scheduleID, ScheduleModel importEvent) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateScheduleStmt = sqlDb.dbConnection.prepareStatement(
+						"UPDATE Schedule SET NumStudents=?, MinAge=?, MaxAge=?, AverageAge=? " + "WHERE ScheduleID=?;");
+
+				int col = 1;
+				updateScheduleStmt.setInt(col++, importEvent.getAttCount());
+				updateScheduleStmt.setString(col++, importEvent.getAgeMin());
+				updateScheduleStmt.setString(col++, importEvent.getAgeMax());
+				updateScheduleStmt.setString(col++, importEvent.getAgeAvg());
+				updateScheduleStmt.setInt(col, scheduleID);
+
+				updateScheduleStmt.executeUpdate();
+				updateScheduleStmt.close();
+
+				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
+						" for " + importEvent.getClassName() + " on " + dayOfWeek[importEvent.getDayOfWeek()] + " at "
+								+ importEvent.getStartTimeFormatted());
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
 
 			} catch (SQLException e3) {
 				MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,

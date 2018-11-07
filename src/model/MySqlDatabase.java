@@ -1120,11 +1120,58 @@ public class MySqlDatabase {
 						.prepareStatement("SELECT * FROM Schedule ORDER BY DayOfWeek, StartTime, ClassName, Duration;");
 				ResultSet result = selectStmt.executeQuery();
 
+				int totalCount = 0;
 				while (result.next()) {
-					String className = result.getString("ClassName");
-					eventList.add(new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
-							result.getString("StartTime"), result.getInt("Duration"), className));
+					totalCount++;
+					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
+							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
+					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("MinAge"),
+							result.getString("MaxAge"), result.getString("AverageAge"));
+					eventList.add(sched);
 				}
+				System.out.println("Total # classes: " + totalCount);
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return eventList;
+	}
+
+	public ArrayList<ScheduleModel> getClassDetails() {
+		ArrayList<ScheduleModel> eventList = new ArrayList<ScheduleModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get schedule data for weekly classes
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT * FROM Schedule WHERE LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '9' "
+								+ "ORDER BY DayOfWeek, StartTime, ClassName;");
+				ResultSet result = selectStmt.executeQuery();
+
+				int totalCount = 0;
+				while (result.next()) {
+					totalCount++;
+					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
+							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
+					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("MinAge"),
+							result.getString("MaxAge"), result.getString("AverageAge"));
+					eventList.add(sched);
+				}
+				System.out.println("Total # classes: " + totalCount);
 
 				result.close();
 				selectStmt.close();

@@ -19,11 +19,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -86,7 +83,6 @@ public class MainFrame {
 	private static final int MIN_CLASSES_WITH_NO_GITHUB = 3;
 
 	/* Private instance variables */
-	private Preferences prefs = Preferences.userRoot();
 	private static Controller controller;
 	private JPanel mainPanel;
 	private JPanel tablePanel = new JPanel();
@@ -101,7 +97,6 @@ public class MainFrame {
 	private JTable activeTable;
 	private JTextField searchField;
 	private String activeTableHeader;
-	private String githubToken, pike13Token;
 	private ImageIcon icon;
 	private static JFrame frame = new JFrame();
 
@@ -123,16 +118,10 @@ public class MainFrame {
 		PasswordDialog pwDialog = new PasswordDialog();
 		String awsPassword = pwDialog.getDialogResponse();
 
-		// Retrieve tokens for Pike13 and Github access
-		githubToken = prefs.get("GithubToken", "");
-		pike13Token = prefs.get("Pike13Token", "");
-		if (pike13Token.equals(""))
-			pike13Token = getPike13TokenFromFile();
-
 		// Create components
 		mainPanel = new JPanel(new BorderLayout());
 		frame.add(mainPanel);
-		controller = new Controller(frame, awsPassword, githubToken, pike13Token, icon);
+		controller = new Controller(frame, awsPassword, icon);
 
 		// Check if database key file exists
 		File tmpFile = new File(controller.getKeyFilePath());
@@ -433,14 +422,22 @@ public class MainFrame {
 	private void createScheduleMenu(JMenu scheduleMenu) {
 		// Create sub-menu for the Schedule menu
 		JMenuItem scheduleViewMenu = new JMenuItem("View Weekly Class Schedule ");
+		JMenuItem schedDetailMenu = new JMenuItem("View Weekly Class Details ");
 		JMenuItem courseViewMenu = new JMenuItem("View Workshop and Summer Slam Schedule ");
 		scheduleMenu.add(scheduleViewMenu);
+		scheduleMenu.add(schedDetailMenu);
 		scheduleMenu.add(courseViewMenu);
 
 		// Set up listeners for Schedule menu
 		scheduleViewMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshScheduleTable();
+			}
+		});
+		schedDetailMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO: Create new table to display weekly class info
+				controller.getWeeklyClassDetails();
 			}
 		});
 		courseViewMenu.addActionListener(new ActionListener() {
@@ -780,23 +777,6 @@ public class MainFrame {
 		githubTable.removeData();
 		coursesTable.removeData();
 		gradTable.removeData();
-	}
-
-	private String getPike13TokenFromFile() {
-		try {
-			File file = new File("./Pike13Token.txt");
-			FileInputStream fis = new FileInputStream(file);
-
-			byte[] data = new byte[(int) file.length()];
-			fis.read(data);
-			fis.close();
-
-			return new String(data, "UTF-8");
-
-		} catch (IOException e) {
-			// Do nothing if file is not there
-		}
-		return "";
 	}
 
 	public static void shutdown() {

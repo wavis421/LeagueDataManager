@@ -5,8 +5,9 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 
 public class ScheduleModel implements Comparable<ScheduleModel> {
-	private int scheduleID, dayOfWeek, duration;
+	private int scheduleID, dayOfWeek, duration, attCount;
 	private String startTime, startTimeFormatted, className;
+	private String ageMin, ageMax, ageAvg;
 
 	public ScheduleModel(int scheduleID, int dayOfWeek, String startTime, int duration, String className) {
 		this.scheduleID = scheduleID;
@@ -14,6 +15,7 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 		this.startTime = startTime;
 		this.duration = duration;
 		this.className = className;
+		ageMin = ageMax = ageAvg = "";
 
 		// Need original startTime for sorting; create formatted start time as 12 hour
 		MutableDateTime mdt = (new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))).toMutableDateTime();
@@ -44,6 +46,38 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 
 	public String getClassName() {
 		return className;
+	}
+
+	public int getAttCount() {
+		return attCount;
+	}
+
+	public String getAgeMin() {
+		return ageMin;
+	}
+
+	public String getAgeMax() {
+		return ageMax;
+	}
+
+	public String getAgeAvg() {
+		return ageAvg;
+	}
+
+	public void setMiscSchedFields(int attCount, String minAge, String maxAge, String avgAge) {
+		this.attCount = attCount;
+		this.ageMin = minAge;
+		this.ageMax = maxAge;
+		this.ageAvg = avgAge;
+	}
+
+	public boolean miscSchedFieldsMatch(ScheduleModel other) {
+		// Check if miscellaneous schedule fields match
+		if (attCount == other.getAttCount() && ageMin.equals(other.getAgeMin()) && ageMax.equals(other.getAgeMax())
+				&& ageAvg.equals(other.getAgeAvg()))
+			return true;
+		else
+			return false;
 	}
 
 	@Override

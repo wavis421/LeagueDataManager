@@ -25,17 +25,14 @@ public class Controller {
 	public static final String GRAD_MODEL_VERIFIED_FIELD = MySqlDatabase.GRAD_MODEL_VERIFIED_FIELD;
 
 	private MySqlDatabase sqlDb;
-	private Pike13Api pike13Api;
 	private JFrame parent;
 	private ImageIcon icon;
 
-	public Controller(JFrame parent, String awsPassword, String githubToken, String pike13Token, ImageIcon icon) {
+	public Controller(JFrame parent, String awsPassword, ImageIcon icon) {
 		this.parent = parent;
 		this.icon = icon;
 		sqlDb = new MySqlDatabase(parent, awsPassword, MySqlDatabase.TRACKER_APP_SSH_PORT);
 		new MySqlDbLogging(sqlDb);
-		new GithubApi(sqlDb, githubToken);
-		pike13Api = new Pike13Api(sqlDb, pike13Token);
 	}
 
 	/*
@@ -180,6 +177,13 @@ public class Controller {
 
 	public ArrayList<ScheduleModel> getClassSchedule() {
 		ArrayList<ScheduleModel> result = sqlDb.getClassSchedule();
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
+	}
+	
+	public ArrayList<ScheduleModel> getWeeklyClassDetails() {
+		ArrayList<ScheduleModel> result = sqlDb.getClassDetails();
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;
