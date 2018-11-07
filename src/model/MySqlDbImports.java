@@ -777,7 +777,7 @@ public class MySqlDbImports {
 			if (compare == 0) {
 				// Class data matches, check misc fields
 				if (!dbList.get(dbListIdx).miscSchedFieldsMatch(importEvent))
-					updateClassInSchedule(dbList.get(dbListIdx).getScheduleID(), importEvent);
+					updateClassInSchedule(dbList.get(dbListIdx), importEvent);
 				dbListIdx++;
 
 			} else if (compare > 0) {
@@ -801,9 +801,9 @@ public class MySqlDbImports {
 				if (compare == 0) {
 					// Match, so check misc fields then continue through list
 					if (!dbList.get(dbListIdx).miscSchedFieldsMatch(importEvent))
-						updateClassInSchedule(dbList.get(dbListIdx).getScheduleID(), importEvent);
-					dbListIdx++;					
-					
+						updateClassInSchedule(dbList.get(dbListIdx), importEvent);
+					dbListIdx++;
+
 				} else {
 					// Insert new event into DB
 					addClassToSchedule(importEvent);
@@ -896,7 +896,7 @@ public class MySqlDbImports {
 		}
 	}
 
-	private void updateClassInSchedule(int scheduleID, ScheduleModel importEvent) {
+	private void updateClassInSchedule(ScheduleModel dbEvent, ScheduleModel pike13Event) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
@@ -904,18 +904,22 @@ public class MySqlDbImports {
 						"UPDATE Schedule SET NumStudents=?, MinAge=?, MaxAge=?, AverageAge=? " + "WHERE ScheduleID=?;");
 
 				int col = 1;
-				updateScheduleStmt.setInt(col++, importEvent.getAttCount());
-				updateScheduleStmt.setString(col++, importEvent.getAgeMin());
-				updateScheduleStmt.setString(col++, importEvent.getAgeMax());
-				updateScheduleStmt.setString(col++, importEvent.getAgeAvg());
-				updateScheduleStmt.setInt(col, scheduleID);
+				updateScheduleStmt.setInt(col++, pike13Event.getAttCount());
+				updateScheduleStmt.setString(col++, pike13Event.getAgeMin());
+				updateScheduleStmt.setString(col++, pike13Event.getAgeMax());
+				updateScheduleStmt.setString(col++, pike13Event.getAgeAvg());
+				updateScheduleStmt.setInt(col, dbEvent.getScheduleID());
 
 				updateScheduleStmt.executeUpdate();
 				updateScheduleStmt.close();
+				
+				String countChanged = "";
+				if (dbEvent.getAttCount() != pike13Event.getAttCount())
+					countChanged = " (" + dbEvent.getAttCount() + " -> " + pike13Event.getAttCount() + ")";
 
 				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
-						" for " + importEvent.getClassName() + " on " + dayOfWeek[importEvent.getDayOfWeek()] + " at "
-								+ importEvent.getStartTimeFormatted());
+						" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()] + " at "
+								+ pike13Event.getStartTimeFormatted() + countChanged);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

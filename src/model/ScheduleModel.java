@@ -6,8 +6,10 @@ import org.joda.time.MutableDateTime;
 
 public class ScheduleModel implements Comparable<ScheduleModel> {
 	private int scheduleID, dayOfWeek, duration, attCount;
-	private String startTime, startTimeFormatted, className;
+	private String startTime, startTimeFormatted, dowFormatted, className;
 	private String ageMin, ageMax, ageAvg;
+	private static final String[] dowAsString = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+			"Saturday" };
 
 	public ScheduleModel(int scheduleID, int dayOfWeek, String startTime, int duration, String className) {
 		this.scheduleID = scheduleID;
@@ -22,6 +24,7 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 		mdt.setHourOfDay(Integer.parseInt(startTime.substring(0, 2)));
 		mdt.setMinuteOfHour(Integer.parseInt(startTime.substring(3, 5)));
 		this.startTimeFormatted = mdt.toDateTime().toString("h:mm a");
+		this.dowFormatted = dowAsString[dayOfWeek];
 	}
 
 	public int getScheduleID() {
@@ -30,6 +33,10 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 
 	public int getDayOfWeek() {
 		return dayOfWeek;
+	}
+
+	public String getDayOfWeekFormatted() {
+		return dowFormatted;
 	}
 
 	public String getStartTime() {

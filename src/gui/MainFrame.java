@@ -48,6 +48,7 @@ import model.GithubModel;
 import model.GraduationModel;
 import model.LocationLookup;
 import model.LogDataModel;
+import model.ScheduleModel;
 
 public class MainFrame {
 	/* Private constants */
@@ -64,6 +65,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
+	private static final String SCHED_DETAILS_TITLE = "Weekly Class Details";
 	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
@@ -91,6 +93,7 @@ public class MainFrame {
 	private AttendanceTable attendanceTable;
 	private LogTable logTable;
 	private ScheduleTable scheduleTable;
+	private SchedDetailsTable schedDetailsTable;
 	private GithubTable githubTable;
 	private CoursesTable coursesTable;
 	private GraduationTable gradTable;
@@ -159,6 +162,7 @@ public class MainFrame {
 		attendanceTable = new AttendanceTable(tablePanel, new ArrayList<AttendanceModel>());
 		logTable = new LogTable(tablePanel, new ArrayList<LogDataModel>());
 		scheduleTable = new ScheduleTable(tablePanel);
+		schedDetailsTable = new SchedDetailsTable(tablePanel, new ArrayList<ScheduleModel>());
 		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
 		coursesTable = new CoursesTable(tablePanel, new ArrayList<CoursesModel>());
 		gradTable = new GraduationTable(tablePanel, new ArrayList<GraduationModel>());
@@ -243,6 +247,8 @@ public class MainFrame {
 					scheduleTable.updateSearchField(searchField.getText());
 				else if (activeTable == gradTable.getTable())
 					gradTable.updateSearchField(searchField.getText());
+				else if (activeTable == schedDetailsTable.getTable())
+					schedDetailsTable.updateSearchField(searchField.getText());
 			}
 		});
 
@@ -437,7 +443,7 @@ public class MainFrame {
 		schedDetailMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// TODO: Create new table to display weekly class info
-				controller.getWeeklyClassDetails();
+				refreshSchedDetailsTable();
 			}
 		});
 		courseViewMenu.addActionListener(new ActionListener() {
@@ -631,6 +637,7 @@ public class MainFrame {
 		githubTable.setTableListener(listener);
 		coursesTable.setTableListener(listener);
 		gradTable.setTableListener(listener);
+		schedDetailsTable.setTableListener(listener);
 		TableHeaderBox.setTableListener(listener);
 	}
 
@@ -738,6 +745,21 @@ public class MainFrame {
 		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
 	}
 
+	private void refreshSchedDetailsTable() {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add log data table and header
+		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails());
+		headerLabel.setText(SCHED_DETAILS_TITLE);
+		searchField.setText("");
+		schedDetailsTable.updateSearchField("");
+
+		activeTable = schedDetailsTable.getTable();
+		activeTableHeader = headerLabel.getText();
+		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+	}
+
 	private void refreshCoursesTable() {
 		// Remove data being displayed
 		removeDataFromTables();
@@ -777,6 +799,7 @@ public class MainFrame {
 		githubTable.removeData();
 		coursesTable.removeData();
 		gradTable.removeData();
+		schedDetailsTable.removeData();
 	}
 
 	public static void shutdown() {
