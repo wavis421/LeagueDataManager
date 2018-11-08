@@ -150,7 +150,7 @@ public class MainFrame {
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		new TableHeaderBox(headerLabel);
-		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD), BorderLayout.NORTH);
+		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY), BorderLayout.NORTH);
 
 		// Default tables to display all data
 		headerLabel.setText(STUDENT_TITLE);
@@ -352,7 +352,7 @@ public class MainFrame {
 		studentNotInMasterMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Show all students not in master database
-				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0);
+				refreshStudentTable(STUDENT_TABLE_NOT_IN_MASTER_DB, 0, true);
 			}
 		});
 		studentNoRecentGitItem.addActionListener(new ActionListener() {
@@ -377,22 +377,23 @@ public class MainFrame {
 		});
 		studentViewEmailMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_EMAIL_ALL, 0);
+				refreshStudentTable(STUDENT_TABLE_EMAIL_ALL, 0, true);
 			}
 		});
 		studentViewPhoneMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_PHONE_ALL, 0);
+				refreshStudentTable(STUDENT_TABLE_PHONE_ALL, 0, true);
 			}
 		});
 		studentViewTAMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0);
+				TableHeaderBox.clearFilters();
+				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0, true);
 			}
 		});
 		studentViewAllMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshStudentTable(STUDENT_TABLE_ALL, 0);
+				refreshStudentTable(STUDENT_TABLE_ALL, 0, true);
 			}
 		});
 	}
@@ -442,8 +443,8 @@ public class MainFrame {
 		});
 		schedDetailMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Create new table to display weekly class info
-				refreshSchedDetailsTable();
+				TableHeaderBox.clearFilters();
+				refreshSchedDetailsTable(TableHeaderBox.getDowSelectList(), true);
 			}
 		});
 		courseViewMenu.addActionListener(new ActionListener() {
@@ -552,7 +553,7 @@ public class MainFrame {
 		TableListeners listener = new TableListeners() {
 			@Override
 			public void viewStudentTableByStudent(int clientID) {
-				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID);
+				refreshStudentTable(STUDENT_TABLE_BY_STUDENT, clientID, true);
 			}
 
 			@Override
@@ -613,19 +614,25 @@ public class MainFrame {
 			@Override
 			public void viewEmailByStudent(int clientID) {
 				// Get student's email info
-				refreshStudentTable(STUDENT_TABLE_EMAIL_BY_STUDENT, clientID);
+				refreshStudentTable(STUDENT_TABLE_EMAIL_BY_STUDENT, clientID, true);
 			}
 
 			@Override
 			public void viewPhoneByStudent(int clientID) {
 				// Get student's phone numbers
-				refreshStudentTable(STUDENT_TABLE_PHONE_BY_STUDENT, clientID);
+				refreshStudentTable(STUDENT_TABLE_PHONE_BY_STUDENT, clientID, true);
 			}
 
 			@Override
 			public void viewActiveTAs() {
 				// View active TA's using TA table filters
-				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0);
+				refreshStudentTable(STUDENT_TABLE_FOR_TA, 0, false);
+			}
+
+			@Override
+			public void viewClassDetails(boolean[] dowSelectList) {
+				// View class details using DOW filters
+				refreshSchedDetailsTable(dowSelectList, false);
 			}
 		};
 
@@ -641,10 +648,10 @@ public class MainFrame {
 		TableHeaderBox.setTableListener(listener);
 	}
 
-	private void refreshStudentTable(int tableType, int clientID) {
+	private void refreshStudentTable(int tableType, int clientID, boolean clearSearch) {
 		// Remove data being displayed
 		removeDataFromTables();
-		int state = TableHeaderBox.STANDARD;
+		int state = TableHeaderBox.HDR_EMPTY;
 
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
@@ -684,14 +691,15 @@ public class MainFrame {
 
 		else { // STUDENT_TABLE_FOR_TA
 			headerLabel.setText(STUDENT_TA_TITLE);
-			state = TableHeaderBox.EXTRA;
+			state = TableHeaderBox.HDR_STUDENT_TA;
 			TableHeaderBox.refreshHeader(state);
 			studentTable.setData(tablePanel, controller.getActiveTAs(TableHeaderBox.getMinClasses(),
 					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE);
 		}
-
-		searchField.setText("");
-		studentTable.updateSearchField("");
+		if (clearSearch) {
+			searchField.setText("");
+			studentTable.updateSearchField("");
+		}
 
 		// Update current table type
 		activeTable = studentTable.getTable();
@@ -712,7 +720,7 @@ public class MainFrame {
 
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
 	private void refreshLogTable() {
@@ -727,7 +735,7 @@ public class MainFrame {
 
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
 	private void refreshScheduleTable() {
@@ -742,22 +750,24 @@ public class MainFrame {
 
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
-	private void refreshSchedDetailsTable() {
+	private void refreshSchedDetailsTable(boolean[] dowSelectList, boolean clearSearch) {
 		// Remove data being displayed
 		removeDataFromTables();
 
-		// Add log data table and header
-		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails());
+		// Add schedule data table and header
+		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails(dowSelectList));
 		headerLabel.setText(SCHED_DETAILS_TITLE);
-		searchField.setText("");
-		schedDetailsTable.updateSearchField("");
+		if (clearSearch) {
+			searchField.setText("");
+			schedDetailsTable.updateSearchField("");
+		}
 
 		activeTable = schedDetailsTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_CLASS_DETAILS);
 	}
 
 	private void refreshCoursesTable() {
@@ -772,7 +782,7 @@ public class MainFrame {
 
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
 	private void refreshGradTable() {
@@ -787,7 +797,7 @@ public class MainFrame {
 
 		activeTable = gradTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.STANDARD);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
 	private void removeDataFromTables() {

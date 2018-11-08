@@ -1151,15 +1151,31 @@ public class MySqlDatabase {
 		return eventList;
 	}
 
-	public ArrayList<ScheduleModel> getClassDetails() {
+	public ArrayList<ScheduleModel> getClassDetails(boolean[] dowSelectList) {
 		ArrayList<ScheduleModel> eventList = new ArrayList<ScheduleModel>();
+
+		// Create dow select fields for the mySql command
+		String dowSelect = " AND (";
+		boolean isDowSelected = false;
+		for (int i = 0; i < dowSelectList.length; i++) {
+			if (dowSelectList[i]) {
+				if (isDowSelected)
+					dowSelect += " OR ";
+				dowSelect += "DayOfWeek=" + i;
+				isDowSelected = true;
+			}
+		}
+		if (isDowSelected)
+			dowSelect += ") ";
+		else
+			dowSelect = "";
 
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Get schedule data for weekly classes
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Schedule WHERE LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '9' "
-								+ "ORDER BY DayOfWeek, StartTime, ClassName;");
+								+ dowSelect + "ORDER BY DayOfWeek, StartTime, ClassName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				int totalCount = 0;

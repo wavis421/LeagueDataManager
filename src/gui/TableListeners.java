@@ -13,4 +13,5 @@ public interface TableListeners {
 	public void viewEmailByStudent(int clientID);
 	public void viewPhoneByStudent(int clientID);
 	public void viewActiveTAs();
+	public void viewClassDetails(boolean[] dowSelectList);
 }

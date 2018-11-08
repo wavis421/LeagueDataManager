@@ -182,8 +182,8 @@ public class Controller {
 		return result;
 	}
 	
-	public ArrayList<ScheduleModel> getWeeklyClassDetails() {
-		ArrayList<ScheduleModel> result = sqlDb.getClassDetails();
+	public ArrayList<ScheduleModel> getWeeklyClassDetails(boolean[] dowSelectList) {
+		ArrayList<ScheduleModel> result = sqlDb.getClassDetails(dowSelectList);
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;
