@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -19,6 +20,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
@@ -47,6 +49,7 @@ public class StudentTable extends JPanel {
 	private JScrollPane scrollPane;
 
 	private TableRowSorter<StudentTableModel> rowSorter;
+	private List<? extends SortKey> defaultSortKeys, currSortKeys;
 
 	public StudentTable(JPanel tablePanel, ArrayList<StudentModel> studentList) {
 		this.tablePanel = tablePanel;
@@ -59,6 +62,7 @@ public class StudentTable extends JPanel {
 		createStudentTablePopups();
 
 		rowSorter = new TableRowSorter<StudentTableModel>((StudentTableModel) table.getModel());
+		defaultSortKeys = rowSorter.getSortKeys();
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -69,15 +73,24 @@ public class StudentTable extends JPanel {
 		return table;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList, int tableType) {
+	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList, int tableType,
+			boolean clearTableSettings) {
 		this.tableType = tableType;
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		currSortKeys = rowSorter.getSortKeys();
 
 		studentTableModel.setData(studentList, tableType);
 		studentTableModel.fireTableStructureChanged();
 		configureColumnWidths();
+
+		// If table settings being cleared, go back to default sorting
+		if (clearTableSettings)
+			rowSorter.setSortKeys(defaultSortKeys);
+		else
+			rowSorter.setSortKeys(currSortKeys);
+
 		studentTableModel.fireTableDataChanged();
 	}
 

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -18,6 +19,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
@@ -44,6 +46,7 @@ public class SchedDetailsTable extends JPanel {
 	private JScrollPane scrollPane;
 
 	private TableRowSorter<SchedDetailsTableModel> rowSorter;
+	private List<? extends SortKey> defaultSortKeys, currSortKeys = null;
 
 	public SchedDetailsTable(JPanel tablePanel, ArrayList<ScheduleModel> arrayList) {
 		this.tablePanel = tablePanel;
@@ -55,6 +58,7 @@ public class SchedDetailsTable extends JPanel {
 		createSchedTablePopups();
 
 		rowSorter = new TableRowSorter<SchedDetailsTableModel>((SchedDetailsTableModel) table.getModel());
+		defaultSortKeys = rowSorter.getSortKeys();
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -65,12 +69,21 @@ public class SchedDetailsTable extends JPanel {
 		return table;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<ScheduleModel> schedList) {
+	public void setData(JPanel tablePanel, ArrayList<ScheduleModel> schedList, boolean clearTableSettings) {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
+		currSortKeys = rowSorter.getSortKeys();
 
+		// Update schedule data model
 		schedTablemodel.setData(schedList);
+
+		// If table settings being cleared, go back to default sorting
+		if (clearTableSettings)
+			rowSorter.setSortKeys(defaultSortKeys);
+		else
+			rowSorter.setSortKeys(currSortKeys);
+
 		schedTablemodel.fireTableDataChanged();
 	}
 

@@ -656,37 +656,40 @@ public class MainFrame {
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
 			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.STANDARD_STUDENT_TABLE_TYPE,
+					clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB(),
-					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+					StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_BY_STUDENT) {
 			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.STANDARD_STUDENT_TABLE_TYPE);
+					StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_EMAIL_ALL) {
 			headerLabel.setText(STUDENT_EMAIL_TITLE);
-			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.EMAIL_STUDENT_TABLE_TYPE);
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.EMAIL_STUDENT_TABLE_TYPE,
+					clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_PHONE_ALL) {
 			headerLabel.setText(STUDENT_PHONE_TITLE);
-			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.PHONE_STUDENT_TABLE_TYPE);
+			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.PHONE_STUDENT_TABLE_TYPE,
+					clearSearch);
 		}
 
 		else if (tableType == STUDENT_TABLE_EMAIL_BY_STUDENT) {
 			headerLabel.setText(STUDENT_EMAIL_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.EMAIL_STUDENT_TABLE_TYPE);
+					StudentTable.EMAIL_STUDENT_TABLE_TYPE, clearSearch);
 		}
 
 		else if (tableType == STUDENT_TABLE_PHONE_BY_STUDENT) {
 			headerLabel.setText(STUDENT_PHONE_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.PHONE_STUDENT_TABLE_TYPE);
+					StudentTable.PHONE_STUDENT_TABLE_TYPE, clearSearch);
 		}
 
 		else { // STUDENT_TABLE_FOR_TA
@@ -694,7 +697,8 @@ public class MainFrame {
 			state = TableHeaderBox.HDR_STUDENT_TA;
 			TableHeaderBox.refreshHeader(state);
 			studentTable.setData(tablePanel, controller.getActiveTAs(TableHeaderBox.getMinClasses(),
-					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE);
+					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE, 
+					clearSearch);
 		}
 		if (clearSearch) {
 			searchField.setText("");
@@ -758,7 +762,7 @@ public class MainFrame {
 		removeDataFromTables();
 
 		// Add schedule data table and header
-		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails(dowSelectList));
+		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails(dowSelectList), clearSearch);
 		headerLabel.setText(SCHED_DETAILS_TITLE);
 		if (clearSearch) {
 			searchField.setText("");
