@@ -457,15 +457,25 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateLastEventNameByStudent(int clientID, String eventName) {
+	public void updateLastEventNameByStudent(int clientID, String eventName, String repoName) {
+		String module = parseRepoName(eventName, repoName);
+		
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateStudentStmt = dbConnection
-						.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
+				PreparedStatement updateStudentStmt;
+				if (module == null)
+					updateStudentStmt = dbConnection
+							.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
+				else
+					updateStudentStmt = dbConnection
+							.prepareStatement("UPDATE Students SET CurrentClass=?, CurrentModule=? WHERE ClientID=?;");
 
-				updateStudentStmt.setString(1, eventName);
-				updateStudentStmt.setInt(2, clientID);
+				int col = 1;
+				updateStudentStmt.setString(col++, eventName);
+				if (module != null)
+					updateStudentStmt.setString(col++, module);
+				updateStudentStmt.setInt(col, clientID);
 
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
@@ -484,6 +494,29 @@ public class MySqlDatabase {
 				break;
 			}
 		}
+	}
+
+	private String parseRepoName(String eventName, String repoName) {
+		// Extract module from repo name: level must match event name level
+		String newRepoName = null;
+
+		if (repoName != null) {
+			int idx;
+			// Github classroom names are formatted level-0-module-3 OR level3-module1
+			if (repoName.startsWith("level" + eventName.charAt(0) + "-module"))
+				idx = 13;
+			else if (repoName.startsWith("level-" + eventName.charAt(0) + "-module"))
+				idx = 14;
+			else
+				return null;
+
+			if (repoName.charAt(idx) == '-')
+				idx++;
+			
+			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' && repoName.charAt(idx + 1) == '-')
+				newRepoName = repoName.substring(idx, idx + 1);
+		}
+		return newRepoName;
 	}
 
 	private Double getAge(DateTime today, String birthdate) {

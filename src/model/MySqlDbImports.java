@@ -641,7 +641,7 @@ public class MySqlDbImports {
 						continue;
 
 					lastClientID = thisClientID;
-					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"));
+					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"), null);
 				}
 
 				result.close();
