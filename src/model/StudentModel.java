@@ -4,7 +4,7 @@ import java.sql.Date;
 
 public class StudentModel implements Comparable<StudentModel> {
 	private int clientID;
-	private String githubName, currentClass, staffSinceDate;
+	private String githubName, currentClass, currentModule, staffSinceDate;
 	private int homeLocation, gender, gradYear, staffPastEvents;
 	private Double age;
 	private Date startDate;
@@ -12,9 +12,10 @@ public class StudentModel implements Comparable<StudentModel> {
 	private boolean missingData;
 	private String email, acctMgrEmail, emergEmail, phone, acctMgrPhone, homePhone, emergPhone;
 
-	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String githubName, int gender, Date startDate,
-			int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail, String emergEmail,
-			String phone, String acctMgrPhone, String homePhone, String emergPhone) {
+	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String githubName, int gender,
+			Date startDate, int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail,
+			String emergEmail, String phone, String acctMgrPhone, String homePhone, String emergPhone,
+			String currModule) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.age = age;
@@ -24,6 +25,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.gradYear = gradYear;
 		this.startDate = startDate;
 		this.currentClass = currClass;
+		this.currentModule = currModule;
 
 		this.email = email;
 		this.acctMgrEmail = acctMgrEmail;
@@ -41,8 +43,8 @@ public class StudentModel implements Comparable<StudentModel> {
 			missingData = false;
 	}
 
-	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String currClass,
-			String staffSinceDate, int staffPastEvents, String email, String phone) {
+	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String currClass, String staffSinceDate,
+			int staffPastEvents, String email, String phone) {
 		// Student model for student TA's
 		this.clientID = clientID;
 		this.nameModel = nameModel;
@@ -102,8 +104,8 @@ public class StudentModel implements Comparable<StudentModel> {
 		return currentClass;
 	}
 
-	public void setCurrentClass(String currentClass) {
-		this.currentClass = currentClass;
+	public String getCurrentModule() {
+		return currentModule;
 	}
 
 	public String getEmail() {

@@ -641,7 +641,8 @@ public class MySqlDbImports {
 						continue;
 
 					lastClientID = thisClientID;
-					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"), null);
+					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"),
+							null);
 				}
 
 				result.close();
@@ -898,7 +899,7 @@ public class MySqlDbImports {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addScheduleStmt = sqlDb.dbConnection.prepareStatement(
 						"INSERT INTO Schedule (DayOfWeek, StartTime, Duration, ClassName, NumStudents, "
-								+ "MinAge, MaxAge, AverageAge) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+								+ "Youngest, Oldest, AverageAge, ModuleCount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				String className = importEvent.getClassName();
@@ -910,9 +911,10 @@ public class MySqlDbImports {
 					className = className.substring(0, CLASS_NAME_WIDTH);
 				addScheduleStmt.setString(col++, className);
 				addScheduleStmt.setInt(col++, importEvent.getAttCount());
-				addScheduleStmt.setString(col++, importEvent.getAgeMin());
-				addScheduleStmt.setString(col++, importEvent.getAgeMax());
-				addScheduleStmt.setString(col++, importEvent.getAgeAvg());
+				addScheduleStmt.setString(col++, importEvent.getYoungest());
+				addScheduleStmt.setString(col++, importEvent.getOldest());
+				addScheduleStmt.setString(col++, importEvent.getAverageAge());
+				addScheduleStmt.setString(col++, importEvent.getModuleCount());
 
 				addScheduleStmt.executeUpdate();
 				addScheduleStmt.close();
@@ -945,13 +947,15 @@ public class MySqlDbImports {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateScheduleStmt = sqlDb.dbConnection.prepareStatement(
-						"UPDATE Schedule SET NumStudents=?, MinAge=?, MaxAge=?, AverageAge=? " + "WHERE ScheduleID=?;");
+						"UPDATE Schedule SET NumStudents=?, Youngest=?, Oldest=?, AverageAge=?, ModuleCount=? "
+								+ "WHERE ScheduleID=?;");
 
 				int col = 1;
 				updateScheduleStmt.setInt(col++, pike13Event.getAttCount());
-				updateScheduleStmt.setString(col++, pike13Event.getAgeMin());
-				updateScheduleStmt.setString(col++, pike13Event.getAgeMax());
-				updateScheduleStmt.setString(col++, pike13Event.getAgeAvg());
+				updateScheduleStmt.setString(col++, pike13Event.getYoungest());
+				updateScheduleStmt.setString(col++, pike13Event.getOldest());
+				updateScheduleStmt.setString(col++, pike13Event.getAverageAge());
+				updateScheduleStmt.setString(col++, pike13Event.getModuleCount());
 				updateScheduleStmt.setInt(col, dbEvent.getScheduleID());
 
 				updateScheduleStmt.executeUpdate();

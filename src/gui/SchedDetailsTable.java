@@ -106,18 +106,18 @@ public class SchedDetailsTable extends JPanel {
 		// Configure column widths
 		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setPreferredWidth(300);
 		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setMaxWidth(600);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setPreferredWidth(170);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setMaxWidth(200);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setMaxWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setMaxWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setMaxWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setMaxWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setMaxWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setPreferredWidth(135);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setMaxWidth(135);
 		table.getColumnModel().getColumn(SchedDetailsTableModel.MODULE_RANGE_COLUMN).setPreferredWidth(400);
 
 		table.setDefaultRenderer(Object.class, new SchedDetailTableRenderer());

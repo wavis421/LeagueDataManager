@@ -16,16 +16,16 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 	public static final int CLASS_NAME_COLUMN = 0;
 	public static final int DOW_COLUMN = 1;
 	public static final int TIME_COLUMN = 2;
-	public static final int MODULE_RANGE_COLUMN = 3;
-	public static final int NUM_STUDENTS_COLUMN = 4;
+	public static final int NUM_STUDENTS_COLUMN = 3;
+	public static final int MODULE_RANGE_COLUMN = 4;
 	public static final int AVG_AGE_COLUMN = 5;
 	public static final int MIN_AGE_COLUMN = 6;
 	public static final int MAX_AGE_COLUMN = 7;
 	public static final int NUM_COLUMNS = 8;
 
 	private ArrayList<ScheduleModel> schedList;
-	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " Current Module Range ", " # Students ",
-			" Avg Age ", " Min Age ", " Max Age " };
+	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " # Students ", " Current Module Range ",
+			" Avg Age ", " Youngest ", " Oldest " };
 
 	public SchedDetailsTableModel(ArrayList<ScheduleModel> schedList) {
 		this.schedList = schedList;
@@ -76,13 +76,13 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 		case NUM_STUDENTS_COLUMN:
 			return ((Integer) sched.getAttCount()).toString();
 		case MIN_AGE_COLUMN:
-			return sched.getAgeMin();
+			return sched.getYoungest();
 		case MAX_AGE_COLUMN:
-			return sched.getAgeMax();
+			return sched.getOldest();
 		case AVG_AGE_COLUMN:
-			return sched.getAgeAvg();
+			return sched.getAverageAge();
 		case MODULE_RANGE_COLUMN:
-			return "";
+			return sched.getModuleCount();
 		}
 		return null;
 	}

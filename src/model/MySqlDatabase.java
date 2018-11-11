@@ -123,7 +123,7 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
 				}
 
 				result.close();
@@ -167,7 +167,7 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
 				}
 
 				result.close();
@@ -281,7 +281,7 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
 				}
 
 				result.close();
@@ -362,7 +362,7 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
 				}
 
 				result.close();
@@ -405,7 +405,7 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
 				}
 
 				result.close();
@@ -1158,8 +1158,8 @@ public class MySqlDatabase {
 					totalCount++;
 					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
 							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
-					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("MinAge"),
-							result.getString("MaxAge"), result.getString("AverageAge"));
+					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("Youngest"),
+							result.getString("Oldest"), result.getString("AverageAge"), result.getString("ModuleCount"));
 					eventList.add(sched);
 				}
 				System.out.println("Total # classes: " + totalCount);
@@ -1216,8 +1216,8 @@ public class MySqlDatabase {
 					totalCount++;
 					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
 							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
-					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("MinAge"),
-							result.getString("MaxAge"), result.getString("AverageAge"));
+					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("Youngest"),
+							result.getString("Oldest"), result.getString("AverageAge"), result.getString("ModuleCount"));
 					eventList.add(sched);
 				}
 				System.out.println("Total # classes: " + totalCount);

@@ -5,9 +5,9 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 
 public class ScheduleModel implements Comparable<ScheduleModel> {
-	private int scheduleID, dayOfWeek, duration, attCount;
+	private int scheduleID, dayOfWeek, duration, numStudents;
 	private String startTime, startTimeFormatted, dowFormatted, className;
-	private String ageMin, ageMax, ageAvg;
+	private String youngest, oldest, averageAge, moduleCount;
 	private static final String[] dowAsString = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
 
@@ -17,7 +17,7 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 		this.startTime = startTime;
 		this.duration = duration;
 		this.className = className;
-		ageMin = ageMax = ageAvg = "";
+		youngest = oldest = averageAge = "";
 
 		// Need original startTime for sorting; create formatted start time as 12 hour
 		MutableDateTime mdt = (new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))).toMutableDateTime();
@@ -56,32 +56,39 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 	}
 
 	public int getAttCount() {
-		return attCount;
+		return numStudents;
 	}
 
-	public String getAgeMin() {
-		return ageMin;
+	public String getYoungest() {
+		return youngest;
 	}
 
-	public String getAgeMax() {
-		return ageMax;
+	public String getOldest() {
+		return oldest;
 	}
 
-	public String getAgeAvg() {
-		return ageAvg;
+	public String getAverageAge() {
+		return averageAge;
 	}
 
-	public void setMiscSchedFields(int attCount, String minAge, String maxAge, String avgAge) {
-		this.attCount = attCount;
-		this.ageMin = minAge;
-		this.ageMax = maxAge;
-		this.ageAvg = avgAge;
+	public String getModuleCount() {
+		return moduleCount;
+	}
+
+	public void setMiscSchedFields(int numStudents, String youngest, String oldest, String averageAge,
+			String moduleCount) {
+		this.numStudents = numStudents;
+		this.youngest = youngest;
+		this.oldest = oldest;
+		this.averageAge = averageAge;
+		this.moduleCount = moduleCount;
 	}
 
 	public boolean miscSchedFieldsMatch(ScheduleModel other) {
 		// Check if miscellaneous schedule fields match
-		if (attCount == other.getAttCount() && ageMin.equals(other.getAgeMin()) && ageMax.equals(other.getAgeMax())
-				&& ageAvg.equals(other.getAgeAvg()))
+		if (numStudents == other.getAttCount() && youngest.equals(other.getYoungest())
+				&& oldest.equals(other.getOldest()) && averageAge.equals(other.getAverageAge())
+				&& moduleCount.equals(other.getModuleCount()))
 			return true;
 		else
 			return false;
