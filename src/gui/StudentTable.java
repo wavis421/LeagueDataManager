@@ -73,6 +73,10 @@ public class StudentTable extends JPanel {
 		return table;
 	}
 
+	public int getTableRowCount() {
+		return studentTableModel.getRowCount();
+	}
+
 	public void setData(JPanel tablePanel, ArrayList<StudentModel> studentList, int tableType,
 			boolean clearTableSettings) {
 		this.tableType = tableType;

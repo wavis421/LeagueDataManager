@@ -233,6 +233,43 @@ public class MySqlDatabase {
 		return nameList;
 	}
 
+	private ArrayList<StudentClassLevelModel> getStudentCurrentLevels() {
+		ArrayList<StudentClassLevelModel> studList = new ArrayList<StudentClassLevelModel>();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement selectStmt = dbConnection.prepareStatement(
+						"SELECT ClientID, FirstName, LastName, CurrentClass, CurrentModule FROM Students "
+								+ "WHERE isInMasterDb AND LEFT(CurrentClass,1) >= '0' AND LEFT(CurrentClass,1) <= '9';");
+				ResultSet result = selectStmt.executeQuery();
+
+				while (result.next()) {
+					studList.add(new StudentClassLevelModel(result.getInt("ClientID"),
+							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
+							result.getString("CurrentClass"), result.getString("CurrentModule")));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return studList;
+	}
+
 	public void removeStudentByClientID(int clientID) {
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -457,23 +494,61 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateLastEventNameByStudent(int clientID, String eventName, String repoName) {
-		String module = parseRepoName(eventName, repoName);
-		
+	public void updateLastEventNames(ArrayList<StudentClassLevelModel> classLevelList) {
+		// Get student records for any non-null class name
+		ArrayList<StudentClassLevelModel> dbClassList = getStudentCurrentLevels();
+
+		for (StudentClassLevelModel importStud : classLevelList) {
+			String module = parseRepoName(importStud.getEventName(), importStud.getRepoName());
+			StudentClassLevelModel dbStud = getStudentFromClassList(importStud.getClientID(), dbClassList);
+
+			if (dbStud != null) {
+				// Found student match in database with existing event name
+				if (!dbStud.getEventName().equals(importStud.getEventName())) {
+					// Event name changed, so clear the module field if the level also changed
+					if (dbStud.getEventName().charAt(0) != importStud.getEventName().charAt(0)) {
+						// Level changed
+						MySqlDbLogging.insertLogData(LogDataModel.STUDENT_CLASS_LEVEL_CHANGE, dbStud.getStudentName(),
+								dbStud.getClientID(),
+								": " + dbStud.getEventName() + " to " + importStud.getEventName());
+						if (module == null)
+							module = "NULL"; // Force clear module field
+					}
+				}
+
+				// Module and event both match, so skip
+				else if (module == null || module.equals(dbStud.getModuleName()))
+					continue;
+
+				// Module has changed, only update if module has increased
+				else if (dbStud.getModuleName() != null && module.compareTo(dbStud.getModuleName()) < 0) {
+					continue;
+				}
+			}
+
+			// Ready to update: either event or module has changed
+			updateLastEventNameByStudent(importStud.getClientID(), importStud.getEventName(), module);
+		}
+	}
+
+	public void updateLastEventNameByStudent(int clientID, String eventName, String module) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt;
-				if (module == null)
+				if (module == null) // Future class, no module info
 					updateStudentStmt = dbConnection
 							.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
+				else if (module.equals("NULL")) // Module cleared due to new class level
+					updateStudentStmt = dbConnection.prepareStatement(
+							"UPDATE Students SET CurrentClass=?, CurrentModule=NULL WHERE ClientID=?;");
 				else
 					updateStudentStmt = dbConnection
 							.prepareStatement("UPDATE Students SET CurrentClass=?, CurrentModule=? WHERE ClientID=?;");
 
 				int col = 1;
 				updateStudentStmt.setString(col++, eventName);
-				if (module != null)
+				if (module != null && !module.equals("NULL"))
 					updateStudentStmt.setString(col++, module);
 				updateStudentStmt.setInt(col, clientID);
 
@@ -496,6 +571,15 @@ public class MySqlDatabase {
 		}
 	}
 
+	private StudentClassLevelModel getStudentFromClassList(int clientID, ArrayList<StudentClassLevelModel> studList) {
+		// Find matching Client ID in the student class level list
+		for (StudentClassLevelModel s : studList) {
+			if (s.getClientID() == clientID)
+				return s;
+		}
+		return null;
+	}
+
 	private String parseRepoName(String eventName, String repoName) {
 		// Extract module from repo name: level must match event name level
 		String newRepoName = null;
@@ -512,7 +596,7 @@ public class MySqlDatabase {
 
 			if (repoName.charAt(idx) == '-')
 				idx++;
-			
+
 			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' && repoName.charAt(idx + 1) == '-')
 				newRepoName = repoName.substring(idx, idx + 1);
 		}
@@ -1159,7 +1243,8 @@ public class MySqlDatabase {
 					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
 							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
 					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("Youngest"),
-							result.getString("Oldest"), result.getString("AverageAge"), result.getString("ModuleCount"));
+							result.getString("Oldest"), result.getString("AverageAge"),
+							result.getString("ModuleCount"));
 					eventList.add(sched);
 				}
 				System.out.println("Total # classes: " + totalCount);
@@ -1207,7 +1292,7 @@ public class MySqlDatabase {
 			try {
 				// Get schedule data for weekly classes
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Schedule WHERE LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '9' "
+						"SELECT * FROM Schedule WHERE LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '7' "
 								+ dowSelect + "ORDER BY DayOfWeek, StartTime, ClassName;");
 				ResultSet result = selectStmt.executeQuery();
 
@@ -1217,7 +1302,8 @@ public class MySqlDatabase {
 					ScheduleModel sched = new ScheduleModel(result.getInt("ScheduleID"), result.getInt("DayOfWeek"),
 							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
 					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("Youngest"),
-							result.getString("Oldest"), result.getString("AverageAge"), result.getString("ModuleCount"));
+							result.getString("Oldest"), result.getString("AverageAge"),
+							result.getString("ModuleCount"));
 					eventList.add(sched);
 				}
 				System.out.println("Total # classes: " + totalCount);

@@ -98,9 +98,10 @@ public class LogDataModel {
 	public static final int MISSING_SF_CONTACT_FOR_ENROLL_STATS = 86;
 	public static final int SF_ENROLL_STATS_IMPORT_ERROR = 87;
 	public static final int UPDATE_CLASS_INFO = 88;
+	public static final int STUDENT_CLASS_LEVEL_CHANGE = 89;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 89;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 90;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -152,7 +153,7 @@ public class LogDataModel {
 			// 80
 			"Graduated", "SalesForce Diary updated", "SalesForce Diary Import error", "Missing Visit ID for SF Import",
 			"Class Level Mismatch", "SalesForce Enrollment Stats updated", "Missing SF contact for Enrollment Stats", 
-			"SalesForce Enrollment Stats import error", "Update Class Info" };
+			"SalesForce Enrollment Stats import error", "Update Class Info", "Student Class Level Change" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

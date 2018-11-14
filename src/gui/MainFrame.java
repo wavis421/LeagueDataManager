@@ -65,7 +65,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
-	private static final String SCHED_DETAILS_TITLE = "Weekly Class Details";
+	private static final String SCHED_DETAILS_TITLE = "Weekly Class Details for Levels 0 - 7";
 	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
@@ -152,10 +152,6 @@ public class MainFrame {
 		new TableHeaderBox(headerLabel);
 		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY), BorderLayout.NORTH);
 
-		// Default tables to display all data
-		headerLabel.setText(STUDENT_TITLE);
-		activeTableHeader = STUDENT_TITLE;
-
 		// Configure panel and each table
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
 		LocationLookup.setLocationData(controller.getLocationList());
@@ -168,6 +164,10 @@ public class MainFrame {
 		gradTable = new GraduationTable(tablePanel, new ArrayList<GraduationModel>());
 		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
+
+		// Default tables to display all data
+		headerLabel.setText(STUDENT_TITLE + " (" + studentTable.getTableRowCount() + " Students)");
+		activeTableHeader = STUDENT_TITLE;
 
 		createTableListeners();
 
@@ -655,9 +655,9 @@ public class MainFrame {
 
 		// Add student table and header
 		if (tableType == STUDENT_TABLE_ALL) {
-			headerLabel.setText(STUDENT_TITLE);
 			studentTable.setData(tablePanel, controller.getActiveStudents(), StudentTable.STANDARD_STUDENT_TABLE_TYPE,
 					clearSearch);
+			headerLabel.setText(STUDENT_TITLE + " (" + studentTable.getTableRowCount() + " Students)");
 
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
 			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
@@ -697,8 +697,7 @@ public class MainFrame {
 			state = TableHeaderBox.HDR_STUDENT_TA;
 			TableHeaderBox.refreshHeader(state);
 			studentTable.setData(tablePanel, controller.getActiveTAs(TableHeaderBox.getMinClasses(),
-					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE, 
-					clearSearch);
+					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE, clearSearch);
 		}
 		if (clearSearch) {
 			searchField.setText("");

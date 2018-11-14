@@ -49,11 +49,11 @@ public class StudentTableModel extends AbstractTableModel {
 
 	// Table column names for each table type
 	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Age ", " Github ", " Home Loc ",
-			" Start Date ", " Grad Yr ", " Current Class " };
+			" Start Date ", " Grad Yr ", " Last Class Visit (0 - 7) " };
 	private final String colEmailNames[] = { " ID ", " Student Name ", " Student Email ", " Acct Mgr Email ",
-			" Emerg Email ", " Current Class " };
+			" Emerg Email ", " Last Class Visit (0 - 7) " };
 	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
-			" Home Phone ", " Emerg Phone ", " Current Class " };
+			" Home Phone ", " Emerg Phone ", " Last Class Visit (0 - 7) " };
 	private final String colTANames[] = { " ID ", " Student Name ", " TA Start Date ", " # Classes ", " Curr Age ",
 			" Curr Level ", " Student Email ", " Student Phone " };
 
@@ -148,10 +148,12 @@ public class StudentTableModel extends AbstractTableModel {
 				else
 					return String.valueOf(student.getGradYear());
 			case CURR_CLASS_COLUMN:
-				if (student.getCurrentClass() == null)
+				if (student.getCurrentClass() == null || student.getCurrentClass().length() < 1)
 					return "";
-				else
+				else if (student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '9')
 					return student.getCurrentClass();
+				else
+					return "";
 			}
 		} else if (tableType == StudentTable.EMAIL_STUDENT_TABLE_TYPE) {
 			switch (col) {
