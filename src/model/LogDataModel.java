@@ -29,8 +29,8 @@ public class LogDataModel {
 	public static final int PIKE13_CONNECTION_ERROR = 23;
 	public static final int PIKE13_IMPORT_ERROR = 24;
 	public static final int GITHUB_MODULE_REPO_ERROR = 25;
-	public static final int STARTING_STUDENT_IMPORT = 26;
-	public static final int STUDENT_IMPORT_COMPLETE = 27;
+	public static final int STARTING_TRACKER_IMPORT = 26;
+	public static final int TRACKER_IMPORT_COMPLETE = 27;
 	public static final int STARTING_ATTENDANCE_IMPORT = 28;
 	public static final int ATTENDANCE_IMPORT_COMPLETE = 29;
 
@@ -100,8 +100,10 @@ public class LogDataModel {
 	public static final int UPDATE_CLASS_INFO = 88;
 	public static final int STUDENT_CLASS_LEVEL_CHANGE = 89;
 
+	public static final int MISSING_BIRTHDATE = 90;
+
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 90;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 91;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -116,8 +118,8 @@ public class LogDataModel {
 
 			// 20
 			"Attendance Database error", "Logging Database error", "Schedule Database error", "Pike13 Connection error",
-			"Pike13 Import error", "Failure getting Module Repo", "*** BEGIN STUDENT IMPORT",
-			"*** STUDENT IMPORT COMPLETE", "*** BEGIN CLASS ATTENDANCE IMPORT", "*** CLASS ATTENDANCE IMPORT COMPLETE",
+			"Pike13 Import error", "Failure getting Module Repo", "*** BEGIN TRACKER IMPORT",
+			"*** TRACKER IMPORT COMPLETE", "*** BEGIN CLASS ATTENDANCE IMPORT", "*** CLASS ATTENDANCE IMPORT COMPLETE",
 
 			// 30
 			"*** BEGIN GITHUB IMPORT", "*** GITHUB IMPORT COMPLETE", "*** GITHUB IMPORT ABORTED",
@@ -152,8 +154,11 @@ public class LogDataModel {
 
 			// 80
 			"Graduated", "SalesForce Diary updated", "SalesForce Diary Import error", "Missing Visit ID for SF Import",
-			"Class Level Mismatch", "SalesForce Enrollment Stats updated", "Missing SF contact for Enrollment Stats", 
-			"SalesForce Enrollment Stats import error", "Update Class Info", "Student Class Level Change" };
+			"Class Level Mismatch", "SalesForce Enrollment Stats updated", "Missing SF contact for Enrollment Stats",
+			"SalesForce Enrollment Stats import error", "Update Class Info", "Student Class Level Change",
+
+			// 90
+			"Missing Birthdate" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;

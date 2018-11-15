@@ -47,11 +47,10 @@ public class MySqlDbImports {
 			StudentImportModel importStudent = importList.get(i);
 
 			// Log any missing data
-			if (importStudent.getGithubName().equals("")) {
-				MySqlDbLogging.insertLogData(LogDataModel.MISSING_GITHUB_NAME,
+			if (importStudent.getIsInMasterDb() == 1 && importStudent.getBirthDate().equals(""))
+				MySqlDbLogging.insertLogData(LogDataModel.MISSING_BIRTHDATE,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), "");
-			}
 
 			if (importStudent.getGradYear() == 0)
 				MySqlDbLogging.insertLogData(LogDataModel.MISSING_GRAD_YEAR,
@@ -294,9 +293,10 @@ public class MySqlDbImports {
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();
 
-				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_STUDENT_INFO,
-						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
-						importStudent.getClientID(), changedFields);
+				if (!changedFields.equals(""))
+					MySqlDbLogging.insertLogData(LogDataModel.UPDATE_STUDENT_INFO,
+							new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+							importStudent.getClientID(), changedFields);
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -418,12 +418,6 @@ public class MySqlDbImports {
 				changes += " (TA since date";
 			else
 				changes += ", TA since date";
-		}
-		if (importStudent.getStaffPastEvents() != dbStudent.getStaffPastEvents()) {
-			if (changes.equals(""))
-				changes += " (TA # events";
-			else
-				changes += ", TA # events";
 		}
 
 		if (!changes.equals(""))
@@ -568,14 +562,6 @@ public class MySqlDbImports {
 				}
 			}
 		}
-
-		// Log number of attendance records added/updated
-		if (addedAttCount > 0)
-			MySqlDbLogging.insertLogData(LogDataModel.UPDATE_STUDENT_ATTENDANCE, new StudentNameModel("", "", false), 0,
-					": " + addedAttCount + " records changed");
-		if (updatedAttCount > 0)
-			MySqlDbLogging.insertLogData(LogDataModel.UPDATE_ATTENDANCE_STATE, new StudentNameModel("", "", false), 0,
-					": " + updatedAttCount + " records changed");
 
 		if (fullList) {
 			// Delete registered classes that were canceled
@@ -961,13 +947,12 @@ public class MySqlDbImports {
 				updateScheduleStmt.executeUpdate();
 				updateScheduleStmt.close();
 
-				String countChanged = "";
-				if (dbEvent.getAttCount() != pike13Event.getAttCount())
-					countChanged = " (" + dbEvent.getAttCount() + " => " + pike13Event.getAttCount() + ")";
-
-				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
-						" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()] + " at "
-								+ pike13Event.getStartTimeFormatted() + countChanged);
+				if (dbEvent.getAttCount() != pike13Event.getAttCount()) {
+					MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
+							" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()] + " at "
+									+ pike13Event.getStartTimeFormatted() + 
+									" (" + dbEvent.getAttCount() + " => " + pike13Event.getAttCount() + ")");
+				}
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

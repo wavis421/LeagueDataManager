@@ -1177,10 +1177,6 @@ public class MySqlDatabase {
 
 				updateAttendanceStmt.executeUpdate();
 				updateAttendanceStmt.close();
-
-				if (repoName != null)
-					MySqlDbLogging.insertLogData(LogDataModel.UPDATE_GITHUB_COMMENTS, nameModel, clientID,
-							" for " + eventName + ", repo: " + repoName + " (" + serviceDate + ")");
 				return;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

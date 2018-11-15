@@ -24,7 +24,7 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 	public static final int NUM_COLUMNS = 8;
 
 	private ArrayList<ScheduleModel> schedList;
-	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " # Students ", " Current Module Range ",
+	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " # Students ", " # Students per Module ",
 			" Avg Age ", " Youngest ", " Oldest " };
 
 	public SchedDetailsTableModel(ArrayList<ScheduleModel> schedList) {
