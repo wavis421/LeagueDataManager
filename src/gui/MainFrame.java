@@ -360,7 +360,7 @@ public class MainFrame {
 				removeDataFromTables();
 				String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 						.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
-				headerLabel.setText(GITHUB_TITLE + sinceDate);
+				headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 4)");
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
 				searchField.setText("");
@@ -400,25 +400,10 @@ public class MainFrame {
 
 	private void createAttendanceMenu(JMenu attendanceMenu) {
 		// Create sub-menus for the Attendance menu
-		JMenu attendanceViewByClassMenu = new JMenu("View Attendance by Class ");
 		JMenuItem attendanceViewAllItem = new JMenuItem("View All Attendance ");
-		attendanceMenu.add(attendanceViewByClassMenu);
 		attendanceMenu.add(attendanceViewAllItem);
 
 		// Set up listeners for Attendance menu
-		for (int i = 0; i < classMenuNames.length; i++) {
-			int classFilter = i;
-			JMenu subMenu = new JMenu(classMenuNames[i]);
-			attendanceViewByClassMenu.add(subMenu);
-
-			subMenu.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					viewClassMenuListener(subMenu, classFilter);
-				}
-			});
-		}
-
 		attendanceViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshAttendanceTable(controller.getAllAttendance(), "", false);
@@ -518,35 +503,6 @@ public class MainFrame {
 				new NotesWindow(NotesWindow.ABOUT);
 			}
 		});
-	}
-
-	private void viewClassMenuListener(JMenu menu, int filter) {
-		// filter: 0 - 9 for levels 0-9, 10 for labs
-		menu.removeAll();
-
-		ArrayList<String> classList;
-		classList = controller.getClassNamesByLevel(filter);
-
-		for (int i = 0; i < classList.size(); i++) {
-			JMenuItem classItem = new JMenuItem(classList.get(i).toString());
-			menu.add(classItem);
-
-			classItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent ev) {
-					classList.clear();
-					menu.removeAll();
-
-					// Add attendance table and header
-					refreshAttendanceTable(controller.getAttendanceByClassName(classItem.getText()),
-							" for '" + classItem.getText() + "'", false);
-				}
-			});
-		}
-		if (classList.size() < 20)
-			menu.getPopupMenu().setLayout(new GridLayout(classList.size(), 1));
-		else {
-			menu.getPopupMenu().setLayout(new GridLayout(20, 1));
-		}
 	}
 
 	private void createTableListeners() {

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -18,6 +19,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
@@ -38,6 +40,7 @@ public class GithubTable extends JPanel {
 	private JScrollPane scrollPane;
 
 	private TableRowSorter<GithubTableModel> rowSorter;
+	private List<? extends SortKey> defaultSortKeys;
 
 	public GithubTable(JPanel tablePanel, ArrayList<GithubModel> arrayList) {
 		this.tablePanel = tablePanel;
@@ -49,6 +52,9 @@ public class GithubTable extends JPanel {
 		createGithubTablePopups();
 
 		rowSorter = new TableRowSorter<GithubTableModel>((GithubTableModel) table.getModel());
+		defaultSortKeys = rowSorter.getSortKeys();
+		table.setAutoCreateRowSorter(true);
+		table.setRowSorter(rowSorter);
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -63,6 +69,8 @@ public class GithubTable extends JPanel {
 		scrollPane.setVisible(true);
 		this.tablePanel = tablePanel;
 		tablePanel.add(scrollPane, BorderLayout.NORTH);
+
+		rowSorter.setSortKeys(defaultSortKeys);
 
 		githubTableModel.setData(githubList);
 		githubTableModel.fireTableDataChanged();
@@ -93,7 +101,6 @@ public class GithubTable extends JPanel {
 		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setPreferredWidth(170);
 
 		table.setDefaultRenderer(Object.class, new GithubTableRenderer());
-		table.setAutoCreateRowSorter(true);
 		table.setCellSelectionEnabled(true);
 		new TableKeystrokeHandler(table);
 
@@ -177,8 +184,7 @@ public class GithubTable extends JPanel {
 				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
 				GithubTableModel model = (GithubTableModel) table.getModel();
 				String clientID = (String) model.getValueAt(modelRow, GithubTableModel.CLIENT_ID_COLUMN);
-				String studentName = (String) model.getValueAt(modelRow, GithubTableModel.STUDENT_NAME_COLUMN);
-				
+
 				// Show graduation dialog
 				table.clearSelection();
 				githubListener.graduateStudent(clientID, clientID);

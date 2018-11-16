@@ -926,9 +926,11 @@ public class MySqlDatabase {
 						if (eventName.charAt(0) >= '0' && eventName.charAt(0) <= '4') {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
+							int dowInt = serviceDate.getDayOfWeek();
+							if (dowInt > 6) dowInt -= 7;
 							lastGithubModel = new GithubModel(thisClientID,
 									result.getString("FirstName") + " " + result.getString("LastName"),
-									serviceDate.toString("EEEEE"), eventName, result.getString("GithubName"),
+									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
 									result.getString("TeacherNames"));
 						}
 

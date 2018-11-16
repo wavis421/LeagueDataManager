@@ -101,8 +101,8 @@ public class TableHeaderBox implements ActionListener {
 		ageBox.setMaximumSize(new Dimension(70, ageBox.getPreferredSize().height));
 		lvlBox.setPreferredSize(new Dimension(65, lvlBox.getPreferredSize().height));
 		lvlBox.setMaximumSize(new Dimension(65, lvlBox.getPreferredSize().height));
-		dowMenuBar.setPreferredSize(new Dimension(130, 40));
-		dowMenuBar.setMaximumSize(new Dimension(130, 40));
+		dowMenuBar.setPreferredSize(new Dimension(160, 40));
+		dowMenuBar.setMaximumSize(new Dimension(160, 40));
 
 		// Border and colors
 		classesField.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));

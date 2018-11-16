@@ -37,7 +37,7 @@ public class StudentModel implements Comparable<StudentModel> {
 
 		if (nameModel.getIsInMasterDb()
 				&& (homeLocation == LocationModel.CLASS_LOCATION_UNKNOWN || gender == GenderModel.getGenderUnknown()
-						|| gradYear == 0 || githubName == null || githubName.equals("")))
+						|| gradYear == 0 || githubName == null || githubName.equals("") || age == 0))
 			missingData = true;
 		else
 			missingData = false;
