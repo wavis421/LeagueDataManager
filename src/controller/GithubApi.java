@@ -174,11 +174,6 @@ public class GithubApi {
 			if (event.getGithubComments().equals("") && event.getServiceDateString().compareTo(today) < 0) {
 				sqlDb.updateAttendance(event.getClientID(), event.getStudentNameModel(), event.getServiceDateString(),
 						event.getEventName(), null, "");
-				MySqlDbLogging.insertLogData(LogDataModel.MISSING_GITHUB_COMMENTS_BY_EVENT, event.getStudentNameModel(),
-						event.getClientID(),
-						" for " + event.getEventName()
-								+ (event.getGithubName().equals("") ? "" : ", git user: " + event.getGithubName())
-								+ " (" + event.getServiceDateString() + ")");
 			}
 		}
 	}
