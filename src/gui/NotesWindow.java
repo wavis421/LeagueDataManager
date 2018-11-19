@@ -20,8 +20,7 @@ public class NotesWindow {
 	public static final int EXAMPLES = 4;
 	public static final int SEARCH_COPY = 5;
 	public static final int LOCATION_CODES = 6;
-	public static final int FEEDBACK = 7;
-	public static final int ABOUT = 8;
+	public static final int ABOUT = 7;
 
 	private static final String[] notes = { "\n"
 			// File Menu
@@ -31,35 +30,40 @@ public class NotesWindow {
 			+ "      => The Print Table menu option prints the currently displayed table. Note that the printing uses\n"
 			+ "            auto-fit width, so if you're printing attendance data then landscape will be your best option.\n"
 			+ "      => The Export Data to CSV file option allows you to export the currently displayed table to\n"
-			+ "            a CSV file, which can then be imported to an Excel spreadsheet. The tables that can\n"
-			+ "            be exported include the Student, Courses, Graduation, Missing Github and Log Data tables.",
+			+ "            a CSV file, which can then be imported to an Excel spreadsheet. The tables that can be\n"
+			+ "            exported include the Students, Student TA's, Student email/phone, Courses, Course Details,\n"
+			+ "            Graduation, Missing Github and Log Data tables...pretty much everything except the Attendance tables.",
 			
 			// Student Menu
 			"     Student Menu:\n\n"
-			+ "      => The Student menu shows basic information for ALL students as well as for inactive students.\n"
+			+ "      => The Student menu shows basic information for ALL students as well as for inactive students,\n"
+			+ "            pending graduates, TA's, and students without recent github.\n"
 			+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
 			+ "      => 'View students without recent Github' shows students who have attended at least 3 out of the\n"
 			+ "            last 4 weeks of classes without any Github commits. This indicates that either the student's\n"
 			+ "            Github user name is incorrect or that the student is not committing his/her work.\n"
 			+ "      => 'View pending graduates' shows a list of students who have recently been graduated. They are\n"
 			+ "            then removed from the list once they have been assigned to a new class/level.\n"
-			+ "      => From the Student tables, select a student and then use the Right Mouse button to viewthe student's\n"
-			+ "            attendance data. Refer to the Attendance menu description for more details regarding attendance.",
+			+ "      => From the Student tables, select a student and then use the Right Mouse button to view the student's\n"
+			+ "            attendance, phone and email data. Refer to the Attendance menu description for more details \n"
+			+ "            regarding attendance.",
 			
 			// Attendance Menu
 			"     Attendance Menu:\n\n"
-			+ "      => The Attendance menu allows you to view ALL attendance data and to view attendance by class.\n"
+			+ "      => The Attendance menu allows you to view ALL attendance data.\n"
 			+ "      => From the attendance table, select and right-click the user name to get the Student Info or\n"
 			+ "            Student Attendance.\n"
 			+ "      => Double-click on the right column to get the complete attendance history for a student.\n"
-			+ "      => Select and right-click on any of the attendance rows to get attendance data by Class to \n"
-			+ "            determine what that class has been working on for the last 4 weeks.",
+			+ "      => Select and right-click on any of the attendance rows to get roster and attendance data by Class \n"
+			+ "            to determine what that class has been working on for the last 4 weeks.",
 			
 			// Schedule Menu
 			"     Schedule Menu:\n\n"
 			+ "      => View the weekly class schedule to show the class schedule for each day of the week.\n"
 			+ "            Then select a class and right click to view the attendance data for that class.\n"
 			+ "            Note that you can filter the Schedule data using the search box, e.g. all 'Make-Up' classes.\n"
+			+ "      => View weekly class details to show how many students in each class along with the modules\n"
+			+ "            that class is working on. This table also shows average age, youngest and oldest in the class.\n"
 			+ "      => Viewing Workshops and Summer Slam shows all the courses available. From there, select\n"
 			+ "            and then right-click a course to view the students enrolled in the course.",
 
@@ -93,13 +97,8 @@ public class NotesWindow {
 			// Location Codes
 			"\n     LOCATION CODES:\n\n",
 			
-			// Feedback
-			"\n\n\n"
-			+ "                                       !!! WE APPRECIATE YOUR FEEDBACK !!!\n\n"
-			+ "      *** Please send any feedback, suggestions or bug reports to wendy.avis@jointheleague.org *** \n",
-			
 			// About League Student Tracker
-			"\n   VERSION 4.9G (G = includes Graduation Dialog, Limited Distribution) \n\n"
+			"\n   VERSION 4.10G (G = includes Graduation Dialog, Limited Distribution) \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
@@ -108,20 +107,20 @@ public class NotesWindow {
 			+ "         => Github \n\n"
 			+ "      This data is then merged into a single database. \n"
 			+ "      This merged database is a slave to all of the above databases, and does not create any new data on its own.\n"
-			+ "      Once every 24 hours, the application searches for all completed attendance for that day, which triggers a search \n"
-			+ "          in Github for the related student comments and updates the database accordingly. \n\n"
+			+ "      Once every 24 hours, a nightly import program searches for all completed Pike13 attendance for that day, which \n"
+			+ "          triggers a search in Github for the related student comments, and then updates the database accordingly. \n\n"
 			+ "      As you will see when you use this Application, data IN is data OUT. So it is very important to emphasize to your \n"
-			+ "          students that they need to write descriptive comments  when they sync to Github!!\n\n"
+			+ "          students that they need to write descriptive comments when they sync to Github!!\n"
 			+ "      Naming conventions are to write each recipe that the student worked on separated by commas, and followed by (IP) \n"
 			+ "          if the recipe is still In Progress. Please also add comments about written tests and worksheets (WS).\n" };
 
 	private static final String[] titles = { "File Menu Description ", "Student Menu Description ", "Attendance Menu Description ", 
 			"Schedule Menu Description ", "Examples ", "Search, Filter and Copy Features", 
-			"Location Codes ", "Provide Feedback ",	"About League Student Tracker " };
+			"Location Codes ", "About League Student Tracker " };
 
-	private static final Dimension[] sizes = { new Dimension(820, 275), new Dimension(820, 300), new Dimension(820, 275), 
+	private static final Dimension[] sizes = { new Dimension(820, 300), new Dimension(820, 325), new Dimension(820, 275), 
 			new Dimension(820, 275), new Dimension(630, 440), new Dimension(820, 300), new Dimension(680, 720), 
-			new Dimension(720, 270), new Dimension(825, 520) };
+			new Dimension(825, 520) };
 
 	public NotesWindow(int notesSelection) {
 		JFrame frame = new JFrame(titles[notesSelection]);

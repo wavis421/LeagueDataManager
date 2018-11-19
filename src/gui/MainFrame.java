@@ -442,7 +442,6 @@ public class MainFrame {
 		JMenuItem exampleUsageItem = new JMenuItem("Example usage ");
 		JMenuItem searchFilterCopyItem = new JMenuItem("Search, filter, copy ");
 		JMenuItem locationCodesItem = new JMenuItem("Location Codes ");
-		JMenuItem feedbackItem = new JMenuItem("Provide Feedback ");
 		JMenuItem aboutItem = new JMenuItem("About League Student Tracker ");
 
 		// Add these sub-menus to the Help menu
@@ -450,7 +449,6 @@ public class MainFrame {
 		helpMenu.add(exampleUsageItem);
 		helpMenu.add(searchFilterCopyItem);
 		helpMenu.add(locationCodesItem);
-		helpMenu.add(feedbackItem);
 		helpMenu.addSeparator();
 		helpMenu.add(aboutItem);
 
@@ -488,11 +486,6 @@ public class MainFrame {
 		locationCodesItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new NotesWindow(NotesWindow.LOCATION_CODES);
-			}
-		});
-		feedbackItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				new NotesWindow(NotesWindow.FEEDBACK);
 			}
 		});
 		aboutItem.addActionListener(new ActionListener() {
