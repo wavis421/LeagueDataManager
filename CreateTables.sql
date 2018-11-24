@@ -38,6 +38,7 @@ BEGIN
 		
 		# Attendance data
 		ServiceDate date DEFAULT NULL,
+		ServiceTime varchar(10) DEFAULT '',
 		EventName varchar(100) DEFAULT NULL,
 		RepoName varchar(50) DEFAULT NULL,
 		Comments varchar(150) DEFAULT NULL,
@@ -47,7 +48,7 @@ BEGIN
 		State varchar(30) DEFAULT NULL,
 		LastSFState varchar(30) DEFAULT NULL,
 		
-		UNIQUE KEY(ClientID, EventName, ServiceDate)
+		UNIQUE KEY(ClientID, EventName, ServiceDate, ServiceTime)
 				
 	) ENGINE=InnoDB;
 	

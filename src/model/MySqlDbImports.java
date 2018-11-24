@@ -465,7 +465,6 @@ public class MySqlDbImports {
 		ArrayList<StudentModel> studentList = sqlDb.getActiveStudents();
 		int dbListIdx = 0;
 		int dbListSize = dbList.size();
-		int addedAttCount = 0, updatedAttCount = 0;
 		Collections.sort(importList);
 		Collections.sort(dbList);
 
@@ -482,7 +481,8 @@ public class MySqlDbImports {
 				// Compare attendance; if matched, also check state & teachers
 				compare = dbAttendance.compareTo(importEvent);
 				if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
-						|| !dbAttendance.getTeacherNames().equals(teachers)))
+						|| !dbAttendance.getTeacherNames().equals(teachers)
+						|| (dbAttendance.getServiceTime().equals("") && !importEvent.getServiceTime().equals(""))))
 					compare = 2;
 			}
 
@@ -510,7 +510,8 @@ public class MySqlDbImports {
 					// Compare attendance; if matched, also check state & teachers
 					compare = dbAttendance.compareTo(importEvent);
 					if (compare == 0 && (!dbAttendance.getState().equals(importEvent.getState())
-							|| !dbAttendance.getTeacherNames().equals(teachers)))
+							|| !dbAttendance.getTeacherNames().equals(teachers)
+							|| (dbAttendance.getServiceTime().equals("") && !importEvent.getServiceTime().equals(""))))
 						compare = 2;
 				}
 
@@ -521,13 +522,13 @@ public class MySqlDbImports {
 					int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
 					if (idx >= 0) {
 						if (compare == 1)
-							addedAttCount += addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-									importEvent.getServiceDateString(), importEvent.getEventName(),
-									studentList.get(idx).getNameModel(), teachers, importEvent.getServiceCategory(),
-									importEvent.getState());
+							addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+									importEvent.getServiceDateString(), importEvent.getServiceTime(),
+									importEvent.getEventName(), studentList.get(idx).getNameModel(), teachers,
+									importEvent.getServiceCategory(), importEvent.getState());
 						else // state field has changed, so update
-							updatedAttCount += updateAttendanceState(importEvent.getClientID(),
-									studentList.get(idx).getNameModel(), importEvent.getServiceDateString(),
+							updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
+									importEvent.getServiceDateString(), importEvent.getServiceTime(),
 									importEvent.getEventName(), importEvent.getState(), teachers);
 
 					} else
@@ -544,13 +545,13 @@ public class MySqlDbImports {
 				if (idx >= 0) {
 					// Student exists in DB, so add attendance data for this student
 					if (compare == 1)
-						addedAttCount += addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-								importEvent.getServiceDateString(), importEvent.getEventName(),
-								studentList.get(idx).getNameModel(), teachers, importEvent.getServiceCategory(),
-								importEvent.getState());
+						addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
+								importEvent.getServiceDateString(), importEvent.getServiceTime(),
+								importEvent.getEventName(), studentList.get(idx).getNameModel(), teachers,
+								importEvent.getServiceCategory(), importEvent.getState());
 					else // state field has changed, so update
-						updatedAttCount += updateAttendanceState(importEvent.getClientID(),
-								studentList.get(idx).getNameModel(), importEvent.getServiceDateString(),
+						updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
+								importEvent.getServiceDateString(), importEvent.getServiceTime(),
 								importEvent.getEventName(), importEvent.getState(), teachers);
 
 				} else {
@@ -649,18 +650,19 @@ public class MySqlDbImports {
 		}
 	}
 
-	private int addAttendance(int clientID, int visitID, String serviceDate, String eventName,
+	private int addAttendance(int clientID, int visitID, String serviceDate, String serviceTime, String eventName,
 			StudentNameModel nameModel, String teacherNames, String serviceCategory, String state) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement addAttendanceStmt = sqlDb.dbConnection.prepareStatement(
-						"INSERT INTO Attendance (ClientID, ServiceDate, EventName, VisitID, TeacherNames, ServiceCategory, State) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?);");
+						"INSERT INTO Attendance (ClientID, ServiceDate, ServiceTime, EventName, VisitID, TeacherNames, ServiceCategory, State) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addAttendanceStmt.setInt(col++, clientID);
 				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				addAttendanceStmt.setString(col++, serviceTime);
 				addAttendanceStmt.setString(col++, eventName);
 				addAttendanceStmt.setInt(col++, visitID);
 				addAttendanceStmt.setString(col++, teacherNames);
@@ -693,20 +695,23 @@ public class MySqlDbImports {
 		return 0;
 	}
 
-	private int updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String eventName,
-			String state, String teachers) {
+	private int updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String serviceTime,
+			String eventName, String state, String teachers) {
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
 				// The only fields that should be updated are the State & Teacher fields
 				updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
-						"UPDATE Attendance SET State=?, TeacherNames=? WHERE ClientID=? AND ServiceDate=?;");
+						"UPDATE Attendance SET State=?, TeacherNames=?, ServiceTime=? "
+								+ "WHERE ClientID=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
 
 				int col = 1;
 				updateAttendanceStmt.setString(col++, state);
 				updateAttendanceStmt.setString(col++, teachers);
+				updateAttendanceStmt.setString(col++, serviceTime);
 				updateAttendanceStmt.setInt(col++, clientID);
 				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
+				updateAttendanceStmt.setString(col++, serviceTime);
 
 				updateAttendanceStmt.executeUpdate();
 				updateAttendanceStmt.close();
@@ -949,9 +954,9 @@ public class MySqlDbImports {
 
 				if (dbEvent.getAttCount() != pike13Event.getAttCount()) {
 					MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
-							" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()] + " at "
-									+ pike13Event.getStartTimeFormatted() + 
-									" (" + dbEvent.getAttCount() + " => " + pike13Event.getAttCount() + ")");
+							" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()]
+									+ " at " + pike13Event.getStartTimeFormatted() + " (" + dbEvent.getAttCount()
+									+ " => " + pike13Event.getAttCount() + ")");
 				}
 				break;
 

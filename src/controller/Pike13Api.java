@@ -137,6 +137,7 @@ public class Pike13Api {
 	private final int ENROLL_TEACHER_NAMES_IDX = 5;
 	private final int ENROLL_SERVICE_CATEGORY_IDX = 6;
 	private final int ENROLL_STATE_IDX = 7;
+	private final int ENROLL_SERVICE_TIME_IDX = 8;
 
 	// Indices for enrollment stats data
 	private final int STATS_CLIENT_ID_IDX = 0;
@@ -267,7 +268,7 @@ public class Pike13Api {
 			+ "\"attributes\":{"
 			// Select fields
 			+ "\"fields\":[\"person_id\",\"full_name\",\"service_date\",\"event_name\",\"visit_id\",\"instructor_names\","
-			+ "            \"service_category\",\"state\"],"
+			+ "            \"service_category\",\"state\",\"service_time\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -634,7 +635,8 @@ public class Pike13Api {
 				if (!eventName.equals("") && !eventName.equals("\"\"") && !serviceDate.equals("")) {
 					eventList.add(new AttendanceEventModel(eventArray.getInt(ENROLL_CLIENT_ID_IDX),
 							eventArray.getInt(ENROLL_VISIT_ID_IDX),
-							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, eventName,
+							stripQuotes(eventArray.get(ENROLL_FULL_NAME_IDX).toString()), serviceDate, 
+							stripQuotes(eventArray.get(ENROLL_SERVICE_TIME_IDX).toString()), eventName,
 							stripQuotes(eventArray.get(ENROLL_TEACHER_NAMES_IDX).toString()),
 							stripQuotes(eventArray.get(ENROLL_SERVICE_CATEGORY_IDX).toString()),
 							stripQuotes(eventArray.get(ENROLL_STATE_IDX).toString()), null));

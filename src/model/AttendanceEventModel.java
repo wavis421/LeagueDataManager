@@ -6,17 +6,18 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private int clientID, visitID;
 	private String eventName, teacherNames, serviceCategory, state, lastSFState;
 	private Date serviceDate;
-	private String serviceDateString;
+	private String serviceDateString, serviceTime;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 	private boolean markForDeletion;
 
-	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String event, String githubName,
-			String repoName, String githubComments, StudentNameModel nameModel, String serviceCategory, String state,
-			String lastSFState, String teacherNames) {
+	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String serviceTime, String event,
+			String githubName, String repoName, String githubComments, StudentNameModel nameModel,
+			String serviceCategory, String state, String lastSFState, String teacherNames) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
+		this.serviceTime = serviceTime;
 		this.teacherNames = teacherNames;
 		if (teacherNames == null)
 			this.teacherNames = "";
@@ -53,12 +54,13 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			this.githubComments = "  > " + githubComments.trim();
 	}
 
-	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String eventName,
-			String teacherNames, String serviceCategory, String state, String lastSFState) {
+	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String serviceTime,
+			String eventName, String teacherNames, String serviceCategory, String state, String lastSFState) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.nameModel = new StudentNameModel(studentName, "", false);
 		this.serviceDateString = serviceDate;
+		this.serviceTime = serviceTime;
 		this.eventName = eventName;
 		this.teacherNames = teacherNames;
 		this.serviceCategory = serviceCategory;
@@ -93,6 +95,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			return serviceDate.toString();
 		else
 			return "";
+	}
+
+	public String getServiceTime() {
+		return serviceTime;
 	}
 
 	public String getServiceCategory() {
@@ -147,22 +153,28 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		else if (this.clientID > other.getClientID())
 			return 1;
 
-		else {
-			// Client ID matches, compare date next
-			int comp = this.getServiceDateString().compareTo(other.getServiceDateString());
-			// Dates in descending order
-			if (comp < 0)
-				return 1;
-			else if (comp > 0)
-				return -1;
+		// Client ID matches, compare date next
+		int comp = this.getServiceDateString().compareTo(other.getServiceDateString());
+		// Dates in descending order
+		if (comp < 0)
+			return 1;
+		else if (comp > 0)
+			return -1;
 
-			// Client ID and service date match, sort visit ID
-			else if (this.visitID < other.getVisitID())
-				return -1;
-			else if (this.visitID > other.getVisitID())
-				return 1;
-			else
-				return 0;
-		}
+		// Client ID and service date match, sort visit ID
+		else if (this.visitID < other.getVisitID())
+			return -1;
+		else if (this.visitID > other.getVisitID())
+			return 1;
+
+		// ClientID, date and Visit ID match, order by time.
+		// Visit ID will be null for future visits.
+		comp = this.getServiceTime().compareTo(other.getServiceTime());
+		if (comp < 0)
+			return -1;
+		else if (comp > 0)
+			return 1;
+		else
+			return 0;
 	}
 }

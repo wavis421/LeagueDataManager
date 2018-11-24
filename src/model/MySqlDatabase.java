@@ -624,7 +624,7 @@ public class MySqlDatabase {
 			try {
 				// Get 1st 4 attendance records for each client; use sorted attendance table
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * "
-						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, EventName, VisitID, "
+						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, ServiceTime, EventName, VisitID, "
 						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, isInMasterDb, "
 						+ "         GithubName, Birthdate, RepoName, Comments, TeacherNames, "
 						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
@@ -672,7 +672,7 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
-							result.getDate("ServiceDate"), result.getString("EventName"),
+							result.getDate("ServiceDate"), result.getString("ServiceTime"), result.getString("EventName"), 
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
@@ -818,7 +818,7 @@ public class MySqlDatabase {
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name,
 								getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
-								new AttendanceEventModel(thisClientID, 0, null, "   ", result.getString("GithubName"),
+								new AttendanceEventModel(thisClientID, 0, null, "   ", "", result.getString("GithubName"),
 										"", "", name, result.getString("ServiceCategory"), result.getString("State"),
 										result.getString("LastSFState"), result.getString("TeacherNames"))));
 					else
@@ -927,7 +927,8 @@ public class MySqlDatabase {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							int dowInt = serviceDate.getDayOfWeek();
-							if (dowInt > 6) dowInt -= 7;
+							if (dowInt > 6)
+								dowInt -= 7;
 							lastGithubModel = new GithubModel(thisClientID,
 									result.getString("FirstName") + " " + result.getString("LastName"),
 									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
@@ -988,8 +989,8 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
-							result.getDate("ServiceDate"), result.getString("EventName"),
-							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
+							result.getDate("ServiceDate"), result.getString("ServiceTime"),	result.getString("EventName"),
+							result.getString("GithubName"),	result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
 							result.getString("LastSFState"), result.getString("TeacherNames")));
@@ -1035,8 +1036,9 @@ public class MySqlDatabase {
 					}
 					// Add more data to existing client
 					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(thisClientID,
-							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("EventName"),
-							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
+							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("ServiceTime"),
+							result.getString("EventName"), result.getString("GithubName"), 	result.getString("RepoName"), 
+							result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
 							result.getString("LastSFState"), result.getString("TeacherNames")));
@@ -1058,9 +1060,9 @@ public class MySqlDatabase {
 									result.getBoolean("isInMasterDb")),
 							getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
 							new AttendanceEventModel(thisClientID, result.getInt("VisitID"),
-									result.getDate("ServiceDate"), result.getString("EventName"),
-									result.getString("GithubName"), result.getString("RepoName"),
-									result.getString("Comments"),
+									result.getDate("ServiceDate"), result.getString("ServiceTime"),
+									result.getString("EventName"), result.getString("GithubName"),
+									result.getString("RepoName"), result.getString("Comments"),
 									new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 											true),
 									result.getString("ServiceCategory"), result.getString("State"),
