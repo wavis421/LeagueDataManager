@@ -703,13 +703,14 @@ public class MySqlDbImports {
 				// The only fields that should be updated are the State & Teacher fields
 				updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
 						"UPDATE Attendance SET State=?, TeacherNames=?, ServiceTime=? "
-								+ "WHERE ClientID=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
+								+ "WHERE ClientID=? AND EventName=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
 
 				int col = 1;
 				updateAttendanceStmt.setString(col++, state);
 				updateAttendanceStmt.setString(col++, teachers);
 				updateAttendanceStmt.setString(col++, serviceTime);
 				updateAttendanceStmt.setInt(col++, clientID);
+				updateAttendanceStmt.setString(col++, eventName);
 				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
 				updateAttendanceStmt.setString(col++, serviceTime);
 
