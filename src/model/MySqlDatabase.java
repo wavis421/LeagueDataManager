@@ -597,7 +597,8 @@ public class MySqlDatabase {
 			if (repoName.charAt(idx) == '-')
 				idx++;
 
-			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' && repoName.charAt(idx + 1) == '-')
+			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' 
+					&& (repoName.length() == (idx + 1) || repoName.charAt(idx + 1) == '-'))
 				newRepoName = repoName.substring(idx, idx + 1);
 		}
 		return newRepoName;
