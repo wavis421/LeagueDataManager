@@ -2,7 +2,7 @@ package model;
 
 public class StudentImportModel implements Comparable<StudentImportModel> {
 	private int clientID;
-	private String lastName, firstName, githubName, startDate, homeLocString;
+	private String lastName, firstName, githubName, startDate, homeLocString, currLevel;
 	private int homeLocation, gender, gradYear, isInMasterDb;
 
 	// Additional fields for importing contacts to SalesForce
@@ -22,7 +22,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear, String email, String acctMgrEmail,
 			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
-			String birthDate) {
+			String birthDate, String currentLevel, int futureVisits) {
 
 		// Pike13 import data
 		this.clientID = clientID;
@@ -32,6 +32,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.gender = GenderModel.convertStringToGender(gender);
 		this.startDate = startDate;
 		this.birthDate = birthDate;
+		this.currLevel = currentLevel;
+		this.futureVisits = futureVisits;
 
 		this.homeLocation = LocationLookup.convertStringToLocation(homeLocation);
 		this.homeLocString = LocationLookup.convertLocationToString(this.homeLocation);
@@ -69,7 +71,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
 			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
-			String birthdate, String staffSinceDate, int staffPastEvents) {
+			String birthdate, String staffSinceDate, int staffPastEvents, String currentLevel) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -84,6 +86,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.birthDate = birthdate;
 		this.staffSinceDate = staffSinceDate;
 		this.staffPastEvents = staffPastEvents;
+		this.currLevel = currentLevel;
 
 		this.email = email;
 		this.accountMgrEmails = acctMgrEmail;
@@ -231,6 +234,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		return currGrade;
 	}
 
+	public String getCurrLevel() {
+		return currLevel;
+	}
+
 	public String getEmail() {
 		return email;
 	}
@@ -373,7 +380,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 				&& accountMgrEmails.equals(other.getAccountMgrEmails()) && mobilePhone.equals(other.getMobilePhone())
 				&& accountMgrPhones.equals(other.getAccountMgrPhones()) && homePhone.equals(other.getHomePhone())
 				&& emergContactPhone.equals(other.getEmergContactPhone()) && birthDate.equals(other.getBirthDate())
-				&& staffSinceDate.equals(other.getStaffSinceDate()) && staffPastEvents == other.getStaffPastEvents()) {
+				&& staffSinceDate.equals(other.getStaffSinceDate()) && staffPastEvents == other.getStaffPastEvents()
+				&& currLevel.equals(other.currLevel)) {
 			return 0;
 		}
 

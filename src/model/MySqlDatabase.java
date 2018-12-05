@@ -123,7 +123,8 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -167,7 +168,8 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -318,7 +320,8 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -399,7 +402,8 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -442,7 +446,8 @@ public class MySqlDatabase {
 							result.getInt("GradYear"), result.getString("CurrentClass"), result.getString("Email"),
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
-							result.getString("EmergencyPhone"), result.getString("CurrentModule")));
+							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();

@@ -50,6 +50,7 @@ public class Pike13Api {
 	private final String GRANT_INFO_FIELD = "custom_field_148317";
 	private final String LEAVE_REASON_FIELD = "custom_field_148655";
 	private final String STOP_EMAIL_FIELD = "custom_field_149207";
+	private final String CURRENT_LEVEL_FIELD = "custom_field_157737";
 
 	// Custom field names for Staff Member data
 	private final String STAFF_SF_CLIENT_ID_FIELD = "custom_field_152501";
@@ -82,6 +83,7 @@ public class Pike13Api {
 	private final int GENDER_IDX = 5;
 	private final int HOME_LOC_IDX = 6;
 	private final int FIRST_VISIT_IDX = 7;
+	private final int FUTURE_VISITS_IDX = 8;
 	private final int EMAIL_IDX = 10;
 	private final int ACCT_MGR_EMAIL_IDX = 11;
 	private final int EMERG_EMAIL_IDX = 12;
@@ -90,6 +92,7 @@ public class Pike13Api {
 	private final int HOME_PHONE_IDX = 15;
 	private final int EMERG_PHONE_IDX = 16;
 	private final int BIRTHDATE_IDX = 17;
+	private final int CURRENT_LEVEL_IDX = 18;
 
 	// Indices for client data import to SF
 	private final int CLIENT_SF_ID_IDX = 0;
@@ -229,7 +232,8 @@ public class Pike13Api {
 			+ "            \"" + GENDER_FIELD + "\",\"home_location_name\",\"first_visit_date\","
 			+ "            \"future_visits\",\"completed_visits\",\"email\",\"account_manager_emails\","
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"phone\",\"account_manager_phones\","
-			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\",\"birthdate\"],"
+			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\",\"birthdate\","
+			+ "            \"" + CURRENT_LEVEL_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
@@ -467,7 +471,7 @@ public class Pike13Api {
 				if (personArray.get(BIRTHDATE_IDX) != null)
 					birthday = stripQuotes(personArray.get(BIRTHDATE_IDX).toString());
 
-				if (!firstName.startsWith("Guest")) {
+				if (!firstName.startsWith("Guest") && !firstName.equals("Test")) {
 					// Get fields for this Json array entry
 					StudentImportModel model = new StudentImportModel(personArray.getInt(CLIENT_ID_IDX),
 							stripQuotes(personArray.get(LAST_NAME_IDX).toString()),
@@ -484,7 +488,8 @@ public class Pike13Api {
 							stripQuotes(personArray.get(ACCT_MGR_PHONE_IDX).toString()),
 							stripQuotes(personArray.get(HOME_PHONE_IDX).toString()),
 							stripQuotes(personArray.get(EMERG_PHONE_IDX).toString()),
-							birthday);
+							birthday, stripQuotes(personArray.get(CURRENT_LEVEL_IDX).toString()),
+							personArray.getInt(FUTURE_VISITS_IDX));
 					studentList.add(model);
 				}
 			}

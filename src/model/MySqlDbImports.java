@@ -73,6 +73,12 @@ public class MySqlDbImports {
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), "");
 
+			if (importStudent.getCurrLevel().equals("") && !importStudent.getStartDate().equals("")
+					&& importStudent.getFutureVisits() > 0)
+				MySqlDbLogging.insertLogData(LogDataModel.MISSING_CURRENT_LEVEL,
+						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
+						importStudent.getClientID(), "");
+			
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
@@ -146,7 +152,8 @@ public class MySqlDbImports {
 							result.getString("EmergencyEmail"), result.getString("Phone"),
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("Birthdate"),
-							result.getString("TASinceDate"), result.getInt("TAPastEvents")));
+							result.getString("TASinceDate"), result.getInt("TAPastEvents"),
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -176,8 +183,8 @@ public class MySqlDbImports {
 						"INSERT INTO Students (ClientID, LastName, FirstName, GithubName, NewGithub, NewStudent, "
 								+ "Gender, StartDate, Location, GradYear, isInMasterDb, Email, EmergencyEmail, "
 								+ "AcctMgrEmail, Phone, AcctMgrPhone, HomePhone, EmergencyPhone, Birthdate, "
-								+ "TASinceDate, TAPastEvents) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+								+ "TASinceDate, TAPastEvents, CurrentLevel) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
 				addStudentStmt.setInt(col++, student.getClientID());
@@ -208,6 +215,7 @@ public class MySqlDbImports {
 				addStudentStmt.setString(col++, student.getBirthDate());
 				addStudentStmt.setString(col++, student.getStaffSinceDate());
 				addStudentStmt.setInt(col++, student.getStaffPastEvents());
+				addStudentStmt.setString(col++, student.getCurrLevel());
 
 				addStudentStmt.executeUpdate();
 				addStudentStmt.close();
@@ -257,7 +265,7 @@ public class MySqlDbImports {
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
 								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=?, Email=?,"
 								+ "EmergencyEmail=?, AcctMgrEmail=?, Phone=?, AcctMgrPhone=?, HomePhone=?, "
-								+ "EmergencyPhone=?, Birthdate=?, TASinceDate=?, TAPastEvents=? "
+								+ "EmergencyPhone=?, Birthdate=?, TASinceDate=?, TAPastEvents=?, CurrentLevel=? "
 								+ "WHERE ClientID=?;");
 
 				int col = 1;
@@ -288,6 +296,7 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getBirthDate());
 				updateStudentStmt.setString(col++, importStudent.getStaffSinceDate());
 				updateStudentStmt.setInt(col++, importStudent.getStaffPastEvents());
+				updateStudentStmt.setString(col++, importStudent.getCurrLevel());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
@@ -418,6 +427,12 @@ public class MySqlDbImports {
 				changes += " (TA since date";
 			else
 				changes += ", TA since date";
+		}
+		if (!importStudent.getCurrLevel().equals(dbStudent.getCurrLevel())) {
+			if (changes.equals(""))
+				changes += " (Current Level " + importStudent.getCurrLevel();
+			else
+				changes += ", Current Level " + importStudent.getCurrLevel();
 		}
 
 		if (!changes.equals(""))
