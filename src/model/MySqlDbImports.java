@@ -78,7 +78,7 @@ public class MySqlDbImports {
 				MySqlDbLogging.insertLogData(LogDataModel.MISSING_CURRENT_LEVEL,
 						new StudentNameModel(importStudent.getFirstName(), importStudent.getLastName(), true),
 						importStudent.getClientID(), "");
-			
+
 			// If at end of DB list, then default operation is insert (1)
 			int compare = 1;
 			if (dbListIdx < dbListSize) {
@@ -499,7 +499,8 @@ public class MySqlDbImports {
 						|| !dbAttendance.getTeacherNames().equals(teachers)
 						|| (dbAttendance.getServiceTime().equals("") && !importEvent.getServiceTime().equals(""))))
 					compare = 2;
-			}
+			} else
+				dbAttendance = null;
 
 			if (compare == 0) {
 				// All data matches, so continue through list
@@ -528,7 +529,8 @@ public class MySqlDbImports {
 							|| !dbAttendance.getTeacherNames().equals(teachers)
 							|| (dbAttendance.getServiceTime().equals("") && !importEvent.getServiceTime().equals(""))))
 						compare = 2;
-				}
+				} else
+					dbAttendance = null;
 
 				if (compare == 0) {
 					dbListIdx++;
@@ -537,14 +539,9 @@ public class MySqlDbImports {
 					int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
 					if (idx >= 0) {
 						if (compare == 1)
-							addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-									importEvent.getServiceDateString(), importEvent.getServiceTime(),
-									importEvent.getEventName(), studentList.get(idx).getNameModel(), teachers,
-									importEvent.getServiceCategory(), importEvent.getState());
+							addAttendance(importEvent, dbAttendance, teachers, studentList.get(idx));
 						else // state field has changed, so update
-							updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
-									importEvent.getServiceDateString(), importEvent.getServiceTime(),
-									importEvent.getEventName(), importEvent.getState(), teachers);
+							updateAttendanceState(importEvent, dbAttendance, teachers, studentList.get(idx));
 
 					} else
 						MySqlDbLogging.insertLogData(LogDataModel.STUDENT_NOT_FOUND,
@@ -560,14 +557,9 @@ public class MySqlDbImports {
 				if (idx >= 0) {
 					// Student exists in DB, so add attendance data for this student
 					if (compare == 1)
-						addAttendance(importEvent.getClientID(), importEvent.getVisitID(),
-								importEvent.getServiceDateString(), importEvent.getServiceTime(),
-								importEvent.getEventName(), studentList.get(idx).getNameModel(), teachers,
-								importEvent.getServiceCategory(), importEvent.getState());
+						addAttendance(importEvent, dbAttendance, teachers, studentList.get(idx));
 					else // state field has changed, so update
-						updateAttendanceState(importEvent.getClientID(), studentList.get(idx).getNameModel(),
-								importEvent.getServiceDateString(), importEvent.getServiceTime(),
-								importEvent.getEventName(), importEvent.getState(), teachers);
+						updateAttendanceState(importEvent, dbAttendance, teachers, studentList.get(idx));
 
 				} else {
 					// Student not found
@@ -665,24 +657,41 @@ public class MySqlDbImports {
 		}
 	}
 
-	private int addAttendance(int clientID, int visitID, String serviceDate, String serviceTime, String eventName,
-			StudentNameModel nameModel, String teacherNames, String serviceCategory, String state) {
+	private int addAttendance(AttendanceEventModel importEvent, AttendanceEventModel dbAttendance, String teacherNames,
+			StudentModel student) {
+		// When transitioning to completed state, update student's current level
+		boolean addLevel = false;
+		if ((dbAttendance == null || !dbAttendance.getState().equals("completed"))
+				&& importEvent.getState().equals("completed") 
+				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7') 
+						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
+								|| importEvent.getEventName().startsWith("PG")))
+			addLevel = true;
+
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement addAttendanceStmt = sqlDb.dbConnection.prepareStatement(
-						"INSERT INTO Attendance (ClientID, ServiceDate, ServiceTime, EventName, VisitID, TeacherNames, ServiceCategory, State) "
-								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+				PreparedStatement addAttendanceStmt;
+				if (addLevel)
+					addAttendanceStmt = sqlDb.dbConnection.prepareStatement(
+							"INSERT INTO Attendance (ClientID, ServiceDate, ServiceTime, EventName, VisitID, TeacherNames, "
+									+ "ServiceCategory, State, ClassLevel) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+				else
+					addAttendanceStmt = sqlDb.dbConnection.prepareStatement(
+							"INSERT INTO Attendance (ClientID, ServiceDate, ServiceTime, EventName, VisitID, TeacherNames, "
+									+ "ServiceCategory, State) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
 
 				int col = 1;
-				addAttendanceStmt.setInt(col++, clientID);
-				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-				addAttendanceStmt.setString(col++, serviceTime);
-				addAttendanceStmt.setString(col++, eventName);
-				addAttendanceStmt.setInt(col++, visitID);
+				addAttendanceStmt.setInt(col++, importEvent.getClientID());
+				addAttendanceStmt.setDate(col++, java.sql.Date.valueOf(importEvent.getServiceDateString()));
+				addAttendanceStmt.setString(col++, importEvent.getServiceTime());
+				addAttendanceStmt.setString(col++, importEvent.getEventName());
+				addAttendanceStmt.setInt(col++, importEvent.getVisitID());
 				addAttendanceStmt.setString(col++, teacherNames);
-				addAttendanceStmt.setString(col++, serviceCategory);
-				addAttendanceStmt.setString(col, state);
+				addAttendanceStmt.setString(col++, importEvent.getServiceCategory());
+				addAttendanceStmt.setString(col++, importEvent.getState());
+				if (addLevel)
+					addAttendanceStmt.setString(col, student.getCurrentLevel());
 
 				addAttendanceStmt.executeUpdate();
 				addAttendanceStmt.close();
@@ -700,34 +709,47 @@ public class MySqlDbImports {
 				break;
 
 			} catch (SQLException e3) {
-				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
-						nameModel.getIsInMasterDb());
-				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID,
-						": " + e3.getMessage());
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, student.getNameModel(),
+						importEvent.getClientID(), ": " + e3.getMessage());
 				break;
 			}
 		}
 		return 0;
 	}
 
-	private int updateAttendanceState(int clientID, StudentNameModel nameModel, String serviceDate, String serviceTime,
-			String eventName, String state, String teachers) {
+	private int updateAttendanceState(AttendanceEventModel importEvent, AttendanceEventModel dbAttendance,
+			String teachers, StudentModel student) {
+		// When transitioning to completed state, update student's current level
+		boolean addLevel = false;
+		if ((dbAttendance == null || !dbAttendance.getState().equals("completed"))
+				&& importEvent.getState().equals("completed")
+				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7') 
+						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
+								|| importEvent.getEventName().startsWith("PG")))
+			addLevel = true;
+
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
 			try {
 				// The only fields that should be updated are the State & Teacher fields
-				updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
-						"UPDATE Attendance SET State=?, TeacherNames=?, ServiceTime=? "
-								+ "WHERE ClientID=? AND EventName=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
-
+				if (addLevel)
+					updateAttendanceStmt = sqlDb.dbConnection.prepareStatement(
+							"UPDATE Attendance SET State=?, TeacherNames=?, ServiceTime=?, ClassLevel=? "
+									+ "WHERE ClientID=? AND EventName=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
+				else
+					updateAttendanceStmt = sqlDb.dbConnection
+							.prepareStatement("UPDATE Attendance SET State=?, TeacherNames=?, ServiceTime=? "
+									+ "WHERE ClientID=? AND EventName=? AND ServiceDate=? AND (ServiceTime='' OR ServiceTime=?);");
 				int col = 1;
-				updateAttendanceStmt.setString(col++, state);
+				updateAttendanceStmt.setString(col++, importEvent.getState());
 				updateAttendanceStmt.setString(col++, teachers);
-				updateAttendanceStmt.setString(col++, serviceTime);
-				updateAttendanceStmt.setInt(col++, clientID);
-				updateAttendanceStmt.setString(col++, eventName);
-				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(serviceDate));
-				updateAttendanceStmt.setString(col++, serviceTime);
+				updateAttendanceStmt.setString(col++, importEvent.getServiceTime());
+				if (addLevel)
+					updateAttendanceStmt.setString(col++, student.getCurrentLevel());
+				updateAttendanceStmt.setInt(col++, importEvent.getClientID());
+				updateAttendanceStmt.setString(col++, importEvent.getEventName());
+				updateAttendanceStmt.setDate(col++, java.sql.Date.valueOf(importEvent.getServiceDateString()));
+				updateAttendanceStmt.setString(col++, importEvent.getServiceTime());
 
 				updateAttendanceStmt.executeUpdate();
 				updateAttendanceStmt.close();
@@ -741,10 +763,8 @@ public class MySqlDbImports {
 				}
 
 			} catch (SQLException e) {
-				StudentNameModel studentModel = new StudentNameModel(nameModel.getFirstName(), nameModel.getLastName(),
-						nameModel.getIsInMasterDb());
-				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, studentModel, clientID,
-						": " + e.getMessage());
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, student.getNameModel(),
+						importEvent.getClientID(), ": " + e.getMessage());
 				break;
 			}
 		}

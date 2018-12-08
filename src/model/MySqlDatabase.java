@@ -202,7 +202,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT * FROM Students WHERE isInMasterDb AND TASinceDate != '' "
-								+ "AND TAPastEvents >= " + minNumClasses + " AND LEFT(CurrentClass,1) >= " + minLevel
+								+ "AND TAPastEvents >= " + minNumClasses + " AND CurrentLevel >= " + minLevel
 								+ " AND Birthdate <= '" + latestBirthdate + "' ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
@@ -211,8 +211,8 @@ public class MySqlDatabase {
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
 							getAge(today, result.getString("Birthdate")), result.getString("CurrentClass"),
-							result.getString("TASinceDate"), result.getInt("TAPastEvents"), result.getString("Email"),
-							result.getString("Phone")));
+							result.getString("CurrentLevel"), result.getString("TASinceDate"),
+							result.getInt("TAPastEvents"), result.getString("Email"), result.getString("Phone")));
 				}
 
 				result.close();
@@ -242,14 +242,15 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT ClientID, FirstName, LastName, CurrentClass, CurrentModule FROM Students "
-								+ "WHERE isInMasterDb AND LEFT(CurrentClass,1) >= '0' AND LEFT(CurrentClass,1) <= '9';");
+						"SELECT ClientID, FirstName, LastName, CurrentClass, CurrentModule, CurrentLevel "
+								+ "FROM Students WHERE isInMasterDb AND CurrentLevel != '';");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
 					studList.add(new StudentClassLevelModel(result.getInt("ClientID"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("CurrentClass"), result.getString("CurrentModule")));
+							result.getString("CurrentClass"), result.getString("CurrentModule"), 
+							result.getString("CurrentLevel")));
 				}
 
 				result.close();
@@ -602,7 +603,7 @@ public class MySqlDatabase {
 			if (repoName.charAt(idx) == '-')
 				idx++;
 
-			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' 
+			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9'
 					&& (repoName.length() == (idx + 1) || repoName.charAt(idx + 1) == '-'))
 				newRepoName = repoName.substring(idx, idx + 1);
 		}
@@ -632,7 +633,7 @@ public class MySqlDatabase {
 				PreparedStatement selectStmt = dbConnection.prepareStatement("SELECT * "
 						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, ServiceTime, EventName, VisitID, "
 						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, isInMasterDb, "
-						+ "         GithubName, Birthdate, RepoName, Comments, TeacherNames, "
+						+ "         GithubName, Birthdate, RepoName, Comments, TeacherNames, ClassLevel, "
 						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
 						+ "      FROM SortedAttendance, Students "
 						+ "      WHERE isInMasterDb AND SortedAttendance.ClientID = Students.ClientID "
@@ -678,11 +679,11 @@ public class MySqlDatabase {
 
 				while (result.next()) {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
-							result.getDate("ServiceDate"), result.getString("ServiceTime"), result.getString("EventName"), 
+							result.getDate("ServiceDate"), result.getString("ServiceTime"), result.getString("EventName"),
 							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("LastSFState"), result.getString("TeacherNames")));
+							result.getString("ServiceCategory"), result.getString("State"), result.getString("LastSFState"),
+							result.getString("TeacherNames"), result.getString("ClassLevel")));
 				}
 
 				result.close();
@@ -808,7 +809,8 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
 						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
-								+ "LastSFState, ServiceCategory, TeacherNames, Birthdate FROM Attendance, Students "
+								+ "LastSFState, ServiceCategory, TeacherNames, Birthdate, ClassLevel "
+								+ "FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
 								+ "GROUP BY Students.ClientID;");
@@ -824,9 +826,11 @@ public class MySqlDatabase {
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name,
 								getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
-								new AttendanceEventModel(thisClientID, 0, null, "   ", "", result.getString("GithubName"),
-										"", "", name, result.getString("ServiceCategory"), result.getString("State"),
-										result.getString("LastSFState"), result.getString("TeacherNames"))));
+								new AttendanceEventModel(thisClientID, 0, null, "   ", "",
+										result.getString("GithubName"), "", "", name,
+										result.getString("ServiceCategory"), result.getString("State"),
+										result.getString("LastSFState"), result.getString("TeacherNames"),
+										result.getString("ClassLevel"))));
 					else
 						attendanceList.addAll(listByClient);
 				}
@@ -860,7 +864,7 @@ public class MySqlDatabase {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND State = 'completed' "
-								+ "AND Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName LIMIT 36;");
+								+ "AND Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName LIMIT 52;");
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();
@@ -927,9 +931,11 @@ public class MySqlDatabase {
 					if (!ignore && (comments == null || comments.equals(""))) {
 						// No github comments for this client either previously or now
 						String eventName = result.getString("EventName");
+						String classLevel = result.getString("ClassLevel");
 						count++;
 
-						if (eventName.charAt(0) >= '0' && eventName.charAt(0) <= '4') {
+						if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '4') 
+								|| (classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '4')) {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							int dowInt = serviceDate.getDayOfWeek();
@@ -996,10 +1002,11 @@ public class MySqlDatabase {
 				while (result.next()) {
 					eventList.add(new AttendanceEventModel(result.getInt("ClientID"), result.getInt("VisitID"),
 							result.getDate("ServiceDate"), result.getString("ServiceTime"),	result.getString("EventName"),
-							result.getString("GithubName"),	result.getString("RepoName"), result.getString("Comments"),
+							result.getString("GithubName"), result.getString("RepoName"), result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("LastSFState"), result.getString("TeacherNames")));
+							result.getString("LastSFState"), result.getString("TeacherNames"),
+							result.getString("ClassLevel")));
 				}
 
 				result.close();
@@ -1041,13 +1048,14 @@ public class MySqlDatabase {
 						continue;
 					}
 					// Add more data to existing client
-					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(thisClientID,
+					lastAttendanceModel.addAttendanceData(new AttendanceEventModel(thisClientID, 
 							result.getInt("VisitID"), result.getDate("ServiceDate"), result.getString("ServiceTime"),
-							result.getString("EventName"), result.getString("GithubName"), 	result.getString("RepoName"), 
+							result.getString("EventName"), result.getString("GithubName"), result.getString("RepoName"),
 							result.getString("Comments"),
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
 							result.getString("ServiceCategory"), result.getString("State"),
-							result.getString("LastSFState"), result.getString("TeacherNames")));
+							result.getString("LastSFState"), result.getString("TeacherNames"),
+							result.getString("ClassLevel")));
 
 				} else {
 					lastClientID = thisClientID;
@@ -1072,7 +1080,8 @@ public class MySqlDatabase {
 									new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 											true),
 									result.getString("ServiceCategory"), result.getString("State"),
-									result.getString("LastSFState"), result.getString("TeacherNames")));
+									result.getString("LastSFState"), result.getString("TeacherNames"),
+									result.getString("ClassLevel")));
 					attendanceList.add(lastAttendanceModel);
 				}
 			}
@@ -1082,54 +1091,6 @@ public class MySqlDatabase {
 					": " + e.getMessage());
 			return;
 		}
-	}
-
-	public ArrayList<String> getClassNamesByLevel(int filter) {
-		ArrayList<String> classList = new ArrayList<String>();
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt;
-				if (filter < NUM_CLASS_LEVELS) { // Classes 0 through 9
-					selectStmt = dbConnection.prepareStatement(
-							"SELECT EventName FROM Attendance WHERE EventName != '' AND LEFT(EventName,2) = ? "
-									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
-					selectStmt.setString(1, String.valueOf(filter) + "@");
-				} else {
-					selectStmt = dbConnection
-							.prepareStatement("SELECT EventName FROM Attendance WHERE EventName != '' AND "
-									+ "(LEFT(EventName,2) = ? OR LEFT(EventName,2) = ? OR LEFT(EventName,3) = ?"
-									+ " OR Left(EventName,3) = ?) "
-									+ "AND State = 'completed' GROUP BY EventName ORDER BY EventName;");
-					selectStmt.setString(1, "L@");
-					selectStmt.setString(2, "E@");
-					selectStmt.setString(3, "AP@");
-					selectStmt.setString(4, "E1@");
-				}
-
-				ResultSet result = selectStmt.executeQuery();
-				while (result.next()) {
-					classList.add(result.getString("EventName"));
-				}
-				result.close();
-				selectStmt.close();
-				break;
-
-			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
-				if (i == 0) {
-					// First attempt to re-connect
-					connectDatabase();
-				} else
-					connectError = true;
-
-			} catch (SQLException e2) {
-				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
-						": " + e2.getMessage());
-				break;
-			}
-		}
-		return classList;
 	}
 
 	public ArrayList<StudentNameModel> getAllStudentNames() {
@@ -1298,7 +1259,8 @@ public class MySqlDatabase {
 			try {
 				// Get schedule data for weekly classes
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT * FROM Schedule WHERE LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '7' "
+						"SELECT * FROM Schedule WHERE ((LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '7') "
+								+ "OR LEFT(ClassName,2) = 'AD' OR LEFT(ClassName,2) = 'AG' OR LEFT(ClassName,2) = 'PG') "
 								+ dowSelect + "ORDER BY DayOfWeek, StartTime, ClassName;");
 				ResultSet result = selectStmt.executeQuery();
 
@@ -1385,15 +1347,17 @@ public class MySqlDatabase {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection
-						.prepareStatement("SELECT ServiceDate, EventName FROM Attendance WHERE ClientID = ? "
-								+ "AND State = 'completed' ORDER BY ServiceDate ASC;");
+						.prepareStatement("SELECT ServiceDate, EventName, ClassLevel FROM Attendance "
+								+ "WHERE ClientID = ? AND State = 'completed' ORDER BY ServiceDate ASC;");
 				selectStmt.setInt(1, clientID);
 
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
 					String eventName = result.getString("EventName");
-					if (eventName.charAt(1) == '@' && eventName.startsWith(levelString)) {
+					String classLevel = result.getString("ClassLevel");
+					if ((eventName.charAt(1) == '@' && eventName.startsWith(levelString))
+							|| classLevel.equals(levelString)) {
 						String startDate = result.getDate("ServiceDate").toString();
 						if (startDate.compareTo("2017-09-30") < 0)
 							return "";

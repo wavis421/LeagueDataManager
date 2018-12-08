@@ -6,18 +6,19 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private int clientID, visitID;
 	private String eventName, teacherNames, serviceCategory, state, lastSFState;
 	private Date serviceDate;
-	private String serviceDateString, serviceTime;
+	private String serviceDateString, serviceTime, classLevel;
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 	private boolean markForDeletion;
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String serviceTime, String event,
 			String githubName, String repoName, String githubComments, StudentNameModel nameModel,
-			String serviceCategory, String state, String lastSFState, String teacherNames) {
+			String serviceCategory, String state, String lastSFState, String teacherNames, String classLevel) {
 		this.clientID = clientID;
 		this.visitID = visitID;
 		this.serviceDate = serviceDate;
 		this.serviceTime = serviceTime;
+		this.classLevel = classLevel;
 		this.teacherNames = teacherNames;
 		if (teacherNames == null)
 			this.teacherNames = "";
@@ -78,6 +79,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 
 	public String getEventName() {
 		return eventName;
+	}
+
+	public String getClassLevel() {
+		return classLevel;
 	}
 
 	public String getTeacherNames() {

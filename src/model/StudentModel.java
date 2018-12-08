@@ -44,13 +44,14 @@ public class StudentModel implements Comparable<StudentModel> {
 			missingData = false;
 	}
 
-	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String currClass, String staffSinceDate,
-			int staffPastEvents, String email, String phone) {
+	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String currClass, String currLevel,
+			String staffSinceDate, int staffPastEvents, String email, String phone) {
 		// Student model for student TA's
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.age = age;
 		this.currentClass = currClass;
+		this.currentLevel = currLevel;
 		this.staffSinceDate = staffSinceDate;
 		this.staffPastEvents = staffPastEvents;
 		this.email = email;

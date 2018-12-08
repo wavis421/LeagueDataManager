@@ -130,6 +130,7 @@ public class Pike13Api {
 	private final int CLIENT_ACCOUNT_MGR_EMAILS_IDX = 32;
 	private final int CLIENT_ACCOUNT_MGR_PHONES_IDX = 33;
 	private final int CLIENT_DEPENDENT_NAMES_IDX = 34;
+	private final int CLIENT_CURRENT_LEVEL_IDX = 35;
 
 	// Indices for enrollment data
 	private final int ENROLL_CLIENT_ID_IDX = 0;
@@ -257,7 +258,8 @@ public class Pike13Api {
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"" + FINANCIAL_AID_FIELD + "\",\"" + FINANCIAL_AID_PERCENT_FIELD + "\","
 			+ "            \"" + GITHUB_FIELD + "\",\"" + GRANT_INFO_FIELD + "\",\"" + LEAVE_REASON_FIELD + "\","
 			+ "            \"" + STOP_EMAIL_FIELD + "\",\"first_visit_date\",\"" + HOME_PHONE_FIELD + "\","
-			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\",\"dependent_names\"],"
+			+ "            \"account_manager_names\",\"account_manager_emails\",\"account_manager_phones\",\"dependent_names\","
+			+ "            \"" + CURRENT_LEVEL_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 
@@ -577,7 +579,8 @@ public class Pike13Api {
 						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_NAMES_IDX).toString()),
 						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_PHONES_IDX).toString()),
 						stripQuotes(personArray.get(CLIENT_ACCOUNT_MGR_EMAILS_IDX).toString()),
-						stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()));
+						stripQuotes(personArray.get(CLIENT_DEPENDENT_NAMES_IDX).toString()),
+						stripQuotes(personArray.get(CLIENT_CURRENT_LEVEL_IDX).toString()));
 
 				studentList.add(model);
 			}

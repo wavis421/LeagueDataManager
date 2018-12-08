@@ -148,12 +148,7 @@ public class StudentTableModel extends AbstractTableModel {
 				else
 					return String.valueOf(student.getGradYear());
 			case CURR_CLASS_COLUMN:
-				if (student.getCurrentClass() == null || student.getCurrentClass().length() < 1)
-					return "";
-				else if (student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '9')
-					return student.getCurrentClass();
-				else
-					return "";
+				return getCurrentClassString(student);
 			}
 		} else if (tableType == StudentTable.EMAIL_STUDENT_TABLE_TYPE) {
 			switch (col) {
@@ -168,10 +163,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case EMERGENCY_EMAIL_COLUMN:
 				return student.getEmergEmail();
 			case CURR_CLASS_EMAIL_COLUMN:
-				if (student.getCurrentClass() == null)
-					return "";
-				else
-					return student.getCurrentClass();
+				return getCurrentClassString(student);
 			}
 		} else if (tableType == StudentTable.PHONE_STUDENT_TABLE_TYPE) {
 			switch (col) {
@@ -188,10 +180,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case EMERGENCY_PHONE_COLUMN:
 				return student.getEmergPhone();
 			case CURR_CLASS_PHONE_COLUMN:
-				if (student.getCurrentClass() == null)
-					return "";
-				else
-					return student.getCurrentClass();
+				return getCurrentClassString(student);
 			}
 		} else {
 			switch (col) {
@@ -209,10 +198,7 @@ public class StudentTableModel extends AbstractTableModel {
 				else
 					return student.getAge().toString().substring(0, 4);
 			case TA_CURR_LEVEL_COLUMN:
-				if (student.getCurrentClass() == null || student.getCurrentClass().length() < 1)
-					return "";
-				else
-					return student.getCurrentClass().substring(0, 1);
+					return student.getCurrentLevel();
 			case TA_EMAIL_COLUMN:
 				return student.getEmail();
 			case TA_PHONE_COLUMN:
@@ -220,6 +206,18 @@ public class StudentTableModel extends AbstractTableModel {
 			}
 		}
 		return null;
+	}
+
+	private String getCurrentClassString(StudentModel student) {
+		if (student.getCurrentClass() == null || student.getCurrentClass().equals(""))
+			return "";
+		else if (student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '7')
+			return student.getCurrentClass();
+		else if (student.getCurrentClass().startsWith("AD") || student.getCurrentClass().startsWith("AG")
+				|| student.getCurrentClass().startsWith("PG"))
+			return student.getCurrentClass() + " [" + student.getCurrentLevel() + "]";
+		else
+			return student.getCurrentLevel();
 	}
 
 	public StudentModel getValueByRow(int row) {

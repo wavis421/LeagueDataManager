@@ -104,7 +104,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 			boolean financialAid, String financialAidPercent, String grantInfo, String leaveReason, String hearAboutUs,
 			String whoToThank, String emergContactName, String emergContactPhone, String emergContactEmail,
 			String homePhone, String accountMgrNames, String accountMgrPhones, String accountMgrEmails,
-			String dependentNames) {
+			String dependentNames, String currentLevel) {
 
 		this.clientID = clientID;
 		this.firstName = firstName;
@@ -140,6 +140,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.accountMgrPhones = accountMgrPhones;
 		this.accountMgrEmails = accountMgrEmails;
 		this.homePhone = homePhone;
+		this.currLevel = currentLevel;
 		if (dependentNames == null)
 			this.dependentNames = "";
 		else

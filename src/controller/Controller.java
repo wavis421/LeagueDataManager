@@ -168,13 +168,6 @@ public class Controller {
 		return result;
 	}
 
-	public ArrayList<String> getClassNamesByLevel(int level) {
-		ArrayList<String> result = sqlDb.getClassNamesByLevel(level);
-		if (sqlDb.getConnectError())
-			reportConnectError();
-		return result;
-	}
-
 	public ArrayList<ScheduleModel> getClassSchedule() {
 		ArrayList<ScheduleModel> result = sqlDb.getClassSchedule();
 		if (sqlDb.getConnectError())

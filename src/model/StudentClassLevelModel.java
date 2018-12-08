@@ -8,7 +8,7 @@ package model;
  */
 public class StudentClassLevelModel {
 	int clientID;
-	String eventName, serviceDate, moduleName, repoName;
+	String eventName, serviceDate, moduleName, repoName, currentLevel;
 	StudentNameModel studentName;
 
 	public StudentClassLevelModel(int clientID, String eventName, String serviceDate, String repoName) {
@@ -24,11 +24,13 @@ public class StudentClassLevelModel {
 		this.moduleName = moduleName;
 	}
 
-	public StudentClassLevelModel(int clientID, StudentNameModel studentName, String eventName, String moduleName) {
+	public StudentClassLevelModel(int clientID, StudentNameModel studentName, String eventName, String moduleName,
+			String currentLevel) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.eventName = eventName;
 		this.moduleName = moduleName;
+		this.currentLevel = currentLevel;
 	}
 
 	public int getClientID() {
@@ -45,6 +47,10 @@ public class StudentClassLevelModel {
 
 	public String getModuleName() {
 		return moduleName;
+	}
+
+	public String getCurrentLevel() {
+		return currentLevel;
 	}
 
 	public String getServiceDate() {
