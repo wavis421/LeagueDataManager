@@ -259,6 +259,10 @@ public class MySqlDbImports {
 			if (changedFields.contains("Github") || (newStudent && !importStudent.getGithubName().equals("")))
 				githubChanged = true;
 
+			// If student current level just changed, then clear the CurrentModule field
+			if (changedFields.contains("Current Level"))
+				sqlDb.updateLastEventInfoByStudent(dbStudent.getClientID(), null, null, "NULL");
+
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement updateStudentStmt = sqlDb.dbConnection.prepareStatement(
@@ -539,7 +543,7 @@ public class MySqlDbImports {
 					int idx = getClientIdxInStudentList(studentList, importEvent.getClientID());
 					if (idx >= 0) {
 						if (compare == 1)
-							addAttendance(importEvent, dbAttendance, teachers, studentList.get(idx));
+							addAttendance(importEvent, teachers, studentList.get(idx));
 						else // state field has changed, so update
 							updateAttendanceState(importEvent, dbAttendance, teachers, studentList.get(idx));
 
@@ -557,7 +561,7 @@ public class MySqlDbImports {
 				if (idx >= 0) {
 					// Student exists in DB, so add attendance data for this student
 					if (compare == 1)
-						addAttendance(importEvent, dbAttendance, teachers, studentList.get(idx));
+						addAttendance(importEvent, teachers, studentList.get(idx));
 					else // state field has changed, so update
 						updateAttendanceState(importEvent, dbAttendance, teachers, studentList.get(idx));
 
@@ -635,8 +639,8 @@ public class MySqlDbImports {
 						continue;
 
 					lastClientID = thisClientID;
-					sqlDb.updateLastEventNameByStudent(Integer.parseInt(thisClientID), result.getString("EventName"),
-							null);
+					sqlDb.updateLastEventInfoByStudent(Integer.parseInt(thisClientID), result.getString("EventName"),
+							null, null);
 				}
 
 				result.close();
@@ -657,16 +661,21 @@ public class MySqlDbImports {
 		}
 	}
 
-	private int addAttendance(AttendanceEventModel importEvent, AttendanceEventModel dbAttendance, String teacherNames,
-			StudentModel student) {
-		// When transitioning to completed state, update student's current level
+	private int addAttendance(AttendanceEventModel importEvent, String teacherNames, StudentModel student) {
+		// Update class level if <= L7
 		boolean addLevel = false;
-		if ((dbAttendance == null || !dbAttendance.getState().equals("completed"))
-				&& importEvent.getState().equals("completed") 
-				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7') 
+
+		if (importEvent.getState().equals("completed")
+				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7')
 						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
-								|| importEvent.getEventName().startsWith("PG")))
+						|| importEvent.getEventName().startsWith("PG")
+						|| ((importEvent.getServiceCategory().startsWith("class jlab") 
+								|| importEvent.getServiceCategory().startsWith("class jslam"))
+							&& !student.getCurrentLevel().equals("")
+							&& student.getCurrentLevel().charAt(0) <= '7'))) {
 			addLevel = true;
+			updateStudentLastVisit(student, importEvent);
+		}
 
 		for (int i = 0; i < 2; i++) {
 			try {
@@ -719,14 +728,22 @@ public class MySqlDbImports {
 
 	private int updateAttendanceState(AttendanceEventModel importEvent, AttendanceEventModel dbAttendance,
 			String teachers, StudentModel student) {
-		// When transitioning to completed state, update student's current level
+		// When transitioning to completed, update current level for students <= L7.
+		// Only set level for old levels 0-7, AD/AG/PG, Slams & Make-ups.
 		boolean addLevel = false;
+
 		if ((dbAttendance == null || !dbAttendance.getState().equals("completed"))
 				&& importEvent.getState().equals("completed")
-				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7') 
+				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7')
 						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
-								|| importEvent.getEventName().startsWith("PG")))
+						|| importEvent.getEventName().startsWith("PG")
+						|| ((importEvent.getServiceCategory().startsWith("class jlab") 
+								|| importEvent.getServiceCategory().startsWith("class jslam"))
+							&& !student.getCurrentLevel().equals("")
+							&& student.getCurrentLevel().charAt(0) <= '7'))) {
 			addLevel = true;
+			updateStudentLastVisit(student, importEvent);
+		}
 
 		PreparedStatement updateAttendanceStmt;
 		for (int i = 0; i < 2; i++) {
@@ -769,6 +786,17 @@ public class MySqlDbImports {
 			}
 		}
 		return 0;
+	}
+
+	private void updateStudentLastVisit(StudentModel student, AttendanceEventModel importEvent) {
+		if (student.getLastVisitDate() == null
+				|| student.getLastVisitDateString().compareTo(importEvent.getServiceDateString()) < 0) {
+			// Update student's current class and last visit time
+			if (importEvent.getServiceCategory().equals("class java")) {
+				sqlDb.updateLastEventInfoByStudent(student.getClientID(), importEvent.getEventName(),
+						importEvent.getServiceDateString(), null);
+			}
+		}
 	}
 
 	private void deleteFromAttendance(int clientID, int visitID, StudentNameModel studentModel) {

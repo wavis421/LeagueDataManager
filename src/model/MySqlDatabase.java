@@ -124,7 +124,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -169,7 +169,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getDate("LastVistiDate")));
 				}
 
 				result.close();
@@ -235,22 +235,17 @@ public class MySqlDatabase {
 		return nameList;
 	}
 
-	private ArrayList<StudentClassLevelModel> getStudentCurrentLevels() {
-		ArrayList<StudentClassLevelModel> studList = new ArrayList<StudentClassLevelModel>();
-
+	private StudentModel getStudentCurrentLevel(int clientID) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = dbConnection.prepareStatement(
-						"SELECT ClientID, FirstName, LastName, CurrentClass, CurrentModule, CurrentLevel "
-								+ "FROM Students WHERE isInMasterDb AND CurrentLevel != '';");
+						"SELECT CurrentLevel, CurrentModule FROM Students WHERE ClientID=?;");
+				selectStmt.setInt(1, clientID);
 				ResultSet result = selectStmt.executeQuery();
 
-				while (result.next()) {
-					studList.add(new StudentClassLevelModel(result.getInt("ClientID"),
-							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"), true),
-							result.getString("CurrentClass"), result.getString("CurrentModule"), 
-							result.getString("CurrentLevel")));
+				if (result.next()) {
+					return new StudentModel(clientID, result.getString("CurrentLevel"), result.getString("CurrentModule"));
 				}
 
 				result.close();
@@ -270,7 +265,7 @@ public class MySqlDatabase {
 				break;
 			}
 		}
-		return studList;
+		return null;
 	}
 
 	public void removeStudentByClientID(int clientID) {
@@ -322,7 +317,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -404,7 +399,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -448,7 +443,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -500,62 +495,40 @@ public class MySqlDatabase {
 		}
 	}
 
-	public void updateLastEventNames(ArrayList<StudentClassLevelModel> classLevelList) {
-		// Get student records for any non-null class name
-		ArrayList<StudentClassLevelModel> dbClassList = getStudentCurrentLevels();
-
-		for (StudentClassLevelModel importStud : classLevelList) {
-			String module = parseRepoName(importStud.getEventName(), importStud.getRepoName());
-			StudentClassLevelModel dbStud = getStudentFromClassList(importStud.getClientID(), dbClassList);
-
-			if (dbStud != null) {
-				// Found student match in database with existing event name
-				if (!dbStud.getEventName().equals(importStud.getEventName())) {
-					// Event name changed, so clear the module field if the level also changed
-					if (dbStud.getEventName().charAt(0) != importStud.getEventName().charAt(0)) {
-						// Level changed
-						MySqlDbLogging.insertLogData(LogDataModel.STUDENT_CLASS_LEVEL_CHANGE, dbStud.getStudentName(),
-								dbStud.getClientID(),
-								": " + dbStud.getEventName() + " to " + importStud.getEventName());
-						if (module == null)
-							module = "NULL"; // Force clear module field
-					}
-				}
-
-				// Module and event both match, so skip
-				else if (module == null || module.equals(dbStud.getModuleName()))
-					continue;
-
-				// Module has changed, only update if module has increased
-				else if (dbStud.getModuleName() != null && module.compareTo(dbStud.getModuleName()) < 0) {
-					continue;
-				}
-			}
-
-			// Ready to update: either event or module has changed
-			updateLastEventNameByStudent(importStud.getClientID(), importStud.getEventName(), module);
+	public void updateLastEventInfoByStudent(int clientID, String eventName, String lastVisitDate, String module) {		
+		boolean addModule = false;
+		String separator = "";
+		String updateFields = "";
+		
+		if (eventName != null) {
+			updateFields = "CurrentClass=? ";
+			separator = ", ";
 		}
-	}
+		if (module != null) {
+			if (module.equals("NULL"))
+				// Module cleared due to new class level
+				updateFields += separator + "CurrentModule=NULL ";
+			else {
+				updateFields += separator + "CurrentModule=? ";
+				addModule = true;
+			}
+		}
+		if (lastVisitDate != null)
+			updateFields += separator + "LastVisitDate=? ";
 
-	public void updateLastEventNameByStudent(int clientID, String eventName, String module) {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement updateStudentStmt;
-				if (module == null) // Future class, no module info
-					updateStudentStmt = dbConnection
-							.prepareStatement("UPDATE Students SET CurrentClass=? WHERE ClientID=?;");
-				else if (module.equals("NULL")) // Module cleared due to new class level
-					updateStudentStmt = dbConnection.prepareStatement(
-							"UPDATE Students SET CurrentClass=?, CurrentModule=NULL WHERE ClientID=?;");
-				else
-					updateStudentStmt = dbConnection
-							.prepareStatement("UPDATE Students SET CurrentClass=?, CurrentModule=? WHERE ClientID=?;");
-
+				PreparedStatement updateStudentStmt = dbConnection
+							.prepareStatement("UPDATE Students SET " + updateFields + "WHERE ClientID=?;");
+				
 				int col = 1;
-				updateStudentStmt.setString(col++, eventName);
-				if (module != null && !module.equals("NULL"))
+				if (eventName != null)
+					updateStudentStmt.setString(col++, eventName);
+				if (addModule)
 					updateStudentStmt.setString(col++, module);
+				if (lastVisitDate != null)
+					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(lastVisitDate));
 				updateStudentStmt.setInt(col, clientID);
 
 				updateStudentStmt.executeUpdate();
@@ -577,37 +550,37 @@ public class MySqlDatabase {
 		}
 	}
 
-	private StudentClassLevelModel getStudentFromClassList(int clientID, ArrayList<StudentClassLevelModel> studList) {
-		// Find matching Client ID in the student class level list
-		for (StudentClassLevelModel s : studList) {
-			if (s.getClientID() == clientID)
-				return s;
+	private void updateStudentModule(int clientID, StudentModel student, String repoName) {
+		// Extract module from repo name: level must match student current level
+		if (repoName != null && student != null) {
+			String currLevel = student.getCurrentLevel();
+			if (!currLevel.equals("") && currLevel.charAt(0) <= '5') {
+				int idx;
+				// Github classroom names are formatted level-0-module-3 OR level3-module1
+				if (repoName.startsWith("level" + currLevel + "-module"))
+					idx = 13;
+				else if (repoName.startsWith("level-" + currLevel + "-module"))
+					idx = 14;
+				else
+					return; // No matching level in repo name
+
+				if (repoName.charAt(idx) == '-')
+					idx++;
+
+				// Now find module
+				if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9'
+						&& (repoName.length() == (idx + 1) || repoName.charAt(idx + 1) == '-')) {
+					String newModuleName = repoName.substring(idx, idx + 1);
+			
+					// Done parsing repo name; update student module if changed
+					if (newModuleName.compareTo(student.getCurrentModule()) > 0) {
+						System.out.println("Updating module: " + clientID + ", " + repoName + ", " 
+								+ currLevel + ", " + student.getCurrentModule() + " to " + newModuleName);
+						updateLastEventInfoByStudent(clientID, null, null, newModuleName);
+					}
+				}
+			}
 		}
-		return null;
-	}
-
-	private String parseRepoName(String eventName, String repoName) {
-		// Extract module from repo name: level must match event name level
-		String newRepoName = null;
-
-		if (repoName != null) {
-			int idx;
-			// Github classroom names are formatted level-0-module-3 OR level3-module1
-			if (repoName.startsWith("level" + eventName.charAt(0) + "-module"))
-				idx = 13;
-			else if (repoName.startsWith("level-" + eventName.charAt(0) + "-module"))
-				idx = 14;
-			else
-				return null;
-
-			if (repoName.charAt(idx) == '-')
-				idx++;
-
-			if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9'
-					&& (repoName.length() == (idx + 1) || repoName.charAt(idx + 1) == '-'))
-				newRepoName = repoName.substring(idx, idx + 1);
-		}
-		return newRepoName;
 	}
 
 	private Double getAge(DateTime today, String birthdate) {
@@ -1148,6 +1121,9 @@ public class MySqlDatabase {
 
 				updateAttendanceStmt.executeUpdate();
 				updateAttendanceStmt.close();
+				
+				// Now update student latest module using repo name
+				updateStudentModule(clientID, getStudentCurrentLevel(clientID), repoName);
 				return;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

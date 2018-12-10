@@ -7,7 +7,7 @@ public class StudentModel implements Comparable<StudentModel> {
 	private String githubName, currentClass, currentModule, currentLevel, staffSinceDate;
 	private int homeLocation, gender, gradYear, staffPastEvents;
 	private Double age;
-	private Date startDate;
+	private Date startDate, lastVisitDate;
 	private StudentNameModel nameModel;
 	private boolean missingData;
 	private String email, acctMgrEmail, emergEmail, phone, acctMgrPhone, homePhone, emergPhone;
@@ -15,7 +15,7 @@ public class StudentModel implements Comparable<StudentModel> {
 	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String githubName, int gender,
 			Date startDate, int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail,
 			String emergEmail, String phone, String acctMgrPhone, String homePhone, String emergPhone,
-			String currModule, String currLevel) {
+			String currModule, String currLevel, Date lastVisitDate) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.age = age;
@@ -27,6 +27,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.currentClass = currClass;
 		this.currentModule = currModule;
 		this.currentLevel = currLevel;
+		this.lastVisitDate = lastVisitDate;
 
 		this.email = email;
 		this.acctMgrEmail = acctMgrEmail;
@@ -57,6 +58,13 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.email = email;
 		this.phone = phone;
 	}
+	
+	public StudentModel(int clientID, String currLevel, String currModule) {
+		// Student model for updating current module
+		this.clientID = clientID;
+		this.currentLevel = currLevel;
+		this.currentModule = currModule;
+	}
 
 	public String toString() {
 		return nameModel.toString() + " (" + clientID + ")";
@@ -76,6 +84,17 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public Date getStartDate() {
 		return startDate;
+	}
+
+	public Date getLastVisitDate() {
+		return lastVisitDate;
+	}
+
+	public String getLastVisitDateString() {
+		if (lastVisitDate == null)
+			return "";
+		else
+			return lastVisitDate.toString();
 	}
 
 	public int getGradYear() {

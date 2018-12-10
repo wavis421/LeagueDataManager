@@ -198,7 +198,7 @@ public class StudentTableModel extends AbstractTableModel {
 				else
 					return student.getAge().toString().substring(0, 4);
 			case TA_CURR_LEVEL_COLUMN:
-					return student.getCurrentLevel();
+				return student.getCurrentLevel();
 			case TA_EMAIL_COLUMN:
 				return student.getEmail();
 			case TA_PHONE_COLUMN:
@@ -211,9 +211,8 @@ public class StudentTableModel extends AbstractTableModel {
 	private String getCurrentClassString(StudentModel student) {
 		if (student.getCurrentClass() == null || student.getCurrentClass().equals(""))
 			return "";
-		else if (student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '7')
-			return student.getCurrentClass();
-		else if (student.getCurrentClass().startsWith("AD") || student.getCurrentClass().startsWith("AG")
+		else if ((student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '7')
+				|| student.getCurrentClass().startsWith("AD") || student.getCurrentClass().startsWith("AG")
 				|| student.getCurrentClass().startsWith("PG"))
 			return student.getCurrentClass() + " [" + student.getCurrentLevel() + "]";
 		else
