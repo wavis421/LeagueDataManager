@@ -269,8 +269,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 			return 0;
 
 		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
+			// old-style event names start with level
 			return className.charAt(0) - '0';
 		else
+			// new event names, cannot extract level from class
 			return 0;
 	}
 
@@ -286,6 +288,10 @@ public class GraduationDialog extends JDialog implements ActionListener {
 
 		if (className.charAt(0) >= '0' && className.charAt(0) <= '9' && className.charAt(1) == '@')
 			return true;
+
+		else if (className.startsWith("AD@") || className.startsWith("AG@") || className.startsWith("PG@"))
+			return true;
+
 		else
 			return false;
 	}

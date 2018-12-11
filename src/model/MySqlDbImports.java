@@ -259,9 +259,19 @@ public class MySqlDbImports {
 			if (changedFields.contains("Github") || (newStudent && !importStudent.getGithubName().equals("")))
 				githubChanged = true;
 
-			// If student current level just changed, then clear the CurrentModule field
-			if (changedFields.contains("Current Level"))
+			// If student level just changed, clear module field and graduate student
+			if (changedFields.contains("Current Level")) {
 				sqlDb.updateLastEventInfoByStudent(dbStudent.getClientID(), null, null, "NULL");
+
+				if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
+					sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
+							Integer.parseInt(dbStudent.getCurrLevel()), "",
+							sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
+									Integer.parseInt(dbStudent.getCurrLevel())),
+							new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"),
+							false, false, false, false));
+				}
+			}
 
 			try {
 				// If Database no longer connected, the exception code will re-connect
@@ -669,10 +679,10 @@ public class MySqlDbImports {
 				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7')
 						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
 						|| importEvent.getEventName().startsWith("PG")
-						|| ((importEvent.getServiceCategory().startsWith("class jlab") 
+						|| ((importEvent.getServiceCategory().startsWith("class jlab")
 								|| importEvent.getServiceCategory().startsWith("class jslam"))
-							&& !student.getCurrentLevel().equals("")
-							&& student.getCurrentLevel().charAt(0) <= '7'))) {
+								&& !student.getCurrentLevel().equals("")
+								&& student.getCurrentLevel().charAt(0) <= '7'))) {
 			addLevel = true;
 			updateStudentLastVisit(student, importEvent);
 		}
@@ -737,10 +747,10 @@ public class MySqlDbImports {
 				&& ((importEvent.getEventName().charAt(0) >= '0' && importEvent.getEventName().charAt(0) <= '7')
 						|| importEvent.getEventName().startsWith("AD") || importEvent.getEventName().startsWith("AG")
 						|| importEvent.getEventName().startsWith("PG")
-						|| ((importEvent.getServiceCategory().startsWith("class jlab") 
+						|| ((importEvent.getServiceCategory().startsWith("class jlab")
 								|| importEvent.getServiceCategory().startsWith("class jslam"))
-							&& !student.getCurrentLevel().equals("")
-							&& student.getCurrentLevel().charAt(0) <= '7'))) {
+								&& !student.getCurrentLevel().equals("")
+								&& student.getCurrentLevel().charAt(0) <= '7'))) {
 			addLevel = true;
 			updateStudentLastVisit(student, importEvent);
 		}
@@ -789,12 +799,27 @@ public class MySqlDbImports {
 	}
 
 	private void updateStudentLastVisit(StudentModel student, AttendanceEventModel importEvent) {
-		if (student.getLastVisitDate() == null
-				|| student.getLastVisitDateString().compareTo(importEvent.getServiceDateString()) < 0) {
+		if (importEvent.getServiceCategory().equals("class java")) {
+			String eventName = importEvent.getEventName();
+			char levelChar = student.getCurrentLevel().charAt(0);
+
 			// Update student's current class and last visit time
-			if (importEvent.getServiceCategory().equals("class java")) {
-				sqlDb.updateLastEventInfoByStudent(student.getClientID(), importEvent.getEventName(),
-						importEvent.getServiceDateString(), null);
+			if (student.getLastVisitDate() == null
+					|| student.getLastVisitDateString().compareTo(importEvent.getServiceDateString()) < 0) {
+				sqlDb.updateLastEventInfoByStudent(student.getClientID(), eventName, importEvent.getServiceDateString(),
+						null);
+			}
+			
+			// Check if attendance event matches student's current level
+			if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '7'
+					&& !eventName.substring(0, 1).equals(student.getCurrentLevel()))
+					|| (eventName.startsWith("AD") && (levelChar < '0' || levelChar > '2'))
+					|| (eventName.startsWith("AG") && (levelChar < '3' || levelChar > '5'))
+					|| (eventName.startsWith("PG") && (levelChar < '6' || levelChar > '7'))) {
+				// Class mismatch
+				MySqlDbLogging.insertLogData(LogDataModel.CLASS_LEVEL_MISMATCH, student.getNameModel(),
+						importEvent.getClientID(), " for " + eventName + " on " + importEvent.getServiceDateString()
+								+ ", DB Level = " + levelChar);
 			}
 		}
 	}

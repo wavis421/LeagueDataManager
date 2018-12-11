@@ -30,7 +30,6 @@ public class MySqlDatabase {
 	private static final int MAX_CONNECT_ATTEMPTS_LAMBDA = 1;
 	private static final int COMMENT_WIDTH = 150;
 	private static final int REPO_NAME_WIDTH = 50;
-	private static final int NUM_CLASS_LEVELS = 10;
 	public static final int CLASS_ATTEND_NUM_DAYS_TO_KEEP = 30;
 
 	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
@@ -561,14 +560,23 @@ public class MySqlDatabase {
 					idx = 13;
 				else if (repoName.startsWith("level-" + currLevel + "-module"))
 					idx = 14;
-				else
+				else if (repoName.startsWith("old-level" + currLevel + "-module")) {
+					System.out.println(student.getNameModel().toString() + ": " + repoName);
+					idx = 17;
+				} else if (currLevel.equals("5") && repoName.length() > 10 
+						&& repoName.startsWith("level5-0") && repoName.charAt(9) == '-') {
+					System.out.println(student.getNameModel().toString() + ": " + repoName.charAt(8) + ", " + repoName);
+					idx = 8;
+				} else {
+					System.out.println(student.getNameModel().toString() + ": (unknown) " + repoName);
 					return; // No matching level in repo name
+				}
 
 				if (repoName.charAt(idx) == '-')
 					idx++;
 
 				// Now find module
-				if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9'
+				if (repoName.charAt(idx) >= '0' && repoName.charAt(idx) <= '9' // module #
 						&& (repoName.length() == (idx + 1) || repoName.charAt(idx + 1) == '-')) {
 					String newModuleName = repoName.substring(idx, idx + 1);
 			
@@ -907,8 +915,9 @@ public class MySqlDatabase {
 						String classLevel = result.getString("ClassLevel");
 						count++;
 
-						if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '4') 
-								|| (classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '4')) {
+						// Process if student is in levels 0 - 4
+						if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '5') 
+								|| (!classLevel.equals("") && classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '5')) {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							int dowInt = serviceDate.getDayOfWeek();
@@ -1335,6 +1344,7 @@ public class MySqlDatabase {
 					if ((eventName.charAt(1) == '@' && eventName.startsWith(levelString))
 							|| classLevel.equals(levelString)) {
 						String startDate = result.getDate("ServiceDate").toString();
+						System.out.println("Get start date for " + clientID + ": " + level + ", " + classLevel + ", " + eventName + ", " + startDate);
 						if (startDate.compareTo("2017-09-30") < 0)
 							return "";
 						else

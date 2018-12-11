@@ -357,7 +357,7 @@ public class MainFrame {
 				removeDataFromTables();
 				String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 						.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
-				headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 4)");
+				headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 5)");
 				githubTable.setData(tablePanel,
 						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
 				searchField.setText("");
