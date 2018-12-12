@@ -123,7 +123,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
+							result.getString("CurrentLevel"), result.getString("RegisterClass"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -168,7 +168,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel"), result.getDate("LastVistiDate")));
+							result.getString("CurrentLevel"), result.getString("RegisterClass"), result.getDate("LastVistiDate")));
 				}
 
 				result.close();
@@ -316,7 +316,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
+							result.getString("CurrentLevel"), result.getString("RegisterClass"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -398,7 +398,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
+							result.getString("CurrentLevel"), result.getString("RegisterClass"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -442,7 +442,7 @@ public class MySqlDatabase {
 							result.getString("AcctMgrEmail"), result.getString("EmergencyEmail"),
 							result.getString("Phone"), result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("CurrentModule"),
-							result.getString("CurrentLevel"), result.getDate("LastVisitDate")));
+							result.getString("CurrentLevel"), result.getString("RegisterClass"), result.getDate("LastVisitDate")));
 				}
 
 				result.close();
@@ -529,6 +529,62 @@ public class MySqlDatabase {
 				if (lastVisitDate != null)
 					updateStudentStmt.setDate(col++, java.sql.Date.valueOf(lastVisitDate));
 				updateStudentStmt.setInt(col, clientID);
+
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						clientID, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void clearRegisteredClasses() {	
+		// Clear registered classes field for all students (updated daily)
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateStudentStmt = dbConnection
+							.prepareStatement("UPDATE Students SET RegisterClass = '';");
+
+				updateStudentStmt.executeUpdate();
+				updateStudentStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					connectDatabase();
+				} else
+					connectError = true;
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, new StudentNameModel("", "", false),
+						0, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public void updateRegisteredClassByStudent(int clientID, String eventName) {
+		// Update registered (future) class for a student
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement updateStudentStmt = dbConnection
+							.prepareStatement("UPDATE Students SET RegisterClass=? WHERE ClientID=?;");
+				updateStudentStmt.setString(1, eventName);
+				updateStudentStmt.setInt(2, clientID);
 
 				updateStudentStmt.executeUpdate();
 				updateStudentStmt.close();

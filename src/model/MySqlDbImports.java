@@ -671,6 +671,56 @@ public class MySqlDbImports {
 		}
 	}
 
+	public void updateRegisteredClass() {
+		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
+		DateTime endDate = today.plusDays(7);
+		
+		// First clear all currently registered classes
+		sqlDb.clearRegisteredClasses();
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get next registered class for student.
+				// A registered class is only updated when different from the current class.
+				PreparedStatement selectStmt = sqlDb.dbConnection
+						.prepareStatement("SELECT Students.ClientID, EventName "
+								+ "FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
+								+ "AND ((LEFT(EventName,1) >= '0' AND LEFT(EventName,1) <= '7') OR "
+								+ "      LEFT(EventName,2) = 'AD' OR LEFT(EventName,2) = 'AG' OR LEFT(EventName,2) = 'PG') " 
+								+ "AND CurrentClass != EventName AND State = 'registered' "
+								+ "AND ServiceDate >= ? AND ServiceDate <= ? ORDER BY Students.ClientID, ServiceDate ASC;");
+				selectStmt.setString(1, today.toString("yyyy-MM-dd"));
+				selectStmt.setString(2, endDate.toString("yyyy-MM-dd"));
+				ResultSet result = selectStmt.executeQuery();
+
+				String lastClientID = "";
+				while (result.next()) {
+					String thisClientID = result.getString("Students.ClientID");
+					if (thisClientID.equals(lastClientID))
+						continue;
+
+					lastClientID = thisClientID;
+					sqlDb.updateRegisteredClassByStudent(result.getInt("ClientID"), result.getString("EventName"));
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				StudentNameModel model = new StudentNameModel("", "", false);
+				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, model, 0, ": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
 	private int addAttendance(AttendanceEventModel importEvent, String teacherNames, StudentModel student) {
 		// Update class level if <= L7
 		boolean addLevel = false;

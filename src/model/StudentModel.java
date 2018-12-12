@@ -4,7 +4,7 @@ import java.sql.Date;
 
 public class StudentModel implements Comparable<StudentModel> {
 	private int clientID;
-	private String githubName, currentClass, currentModule, currentLevel, staffSinceDate;
+	private String githubName, currentClass, registerClass, currentModule, currentLevel, staffSinceDate;
 	private int homeLocation, gender, gradYear, staffPastEvents;
 	private Double age;
 	private Date startDate, lastVisitDate;
@@ -15,7 +15,7 @@ public class StudentModel implements Comparable<StudentModel> {
 	public StudentModel(int clientID, StudentNameModel nameModel, Double age, String githubName, int gender,
 			Date startDate, int homeLocation, int gradYear, String currClass, String email, String acctMgrEmail,
 			String emergEmail, String phone, String acctMgrPhone, String homePhone, String emergPhone,
-			String currModule, String currLevel, Date lastVisitDate) {
+			String currModule, String currLevel, String registerClass, Date lastVisitDate) {
 		this.clientID = clientID;
 		this.nameModel = nameModel;
 		this.age = age;
@@ -27,6 +27,7 @@ public class StudentModel implements Comparable<StudentModel> {
 		this.currentClass = currClass;
 		this.currentModule = currModule;
 		this.currentLevel = currLevel;
+		this.registerClass = registerClass;
 		this.lastVisitDate = lastVisitDate;
 
 		this.email = email;
@@ -131,6 +132,10 @@ public class StudentModel implements Comparable<StudentModel> {
 
 	public String getCurrentLevel() {
 		return currentLevel;
+	}
+
+	public String getRegisterClass() {
+		return registerClass;
 	}
 
 	public String getEmail() {
