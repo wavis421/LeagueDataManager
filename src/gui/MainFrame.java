@@ -103,8 +103,6 @@ public class MainFrame {
 	// Class and Help menu names
 	private final int fileMenuIdx = 0, studentMenuIdx = 1, attendMenuIdx = 2, schedMenuIdx = 3;
 	private String[] menuDescripNames = { "File Menu ", "Student Menu ", "Attendance Menu ", "Schedule Menu " };
-	private static String[] classMenuNames = { "Level 0 ", "Level 1 ", "Level 2 ", "Level 3 ", "Level 4 ", "Level 5 ",
-			"Level 6 ", "Level 7 ", "Level 8 ", "Level 9 ", "Labs " };
 
 	public MainFrame() {
 		frame.setTitle("League Student Tracker");

@@ -263,7 +263,8 @@ public class MySqlDbImports {
 			if (changedFields.contains("Current Level")) {
 				sqlDb.updateLastEventInfoByStudent(dbStudent.getClientID(), null, null, "NULL");
 
-				if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
+				if (!dbStudent.getCurrLevel().equals("")
+						&& importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
 					sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
 							Integer.parseInt(dbStudent.getCurrLevel()), "",
 							sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
@@ -674,7 +675,7 @@ public class MySqlDbImports {
 	public void updateRegisteredClass() {
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
 		DateTime endDate = today.plusDays(7);
-		
+
 		// First clear all currently registered classes
 		sqlDb.clearRegisteredClasses();
 
@@ -686,7 +687,7 @@ public class MySqlDbImports {
 						.prepareStatement("SELECT Students.ClientID, EventName "
 								+ "FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID "
 								+ "AND ((LEFT(EventName,1) >= '0' AND LEFT(EventName,1) <= '7') OR "
-								+ "      LEFT(EventName,2) = 'AD' OR LEFT(EventName,2) = 'AG' OR LEFT(EventName,2) = 'PG') " 
+								+ "      LEFT(EventName,2) = 'AD' OR LEFT(EventName,2) = 'AG' OR LEFT(EventName,2) = 'PG') "
 								+ "AND CurrentClass != EventName AND State = 'registered' "
 								+ "AND ServiceDate >= ? AND ServiceDate <= ? ORDER BY Students.ClientID, ServiceDate ASC;");
 				selectStmt.setString(1, today.toString("yyyy-MM-dd"));
@@ -851,7 +852,14 @@ public class MySqlDbImports {
 	private void updateStudentLastVisit(StudentModel student, AttendanceEventModel importEvent) {
 		if (importEvent.getServiceCategory().equals("class java")) {
 			String eventName = importEvent.getEventName();
-			char levelChar = student.getCurrentLevel().charAt(0);
+			char levelChar = '0';
+
+			// Report error if no current level (assume level 0)
+			if (student.getCurrentLevel().equals("")) {
+				MySqlDbLogging.insertLogData(LogDataModel.MISSING_CURRENT_LEVEL, student.getNameModel(),
+						student.getClientID(), ", Assuming Level 0");
+			} else
+				levelChar = student.getCurrentLevel().charAt(0);
 
 			// Update student's current class and last visit time
 			if (student.getLastVisitDate() == null
@@ -859,7 +867,7 @@ public class MySqlDbImports {
 				sqlDb.updateLastEventInfoByStudent(student.getClientID(), eventName, importEvent.getServiceDateString(),
 						null);
 			}
-			
+
 			// Check if attendance event matches student's current level
 			if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '7'
 					&& !eventName.substring(0, 1).equals(student.getCurrentLevel()))
@@ -869,7 +877,7 @@ public class MySqlDbImports {
 				// Class mismatch
 				MySqlDbLogging.insertLogData(LogDataModel.CLASS_LEVEL_MISMATCH, student.getNameModel(),
 						importEvent.getClientID(), " for " + eventName + " on " + importEvent.getServiceDateString()
-								+ ", DB Level = " + levelChar);
+								+ ", DB Level = " + student.getCurrentLevel());
 			}
 		}
 	}
