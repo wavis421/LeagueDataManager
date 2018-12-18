@@ -51,6 +51,7 @@ public class Pike13Api {
 	private final String LEAVE_REASON_FIELD = "custom_field_148655";
 	private final String STOP_EMAIL_FIELD = "custom_field_149207";
 	private final String CURRENT_LEVEL_FIELD = "custom_field_157737";
+	private final String LAST_EXAM_SCORE_FIELD = "custom_field_158633";
 
 	// Custom field names for Staff Member data
 	private final String STAFF_SF_CLIENT_ID_FIELD = "custom_field_152501";
@@ -93,6 +94,7 @@ public class Pike13Api {
 	private final int EMERG_PHONE_IDX = 16;
 	private final int BIRTHDATE_IDX = 17;
 	private final int CURRENT_LEVEL_IDX = 18;
+	private final int LAST_EXAM_SCORE_IDX = 19;
 
 	// Indices for client data import to SF
 	private final int CLIENT_SF_ID_IDX = 0;
@@ -234,7 +236,7 @@ public class Pike13Api {
 			+ "            \"future_visits\",\"completed_visits\",\"email\",\"account_manager_emails\","
 			+ "            \"" + EMERG_CONTACT_EMAIL_FIELD + "\",\"phone\",\"account_manager_phones\","
 			+ "            \"" + HOME_PHONE_FIELD + "\",\"" + EMERG_CONTACT_PHONE_FIELD + "\",\"birthdate\","
-			+ "            \"" + CURRENT_LEVEL_FIELD + "\"],"
+			+ "            \"" + CURRENT_LEVEL_FIELD + "\",\"" + LAST_EXAM_SCORE_FIELD + "\"],"
 			// Page limit max is 500
 			+ "\"page\":{\"limit\":500";
 	
@@ -491,7 +493,8 @@ public class Pike13Api {
 							stripQuotes(personArray.get(HOME_PHONE_IDX).toString()),
 							stripQuotes(personArray.get(EMERG_PHONE_IDX).toString()),
 							birthday, stripQuotes(personArray.get(CURRENT_LEVEL_IDX).toString()),
-							personArray.getInt(FUTURE_VISITS_IDX));
+							personArray.getInt(FUTURE_VISITS_IDX), 
+							stripQuotes(personArray.get(LAST_EXAM_SCORE_IDX).toString()));
 					studentList.add(model);
 				}
 			}

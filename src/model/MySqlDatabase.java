@@ -638,8 +638,6 @@ public class MySqlDatabase {
 			
 					// Done parsing repo name; update student module if changed
 					if (newModuleName.compareTo(student.getCurrentModule()) > 0) {
-						System.out.println("Updating module: " + clientID + ", " + repoName + ", " 
-								+ currLevel + ", " + student.getCurrentModule() + " to " + newModuleName);
 						updateLastEventInfoByStudent(clientID, null, null, newModuleName);
 					}
 				}

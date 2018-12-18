@@ -9,7 +9,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String gradYearString;
 	private String genderString;
 	private String birthDate = "";
-	private String currGrade;
+	private String currGrade, lastExamScore;
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
@@ -22,7 +22,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, String gender,
 			String startDate, String homeLocation, String gradYear, String email, String acctMgrEmail,
 			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
-			String birthDate, String currentLevel, int futureVisits) {
+			String birthDate, String currentLevel, int futureVisits, String lastExamScore) {
 
 		// Pike13 import data
 		this.clientID = clientID;
@@ -34,6 +34,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.birthDate = birthDate;
 		this.currLevel = currentLevel;
 		this.futureVisits = futureVisits;
+		this.lastExamScore = lastExamScore;
 
 		this.homeLocation = LocationLookup.convertStringToLocation(homeLocation);
 		this.homeLocString = LocationLookup.convertLocationToString(this.homeLocation);
@@ -237,6 +238,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public String getCurrLevel() {
 		return currLevel;
+	}
+
+	public String getLastExamScore() {
+		return lastExamScore;
 	}
 
 	public String getEmail() {

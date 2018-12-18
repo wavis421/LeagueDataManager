@@ -262,16 +262,7 @@ public class MySqlDbImports {
 			// If student level just changed, clear module field and graduate student
 			if (changedFields.contains("Current Level")) {
 				sqlDb.updateLastEventInfoByStudent(dbStudent.getClientID(), null, null, "NULL");
-
-				if (!dbStudent.getCurrLevel().equals("")
-						&& importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
-					sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
-							Integer.parseInt(dbStudent.getCurrLevel()), "",
-							sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
-									Integer.parseInt(dbStudent.getCurrLevel())),
-							new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"),
-							false, false, false, false));
-				}
+				graduateStudent(importStudent, dbStudent);
 			}
 
 			try {
@@ -335,6 +326,31 @@ public class MySqlDbImports {
 				MySqlDbLogging.insertLogData(LogDataModel.STUDENT_DB_ERROR, studentModel, 0, ": " + e2.getMessage());
 				break;
 			}
+		}
+	}
+
+	private void graduateStudent(StudentImportModel importStudent, StudentImportModel dbStudent) {
+		// Add record to Graduation table if current level has increased
+		if (!dbStudent.getCurrLevel().equals("")
+				&& importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
+			// Expected score format is (example): "L1 85.3"
+			String score = "";
+			if (importStudent.getLastExamScore().length() > 3
+					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " "))
+				score = importStudent.getLastExamScore().substring(3);
+			else
+				MySqlDbLogging.insertLogData(LogDataModel.EXAM_SCORE_INVALID,
+						new StudentNameModel(dbStudent.getFirstName(), dbStudent.getLastName(), true),
+						dbStudent.getClientID(),
+						" for Level " + dbStudent.getCurrLevel() + ": " + importStudent.getLastExamScore());
+
+			// Add graduation record to database
+			sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
+					Integer.parseInt(dbStudent.getCurrLevel()), score,
+					sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
+							Integer.parseInt(dbStudent.getCurrLevel())),
+					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), false,
+					false, false, false));
 		}
 	}
 
@@ -1098,13 +1114,6 @@ public class MySqlDbImports {
 
 				updateScheduleStmt.executeUpdate();
 				updateScheduleStmt.close();
-
-				if (dbEvent.getAttCount() != pike13Event.getAttCount()) {
-					MySqlDbLogging.insertLogData(LogDataModel.UPDATE_CLASS_INFO, new StudentNameModel("", "", false), 0,
-							" for " + pike13Event.getClassName() + " on " + dayOfWeek[pike13Event.getDayOfWeek()]
-									+ " at " + pike13Event.getStartTimeFormatted() + " (" + dbEvent.getAttCount()
-									+ " => " + pike13Event.getAttCount() + ")");
-				}
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
@@ -1244,9 +1253,6 @@ public class MySqlDbImports {
 
 				updateCourseStmt.executeUpdate();
 				updateCourseStmt.close();
-
-				MySqlDbLogging.insertLogData(LogDataModel.UPDATE_COURSES_INFO, new StudentNameModel("", "", true), 0,
-						": " + course.getEventName());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
