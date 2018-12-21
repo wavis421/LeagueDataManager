@@ -9,7 +9,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String gradYearString;
 	private String genderString;
 	private String birthDate = "";
-	private String currGrade, lastExamScore;
+	private String currGrade, lastExamScore, currentClass;
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
@@ -72,7 +72,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
 			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
-			String birthdate, String staffSinceDate, int staffPastEvents, String currentLevel) {
+			String birthdate, String staffSinceDate, int staffPastEvents, String currentLevel, String currentClass) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -88,6 +88,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.staffSinceDate = staffSinceDate;
 		this.staffPastEvents = staffPastEvents;
 		this.currLevel = currentLevel;
+		this.currentClass = currentClass;
 
 		this.email = email;
 		this.accountMgrEmails = acctMgrEmail;
@@ -238,6 +239,10 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 
 	public String getCurrLevel() {
 		return currLevel;
+	}
+
+	public String getCurrClass() {
+		return currentClass;
 	}
 
 	public String getLastExamScore() {

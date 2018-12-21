@@ -86,13 +86,13 @@ public class GraduationTable extends JPanel {
 
 		// Configure column widths
 		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setPreferredWidth(120);
-		table.getColumnModel().getColumn(GraduationTableModel.SF_VERIFIED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.SKIP_LEVEL_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(250);
+		table.getColumnModel().getColumn(GraduationTableModel.CURRENT_CLASS_COLUMN).setPreferredWidth(250);
 		table.getColumnModel().getColumn(GraduationTableModel.SCORE_COLUMN).setPreferredWidth(100);
 
 		table.setDefaultRenderer(Object.class, new GradTableRenderer());
@@ -117,24 +117,17 @@ public class GraduationTable extends JPanel {
 				if (row < 0)
 					return;
 
-				if (e.getButton() == MouseEvent.BUTTON1 && (col == GraduationTableModel.PROCESSED_COLUMN
-						|| col == GraduationTableModel.SF_VERIFIED_COLUMN)) {
+				if (e.getButton() == MouseEvent.BUTTON1 && col == GraduationTableModel.PROCESSED_COLUMN) {
 					int modelRow = table.convertRowIndexToModel(row);
 					boolean checked = (boolean) table.getValueAt(row, col);
-					String field = Controller.GRAD_MODEL_PROCESSED_FIELD;
-
-					if (col == GraduationTableModel.PROCESSED_COLUMN)
-						gradTableModel.setProcessed(modelRow, !checked);
-					else {
-						field = Controller.GRAD_MODEL_VERIFIED_FIELD;
-						gradTableModel.setVerified(modelRow, !checked);
-					}
+					gradTableModel.setProcessed(modelRow, !checked);
 					gradTableModel.fireTableDataChanged();
 
 					// Update changes to database
 					gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
 							(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
-							(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN), field, !checked);
+							(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
+							Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
 				}
 			}
 
@@ -222,7 +215,7 @@ public class GraduationTable extends JPanel {
 			if (column != -1) {
 				super.setHorizontalAlignment(CENTER);
 				setFont(CustomFonts.TABLE_HEADER_FONT);
-				if (column == GraduationTableModel.PROCESSED_COLUMN || column == GraduationTableModel.SF_VERIFIED_COLUMN) {
+				if (column == GraduationTableModel.PROCESSED_COLUMN) {
 					setForeground(CustomFonts.TITLE_COLOR);
 					setBorder(BorderFactory.createCompoundBorder(outerBorder, innerColoredBorder));
 				} else {

@@ -153,7 +153,7 @@ public class MySqlDbImports {
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("Birthdate"),
 							result.getString("TASinceDate"), result.getInt("TAPastEvents"),
-							result.getString("CurrentLevel")));
+							result.getString("CurrentLevel"), result.getString("CurrentClass")));
 				}
 
 				result.close();
@@ -346,10 +346,10 @@ public class MySqlDbImports {
 
 			// Add graduation record to database
 			sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
-					Integer.parseInt(dbStudent.getCurrLevel()), score,
+					Integer.parseInt(dbStudent.getCurrLevel()), score, dbStudent.getCurrClass(),
 					sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
 							Integer.parseInt(dbStudent.getCurrLevel())),
-					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), false,
+					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), 
 					false, false, false));
 		}
 	}

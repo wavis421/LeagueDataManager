@@ -252,15 +252,15 @@ public class GraduationDialog extends JDialog implements ActionListener {
 		// Add grad record with SCORE to database
 		String startDate = controller.getStartDateByClientIdAndLevel(clientID, level);
 
-		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, startDate,
-				gradDatePicker.getJFormattedTextField().getText(), false, false, false, false);
+		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, "", startDate,
+				gradDatePicker.getJFormattedTextField().getText(), false, false, false);
 		controller.addGraduationRecord(gradModel);
 	}
 
 	private void addGradRecordToDbNoDate(int clientID, String studentName, int level, String score) {
 		// Add skip-level grad record with no start or end date
-		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, "",
-				gradDatePicker.getJFormattedTextField().getText(), false, false, false, true);
+		GraduationModel gradModel = new GraduationModel(clientID, studentName, level, score, "", "",
+				gradDatePicker.getJFormattedTextField().getText(), false, false, true);
 		controller.addGraduationRecord(gradModel);
 	}
 
