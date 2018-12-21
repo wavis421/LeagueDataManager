@@ -98,7 +98,7 @@ public class NotesWindow {
 			"\n     LOCATION CODES:\n\n",
 			
 			// About League Student Tracker
-			"\n   VERSION 4.10G (G = includes Graduation Dialog, Limited Distribution) \n\n"
+			"\n   VERSION 5.0 \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"

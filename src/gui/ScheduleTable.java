@@ -32,7 +32,6 @@ import model.ScheduleModel;
 public class ScheduleTable extends JPanel {
 	private static final int POPUP_WIDTH = 240;
 	private static final int POPUP_HEIGHT_1ROW = 30;
-	private static final int POPUP_HEIGHT_2ROWS = 50;
 	private static final int DAYS_IN_WEEK = 7;
 	private static final int ROW_GAP = 5;
 
@@ -170,9 +169,8 @@ public class ScheduleTable extends JPanel {
 		// Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem scheduleViewByClassItem = new JMenuItem("View by Class ");
-		JMenuItem graduateClassItem = new JMenuItem("Graduate Class ");
 		tablePopup.add(scheduleViewByClassItem);
-		tablePopup.add(graduateClassItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
 
 		// POP UP action listeners
 		scheduleViewByClassItem.addActionListener(new ActionListener() {
@@ -197,33 +195,10 @@ public class ScheduleTable extends JPanel {
 			}
 		});
 
-		graduateClassItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Retrieve class name from selected row
-				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				ScheduleTableModel model = (ScheduleTableModel) table.getModel();
-				String className = (String) model.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
-
-				// Display graduation dialog
-				table.clearSelection();
-				scheduleListener.graduateClass(className);
-			}
-		});
-
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = table.getSelectedRow();
 				if (e.getButton() == MouseEvent.BUTTON3 && row != -1) {
-					// Check if this is a valid class to graduate
-					String className = (String) table.getValueAt(row, ScheduleTableModel.CLASS_NAME_COLUMN);
-					if (GraduationDialog.isValidClassName(className)) { // OK
-						tablePopup.add(graduateClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
-					} else { // Not a valid graduation class
-						tablePopup.remove(graduateClassItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_1ROW));
-					}
-
 					// Show the popup menu
 					tablePopup.show(table, e.getX(), e.getY());
 				}

@@ -39,7 +39,7 @@ public class StudentTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_6ROWS = 130;
+	private static final int POPUP_HEIGHT_5ROWS = 110;
 
 	private int tableType;
 	private JPanel tablePanel;
@@ -194,14 +194,12 @@ public class StudentTable extends JPanel {
 		JMenuItem showStudentEmailItem = new JMenuItem("Show student email ");
 		JMenuItem showStudentPhoneItem = new JMenuItem("Show student phone ");
 		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
-		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(showStudentEmailItem);
 		tablePopup.add(showStudentPhoneItem);
 		tablePopup.add(updateGithubUserItem);
-		tablePopup.add(graduateStudentItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_6ROWS));
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_5ROWS));
 
 		// POP UP action listeners
 		updateGithubUserItem.addActionListener(new ActionListener() {
@@ -265,21 +263,6 @@ public class StudentTable extends JPanel {
 				// Display phone number table for selected student
 				table.clearSelection();
 				studentListener.viewPhoneByStudent(Integer.parseInt(clientID));
-			}
-		});
-		graduateStudentItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get student name for selected row/column
-				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
-				StudentTableModel model = (StudentTableModel) table.getModel();
-				String clientID = (String) model.getValueAt(modelRow, StudentTableModel.CLIENT_ID_COLUMN);
-				StudentNameModel studentName = (StudentNameModel) model.getValueAt(modelRow,
-						StudentTableModel.STUDENT_NAME_COLUMN);
-				String className = (String) model.getValueAt(modelRow, StudentTableModel.CURR_CLASS_COLUMN);
-
-				// Display graduation dialog for student
-				table.clearSelection();
-				studentListener.graduateStudent(clientID, studentName.toString(), className);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {

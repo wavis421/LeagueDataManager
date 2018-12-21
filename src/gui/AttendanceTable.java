@@ -34,7 +34,6 @@ public class AttendanceTable extends JPanel {
 
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
-	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
 	private static final int POPUP_MENU_HEIGHT_6ROWS = 130;
 
 	// Columns for embedded event table
@@ -171,16 +170,12 @@ public class AttendanceTable extends JPanel {
 		JMenuItem showStudentEmailItem = new JMenuItem("Show student email ");
 		JMenuItem showStudentPhoneItem = new JMenuItem("Show student phone ");
 		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
-		JMenuItem graduateClassItem = new JMenuItem("Graduate class ");
-		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentClassItem);
 		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(showStudentEmailItem);
 		tablePopup.add(showStudentPhoneItem);
 		tablePopup.add(updateGithubUserItem);
-		tablePopup.add(graduateClassItem);
-		tablePopup.add(graduateStudentItem);
 
 		// POP UP action listeners
 		showStudentClassItem.addActionListener(new ActionListener() {
@@ -252,18 +247,6 @@ public class AttendanceTable extends JPanel {
 				attendanceListener.updateGithubUser(clientID, studentNameModel.toString());
 			}
 		});
-		graduateClassItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				mainTable.clearSelection();
-				attendanceListener.graduateClass(selectedClassName);
-			}
-		});
-		graduateStudentItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				mainTable.clearSelection();
-				attendanceListener.graduateStudent(selectedClientID, selectedStudentName);
-			}
-		});
 		mainTable.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = mainTable.getSelectedRow();
@@ -283,13 +266,11 @@ public class AttendanceTable extends JPanel {
 					if (mainTable.getSelectedColumn() == AttendanceTableModel.STUDENT_NAME_COLUMN) {
 						// Show student's info
 						tablePopup.remove(showStudentClassItem);
-						tablePopup.remove(graduateClassItem);
 						tablePopup.add(showStudentInfoItem);
 						tablePopup.add(showStudentAttendanceItem);
 						tablePopup.add(showStudentEmailItem);
 						tablePopup.add(showStudentPhoneItem);
 						tablePopup.add(updateGithubUserItem);
-						tablePopup.add(graduateStudentItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_6ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
@@ -310,20 +291,10 @@ public class AttendanceTable extends JPanel {
 								tablePopup.remove(showStudentEmailItem);
 								tablePopup.remove(showStudentPhoneItem);
 								tablePopup.remove(updateGithubUserItem);
-								tablePopup.remove(graduateStudentItem);
 								tablePopup.add(showStudentClassItem);
 
-								// Check if this is a valid class to graduate
-								if (GraduationDialog.isValidClassName(selectedClassName)) { // OK
-									tablePopup.add(graduateClassItem);
-									tablePopup
-											.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
-								} else { // Not a valid graduation class
-									tablePopup.remove(graduateClassItem);
-									tablePopup
-											.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
-								}
-
+								// Show pop-up menu
+								tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
 								tablePopup.show(mainTable, e.getX(), e.getY());
 							}
 						}

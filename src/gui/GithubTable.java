@@ -31,7 +31,7 @@ public class GithubTable extends JPanel {
 	private static final int ROW_GAP = 5;
 
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_5ROWS = 110;
+	private static final int POPUP_HEIGHT_4ROWS = 90;
 
 	private JPanel tablePanel;
 	private JTable table;
@@ -119,13 +119,11 @@ public class GithubTable extends JPanel {
 		JMenuItem showStudentEmailItem = new JMenuItem("Show student email ");
 		JMenuItem showStudentPhoneItem = new JMenuItem("Show student phone ");
 		JMenuItem updateGithubUserItem = new JMenuItem("Update Github user name ");
-		JMenuItem graduateStudentItem = new JMenuItem("Graduate student ");
 		tablePopup.add(showStudentAttendanceItem);
 		tablePopup.add(showStudentEmailItem);
 		tablePopup.add(showStudentPhoneItem);
 		tablePopup.add(updateGithubUserItem);
-		tablePopup.add(graduateStudentItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_5ROWS));
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_4ROWS));
 
 		// POP UP action listeners
 		updateGithubUserItem.addActionListener(new ActionListener() {
@@ -176,18 +174,6 @@ public class GithubTable extends JPanel {
 				// Display phone number table for selected student
 				table.clearSelection();
 				githubListener.viewPhoneByStudent(Integer.parseInt(clientID));
-			}
-		});
-		graduateStudentItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				// Get student name for selected row/column
-				int modelRow = table.convertRowIndexToModel(table.getSelectedRow());
-				GithubTableModel model = (GithubTableModel) table.getModel();
-				String clientID = (String) model.getValueAt(modelRow, GithubTableModel.CLIENT_ID_COLUMN);
-
-				// Show graduation dialog
-				table.clearSelection();
-				githubListener.graduateStudent(clientID, clientID);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {

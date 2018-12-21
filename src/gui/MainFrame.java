@@ -530,25 +530,6 @@ public class MainFrame {
 			}
 
 			@Override
-			public void graduateClass(String className) {
-				// Get class student list and open Graduation dialog
-				new GraduationDialog(frame, controller, className, controller.getAttendanceByClassName(className),
-						icon);
-			}
-
-			@Override
-			public void graduateStudent(String clientID, String studentName) {
-				// Open Graduation dialog
-				new GraduationDialog(frame, controller, Integer.parseInt(clientID), studentName, icon);
-			}
-
-			@Override
-			public void graduateStudent(String clientID, String studentName, String className) {
-				// Open Graduation dialog
-				new GraduationDialog(frame, controller, Integer.parseInt(clientID), studentName, className, icon);
-			}
-
-			@Override
 			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
 					boolean newValue) {
 				// Update field in Graduation database
