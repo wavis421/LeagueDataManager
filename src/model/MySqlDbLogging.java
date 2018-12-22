@@ -11,15 +11,18 @@ import org.joda.time.DateTimeZone;
 import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 
-/** MySqlDbLogging
+/**
+ * MySqlDbLogging
  * 
  * @author wavis
  *
- * This file handles the read/write of the AWS Student Trackr database logging table.
- * API's exist for the following:
- *    - insert new log messages into the table
- *    - retrieve table data
- *    - clear all table data
+ *	This file handles the read/write of the AWS Student Trackr database logging table. 
+ *
+ *  API's exist for the following: 
+ *   - insert new log messages into the table 
+ *   - retrieve table data
+ *   - clear all table data
+ *   - remove old log data
  * 
  */
 public class MySqlDbLogging {
@@ -122,6 +125,34 @@ public class MySqlDbLogging {
 			} catch (SQLException e2) {
 				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, new StudentNameModel("", "", false), 0,
 						": " + e2.getMessage());
+				break;
+			}
+		}
+	}
+
+	public static void removeOldLogData(int numDays) {
+		// Delete any log data more than 'numDays' old
+		String date = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).minusDays(numDays)
+				.toString("yyyy-MM-dd");
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				PreparedStatement removeLogDataStmt = sqlDb.dbConnection
+						.prepareStatement("DELETE FROM LogData WHERE LogDate < ?;");
+
+				removeLogDataStmt.setDate(1, java.sql.Date.valueOf(date));
+				removeLogDataStmt.executeUpdate();
+				removeLogDataStmt.close();
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e) {
+				MySqlDbLogging.insertLogData(LogDataModel.LOG_DATA_DB_ERROR, new StudentNameModel("", "", false), 0,
+						" removing old LOG Data: " + e.getMessage());
 				break;
 			}
 		}
