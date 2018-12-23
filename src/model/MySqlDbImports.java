@@ -1028,10 +1028,6 @@ public class MySqlDbImports {
 				deleteClassStmt.setInt(1, model.getScheduleID());
 				deleteClassStmt.executeUpdate();
 				deleteClassStmt.close();
-
-				MySqlDbLogging.insertLogData(LogDataModel.REMOVE_CLASS_FROM_SCHEDULE,
-						new StudentNameModel("", "", false), 0, ": " + model.getClassName() + " on "
-								+ dayOfWeek[model.getDayOfWeek()] + " at " + model.getStartTimeFormatted());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
