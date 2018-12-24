@@ -9,7 +9,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	private String gradYearString;
 	private String genderString;
 	private String birthDate = "";
-	private String currGrade, lastExamScore, currentClass;
+	private String currGrade, lastExamScore = "", currentClass;
 	private String email, mobilePhone, homePhone, address, schoolName, tShirtSize, financialAidPercent, grantInfo;
 	private String membership, passOnFile, leaveReason, hearAboutUs, whoToThank;
 	private String emergContactName, emergContactPhone, emergContactEmail;
@@ -34,7 +34,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.birthDate = birthDate;
 		this.currLevel = currentLevel;
 		this.futureVisits = futureVisits;
-		this.lastExamScore = lastExamScore;
+		if (lastExamScore != null)
+			this.lastExamScore = lastExamScore;
 
 		this.homeLocation = LocationLookup.convertStringToLocation(homeLocation);
 		this.homeLocString = LocationLookup.convertLocationToString(this.homeLocation);
@@ -72,7 +73,8 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 	public StudentImportModel(int clientID, String lastName, String firstName, String githubName, int gender,
 			String startDate, int homeLocation, int gradYear, int isInMasterDb, String email, String acctMgrEmail,
 			String emergEmail, String mobilePhone, String acctMgrPhones, String homePhone, String emergContactPhone,
-			String birthdate, String staffSinceDate, int staffPastEvents, String currentLevel, String currentClass) {
+			String birthdate, String staffSinceDate, int staffPastEvents, String currentLevel, String currentClass,
+			String lastScore) {
 
 		// Database format being converted for comparison purposes
 		this.clientID = clientID;
@@ -89,6 +91,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 		this.staffPastEvents = staffPastEvents;
 		this.currLevel = currentLevel;
 		this.currentClass = currentClass;
+		this.lastExamScore = lastScore;
 
 		this.email = email;
 		this.accountMgrEmails = acctMgrEmail;
@@ -392,7 +395,7 @@ public class StudentImportModel implements Comparable<StudentImportModel> {
 				&& accountMgrPhones.equals(other.getAccountMgrPhones()) && homePhone.equals(other.getHomePhone())
 				&& emergContactPhone.equals(other.getEmergContactPhone()) && birthDate.equals(other.getBirthDate())
 				&& staffSinceDate.equals(other.getStaffSinceDate()) && staffPastEvents == other.getStaffPastEvents()
-				&& currLevel.equals(other.currLevel)) {
+				&& currLevel.equals(other.currLevel) && lastExamScore.equals(other.lastExamScore)) {
 			return 0;
 		}
 

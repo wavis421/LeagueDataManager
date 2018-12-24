@@ -153,7 +153,8 @@ public class MySqlDbImports {
 							result.getString("AcctMgrPhone"), result.getString("HomePhone"),
 							result.getString("EmergencyPhone"), result.getString("Birthdate"),
 							result.getString("TASinceDate"), result.getInt("TAPastEvents"),
-							result.getString("CurrentLevel"), result.getString("CurrentClass")));
+							result.getString("CurrentLevel"), result.getString("CurrentClass"),
+							result.getString("LastScore")));
 				}
 
 				result.close();
@@ -260,7 +261,7 @@ public class MySqlDbImports {
 				githubChanged = true;
 
 			// If student level just changed, clear module field and graduate student
-			if (changedFields.contains("Current Level")) {
+			if (changedFields.contains("Current Level") || changedFields.contains("Exam Score")) {
 				sqlDb.updateLastEventInfoByStudent(dbStudent.getClientID(), null, null, "NULL");
 				graduateStudent(importStudent, dbStudent);
 			}
@@ -271,8 +272,8 @@ public class MySqlDbImports {
 						"UPDATE Students SET LastName=?, FirstName=?, GithubName=?, NewGithub=?, NewStudent=?,"
 								+ "Gender=?, StartDate=?, Location=?, GradYear=?, isInMasterDb=?, Email=?,"
 								+ "EmergencyEmail=?, AcctMgrEmail=?, Phone=?, AcctMgrPhone=?, HomePhone=?, "
-								+ "EmergencyPhone=?, Birthdate=?, TASinceDate=?, TAPastEvents=?, CurrentLevel=? "
-								+ "WHERE ClientID=?;");
+								+ "EmergencyPhone=?, Birthdate=?, TASinceDate=?, TAPastEvents=?, CurrentLevel=?, "
+								+ "LastScore=? WHERE ClientID=?;");
 
 				int col = 1;
 				updateStudentStmt.setString(col++, importStudent.getLastName());
@@ -303,6 +304,7 @@ public class MySqlDbImports {
 				updateStudentStmt.setString(col++, importStudent.getStaffSinceDate());
 				updateStudentStmt.setInt(col++, importStudent.getStaffPastEvents());
 				updateStudentStmt.setString(col++, importStudent.getCurrLevel());
+				updateStudentStmt.setString(col++, importStudent.getLastExamScore());
 				updateStudentStmt.setInt(col, importStudent.getClientID());
 
 				updateStudentStmt.executeUpdate();
@@ -332,25 +334,40 @@ public class MySqlDbImports {
 	private void graduateStudent(StudentImportModel importStudent, StudentImportModel dbStudent) {
 		// Add record to Graduation table if current level has increased
 		if (!dbStudent.getCurrLevel().equals("")
-				&& importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0) {
+				&& (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
+						|| (importStudent.getCurrLevel().equals(dbStudent.getCurrLevel())
+								&& importStudent.getLastExamScore().length() > 3
+								&& dbStudent.getLastExamScore().length() <= 3))) {
 			// Expected score format is (example): "L1 85.3"
 			String score = "";
-			if (importStudent.getLastExamScore().length() > 3
-					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " "))
+			int dbCurrLevelNum = Integer.parseInt(dbStudent.getCurrLevel());
+
+			if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
+					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " ")) {
+				// New graduate: If score is just 'Ln', then no score yet
+				if (importStudent.getLastExamScore().length() > 3)
+					score = importStudent.getLastExamScore().substring(3);
+
+			} else if (importStudent.getCurrLevel().equals(dbStudent.getCurrLevel()) && dbCurrLevelNum > 0
+					&& importStudent.getLastExamScore().startsWith("L" + (dbCurrLevelNum - 1) + " ")) {
+				// Student already graduated, score being updated
 				score = importStudent.getLastExamScore().substring(3);
-			else
+				dbCurrLevelNum -= 1;
+
+			} else {
 				MySqlDbLogging.insertLogData(LogDataModel.EXAM_SCORE_INVALID,
 						new StudentNameModel(dbStudent.getFirstName(), dbStudent.getLastName(), true),
 						dbStudent.getClientID(),
 						" for Level " + dbStudent.getCurrLevel() + ": " + importStudent.getLastExamScore());
+				return;
+			}
 
 			// Add graduation record to database
 			sqlDb.addGraduationRecord(new GraduationModel(dbStudent.getClientID(), dbStudent.getFullName(),
-					Integer.parseInt(dbStudent.getCurrLevel()), score, dbStudent.getCurrClass(),
-					sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(),
-							Integer.parseInt(dbStudent.getCurrLevel())),
-					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), 
-					false, false, false));
+					dbCurrLevelNum, score, dbStudent.getCurrClass(),
+					sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(), dbCurrLevelNum),
+					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), false,
+					false, false));
 		}
 	}
 
@@ -464,6 +481,12 @@ public class MySqlDbImports {
 				changes += " (Current Level " + importStudent.getCurrLevel();
 			else
 				changes += ", Current Level " + importStudent.getCurrLevel();
+		}
+		if (!importStudent.getLastExamScore().equals(dbStudent.getLastExamScore())) {
+			if (changes.equals(""))
+				changes += " (Last Exam Score " + importStudent.getLastExamScore();
+			else
+				changes += ", Last Exam Score " + importStudent.getLastExamScore();
 		}
 
 		if (!changes.equals(""))

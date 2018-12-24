@@ -1397,7 +1397,6 @@ public class MySqlDatabase {
 					if ((eventName.charAt(1) == '@' && eventName.startsWith(levelString))
 							|| classLevel.equals(levelString)) {
 						String startDate = result.getDate("ServiceDate").toString();
-						System.out.println("Get start date for " + clientID + ": " + level + ", " + classLevel + ", " + eventName + ", " + startDate);
 						if (startDate.compareTo("2017-09-30") < 0)
 							return "";
 						else
@@ -1488,7 +1487,7 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Update graduation record in database
-				String cmdString = "UPDATE Graduation SET EndDate=?, " + GRAD_MODEL_IN_SF_FIELD + "=0;";
+				String cmdString = "UPDATE Graduation SET EndDate=?, " + GRAD_MODEL_IN_SF_FIELD + "=0";
 
 				// Only update fields if valid
 				if (!gradModel.getScore().equals(""))
