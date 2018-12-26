@@ -1227,9 +1227,6 @@ public class MySqlDbImports {
 
 				addCourseStmt.executeUpdate();
 				addCourseStmt.close();
-
-				MySqlDbLogging.insertLogData(LogDataModel.ADD_COURSES_TO_SCHEDULE, new StudentNameModel("", "", false),
-						0, ": " + courseEvent.getEventName());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
