@@ -24,11 +24,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
  */
 public class MySqlDbImports {
 	private static final int CLASS_NAME_WIDTH = 40;
-
 	private MySqlDatabase sqlDb;
-
-	private static final String[] dayOfWeek = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-			"Saturday" };
 
 	public MySqlDbImports(MySqlDatabase sqlDb) {
 		this.sqlDb = sqlDb;
@@ -1091,10 +1087,6 @@ public class MySqlDbImports {
 
 				addScheduleStmt.executeUpdate();
 				addScheduleStmt.close();
-
-				MySqlDbLogging.insertLogData(LogDataModel.ADD_CLASS_TO_SCHEDULE, new StudentNameModel("", "", false), 0,
-						": " + importEvent.getClassName() + " on " + dayOfWeek[importEvent.getDayOfWeek()] + " at "
-								+ importEvent.getStartTimeFormatted());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
