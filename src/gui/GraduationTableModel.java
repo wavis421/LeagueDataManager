@@ -19,15 +19,16 @@ public class GraduationTableModel extends AbstractTableModel {
 	public static final int IN_SALESFORCE_COLUMN = 3;
     public static final int CURRENT_CLASS_COLUMN = 4;
 	public static final int SKIP_LEVEL_COLUMN = 5;
-	public static final int SCORE_COLUMN = 6;
-	public static final int START_DATE_COLUMN = 7;
-	public static final int GRAD_DATE_COLUMN = 8;
-	public static final int CLIENT_ID_COLUMN = 9; // not a real column
-	public static final int NUM_COLUMNS = 10;
+	public static final int PROMOTED_COLUMN = 6;
+	public static final int SCORE_COLUMN = 7;
+	public static final int START_DATE_COLUMN = 8;
+	public static final int GRAD_DATE_COLUMN = 9;
+	public static final int CLIENT_ID_COLUMN = 10; // not a real column
+	public static final int NUM_COLUMNS = 11;
 
 	private ArrayList<GraduationModel> gradList;
 	private final String colNames[] = { " Student Name ", " Level ", " Processed ", " In SalesForce ",
-			" Current Class ", " Skip Level ", " Score ", " Start Date ", " Grad Date " };
+			" Current Class ", " Skip Level ", " Promoted ", " Score ", " Start Date ", " Grad Date " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
 		this.gradList = gradList;
@@ -73,6 +74,7 @@ public class GraduationTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 		case SKIP_LEVEL_COLUMN:
+		case PROMOTED_COLUMN:
 		case IN_SALESFORCE_COLUMN:
 		case PROCESSED_COLUMN:
 			return Boolean.class;
@@ -95,6 +97,8 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.getStudentName();
 		case SKIP_LEVEL_COLUMN:
 			return grad.isSkipLevel();
+		case PROMOTED_COLUMN:
+			return grad.isPromoted();
 		case LEVEL_PASSED_COLUMN:
 			return grad.getGradLevelString();
 		case START_DATE_COLUMN:

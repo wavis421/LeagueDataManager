@@ -336,16 +336,25 @@ public class MySqlDbImports {
 								&& dbStudent.getLastExamScore().length() <= 3))) {
 			// Expected score format is (example): "L1 85.3"
 			String score = "";
+			boolean isPromoted = false, isSkip = false;;
 			int dbCurrLevelNum = Integer.parseInt(dbStudent.getCurrLevel());
 
 			if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
 					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " ")) {
+				// If student being promoted (did not pass the exam), then don't set score
+				if (importStudent.getLastExamScore().toLowerCase().contains("promoted"))
+					isPromoted = true;
+				
+				else if (importStudent.getLastExamScore().toLowerCase().contains("skip"))
+					isSkip = true;
+				
 				// New graduate: If score is just 'Ln', then no score yet
-				if (importStudent.getLastExamScore().length() > 3)
+				else if (importStudent.getLastExamScore().length() > 3)
 					score = importStudent.getLastExamScore().substring(3);
 
 			} else if (importStudent.getCurrLevel().equals(dbStudent.getCurrLevel()) && dbCurrLevelNum > 0
-					&& importStudent.getLastExamScore().startsWith("L" + (dbCurrLevelNum - 1) + " ")) {
+					&& importStudent.getLastExamScore().startsWith("L" + (dbCurrLevelNum - 1) + " ")
+					&& importStudent.getLastExamScore().length() > 3) {
 				// Student already graduated, score being updated
 				score = importStudent.getLastExamScore().substring(3);
 				dbCurrLevelNum -= 1;
@@ -363,7 +372,7 @@ public class MySqlDbImports {
 					dbCurrLevelNum, score, dbStudent.getCurrClass(),
 					sqlDb.getStartDateByClientIdAndLevel(dbStudent.getClientID(), dbCurrLevelNum),
 					new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("yyyy-MM-dd"), false,
-					false, false));
+					false, isSkip, isPromoted));
 		}
 	}
 
@@ -1289,9 +1298,6 @@ public class MySqlDbImports {
 				deleteClassStmt.setInt(1, course.getScheduleID());
 				deleteClassStmt.executeUpdate();
 				deleteClassStmt.close();
-
-				MySqlDbLogging.insertLogData(LogDataModel.REMOVE_COURSES_FROM_SCHEDULE,
-						new StudentNameModel("", "", false), 0, ": " + course.getEventName());
 				break;
 
 			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {

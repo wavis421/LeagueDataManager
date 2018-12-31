@@ -192,10 +192,6 @@ public class Controller {
 		return sqlDb.getStartDateByClientIdAndLevel(clientID, level);
 	}
 
-	public void addGraduationRecord(GraduationModel gradModel) {
-		sqlDb.addGraduationRecord(gradModel);
-	}
-
 	public ArrayList<GraduationModel> getAllGradRecords() {
 		return sqlDb.getAllGradRecords();
 	}

@@ -35,6 +35,7 @@ public class MySqlDatabase {
 	public static final String GRAD_MODEL_PROCESSED_FIELD = "Processed";
 	public static final String GRAD_MODEL_IN_SF_FIELD = "InSalesForce";
 	public static final String GRAD_MODEL_SKIP_LEVEL_FIELD = "SkipLevel";
+	public static final String GRAD_MODEL_PROMOTED_FIELD = "Promoted";
 
 	public Connection dbConnection = null;
 	private JFrame parent;
@@ -1428,8 +1429,8 @@ public class MySqlDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Insert graduation record into database
-				String cmdString = "INSERT INTO Graduation (ClientID, GradLevel, SkipLevel, EndDate, CurrentClass";
-				String values = ") VALUES (?, ?, ?, ?, ?";
+				String cmdString = "INSERT INTO Graduation (ClientID, GradLevel, SkipLevel, Promoted, EndDate, CurrentClass";
+				String values = ") VALUES (?, ?, ?, ?, ?, ?";
 
 				// Don't update dates or score if no data
 				if (!gradModel.getStartDate().equals("")) {
@@ -1449,6 +1450,7 @@ public class MySqlDatabase {
 				addGrad.setInt(col++, gradModel.getClientID());
 				addGrad.setInt(col++, gradModel.getGradLevel());
 				addGrad.setBoolean(col++, gradModel.isSkipLevel());
+				addGrad.setBoolean(col++,  gradModel.isPromoted());
 				addGrad.setDate(col++, java.sql.Date.valueOf(gradModel.getEndDate()));
 				addGrad.setString(col++,  gradModel.getCurrentClass());
 				if (!gradModel.getStartDate().equals(""))
@@ -1483,7 +1485,7 @@ public class MySqlDatabase {
 
 	private void updateGraduationRecord(GraduationModel gradModel) {
 		// Graduation records are uniquely identified by clientID & level pair.
-		// Update only EndDate, Score, SkipLevel. Set 'in SF' false to forces update.
+		// Update only EndDate, Score, SkipLevel, Promoted. Set 'in SF' false to forces update.
 		for (int i = 0; i < 2; i++) {
 			try {
 				// Update graduation record in database
@@ -1494,6 +1496,8 @@ public class MySqlDatabase {
 					cmdString += ", Score=?";
 				if (gradModel.isSkipLevel())
 					cmdString += ", SkipLevel=?";
+				if (gradModel.isPromoted())
+					cmdString += ", Promoted=?";
 
 				// Update database
 				PreparedStatement updateGraduateStmt = dbConnection
@@ -1505,6 +1509,8 @@ public class MySqlDatabase {
 				if (!gradModel.getScore().equals(""))
 					updateGraduateStmt.setString(col++, gradModel.getScore());
 				if (gradModel.isSkipLevel())
+					updateGraduateStmt.setBoolean(col++, true);
+				if (gradModel.isPromoted())
 					updateGraduateStmt.setBoolean(col++, true);
 				updateGraduateStmt.setInt(col++, gradModel.getClientID());
 				updateGraduateStmt.setInt(col++, gradModel.getGradLevel());
@@ -1628,7 +1634,7 @@ public class MySqlDatabase {
 							result.getInt("GradLevel"), result.getString("Score"), result.getString("CurrentClass"),
 							result.getString("StartDate"), result.getString("EndDate"), 
 							result.getBoolean(GRAD_MODEL_IN_SF_FIELD), result.getBoolean(GRAD_MODEL_PROCESSED_FIELD),
-							result.getBoolean(GRAD_MODEL_SKIP_LEVEL_FIELD)));
+							result.getBoolean(GRAD_MODEL_SKIP_LEVEL_FIELD), result.getBoolean(GRAD_MODEL_PROMOTED_FIELD)));
 				}
 
 				result.close();

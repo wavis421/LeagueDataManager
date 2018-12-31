@@ -89,6 +89,7 @@ public class GraduationTable extends JPanel {
 		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.SKIP_LEVEL_COLUMN).setPreferredWidth(120);
+		table.getColumnModel().getColumn(GraduationTableModel.PROMOTED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.START_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.GRAD_DATE_COLUMN).setPreferredWidth(130);
 		table.getColumnModel().getColumn(GraduationTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(250);
@@ -121,13 +122,14 @@ public class GraduationTable extends JPanel {
 					int modelRow = table.convertRowIndexToModel(row);
 					boolean checked = (boolean) table.getValueAt(row, col);
 					gradTableModel.setProcessed(modelRow, !checked);
-					gradTableModel.fireTableDataChanged();
 
 					// Update changes to database
 					gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
 							(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
 							(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
 							Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
+					
+					gradTableModel.fireTableDataChanged();
 				}
 			}
 
