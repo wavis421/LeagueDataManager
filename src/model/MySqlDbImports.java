@@ -333,30 +333,28 @@ public class MySqlDbImports {
 				&& (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
 						|| (importStudent.getCurrLevel().equals(dbStudent.getCurrLevel())
 								&& importStudent.getLastExamScore().length() > 3
-								&& dbStudent.getLastExamScore().length() <= 3))) {
+								&& !dbStudent.getLastExamScore().equals(importStudent.getLastExamScore())))) {
 			// Expected score format is (example): "L1 85.3"
 			String score = "";
-			boolean isPromoted = false, isSkip = false;;
+			boolean isPromoted = false, isSkip = false;
 			int dbCurrLevelNum = Integer.parseInt(dbStudent.getCurrLevel());
+
+			if (importStudent.getLastExamScore().toLowerCase().contains("promoted"))
+				isPromoted = true; // Student did not pass the exam
+			else if (importStudent.getLastExamScore().toLowerCase().contains("skip"))
+				isSkip = true;
 
 			if (importStudent.getCurrLevel().compareTo(dbStudent.getCurrLevel()) > 0
 					&& importStudent.getLastExamScore().startsWith("L" + dbStudent.getCurrLevel() + " ")) {
-				// If student being promoted (did not pass the exam), then don't set score
-				if (importStudent.getLastExamScore().toLowerCase().contains("promoted"))
-					isPromoted = true;
-				
-				else if (importStudent.getLastExamScore().toLowerCase().contains("skip"))
-					isSkip = true;
-				
-				// New graduate: If score is just 'Ln', then no score yet
-				else if (importStudent.getLastExamScore().length() > 3)
+				// New graduate: If score is just 'Ln ' or student promoted or skipped, then no score
+				if (!isPromoted && !isSkip && importStudent.getLastExamScore().length() > 3)
 					score = importStudent.getLastExamScore().substring(3);
 
 			} else if (importStudent.getCurrLevel().equals(dbStudent.getCurrLevel()) && dbCurrLevelNum > 0
-					&& importStudent.getLastExamScore().startsWith("L" + (dbCurrLevelNum - 1) + " ")
-					&& importStudent.getLastExamScore().length() > 3) {
+					&& importStudent.getLastExamScore().startsWith("L" + (dbCurrLevelNum - 1) + " ")) {
 				// Student already graduated, score being updated
-				score = importStudent.getLastExamScore().substring(3);
+				if (!isPromoted && !isSkip)
+					score = importStudent.getLastExamScore().substring(3);
 				dbCurrLevelNum -= 1;
 
 			} else {
