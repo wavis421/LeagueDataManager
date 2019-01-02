@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
-import model.GithubModel;
+import model_for_gui.GithubModel;
 
 public class GithubTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;

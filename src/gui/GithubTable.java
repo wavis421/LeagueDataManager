@@ -25,7 +25,7 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
-import model.GithubModel;
+import model_for_gui.GithubModel;
 
 public class GithubTable extends JPanel {
 	private static final int ROW_GAP = 5;

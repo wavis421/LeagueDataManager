@@ -1,6 +1,9 @@
-package model;
+package model_for_gui;
 
 import java.util.ArrayList;
+
+import model.AttendanceEventModel;
+import model.StudentNameModel;
 
 public class AttendanceModel implements Comparable<AttendanceModel> {
 	private int clientID;

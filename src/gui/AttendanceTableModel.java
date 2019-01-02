@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import gui.AttendanceTable.EventTableModel;
-import model.AttendanceModel;
+import model_for_gui.AttendanceModel;
 
 public class AttendanceTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;

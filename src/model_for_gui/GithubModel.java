@@ -1,4 +1,4 @@
-package model;
+package model_for_gui;
 
 public class GithubModel implements Comparable<GithubModel> {
 	int clientID, dowInt;

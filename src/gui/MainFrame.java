@@ -39,13 +39,13 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import controller.Controller;
-import model.AttendanceModel;
 import model.CoursesModel;
-import model.GithubModel;
 import model.GraduationModel;
 import model.LocationLookup;
 import model.LogDataModel;
 import model.ScheduleModel;
+import model_for_gui.AttendanceModel;
+import model_for_gui.GithubModel;
 
 public class MainFrame {
 	/* Private constants */

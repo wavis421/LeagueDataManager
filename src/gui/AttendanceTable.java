@@ -25,8 +25,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import model.AttendanceEventModel;
-import model.AttendanceModel;
 import model.StudentNameModel;
+import model_for_gui.AttendanceModel;
 
 public class AttendanceTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
