@@ -15,19 +15,18 @@ import model.GraduationModel;
 public class GraduationTableModel extends AbstractTableModel {
 	public static final int STUDENT_NAME_COLUMN = 0;
 	public static final int LEVEL_PASSED_COLUMN = 1;
-	public static final int PROCESSED_COLUMN = 2;
-	public static final int IN_SALESFORCE_COLUMN = 3;
-    public static final int CURRENT_CLASS_COLUMN = 4;
-	public static final int SKIP_LEVEL_COLUMN = 5;
-	public static final int PROMOTED_COLUMN = 6;
-	public static final int SCORE_COLUMN = 7;
-	public static final int START_DATE_COLUMN = 8;
-	public static final int GRAD_DATE_COLUMN = 9;
-	public static final int CLIENT_ID_COLUMN = 10; // not a real column
-	public static final int NUM_COLUMNS = 11;
+	public static final int IN_SALESFORCE_COLUMN = 2;
+	public static final int CURRENT_CLASS_COLUMN = 3;
+	public static final int SKIP_LEVEL_COLUMN = 4;
+	public static final int PROMOTED_COLUMN = 5;
+	public static final int SCORE_COLUMN = 6;
+	public static final int START_DATE_COLUMN = 7;
+	public static final int GRAD_DATE_COLUMN = 8;
+	public static final int CLIENT_ID_COLUMN = 9; // not a real column
+	public static final int NUM_COLUMNS = 10;
 
 	private ArrayList<GraduationModel> gradList;
-	private final String colNames[] = { " Student Name ", " Level ", " Processed ", " In SalesForce ",
+	private final String colNames[] = { " Student Name ", " Level ", " In SalesForce ",
 			" Current Class ", " Skip Level ", " Promoted ", " Score ", " Start Date ", " Grad Date " };
 
 	public GraduationTableModel(ArrayList<GraduationModel> gradList) {
@@ -45,10 +44,6 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	public int getClientID(int row) {
 		return gradList.get(row).getClientID();
-	}
-
-	public void setProcessed(int row, boolean checked) {
-		gradList.get(row).setProcessed(checked);
 	}
 
 	public void setScore(int row, String score) {
@@ -76,7 +71,6 @@ public class GraduationTableModel extends AbstractTableModel {
 		case SKIP_LEVEL_COLUMN:
 		case PROMOTED_COLUMN:
 		case IN_SALESFORCE_COLUMN:
-		case PROCESSED_COLUMN:
 			return Boolean.class;
 		}
 		// All remaining columns are Strings
@@ -85,10 +79,7 @@ public class GraduationTableModel extends AbstractTableModel {
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		if (col == PROCESSED_COLUMN) // Check-box
-			return true;
-		else
-			return false;
+		return false;
 	}
 
 	public Object getValueByColumn(GraduationModel grad, int col) {
@@ -109,8 +100,6 @@ public class GraduationTableModel extends AbstractTableModel {
 			return grad.isSfUpdated();
 		case CURRENT_CLASS_COLUMN:
 			return grad.getCurrentClass();
-		case PROCESSED_COLUMN:
-			return grad.isProcessed();
 		case SCORE_COLUMN:
 			return grad.getScore();
 		}

@@ -335,7 +335,6 @@ public class MainFrame {
 
 		// Add these sub-menus to the Student menu
 		studentMenu.add(studentNotInMasterMenu);
-		// studentMenu.add(studentRemoveInactiveMenu);
 		studentMenu.add(studentNoRecentGitItem);
 		studentMenu.add(studentViewPendingGrads);
 		studentMenu.add(studentViewEmailMenu);
@@ -530,13 +529,6 @@ public class MainFrame {
 			}
 
 			@Override
-			public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName,
-					boolean newValue) {
-				// Update field in Graduation database
-				controller.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
-			}
-
-			@Override
 			public void viewEmailByStudent(int clientID) {
 				// Get student's email info
 				refreshStudentTable(STUDENT_TABLE_EMAIL_BY_STUDENT, clientID, true);
@@ -568,7 +560,6 @@ public class MainFrame {
 		logTable.setTableListener(listener);
 		githubTable.setTableListener(listener);
 		coursesTable.setTableListener(listener);
-		gradTable.setTableListener(listener);
 		schedDetailsTable.setTableListener(listener);
 		TableHeaderBox.setTableListener(listener);
 	}

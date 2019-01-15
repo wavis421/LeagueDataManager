@@ -19,7 +19,6 @@ import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
-import controller.Controller;
 import model.GraduationModel;
 
 /**
@@ -34,7 +33,6 @@ public class GraduationTable extends JPanel {
 	private JPanel tablePanel;
 	private JTable table;
 	private GraduationTableModel gradTableModel;
-	private TableListeners gradListener;
 	private JScrollPane scrollPane;
 
 	private TableRowSorter<GraduationTableModel> rowSorter;
@@ -49,10 +47,6 @@ public class GraduationTable extends JPanel {
 		createMouseListeners();
 
 		rowSorter = new TableRowSorter<GraduationTableModel>((GraduationTableModel) table.getModel());
-	}
-
-	public void setTableListener(TableListeners listener) {
-		this.gradListener = listener;
 	}
 
 	public JTable getTable() {
@@ -86,7 +80,6 @@ public class GraduationTable extends JPanel {
 
 		// Configure column widths
 		table.getColumnModel().getColumn(GraduationTableModel.IN_SALESFORCE_COLUMN).setPreferredWidth(120);
-		table.getColumnModel().getColumn(GraduationTableModel.PROCESSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.LEVEL_PASSED_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.SKIP_LEVEL_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GraduationTableModel.PROMOTED_COLUMN).setPreferredWidth(120);
@@ -112,27 +105,6 @@ public class GraduationTable extends JPanel {
 
 	private void createMouseListeners() {
 		table.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				int row = table.getSelectedRow();
-				int col = table.getSelectedColumn();
-				if (row < 0)
-					return;
-
-				if (e.getButton() == MouseEvent.BUTTON1 && col == GraduationTableModel.PROCESSED_COLUMN) {
-					int modelRow = table.convertRowIndexToModel(row);
-					boolean checked = (boolean) table.getValueAt(row, col);
-					gradTableModel.setProcessed(modelRow, !checked);
-
-					// Update changes to database
-					gradListener.updateGradField((int) gradTableModel.getClientID(modelRow),
-							(String) table.getValueAt(row, GraduationTableModel.STUDENT_NAME_COLUMN),
-							(String) table.getValueAt(row, GraduationTableModel.LEVEL_PASSED_COLUMN),
-							Controller.GRAD_MODEL_PROCESSED_FIELD, !checked);
-					
-					gradTableModel.fireTableDataChanged();
-				}
-			}
-
 			public void mouseClicked(MouseEvent e) {
 				// Single row selects one cell (default), double click to get entire row
 				if (e.getClickCount() == 2) {
@@ -200,7 +172,6 @@ public class GraduationTable extends JPanel {
 	private class GradTableHdrRenderer extends JLabel implements TableCellRenderer {
 		// Render the table header
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
-		Border innerColoredBorder = BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true);
 		Border outerBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
 		private GradTableHdrRenderer() {
@@ -217,13 +188,8 @@ public class GraduationTable extends JPanel {
 			if (column != -1) {
 				super.setHorizontalAlignment(CENTER);
 				setFont(CustomFonts.TABLE_HEADER_FONT);
-				if (column == GraduationTableModel.PROCESSED_COLUMN) {
-					setForeground(CustomFonts.TITLE_COLOR);
-					setBorder(BorderFactory.createCompoundBorder(outerBorder, innerColoredBorder));
-				} else {
-					super.setForeground(Color.black);
-					setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
-				}
+				super.setForeground(Color.black);
+				setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 			}
 			return this;
 		}

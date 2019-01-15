@@ -6,7 +6,6 @@ public interface TableListeners {
 	public void viewAttendanceByCourse (String courseName);
 	public void viewAttendanceByStudent (String clientID, String studentName);
 	public void updateGithubUser(String clientID, String name);
-	public void updateGradField(int clientID, String studentName, String gradLevel, String fieldName, boolean newValue);
 	public void viewEmailByStudent(int clientID);
 	public void viewPhoneByStudent(int clientID);
 	public void viewActiveTAs();

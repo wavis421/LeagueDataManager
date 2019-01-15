@@ -20,7 +20,6 @@ import model_for_gui.GithubModel;
 import model_for_gui.MySqlDbForGui;
 
 public class Controller {
-	public static final String GRAD_MODEL_PROCESSED_FIELD = MySqlDatabase.GRAD_MODEL_PROCESSED_FIELD;
 	public static final String GRAD_MODEL_IN_SF_FIELD = MySqlDatabase.GRAD_MODEL_IN_SF_FIELD;
 
 	private MySqlDatabase sqlDb;
@@ -173,11 +172,6 @@ public class Controller {
 
 	public ArrayList<GraduationModel> getAllGradRecords() {
 		return sqlDb.getAllGradRecords();
-	}
-
-	public void updateGraduationField(int clientID, String studentName, String gradLevel, String fieldName,
-			boolean newValue) {
-		sqlDb.updateGraduationField(clientID, studentName, gradLevel, fieldName, newValue);
 	}
 
 	private void reportConnectError() {

@@ -12,11 +12,10 @@ public class GraduationModel {
 	private String studentName, score, currentClass;
 	private Integer gradLevel;
 	private String startDate, endDate;
-	private boolean isSfUpdated, isProcessed, isSkipLevel, isPromoted;
+	private boolean isSfUpdated, isSkipLevel, isPromoted;
 
 	public GraduationModel(int clientID, String studentName, int gradLevel, String score, String currentClass,
-			String startDate, String endDate, boolean isSfUpdated, boolean isProcessed, boolean skipLevel,
-			boolean promoted) {
+			String startDate, String endDate, boolean isSfUpdated, boolean skipLevel, boolean promoted) {
 		// Graduation record with score and start date
 		this.clientID = clientID;
 		this.studentName = studentName;
@@ -26,7 +25,6 @@ public class GraduationModel {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.isSfUpdated = isSfUpdated;
-		this.isProcessed = isProcessed;
 		this.isSkipLevel = skipLevel;
 		this.isPromoted = promoted;
 	}
@@ -70,10 +68,6 @@ public class GraduationModel {
 		return isSfUpdated;
 	}
 
-	public boolean isProcessed() {
-		return isProcessed;
-	}
-
 	public boolean isSkipLevel() {
 		return isSkipLevel;
 	}
@@ -88,9 +82,5 @@ public class GraduationModel {
 
 	public void setSfUpdated(boolean isSfUpdated) {
 		this.isSfUpdated = isSfUpdated;
-	}
-
-	public void setProcessed(boolean isProcessed) {
-		this.isProcessed = isProcessed;
 	}
 }
