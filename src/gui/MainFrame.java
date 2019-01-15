@@ -66,7 +66,6 @@ public class MainFrame {
 	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";
-	private static final String GRADUATION_TITLE = "Pending Student Graduations ";
 
 	private static final int STUDENT_TABLE_ALL = 0;
 	private static final int STUDENT_TABLE_NOT_IN_MASTER_DB = 1;
@@ -93,7 +92,6 @@ public class MainFrame {
 	private SchedDetailsTable schedDetailsTable;
 	private GithubTable githubTable;
 	private CoursesTable coursesTable;
-	private GraduationTable gradTable;
 	private JTable activeTable;
 	private JTextField searchField;
 	private String activeTableHeader;
@@ -156,7 +154,6 @@ public class MainFrame {
 		schedDetailsTable = new SchedDetailsTable(tablePanel, new ArrayList<ScheduleModel>());
 		githubTable = new GithubTable(tablePanel, new ArrayList<GithubModel>());
 		coursesTable = new CoursesTable(tablePanel, new ArrayList<CoursesModel>());
-		gradTable = new GraduationTable(tablePanel, new ArrayList<GraduationModel>());
 		studentTable = new StudentTable(tablePanel, controller.getActiveStudents());
 		activeTable = studentTable.getTable();
 
@@ -240,8 +237,6 @@ public class MainFrame {
 					githubTable.updateSearchField(searchField.getText());
 				else if (activeTable == scheduleTable.getTable())
 					scheduleTable.updateSearchField(searchField.getText());
-				else if (activeTable == gradTable.getTable())
-					gradTable.updateSearchField(searchField.getText());
 				else if (activeTable == schedDetailsTable.getTable())
 					schedDetailsTable.updateSearchField(searchField.getText());
 			}
@@ -327,7 +322,6 @@ public class MainFrame {
 		JMenuItem studentNotInMasterMenu = new JMenuItem("View inactive students ");
 		// JMenuItem studentRemoveInactiveMenu = new JMenuItem("Remove inactive students ");
 		JMenuItem studentNoRecentGitItem = new JMenuItem("View students without recent Github ");
-		JMenuItem studentViewPendingGrads = new JMenuItem("View pending graduates ");
 		JMenuItem studentViewEmailMenu = new JMenuItem("View Student Email ");
 		JMenuItem studentViewPhoneMenu = new JMenuItem("View Student Phone ");
 		JMenuItem studentViewTAMenu = new JMenuItem("View Student TA's ");
@@ -336,7 +330,6 @@ public class MainFrame {
 		// Add these sub-menus to the Student menu
 		studentMenu.add(studentNotInMasterMenu);
 		studentMenu.add(studentNoRecentGitItem);
-		studentMenu.add(studentViewPendingGrads);
 		studentMenu.add(studentViewEmailMenu);
 		studentMenu.add(studentViewPhoneMenu);
 		studentMenu.add(studentViewTAMenu);
@@ -362,11 +355,6 @@ public class MainFrame {
 
 				activeTable = githubTable.getTable();
 				activeTableHeader = headerLabel.getText();
-			}
-		});
-		studentViewPendingGrads.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				refreshGradTable();
 			}
 		});
 		studentViewEmailMenu.addActionListener(new ActionListener() {
@@ -704,21 +692,6 @@ public class MainFrame {
 		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
 	}
 
-	private void refreshGradTable() {
-		// Remove data being displayed
-		removeDataFromTables();
-
-		// Add log data table and header
-		gradTable.setData(tablePanel, controller.getAllGradRecords());
-		headerLabel.setText(GRADUATION_TITLE);
-		searchField.setText("");
-		gradTable.updateSearchField("");
-
-		activeTable = gradTable.getTable();
-		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
-	}
-
 	private void removeDataFromTables() {
 		// Remove data from Student table and Attendance table
 		studentTable.removeData();
@@ -727,7 +700,6 @@ public class MainFrame {
 		scheduleTable.removeData();
 		githubTable.removeData();
 		coursesTable.removeData();
-		gradTable.removeData();
 		schedDetailsTable.removeData();
 	}
 
