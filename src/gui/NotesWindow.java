@@ -37,13 +37,11 @@ public class NotesWindow {
 			// Student Menu
 			"     Student Menu:\n\n"
 			+ "      => The Student menu shows basic information for ALL students as well as for inactive students,\n"
-			+ "            pending graduates, TA's, and students without recent github.\n"
+			+ "            TA's, phone, email and students without recent github.\n"
 			+ "            If a student name is italicized, this indicates that the student is currently inactive.\n"
 			+ "      => 'View students without recent Github' shows students who have attended at least 3 out of the\n"
 			+ "            last 4 weeks of classes without any Github commits. This indicates that either the student's\n"
 			+ "            Github user name is incorrect or that the student is not committing his/her work.\n"
-			+ "      => 'View pending graduates' shows a list of students who have recently been graduated. They are\n"
-			+ "            then removed from the list once they have been assigned to a new class/level.\n"
 			+ "      => From the Student tables, select a student and then use the Right Mouse button to view the student's\n"
 			+ "            attendance, phone and email data. Refer to the Attendance menu description for more details \n"
 			+ "            regarding attendance.",
@@ -62,27 +60,22 @@ public class NotesWindow {
 			+ "      => View the weekly class schedule to show the class schedule for each day of the week.\n"
 			+ "            Then select a class and right click to view the attendance data for that class.\n"
 			+ "            Note that you can filter the Schedule data using the search box, e.g. all 'Make-Up' classes.\n"
-			+ "      => View weekly class details to show how many students in each class along with the modules\n"
+			+ "      => View weekly class details to show how many students in each class along with the levels/modules\n"
 			+ "            that class is working on. This table also shows average age, youngest and oldest in the class.\n"
 			+ "      => Viewing Workshops and Summer Slam shows all the courses available. From there, select\n"
 			+ "            and then right-click a course to view the students enrolled in the course.",
 
 			// Examples
-			"\n   YOU ARE A SUB FOR A CLASS:\n"
+			"\n   YOU ARE A SUB FOR A CLASS or DOING A MAKE-UP SESSION:\n"
 			+ "        There are two ways to select a class that you want to view:\n"
-			+ "        1) From the Attendance menu, select 'View by Class', then select the level\n"
-			+ "            and the class you're interested in.\n"
-			+ "        2) If you do not know the class name, go to the Schedule menu and select,\n"
-			+ "            then right-click the class by day-of-week and time.\n\n"
+			+ "        1) Go to the Attendance table and find the student using the search filter.\n"
+			+ "            Select the class you want to view from the right menu, then right-click\n"
+			+ "            to show what this class has been doing for the last 4 weeks.\n"
+			+ "        2) If you do not know the class name, go to the Weekly Class Schedule menu\n"
+			+ "            and select, then right-click the class by day-of-week and time.\n\n"
 			+ "        This will show you what the class has been doing for the last 4 weeks. \n"
 			+ "        If more detail is needed, double-click the right column for the student\n"
-			+ "        to get more attendance history.\n\n" 
-			+ "   YOU ARE DOING A MAKE-UP SESSION:\n"
-			+ "        Go to the Attendance menu and find the student using the search filter.\n"
-			+ "        Select the class you want to view from the right menu, then right-click \n"
-			+ "        to show what this class has been doing for the last 4 weeks.\n\n"
-			+ "        Alternatively, if you know the day-of-week and time of the student's regular class,\n"
-			+ "        then you can access the class data from the Schedule menu.",
+			+ "        to get more attendance history.",
 
 			// Search and copy features
 			"     Search, Filter and Copy Features:\n\n"
@@ -98,7 +91,7 @@ public class NotesWindow {
 			"\n     LOCATION CODES:\n\n",
 			
 			// About League Student Tracker
-			"\n   VERSION 5.0  \n\n"
+			"\n   VERSION 5.1  \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
