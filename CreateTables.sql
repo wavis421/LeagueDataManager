@@ -22,6 +22,22 @@ BEGIN
 		CurrentClass varchar(75) DEFAULT '',
 		NewGithub boolean DEFAULT 0,
 		NewStudent boolean DEFAULT 0,
+		Email varchar(70) DEFAULT '',
+		EmergencyEmail varchar(70) DEFAULT '',
+		AcctMgrEmail varchar(140) DEFAULT '',
+		Phone varchar(20) DEFAULT '',
+		AcctMgrPhone varchar(60) DEFAULT '',
+		EmergencyPhone varchar(30) DEFAULT '',
+		HomePhone varchar(15) DEFAULT '',
+		Birthdate varchar(20) DEFAULT '',
+		TASinceDate varchar(20) DEFAULT '',
+		TAPastEvents int(5) DEFAULT 0,
+		CurrentModule varchar(3) DEFAULT NULL,
+		TALastServDate varchar(20) DEFAULT '',
+		CurrentLevel varchar(5) DEFAULT '',
+		LastVisitDate date DEFAULT NULL,
+		RegisterClass varchar(75) DEFAULT '',
+		LastScore varchar(20) DEFAULT '',
 		
 		UNIQUE KEY (GithubName)
 	) ENGINE=InnoDB;
@@ -47,6 +63,7 @@ BEGIN
 		SerivceCategory varchar(30) DEFAULT NULL,
 		State varchar(30) DEFAULT NULL,
 		LastSFState varchar(30) DEFAULT NULL,
+		ClassLevel varchar(1) DEFAULT '',
 		
 		UNIQUE KEY(ClientID, EventName, ServiceDate, ServiceTime)
 				
@@ -76,6 +93,11 @@ BEGIN
 		StartTime varchar(10) DEFAULT NULL,
 		Duration int(5) DEFAULT NULL,
 		ClassName varchar(40) DEFAULT NULL,
+		NumStudents int(5) DEFAULT 0,
+		Youngest varchar(6) DEFAULT '';
+		Oldest varchar(6) DEFAULT '';
+		AverageAge varchar(6) DEFAULT '';
+		ModuleCount varchar(80) DEFAULT '';
 
 		# All fields of this table must be unique
 		UNIQUE KEY(DayOfWeek, StartTime, ClassName)
@@ -104,6 +126,7 @@ BEGIN
 		LocCode varchar(10) NOT NULL,
 		LocName varchar(50) NOT NULL,
 		Notes varchar(50) DEFAULT NULL,
+		LocNameLong varchar(50) DEFAULT NULL,
 
 		UNIQUE KEY(LocIdx, LocCode, LocName)
 
@@ -123,11 +146,12 @@ BEGIN
 		GradLevel int(4) NOT NULL,
 		StartDate date DEFAULT NULL,
 		EndDate date DEFAULT NULL,
-		Score varchar(40) DEFAULT NULL,
+		Score varchar(50) DEFAULT NULL,
 		InSalesForce boolean DEFAULT 0,
-		NewClass boolean DEFAULT 0,
-		TestedOut boolean DEFAULT 0,
+		SkipLevel boolean DEFAULT 0,
 		VerifiedSF boolean DEFAULT 0,
+		CurrentClass varchar(75) DEFAULT '',
+		Promoted boolean DEFAULT 0,
 		
 		UNIQUE KEY(ClientID, GradLevel)
 		
