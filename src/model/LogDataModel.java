@@ -103,9 +103,10 @@ public class LogDataModel {
 	public static final int MISSING_BIRTHDATE = 90;
 	public static final int MISSING_CURRENT_LEVEL = 91;
 	public static final int EXAM_SCORE_INVALID = 92;
+	public static final int GITHUB_DB_ERROR = 93;
 
 	// This should always be last
-	private static final int LOG_TYPE_OUT_OF_BOUNDS = 93;
+	private static final int LOG_TYPE_OUT_OF_BOUNDS = 94;
 
 	private static final String[] logTypeName = { "Missing Github user name", "Missing Graduation year",
 			"Missing First Visit date", "Missing Home Location", "Missing Gender", "Added new Student",
@@ -160,7 +161,7 @@ public class LogDataModel {
 			"SalesForce Enrollment Stats import error", "Update Class Info", "Student Class Level Change",
 
 			// 90
-			"Missing Birthdate", "Missing Current Level", "Exam Score invalid" };
+			"Missing Birthdate", "Missing Current Level", "Exam Score invalid", "Pending Github Database error" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
