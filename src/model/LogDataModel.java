@@ -161,7 +161,7 @@ public class LogDataModel {
 			"SalesForce Enrollment Stats import error", "Update Class Info", "Student Class Level Change",
 
 			// 90
-			"Missing Birthdate", "Missing Current Level", "Exam Score invalid", "Pending Github Database error" };
+			"Missing Birthdate", "Missing Current Level in Pike13", "Exam Score invalid", "Pending Github Database error" };
 
 	private int logType, clientID;
 	private StudentNameModel studentName;
