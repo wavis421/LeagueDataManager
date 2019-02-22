@@ -52,7 +52,7 @@ public class AttendanceTable extends JPanel {
 	private TableListeners attendanceListener;
 	private int eventTableSelectedRow = -1; // table row
 	private int eventSelectedRow = -1; // row within table row
-	private String selectedClassName, selectedClassDate, selectedStudentName, selectedClientID;
+	private String selectedClassName, selectedClassDate;
 
 	private TableRowSorter<AttendanceTableModel> rowSorter;
 
@@ -256,10 +256,6 @@ public class AttendanceTable extends JPanel {
 						// Highlight selected row in github event table
 						setSelectedEventRow(row, e.getY());
 
-					} else {
-						selectedClientID = (String) mainTable.getValueAt(row, AttendanceTableModel.CLIENT_ID_COLUMN);
-						selectedStudentName = mainTable.getValueAt(row, AttendanceTableModel.STUDENT_NAME_COLUMN)
-								.toString();
 					}
 
 				} else if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
@@ -450,7 +446,7 @@ public class AttendanceTable extends JPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			// GITHUB column is left justified, all others are centered
-			if (column == attendanceTableModel.GITHUB_COMMENTS_COLUMN)
+			if (column == AttendanceTableModel.GITHUB_COMMENTS_COLUMN)
 				super.setHorizontalAlignment(LEFT);
 			else
 				super.setHorizontalAlignment(CENTER);

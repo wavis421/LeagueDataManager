@@ -40,7 +40,6 @@ import org.joda.time.DateTimeZone;
 
 import controller.Controller;
 import model.CoursesModel;
-import model.GraduationModel;
 import model.LocationLookup;
 import model.LogDataModel;
 import model.ScheduleModel;
