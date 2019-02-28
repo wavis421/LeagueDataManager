@@ -18,9 +18,10 @@ public class StudentTableModel extends AbstractTableModel {
 	public static final int AGE_COLUMN = 3;
 	public static final int GITHUB_NAME_COLUMN = 4;
 	public static final int HOME_LOCATION_COLUMN = 5;
-	public static final int START_DATE_COLUMN = 6;
-	public static final int GRAD_YEAR_COLUMN = 7;
-	public static final int CURR_CLASS_COLUMN = 8;
+	public static final int GRAD_YEAR_COLUMN = 6;
+	public static final int START_DATE_COLUMN = 7;
+    public static final int LAST_VISIT_DATE_COLUMN = 8;
+	public static final int CURR_CLASS_COLUMN = 9;
 
 	// For student email table
 	public static final int STUDENT_EMAIL_COLUMN = 2;
@@ -49,7 +50,7 @@ public class StudentTableModel extends AbstractTableModel {
 
 	// Table column names for each table type
 	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Age ", " Github ", " Home Loc ",
-			" Start Date ", " Grad Yr ", " Last Class Visit (0 - 7) " };
+			" Grad Yr ", " Start Date ", " Last Visit", " Last Class (0 - 7) " };
 	private final String colEmailNames[] = { " ID ", " Student Name ", " Student Email ", " Acct Mgr Email ",
 			" Emerg Email ", " Last Class Visit (0 - 7) " };
 	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
@@ -142,6 +143,11 @@ public class StudentTableModel extends AbstractTableModel {
 					return "";
 				else
 					return student.getStartDate().toString();
+			case LAST_VISIT_DATE_COLUMN:
+				if (student.getLastVisitDateString() == null)
+					return "";
+				else
+					return student.getLastVisitDateString();
 			case GRAD_YEAR_COLUMN:
 				if (student.getGradYear() == 0)
 					return "";
