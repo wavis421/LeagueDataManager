@@ -10,9 +10,10 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 	private String githubName, githubComments, repoName;
 	private StudentNameModel nameModel;
 	private boolean markForDeletion;
+	private String gitDescription;
 
 	public AttendanceEventModel(int clientID, int visitID, Date serviceDate, String serviceTime, String event,
-			String githubName, String repoName, String githubComments, StudentNameModel nameModel,
+			String githubName, String repoName, String githubComments, String githubDescription, StudentNameModel nameModel,
 			String serviceCategory, String state, String lastSFState, String teacherNames, String classLevel) {
 		this.clientID = clientID;
 		this.visitID = visitID;
@@ -53,6 +54,7 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 			this.githubComments = "";
 		else
 			this.githubComments = "  > " + githubComments.trim();
+		this.gitDescription = githubDescription;
 	}
 
 	public AttendanceEventModel(int clientID, int visitID, String studentName, String serviceDate, String serviceTime,
@@ -126,12 +128,40 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		return githubComments;
 	}
 
-	public void setGithubComments(String comments) {
+	public void setGithubComments(String fullMsg) {
+		fullMsg = fullMsg.trim();		
+		String comments = fullMsg;
+		String description = "";
+		
+		// Extract the summary and description
+		int idx = fullMsg.indexOf("\n");
+		if (idx > -1) {
+			// Extract summary
+			comments = fullMsg.substring(0, idx);
+			
+			// Remove all new line characters
+			while (idx < fullMsg.length() && fullMsg.charAt(idx) == '\n')
+				idx++;
+			
+			// Store everything after summary as the description
+			if (idx < fullMsg.length()) {
+				description = fullMsg.substring(idx);
+			}
+		}
+
 		// Add comments to existing github comments if unique
 		if (githubComments.equals(""))
-			githubComments = comments.trim();
+			githubComments = comments;
 		else if (!githubComments.contains(comments))
-			githubComments += " / " + comments.trim();
+			githubComments += " / " + comments;
+		
+		// Only store description if not already present
+		if (gitDescription.equals(""))
+			gitDescription = description;
+	}
+
+	public String getGitDescription() {
+		return gitDescription;
 	}
 
 	public String getRepoName() {
