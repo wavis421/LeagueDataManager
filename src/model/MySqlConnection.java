@@ -86,6 +86,8 @@ public class MySqlConnection {
 
 		} catch (Exception e) {
 			// Failed maximum connection attempts: disconnect session
+			System.out.println("SSH connect failed: " + e.getMessage());
+			e.printStackTrace();
 			closeSSHConnection();
 			return;
 		}
@@ -111,6 +113,8 @@ public class MySqlConnection {
 
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
 			// TODO: How to handle this exception?
+			System.out.println("Connect to remote DB failed: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -122,6 +126,7 @@ public class MySqlConnection {
 		} catch (SQLException | ClassNotFoundException e) {
 			// TODO: How to handle this exception?
 			System.out.println("Lambda function failed to connect to DB: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -137,6 +142,7 @@ public class MySqlConnection {
 			}
 		} catch (SQLException e) {
 			// Exiting program, not much to be done
+			e.printStackTrace();
 		}
 		connection = null;
 	}
