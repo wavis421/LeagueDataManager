@@ -624,7 +624,7 @@ public class MySqlDbForGui {
 				// Get schedule data for weekly classes
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT * FROM Schedule WHERE ((LEFT(ClassName,1) >= '0' AND LEFT(ClassName,1) <= '7') "
-								+ "OR LEFT(ClassName,2) = 'AD' OR LEFT(ClassName,2) = 'AG' OR LEFT(ClassName,2) = 'PG') "
+								+ "OR LEFT(ClassName,2) = 'AD' OR LEFT(ClassName,2) = 'AG' OR LEFT(ClassName,2) = 'PG' OR LEFT(ClassName,4) = 'Java') "
 								+ dowSelect + "ORDER BY DayOfWeek, StartTime, ClassName;");
 				ResultSet result = selectStmt.executeQuery();
 
