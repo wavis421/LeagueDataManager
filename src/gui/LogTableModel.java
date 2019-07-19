@@ -12,9 +12,10 @@ public class LogTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 1;
 	public static final int STUDENT_NAME_COLUMN = 2;
 	public static final int STATUS_COLUMN = 3;
+	public static final int LOG_ID_COLUMN = 4;
 
 	private ArrayList<LogDataModel> logList;
-	private final String[] colNames = { "  Date  ", " ID ", " Student Name ", " Status Message " };
+	private final String[] colNames = { "  Date  ", " ID ", " Student Name ", " Status Message ", "" };
 
 	public LogTableModel(ArrayList<LogDataModel> logData) {
 		this.logList = logData;
@@ -48,6 +49,8 @@ public class LogTableModel extends AbstractTableModel {
 	public Class<?> getColumnClass(int columnIndex) {
 		if (columnIndex == STUDENT_NAME_COLUMN)
 			return StudentNameModel.class;
+		else if (columnIndex == LOG_ID_COLUMN)
+			return Integer.class;
 		else
 			return String.class;
 	}
@@ -70,6 +73,8 @@ public class LogTableModel extends AbstractTableModel {
 			return logData.getStudentName();
 		case STATUS_COLUMN:
 			return logData.getLogString();
+		case LOG_ID_COLUMN:
+			return logData.getLogID();
 		}
 		return null;
 	}

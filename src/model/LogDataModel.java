@@ -165,12 +165,13 @@ public class LogDataModel {
 			"Missing Birthdate", "Missing Current Level in Pike13", "Exam Score invalid", "Pending Github Database error",
 			"SF Upsert WShop by Teacher error" };
 
-	private int logType, clientID;
+	private int logID, logType, clientID;
 	private StudentNameModel studentName;
 	private String appendedString;
 	private String logDate;
 
-	public LogDataModel(int logType, String date, StudentNameModel name, int clientID, String appendedString) {
+	public LogDataModel(int logID, int logType, String date, StudentNameModel name, int clientID, String appendedString) {
+		this.logID = logID;
 		this.clientID = clientID;
 		this.logType = logType;
 		this.studentName = name;
@@ -178,6 +179,10 @@ public class LogDataModel {
 		this.logDate = date;
 	}
 
+	public int getLogID() {
+		return logID;
+	}
+	
 	public int getClientID() {
 		return clientID;
 	}

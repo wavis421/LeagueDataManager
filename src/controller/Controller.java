@@ -65,6 +65,12 @@ public class Controller {
 		if (sqlDb.getConnectError())
 			reportConnectError();
 	}
+	
+	public void deleteDbLogEntry(int logID) {
+		MySqlDbLogging.deleteLogEntry(logID);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+	}
 
 	/*
 	 * ------- Location Data -------

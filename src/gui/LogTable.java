@@ -30,7 +30,7 @@ import model.StudentNameModel;
 public class LogTable extends JPanel {
 	private static final int ROW_GAP = 5;
 	private static final int POPUP_WIDTH = 240;
-	private static final int POPUP_HEIGHT_2ROWS = 50;
+	private static final int POPUP_HEIGHT_3ROWS = 70;
 
 	private JPanel tablePanel;
 	private JTable table;
@@ -108,9 +108,11 @@ public class LogTable extends JPanel {
 		JPopupMenu tablePopup = new JPopupMenu();
 		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		JMenuItem showStudentAttendanceItem = new JMenuItem("Show attendance ");
+		JMenuItem deleteLogEntryItem = new JMenuItem("Delete Log Entry ");
 		tablePopup.add(showStudentInfoItem);
 		tablePopup.add(showStudentAttendanceItem);
-		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_2ROWS));
+		tablePopup.add(deleteLogEntryItem);
+		tablePopup.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT_3ROWS));
 
 		// POP UP action listeners
 		showStudentInfoItem.addActionListener(new ActionListener() {
@@ -144,6 +146,17 @@ public class LogTable extends JPanel {
 				}
 			}
 		});
+		deleteLogEntryItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Log ID for selected row/column
+				int row = table.convertRowIndexToModel(table.getSelectedRow());
+				LogTableModel model = (LogTableModel) table.getModel();
+				int logID = (int) model.getValueAt(row, LogTableModel.LOG_ID_COLUMN);
+						
+				table.clearSelection();
+				tableListener.deleteLogEntry(logID);
+			}
+		});
 		table.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				int row = table.getSelectedRow();
@@ -174,6 +187,10 @@ public class LogTable extends JPanel {
 		table.getColumnModel().getColumn(LogTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setMaxWidth(220);
 		table.getColumnModel().getColumn(LogTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(180);
+		
+		// Log ID column is invisible
+		table.getColumnModel().getColumn(LogTableModel.LOG_ID_COLUMN).setMinWidth(0);
+		table.getColumnModel().getColumn(LogTableModel.LOG_ID_COLUMN).setMaxWidth(0);
 	}
 
 	public void updateSearchField(String searchText) {

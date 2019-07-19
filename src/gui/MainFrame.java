@@ -538,6 +538,13 @@ public class MainFrame {
 				// View class details using DOW filters
 				refreshSchedDetailsTable(dowSelectList, false);
 			}
+			
+			@Override
+			public void deleteLogEntry(int logID) {
+				// Delete entry from Log Table
+				controller.deleteDbLogEntry(logID);
+				refreshLogTable();
+			}
 		};
 
 		// Now provide this listener to each table

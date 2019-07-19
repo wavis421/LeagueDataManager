@@ -83,7 +83,8 @@ public class MySqlDbLogging {
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
-					logData.add(new LogDataModel(result.getInt("LogType"), result.getString("LogDate").substring(0, 19),
+					logData.add(new LogDataModel(result.getInt("LogDataID"), result.getInt("LogType"), 
+							result.getString("LogDate").substring(0, 19),
 							new StudentNameModel(result.getString("StudentName"), "", true), result.getInt("ClientID"),
 							result.getString("AppendedString")));
 				}
@@ -153,6 +154,30 @@ public class MySqlDbLogging {
 			} catch (SQLException e) {
 				MySqlDbLogging.insertLogData(LogDataModel.LOG_DATA_DB_ERROR, new StudentNameModel("", "", false), 0,
 						" removing old LOG Data: " + e.getMessage());
+				break;
+			}
+		}
+	}
+	
+	public static void deleteLogEntry(int logID) {
+		for (int i = 0; i < 2; i++) {
+			try {
+				// If Database no longer connected, the exception code will re-connect
+				PreparedStatement deleteStmt = sqlDb.dbConnection.prepareStatement("DELETE FROM LogData WHERE LogDataID=?;");
+				deleteStmt.setInt(1, logID);
+				deleteStmt.executeUpdate();
+				deleteStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				}
+
+			} catch (SQLException e2) {
+				insertLogData(LogDataModel.LOG_DATA_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
 				break;
 			}
 		}
