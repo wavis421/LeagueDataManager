@@ -6,7 +6,8 @@ import org.joda.time.MutableDateTime;
 
 public class ScheduleModel implements Comparable<ScheduleModel> {
 	private int scheduleID, dayOfWeek, duration, numStudents;
-	private String startTime, startTimeFormatted, dowFormatted, className;
+	private boolean roomMismatch;
+	private String startTime, startTimeFormatted, dowFormatted, className, room;
 	private String youngest, oldest, averageAge, moduleCount;
 	private static final String[] dowAsString = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 			"Saturday" };
@@ -74,21 +75,32 @@ public class ScheduleModel implements Comparable<ScheduleModel> {
 	public String getModuleCount() {
 		return moduleCount;
 	}
+	
+	public String getRoom() {
+		return room;
+	}
+	
+	public boolean getRoomMismatch() {
+		return roomMismatch;
+	}
 
 	public void setMiscSchedFields(int numStudents, String youngest, String oldest, String averageAge,
-			String moduleCount) {
+			String moduleCount, String room, boolean roomMismatch) {
 		this.numStudents = numStudents;
 		this.youngest = youngest;
 		this.oldest = oldest;
 		this.averageAge = averageAge;
 		this.moduleCount = moduleCount;
+		this.room = room;
+		this.roomMismatch = roomMismatch;
 	}
 
 	public boolean miscSchedFieldsMatch(ScheduleModel other) {
 		// Check if miscellaneous schedule fields match
 		if (numStudents == other.getAttCount() && youngest.equals(other.getYoungest())
 				&& oldest.equals(other.getOldest()) && averageAge.equals(other.getAverageAge())
-				&& moduleCount.equals(other.getModuleCount()))
+				&& moduleCount.equals(other.getModuleCount()) 
+				&& room.equals(other.getRoom()) && roomMismatch == other.getRoomMismatch())
 			return true;
 		else
 			return false;

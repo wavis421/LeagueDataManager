@@ -635,7 +635,7 @@ public class MySqlDbForGui {
 							result.getString("StartTime"), result.getInt("Duration"), result.getString("ClassName"));
 					sched.setMiscSchedFields(result.getInt("NumStudents"), result.getString("Youngest"),
 							result.getString("Oldest"), result.getString("AverageAge"),
-							result.getString("ModuleCount"));
+							result.getString("ModuleCount"), result.getString("Room"), result.getBoolean("RoomMismatch"));
 					eventList.add(sched);
 				}
 				System.out.println("Total # classes: " + totalCount);

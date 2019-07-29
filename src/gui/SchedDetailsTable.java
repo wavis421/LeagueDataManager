@@ -104,21 +104,27 @@ public class SchedDetailsTable extends JPanel {
 		table.setRowHeight(origRowHeight + ROW_GAP);
 
 		// Configure column widths
-		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setPreferredWidth(300);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setMaxWidth(600);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setPreferredWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setMaxWidth(135);
-		table.getColumnModel().getColumn(SchedDetailsTableModel.MODULE_RANGE_COLUMN).setPreferredWidth(400);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setPreferredWidth(270);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.CLASS_NAME_COLUMN).setMaxWidth(400);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.DOW_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.TIME_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.NUM_STUDENTS_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.ROOM_COLUMN).setPreferredWidth(130);  
+		table.getColumnModel().getColumn(SchedDetailsTableModel.ROOM_COLUMN).setMaxWidth(130); 
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MIN_AGE_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MAX_AGE_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.AVG_AGE_COLUMN).setMaxWidth(130);
+		table.getColumnModel().getColumn(SchedDetailsTableModel.MODULE_RANGE_COLUMN).setPreferredWidth(500);
+		
+		// Invisible column
+		table.getColumnModel().getColumn(SchedDetailsTableModel.ROOM_MISMATCH_COLUMN).setMinWidth(0);  
+		table.getColumnModel().getColumn(SchedDetailsTableModel.ROOM_MISMATCH_COLUMN).setMaxWidth(0); 
 
 		table.setDefaultRenderer(Object.class, new SchedDetailTableRenderer());
 		table.getTableHeader().setDefaultRenderer(new SchedTableHdrRenderer());
@@ -207,7 +213,10 @@ public class SchedDetailsTable extends JPanel {
 
 			if (column != -1) {
 				setFont(CustomFonts.TABLE_TEXT_FONT);
-				super.setForeground(Color.black);
+				if ((boolean) table.getValueAt(row, SchedDetailsTableModel.ROOM_MISMATCH_COLUMN))
+					super.setForeground(CustomFonts.ICON_COLOR);
+				else
+					super.setForeground(Color.black);
 
 				if (isSelected)
 					super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);

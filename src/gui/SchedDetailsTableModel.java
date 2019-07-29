@@ -17,15 +17,17 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 	public static final int DOW_COLUMN = 1;
 	public static final int TIME_COLUMN = 2;
 	public static final int NUM_STUDENTS_COLUMN = 3;
-	public static final int MODULE_RANGE_COLUMN = 4;
-	public static final int AVG_AGE_COLUMN = 5;
-	public static final int MIN_AGE_COLUMN = 6;
-	public static final int MAX_AGE_COLUMN = 7;
-	public static final int NUM_COLUMNS = 8;
+	public static final int ROOM_COLUMN = 4;
+	public static final int MODULE_RANGE_COLUMN = 5;
+	public static final int AVG_AGE_COLUMN = 6;
+	public static final int MIN_AGE_COLUMN = 7;
+	public static final int MAX_AGE_COLUMN = 8;
+	public static final int ROOM_MISMATCH_COLUMN = 9;
+	public static final int NUM_COLUMNS = 10;
 
 	private ArrayList<ScheduleModel> schedList;
-	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " # Students ", " # Students per Level ",
-			" Avg Age ", " Youngest ", " Oldest " };
+	private final String colNames[] = { " Class Name ", " DOW ", " Time ", " # Students ", " P13 Room ", 
+			" # Students per Level ", " Avg Age ", " Youngest ", " Oldest ", "" };
 
 	public SchedDetailsTableModel(ArrayList<ScheduleModel> schedList) {
 		this.schedList = schedList;
@@ -42,7 +44,7 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return colNames.length;
+		return NUM_COLUMNS;
 	}
 
 	@Override
@@ -57,7 +59,10 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return String.class;
+		if (columnIndex == ROOM_MISMATCH_COLUMN)
+			return Boolean.class;
+		else
+			return String.class;
 	}
 
 	@Override
@@ -75,6 +80,10 @@ public class SchedDetailsTableModel extends AbstractTableModel {
 			return sched.getStartTimeFormatted();
 		case NUM_STUDENTS_COLUMN:
 			return ((Integer) sched.getAttCount()).toString();
+		case ROOM_COLUMN:
+			return sched.getRoom();
+		case ROOM_MISMATCH_COLUMN:
+			return sched.getRoomMismatch();
 		case MIN_AGE_COLUMN:
 			return sched.getYoungest();
 		case MAX_AGE_COLUMN:
