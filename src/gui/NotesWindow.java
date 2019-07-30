@@ -91,7 +91,7 @@ public class NotesWindow {
 			"\n     LOCATION CODES:\n\n",
 			
 			// About League Student Tracker
-			"\n   VERSION 5.3  \n\n"
+			"\n   VERSION 5.4  \n\n"
 			+ "   LEAGUE STUDENT TRACKER OVERVIEW: \n\n"
 			+ "      The League Student Tracker gets data from:\n" 
 			+ "         => Pike13 client database\n"
