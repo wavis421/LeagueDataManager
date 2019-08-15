@@ -219,7 +219,8 @@ public class StudentTableModel extends AbstractTableModel {
 			return "";
 		else if ((student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '7')
 				|| student.getCurrentClass().startsWith("AD") || student.getCurrentClass().startsWith("AG")
-				|| student.getCurrentClass().startsWith("PG") || student.getCurrentClass().startsWith("Java@"))
+				|| student.getCurrentClass().startsWith("PG") || student.getCurrentClass().startsWith("Java@")
+				|| student.getCurrentClass().startsWith("LOA"))
 			return student.getCurrentClass() + " [" + student.getCurrentLevel() + "]";
 		else
 			return student.getCurrentLevel();

@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class LocationLookup {
 	// Locations are static.
@@ -54,6 +55,7 @@ public class LocationLookup {
 
 	public static String getAllLocsForDisplay() {
 		String allLocs = "";
+		Collections.sort(locList);
 		for (LocationModel m : locList) {
 			allLocs += "\t" + m.getLocCode() + "\t" + m.getLocNameLong() + "\n";
 		}

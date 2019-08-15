@@ -1,6 +1,6 @@
 package model;
 
-public class LocationModel {
+public class LocationModel implements Comparable<LocationModel> {
 	// Location constants
 	public static final int CLASS_LOCATION_UNKNOWN = 0;
 
@@ -37,5 +37,10 @@ public class LocationModel {
 
 	public String getNotes() {
 		return notes;
+	}
+	
+	@Override
+	public int compareTo(LocationModel other) {
+		return locCode.compareTo(other.getLocCode());
 	}
 }
