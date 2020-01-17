@@ -227,7 +227,7 @@ public class MySqlDbForGui {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' AND ServiceDate > ?  "
+								+ "AND State = 'completed' AND ServiceDate > ? AND (EventName LIKE 'Java@%' OR EventName LIKE '%Make-Up%') "
 								+ "ORDER BY Attendance.ClientID, ServiceDate ASC, EventName;");
 				selectStmt.setString(1, sinceDate);
 
@@ -262,16 +262,15 @@ public class MySqlDbForGui {
 						String classLevel = result.getString("ClassLevel");
 						count++;
 
-						// Process if student is in levels 0 - 4
-						if ((eventName.charAt(0) >= '0' && eventName.charAt(0) <= '5') || (!classLevel.equals("")
-								&& classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '5')) {
+						// Process if student is in levels 0 - 5
+						if (!classLevel.equals("") && classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '5') {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							int dowInt = serviceDate.getDayOfWeek();
 							if (dowInt > 6)
 								dowInt -= 7;
 							lastGithubModel = new GithubModel(thisClientID,
-									result.getString("FirstName") + " " + result.getString("LastName"),
+									result.getString("FirstName") + " " + result.getString("LastName"), result.getString("CurrentLevel"),
 									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
 									result.getString("TeacherNames"));
 						}

@@ -9,13 +9,14 @@ import model_for_gui.GithubModel;
 public class GithubTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
-	public static final int DOW_COLUMN = 2;
-	public static final int CLASS_NAME_COLUMN = 3;
-	public static final int GITHUB_NAME_COLUMN = 4;
-	public static final int TEACHER_COLUMN = 5;
+	public static final int STUDENT_LEVEL_COLUMN = 2;
+	public static final int DOW_COLUMN = 3;
+	public static final int CLASS_NAME_COLUMN = 4;
+	public static final int GITHUB_NAME_COLUMN = 5;
+	public static final int TEACHER_COLUMN = 6;
 
 	private ArrayList<GithubModel> githubList;
-	private final String colNames[] = { " ID ", " Student Name ", " DOW ", " Class ", " Github ", " Teachers " };
+	private final String colNames[] = { " ID ", " Student Name ", " Lvl ", " DOW ", " Class ", " Github ", " Teachers " };
 
 	public GithubTableModel(ArrayList<GithubModel> githubList) {
 		this.githubList = githubList;
@@ -65,6 +66,8 @@ public class GithubTableModel extends AbstractTableModel {
 			return String.valueOf(student.getClientID());
 		case STUDENT_NAME_COLUMN:
 			return student.getStudentName();
+		case STUDENT_LEVEL_COLUMN:
+			return student.getCurrLevel();
 		case DOW_COLUMN:
 			return student.getDow();
 		case CLASS_NAME_COLUMN:
