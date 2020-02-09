@@ -259,18 +259,18 @@ public class MySqlDbForGui {
 					if (!ignore && (comments == null || comments.equals(""))) {
 						// No github comments for this client either previously or now
 						String eventName = result.getString("EventName");
-						String classLevel = result.getString("ClassLevel");
+						String currLevel = result.getString("CurrentLevel");
 						count++;
 
 						// Process if student is in levels 0 - 5
-						if (!classLevel.equals("") && classLevel.charAt(0) >= '0' && classLevel.charAt(0) <= '5') {
+						if (!currLevel.equals("") && currLevel.charAt(0) >= '0' && currLevel.charAt(0) <= '5') {
 							// Save this record for possible addition to list
 							DateTime serviceDate = new DateTime(result.getDate("ServiceDate"));
 							int dowInt = serviceDate.getDayOfWeek();
 							if (dowInt > 6)
 								dowInt -= 7;
 							lastGithubModel = new GithubModel(thisClientID,
-									result.getString("FirstName") + " " + result.getString("LastName"), result.getString("CurrentLevel"),
+									result.getString("FirstName") + " " + result.getString("LastName"), currLevel,
 									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
 									result.getString("TeacherNames"));
 						}
