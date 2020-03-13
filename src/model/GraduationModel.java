@@ -13,6 +13,10 @@ public class GraduationModel {
 	private Integer gradLevel;
 	private String startDate, endDate;
 	private boolean isSfUpdated, isSkipLevel, isPromoted;
+	
+	public static final int AP_COMPA_EXAM = 10;
+	public static final int AP_PRINC_EXAM = 11;
+	public static final int ORACLE_EXAM   = 12;
 
 	public GraduationModel(int clientID, String studentName, int gradLevel, String score, String currentClass,
 			String startDate, String endDate, boolean isSfUpdated, boolean skipLevel, boolean promoted) {

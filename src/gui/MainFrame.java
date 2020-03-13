@@ -61,7 +61,7 @@ public class MainFrame {
 	private static final String STUDENTS_NOT_IN_MASTER_TITLE = "Inactive League Students";
 	private static final String ATTENDANCE_TITLE = "League Attendance";
 	private static final String SCHEDULE_TITLE = "Weekly Class Schedule";
-	private static final String SCHED_DETAILS_TITLE = "Weekly Class Details for Levels 0 - 7";
+	private static final String SCHED_DETAILS_TITLE = "Weekly Class Details for Levels 0 - 8";
 	private static final String COURSE_TITLE = "Workshops and Summer Slam Schedule";
 	private static final String GITHUB_TITLE = "Students with no Github comments since ";
 	private static final String LOGGING_TITLE = "Logging Data";

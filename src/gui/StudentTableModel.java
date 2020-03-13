@@ -50,11 +50,11 @@ public class StudentTableModel extends AbstractTableModel {
 
 	// Table column names for each table type
 	private final String colStdNames[] = { " ID ", " Student Name ", " G ", " Age ", " Github ", " Home Loc ",
-			" Grad Yr ", " Start Date ", " Last Visit", " Last Class (0 - 7) " };
+			" Grad Yr ", " Start Date ", " Last Visit", " Last Class " };
 	private final String colEmailNames[] = { " ID ", " Student Name ", " Student Email ", " Acct Mgr Email ",
-			" Emerg Email ", " Last Class Visit (0 - 7) " };
+			" Emerg Email ", " Last Class Visit " };
 	private final String colPhoneNames[] = { " ID ", " Student Name ", " Student Phone ", " Acct Mgr Phone ",
-			" Home Phone ", " Emerg Phone ", " Last Class Visit (0 - 7) " };
+			" Home Phone ", " Emerg Phone ", " Last Class Visit " };
 	private final String colTANames[] = { " ID ", " Student Name ", " TA Start Date ", " # Classes ", " Curr Age ",
 			" Curr Level ", " Student Email ", " Student Phone " };
 
@@ -217,10 +217,7 @@ public class StudentTableModel extends AbstractTableModel {
 	private String getCurrentClassString(StudentModel student) {
 		if (student.getCurrentClass() == null || student.getCurrentClass().equals(""))
 			return "";
-		else if ((student.getCurrentClass().charAt(0) >= '0' && student.getCurrentClass().charAt(0) <= '7')
-				|| student.getCurrentClass().startsWith("AD") || student.getCurrentClass().startsWith("AG")
-				|| student.getCurrentClass().startsWith("PG") || student.getCurrentClass().startsWith("Java@")
-				|| student.getCurrentClass().startsWith("LOA"))
+		else if (student.getCurrentClass().startsWith("Java@") || student.getCurrentClass().startsWith("LOA"))
 			return student.getCurrentClass() + " [" + student.getCurrentLevel() + "]";
 		else
 			return student.getCurrentLevel();
