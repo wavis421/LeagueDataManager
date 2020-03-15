@@ -9,14 +9,18 @@ public class AttendanceModel implements Comparable<AttendanceModel> {
 	private int clientID;
 	private Double age;
 	private StudentNameModel studentName;
-	private String githubName;
+	private String currentLevel, githubName;
 	private ArrayList<AttendanceEventModel> attendanceEventList = new ArrayList<AttendanceEventModel>();
 
-	public AttendanceModel(int clientID, StudentNameModel studentName, Double age, String githubName,
+	public AttendanceModel(int clientID, StudentNameModel studentName, Double age, String currentLevel, String githubName,
 			AttendanceEventModel event) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.age = age;
+		if (currentLevel == null || currentLevel.equals(""))
+			this.currentLevel = "";
+		else
+			this.currentLevel = " [" + currentLevel + "]";
 		this.githubName = githubName;
 		this.attendanceEventList.add(event);
 	}
@@ -35,6 +39,10 @@ public class AttendanceModel implements Comparable<AttendanceModel> {
 
 	public Double getAge() {
 		return age;
+	}
+
+	public String getCurrentLevel() {
+		return currentLevel;
 	}
 
 	public StudentNameModel getStudentName() {

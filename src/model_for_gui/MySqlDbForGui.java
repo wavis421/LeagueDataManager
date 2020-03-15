@@ -313,7 +313,7 @@ public class MySqlDbForGui {
 				// Get 1st 4 attendance records for each client; use sorted attendance table
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement("SELECT * "
 						+ "FROM (SELECT Students.ClientID as StudID, ServiceDate, ServiceTime, EventName, VisitID, "
-						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, isInMasterDb, "
+						+ "         ServiceCategory, State, LastSFState, FirstName, LastName, CurrentLevel, isInMasterDb, "
 						+ "         GithubName, Birthdate, RepoName, Comments, TeacherNames, ClassLevel, "
 						+ "         @num := IF(@lastId = Students.ClientID, @num + 1, if (@lastId := Students.ClientId, 1, 1)) as row "
 						+ "      FROM SortedAttendance, Students "
@@ -448,7 +448,7 @@ public class MySqlDbForGui {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = sqlDb.dbConnection
 						.prepareStatement("SELECT Students.ClientID, FirstName, LastName, GithubName, State, "
-								+ "LastSFState, ServiceCategory, TeacherNames, Birthdate, ClassLevel "
+								+ "CurrentLevel, LastSFState, ServiceCategory, TeacherNames, Birthdate, ClassLevel "
 								+ "FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
@@ -464,7 +464,7 @@ public class MySqlDbForGui {
 					listByClient = getAttendanceByClientID(thisClientID.toString());
 					if (listByClient.size() == 0)
 						attendanceList.add(new AttendanceModel(thisClientID, name,
-								sqlDb.getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+								sqlDb.getAge(today, result.getString("Birthdate")), result.getString("CurrentLevel"), result.getString("GithubName"),
 								new AttendanceEventModel(thisClientID, 0, null, "   ", "",
 										result.getString("GithubName"), "", "", null, name,
 										result.getString("ServiceCategory"), result.getString("State"),
@@ -575,7 +575,7 @@ public class MySqlDbForGui {
 					lastAttendanceModel = new AttendanceModel(thisClientID,
 							new StudentNameModel(result.getString("FirstName"), result.getString("LastName"),
 									result.getBoolean("isInMasterDb")),
-							sqlDb.getAge(today, result.getString("Birthdate")), result.getString("GithubName"),
+							sqlDb.getAge(today, result.getString("Birthdate")), result.getString("CurrentLevel"), result.getString("GithubName"),
 							new AttendanceEventModel(thisClientID, result.getInt("VisitID"),
 									result.getDate("ServiceDate"), result.getString("ServiceTime"),
 									result.getString("EventName"), result.getString("GithubName"),

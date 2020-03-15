@@ -142,8 +142,8 @@ public class AttendanceTable extends JPanel {
 		// Configure column height and width
 		table.setRowHeight(ROW_HEIGHT);
 		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(66);
-		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(150);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(240);
+		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(170);
 		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_AGE_COLUMN).setMaxWidth(48);
 
 		// Set table properties

@@ -36,7 +36,7 @@ public class AttendanceTableModel extends AbstractTableModel {
 
 		for (int row = 0; row < db.size(); row++) {
 			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
-			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName();
+			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName() + db.get(row).getCurrentLevel();
 			if (db.get(row).getAge() == 0)
 				tableObjects[row][STUDENT_AGE_COLUMN] = "";
 			else

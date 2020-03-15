@@ -96,8 +96,12 @@ public class GithubTable extends JPanel {
 		// Configure column widths
 		table.getColumnModel().getColumn(GithubTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
 		table.getColumnModel().getColumn(GithubTableModel.STUDENT_LEVEL_COLUMN).setMaxWidth(60);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(130);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(130);
+		table.getColumnModel().getColumn(GithubTableModel.STUDENT_NAME_COLUMN).setMaxWidth(300);
+		table.getColumnModel().getColumn(GithubTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(230);
+		table.getColumnModel().getColumn(GithubTableModel.GITHUB_NAME_COLUMN).setMaxWidth(300);
+		table.getColumnModel().getColumn(GithubTableModel.GITHUB_NAME_COLUMN).setPreferredWidth(220);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(120);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(120);
 		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
 		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setPreferredWidth(170);
 
