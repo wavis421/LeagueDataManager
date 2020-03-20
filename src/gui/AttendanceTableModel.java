@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import gui.AttendanceTable.EventTableModel;
+import model.StudentNameModel;
 import model_for_gui.AttendanceModel;
 
 public class AttendanceTableModel extends AbstractTableModel {
@@ -36,7 +37,9 @@ public class AttendanceTableModel extends AbstractTableModel {
 
 		for (int row = 0; row < db.size(); row++) {
 			tableObjects[row][CLIENT_ID_COLUMN] = String.valueOf(db.get(row).getClientID());
-			tableObjects[row][STUDENT_NAME_COLUMN] = db.get(row).getStudentName() + db.get(row).getCurrentLevel();
+			StudentNameModel name = new StudentNameModel(db.get(row).getStudentName().getFirstName(), 
+					db.get(row).getStudentName().getLastName() + db.get(row).getCurrentLevel(), db.get(row).getStudentName().getIsInMasterDb());
+			tableObjects[row][STUDENT_NAME_COLUMN] = name;
 			if (db.get(row).getAge() == 0)
 				tableObjects[row][STUDENT_AGE_COLUMN] = "";
 			else
