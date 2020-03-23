@@ -503,7 +503,7 @@ public class MySqlDbForGui {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE Attendance.ClientID = Students.ClientID AND State = 'completed' "
-								+ "AND Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName LIMIT 52;");
+								+ "AND Attendance.ClientID=? ORDER BY Attendance.ClientID, ServiceDate DESC, EventName LIMIT 500;");
 				selectStmt.setInt(1, Integer.parseInt(clientID));
 
 				ResultSet result = selectStmt.executeQuery();

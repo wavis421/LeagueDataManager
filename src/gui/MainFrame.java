@@ -626,7 +626,10 @@ public class MainFrame {
 		removeDataFromTables();
 
 		// Add attendance table and header
-		attendanceTable.setData(tablePanel, list, attendanceByStudent);
+		if (attendanceByStudent)
+			attendanceTable.setAttendDataByStudent(tablePanel, list);
+		else
+			attendanceTable.setAllAttendanceData(tablePanel, list);
 		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
 		searchField.setText("");
 		attendanceTable.updateSearchField("");

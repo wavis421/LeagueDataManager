@@ -31,6 +31,7 @@ import model_for_gui.AttendanceModel;
 public class AttendanceTable extends JPanel {
 	private static final int TEXT_HEIGHT = 16;
 	private static final int ROW_HEIGHT = (TEXT_HEIGHT * 4);
+	private static final int ROW_GAP = 4;
 
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
@@ -45,9 +46,10 @@ public class AttendanceTable extends JPanel {
 	private static final int EVENT_TABLE_NUM_COLUMNS = 5;
 
 	private JPanel parentTablePanel;
-	private JTable mainTable;
+	private JTable mainTable, studentTable, activeTable;
 	private ArrayList<JTable> githubEventTableList = new ArrayList<JTable>();
 	private AttendanceTableModel attendanceTableModel;
+	private AttendEventTableModel attendEventTableModel;
 	private JScrollPane tableScrollPane;
 	private TableListeners attendanceListener;
 	private int eventTableSelectedRow = -1; // table row
@@ -59,18 +61,21 @@ public class AttendanceTable extends JPanel {
 	public AttendanceTable(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		this.parentTablePanel = tablePanel;
 
-		// Create main table-model and table
-		attendanceTableModel = new AttendanceTableModel(attendanceList);
+		// Create main & student table-model and table
+		attendanceTableModel  = new AttendanceTableModel(attendanceList);
+		attendEventTableModel = new AttendEventTableModel(new ArrayList<AttendanceEventModel>());
 		mainTable = new JTable(attendanceTableModel);
+		studentTable = new JTable(attendEventTableModel);
 
 		// Create event sub-table with github comments by date
-		createEventTable(attendanceList, githubEventTableList);
+		createAttendSubTable(attendanceList, githubEventTableList);
 
 		// Configure table panel and pop-ups
-		tableScrollPane = createTablePanel(mainTable, parentTablePanel, githubEventTableList,
-				parentTablePanel.getPreferredSize().height - 70);
+		createTablePanel(mainTable, tablePanel, githubEventTableList);
 		createAttendanceTablePopups();
+		createStudAttendTablePopups();
 
+		// Configure row sorter for main table only
 		rowSorter = new TableRowSorter<AttendanceTableModel>((AttendanceTableModel) mainTable.getModel());
 		rowSorter.setSortable(AttendanceTableModel.GITHUB_COMMENTS_COLUMN, false);
 	}
@@ -80,46 +85,65 @@ public class AttendanceTable extends JPanel {
 	}
 
 	public JTable getTable() {
-		return mainTable;
+		return activeTable;
 	}
 
-	public void setData(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList, boolean attendanceByStudent) {
-		this.parentTablePanel = tablePanel;
-
+	public void setAllAttendanceData(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		// Clear event row selections
 		eventTableSelectedRow = -1;
 		eventSelectedRow = -1;
 
-		// Set data for main table
+		// Set data for main table		
+		activeTable = mainTable;
 		attendanceTableModel.setData(attendanceList);
 
-		// Go full row height if attendance for single student
-		if (attendanceByStudent)
-			mainTable.setRowHeight(parentTablePanel.getHeight() - 45);
-		else
-			mainTable.setRowHeight(ROW_HEIGHT);
-
 		// Create github sub-table
-		createEventTable(attendanceList, githubEventTableList);
+		createAttendSubTable(attendanceList, githubEventTableList);
+		
+		// Add table to scroll pane
+		addTableToScrollPane(mainTable);
 
 		// Update table
 		attendanceTableModel.fireTableDataChanged();
 		tableScrollPane.setVisible(true);
 		tablePanel.add(tableScrollPane, BorderLayout.NORTH);
 	}
+	
+	public void setAttendDataByStudent(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
+		// Clear event row selections
+		eventTableSelectedRow = -1;
+		eventSelectedRow = -1;
+
+		// Set data for student table; check for empty attendance
+		activeTable = studentTable;
+		if (attendanceList.size() > 0)
+			attendEventTableModel.setData (attendanceList.get(0).getAttendanceEventList());
+		else 
+			attendEventTableModel.setData (new ArrayList<AttendanceEventModel>());
+		
+		// Add table to scroll pane
+		addTableToScrollPane (studentTable);
+				
+		// Update table
+		attendEventTableModel.fireTableDataChanged();
+		tableScrollPane.setVisible(true);
+		tablePanel.add(tableScrollPane, BorderLayout.NORTH);
+	}
 
 	public void removeData() {
 		// Remove data from tables and lists
-		if (attendanceTableModel.getRowCount() > 0) {
+		githubEventTableList.clear();
+		if (attendanceTableModel.getRowCount() > 0)
 			attendanceTableModel.removeAll();
-			githubEventTableList.clear();
-		}
+		if (attendEventTableModel.getRowCount() > 0)
+			attendEventTableModel.removeAll();
+		
 		tableScrollPane.setVisible(false);
 	}
 
 	public void setSelectedEventRow(int selectedRow, int yPos) {
 		eventSelectedRow = getEventRow(selectedRow, yPos);
-		mainTable.repaint();
+		activeTable.repaint();
 	}
 
 	private int getEventRow(int selectedRow, int yPos) {
@@ -132,14 +156,23 @@ public class AttendanceTable extends JPanel {
 			return -1;
 	}
 
-	private JScrollPane createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList, int panelHeight) {
-		// Set up table parameters
+	private void addTableToScrollPane (JTable table)
+	{
+		// Add table to scroll pane
+		tableScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		tableScrollPane.setPreferredSize(new Dimension(parentTablePanel.getPreferredSize().width, parentTablePanel.getPreferredSize().height - 70));
+		tableScrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));		
+	}
+
+	private void createTablePanel(JTable table, JPanel panel, ArrayList<JTable> eventList) {
+		// >>> Set up main table parameters <<<
 		table.setFont(CustomFonts.TABLE_TEXT_FONT);
 		table.setGridColor(CustomFonts.TABLE_GRID_COLOR);
 		table.setShowGrid(true);
 		table.getTableHeader().setDefaultRenderer(new AttendanceHeaderRenderer());
 
-		// Configure column height and width
+		// Configure column height and width for main table
 		table.setRowHeight(ROW_HEIGHT);
 		table.getColumnModel().getColumn(AttendanceTableModel.CLIENT_ID_COLUMN).setMaxWidth(66);
 		table.getColumnModel().getColumn(AttendanceTableModel.STUDENT_NAME_COLUMN).setMaxWidth(240);
@@ -150,15 +183,33 @@ public class AttendanceTable extends JPanel {
 		table.setDefaultRenderer(Object.class, new AttendanceTableRenderer(eventList));
 		table.setAutoCreateRowSorter(true);
 		new TableKeystrokeHandler(table);
+		
+		// >>> Set up student table <<<
+		studentTable.setFont(CustomFonts.TABLE_TEXT_FONT);
+		studentTable.setGridColor(CustomFonts.TABLE_GRID_COLOR);
+		studentTable.setShowGrid(true);
+		studentTable.getTableHeader().setDefaultRenderer(new AttendanceHeaderRenderer());
 
+		// Configure column height and width for student table
+		studentTable.setRowHeight(studentTable.getRowHeight() + ROW_GAP);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setPreferredWidth(100);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_DATE_COLUMN).setMaxWidth(100);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setMaxWidth(250);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_CLASS_NAME_COLUMN).setPreferredWidth(200);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setMaxWidth(550);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_TEACHER_NAME_COLUMN).setPreferredWidth(280);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setMaxWidth(550);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_REPO_NAME_COLUMN).setPreferredWidth(280);
+		studentTable.getColumnModel().getColumn(EVENT_TABLE_COMMENTS_COLUMN).setPreferredWidth(280);
+				
+		// Set student table properties
+		studentTable.setDefaultRenderer(Object.class, new EventTableRenderer(new ArrayList<JTable>()));
+
+		// Create panel containing main table with scroll
+		activeTable = mainTable;
+		addTableToScrollPane (table);
 		panel.setLayout(new BorderLayout());
-		JScrollPane scrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setPreferredSize(new Dimension(panel.getPreferredSize().width, panelHeight));
-		scrollPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-		panel.add(scrollPane, BorderLayout.NORTH);
-
-		return scrollPane;
+		panel.add(tableScrollPane, BorderLayout.NORTH);
 	}
 
 	private void createAttendanceTablePopups() {
@@ -276,12 +327,12 @@ public class AttendanceTable extends JPanel {
 							int modelRow = mainTable.convertRowIndexToModel(row);
 							EventTableModel eventModel = (EventTableModel) githubEventTableList.get(modelRow)
 									.getModel();
-							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow,
-									EVENT_TABLE_CLASS_NAME_COLUMN);
-							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow,
-									EVENT_TABLE_DATE_COLUMN);
+							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
+							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
 
-							if (selectedClassName != null) {
+							if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java") && !selectedClassName.contains("Make-Up")
+									&& !selectedClassName.startsWith("EL@") && !selectedClassName.startsWith("EL @") 
+									&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
 								tablePopup.remove(showStudentInfoItem);
 								tablePopup.remove(showStudentAttendanceItem);
 								tablePopup.remove(showStudentEmailItem);
@@ -314,7 +365,43 @@ public class AttendanceTable extends JPanel {
 		});
 	}
 
-	private void createEventTable(ArrayList<AttendanceModel> tableData, ArrayList<JTable> eventList) {
+	private void createStudAttendTablePopups() {
+		// Student Table panel POP UP menu
+		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
+		tablePopup.add(showStudentClassItem);
+
+		// POP UP action listeners
+		showStudentClassItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Add attendance table and header for selected class
+				studentTable.clearSelection();
+				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate);
+			}
+		});
+		
+		studentTable.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int row = studentTable.getSelectedRow();
+
+				if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
+					// Show students by class name
+					selectedClassName = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_CLASS_NAME_COLUMN);
+					selectedClassDate = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_DATE_COLUMN);
+
+					if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java") && !selectedClassName.contains("Make-Up")
+							&& !selectedClassName.startsWith("EL@") && !selectedClassName.startsWith("EL @") 
+							&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
+						// Show pop-up menu
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
+						tablePopup.show(studentTable, e.getX(), e.getY());
+					}
+				}
+			}
+		});
+	}
+
+	private void createAttendSubTable(ArrayList<AttendanceModel> tableData, ArrayList<JTable> eventList) {
 		for (int i = 0; i < tableData.size(); i++) {
 			// Create github sub-table
 			ArrayList<AttendanceEventModel> eventData = tableData.get(i).getAttendanceEventList();
@@ -432,6 +519,46 @@ public class AttendanceTable extends JPanel {
 		}
 	}
 
+	public class EventTableRenderer extends JLabel implements TableCellRenderer {
+
+		ArrayList<JTable> eventTable;
+
+		private EventTableRenderer(ArrayList<JTable> eventTable) {
+			super();
+			super.setOpaque(true);
+			this.eventTable = eventTable;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+
+			// Set foreground/background colors
+			super.setForeground(Color.black);
+
+			if (isSelected)
+				super.setBackground(CustomFonts.SELECTED_BACKGROUND_COLOR);
+			else
+				super.setBackground(CustomFonts.UNSELECTED_BACKGROUND_COLOR);
+
+			// All columns centered except Github Comments
+			super.setVerticalAlignment(CENTER);
+			if (column == EVENT_TABLE_COMMENTS_COLUMN)
+				super.setHorizontalAlignment(LEFT);
+			else
+				super.setHorizontalAlignment(CENTER);
+			
+			setFont(CustomFonts.TABLE_TEXT_FONT);
+			
+			if (isSelected && eventSelectedRow == row)
+				super.setForeground(CustomFonts.ICON_COLOR);
+
+			// All columns are strings
+			super.setText(((String) value));
+			return this;
+		}
+	}
+
 	// ===== NESTED Class: Header Renderer for main table ===== //
 	public class AttendanceHeaderRenderer extends JLabel implements TableCellRenderer {
 		Border innerBorder = BorderFactory.createLineBorder(CustomFonts.TABLE_GRID_COLOR, 2, true);
@@ -446,7 +573,7 @@ public class AttendanceTable extends JPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			// GITHUB column is left justified, all others are centered
-			if (column == AttendanceTableModel.GITHUB_COMMENTS_COLUMN)
+			if (table == mainTable && column == AttendanceTableModel.GITHUB_COMMENTS_COLUMN)
 				super.setHorizontalAlignment(LEFT);
 			else
 				super.setHorizontalAlignment(CENTER);
