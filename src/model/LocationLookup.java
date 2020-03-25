@@ -46,6 +46,10 @@ public class LocationLookup {
 	}
 
 	public static boolean findLocationCodeMatch(String locCode, String locStringLong) {
+		// Any class can be made 'virtual' (temporary? added to support virtual classes during COVID-19)
+		if (locStringLong.startsWith("Virtual"))
+			return true;
+		
 		for (LocationModel m : locList) {
 			if (m.getLocCode().equals(locCode) && locStringLong.startsWith(m.getLocNameLong()))
 				return true;
