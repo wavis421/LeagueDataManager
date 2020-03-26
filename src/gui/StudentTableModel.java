@@ -126,7 +126,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
 			case STUDENT_NAME_COLUMN:
-				return student.getNameModel();
+				return getStudentNameWithLevel(student); //student.getNameModel();
 			case GENDER_COLUMN:
 				return GenderModel.convertGenderToString(student.getGender());
 			case AGE_COLUMN:
@@ -214,11 +214,21 @@ public class StudentTableModel extends AbstractTableModel {
 		return null;
 	}
 
+	private StudentNameModel getStudentNameWithLevel (StudentModel student) {
+		if (student.getCurrentLevel() != null && !student.getCurrentLevel().equals("")) {
+			return new StudentNameModel(student.getNameModel().getFirstName(), 
+					                    student.getNameModel().getLastName() + " [" + student.getCurrentLevel() + "]", 
+					                    student.getNameModel().getIsInMasterDb());
+		}
+		else
+			return student.getNameModel();
+	}
+	
 	private String getCurrentClassString(StudentModel student) {
 		if (student.getCurrentClass() == null || student.getCurrentClass().equals(""))
 			return "";
 		else if (student.getCurrentClass().startsWith("Java@") || student.getCurrentClass().startsWith("LOA"))
-			return student.getCurrentClass() + " [" + student.getCurrentLevel() + "]";
+			return student.getCurrentClass();
 		else
 			return student.getCurrentLevel();
 	}

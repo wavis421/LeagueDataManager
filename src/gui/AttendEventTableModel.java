@@ -12,7 +12,8 @@ public class AttendEventTableModel extends AbstractTableModel {
 	public static final int TEACHER_NAMES_COLUMN = 2;
 	public static final int REPO_NAME_COLUMN     = 3;
 	public static final int GIT_COMMENTS_COLUMN  = 4;
-	public static final int TABLE_NUM_COLUMNS    = 5;
+	public static final int CLIENT_ID_COLUMN     = 5;   // Not a visible column
+	public static final int TABLE_NUM_COLUMNS    = 6;
 
 	private Object[][] tableObjects;
 	private final String[] colNames = { " Class Date ", " Class Name ", " Teacher Name(s) ",
@@ -30,11 +31,12 @@ public class AttendEventTableModel extends AbstractTableModel {
 		tableObjects = new Object[db.size()][TABLE_NUM_COLUMNS];
 
 		for (int row = 0; row < db.size(); row++) {
-			tableObjects[row][CLASS_DATE_COLUMN] = db.get(row).getServiceDateString();
-			tableObjects[row][CLASS_NAME_COLUMN] = db.get(row).getEventName();
+			tableObjects[row][CLASS_DATE_COLUMN]    = db.get(row).getServiceDateString();
+			tableObjects[row][CLASS_NAME_COLUMN]    = db.get(row).getEventName();
 			tableObjects[row][TEACHER_NAMES_COLUMN] = db.get(row).getTeacherNames();
-			tableObjects[row][REPO_NAME_COLUMN] = db.get(row).getRepoName();
-			tableObjects[row][GIT_COMMENTS_COLUMN] = db.get(row).getGithubComments();
+			tableObjects[row][REPO_NAME_COLUMN]     = db.get(row).getRepoName();
+			tableObjects[row][GIT_COMMENTS_COLUMN]  = db.get(row).getGithubComments();
+			tableObjects[row][CLIENT_ID_COLUMN]     = db.get(row).getClientID();
 		}
 	}
 

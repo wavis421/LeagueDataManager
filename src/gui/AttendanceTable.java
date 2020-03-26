@@ -34,7 +34,8 @@ public class AttendanceTable extends JPanel {
 	private static final int ROW_GAP = 4;
 
 	private static final int POPUP_MENU_WIDTH = 240;
-	private static final int POPUP_MENU_HEIGHT_1ROW = 30;
+	private static final int POPUP_MENU_HEIGHT_1ROW  = 30;
+	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
 	private static final int POPUP_MENU_HEIGHT_6ROWS = 130;
 
 	// Columns for embedded event table
@@ -368,10 +369,21 @@ public class AttendanceTable extends JPanel {
 	private void createStudAttendTablePopups() {
 		// Student Table panel POP UP menu
 		JPopupMenu tablePopup = new JPopupMenu();
+		JMenuItem showStudentInfoItem = new JMenuItem("Show student info ");
 		JMenuItem showStudentClassItem = new JMenuItem("Show class ");
-		tablePopup.add(showStudentClassItem);
+		tablePopup.add(showStudentInfoItem);
 
-		// POP UP action listeners
+		// POP UP action listeners for student attendance table
+		showStudentInfoItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				// Get Client ID for selected row/column
+				int row = studentTable.getSelectedRow();
+				int clientID = (int) attendEventTableModel.getValueAt(row, AttendEventTableModel.CLIENT_ID_COLUMN);
+
+				studentTable.clearSelection();
+				attendanceListener.viewStudentTableByStudent(clientID);
+			}
+		});
 		showStudentClassItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Add attendance table and header for selected class
@@ -392,7 +404,14 @@ public class AttendanceTable extends JPanel {
 					if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java") && !selectedClassName.contains("Make-Up")
 							&& !selectedClassName.startsWith("EL@") && !selectedClassName.startsWith("EL @") 
 							&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
-						// Show pop-up menu
+						// Show pop-up menu, including show-by-class
+						tablePopup.add(showStudentClassItem);
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));
+						tablePopup.show(studentTable, e.getX(), e.getY());
+					}
+					else {
+						// Show pop-up menu, remove show-by-class
+						tablePopup.remove(showStudentClassItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_1ROW));
 						tablePopup.show(studentTable, e.getX(), e.getY());
 					}
