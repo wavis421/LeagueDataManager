@@ -79,6 +79,9 @@ public class AttendEventTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		return tableObjects[row][col];
+		if (tableObjects[row][col] == null)
+			return "";
+		else
+			return tableObjects[row][col];
 	}
 }

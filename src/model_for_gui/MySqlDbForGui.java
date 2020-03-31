@@ -399,15 +399,15 @@ public class MySqlDbForGui {
 		for (int i = 0; i < 2; i++) {
 			// If Database no longer connected, the exception code will re-connect
 			try {
-				// Get attendance by class and by date
+				// Get attendance by class and by date; class name in database can have added fields, so
+				//    just make sure that at least the base name is matched.
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT Students.ClientID, Students.FirstName, Students.LastName, Attendance.State, "
 								+ "Attendance.ServiceCategory FROM Attendance, Students "
 								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND (State = 'completed' OR State = 'registered') AND EventName=? "
+								+ "AND (State = 'completed' OR State = 'registered') AND EventName LIKE '" + className + "%' "
 								+ "AND ServiceDate=? GROUP BY Students.ClientID;");
-				selectStmt.setString(1, className);
-				selectStmt.setString(2, date);
+				selectStmt.setString(1, date);
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {

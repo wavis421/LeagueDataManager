@@ -10,6 +10,7 @@ public class CustomFonts {
 	public static final Color TITLE_COLOR = new Color(0xF16412);
 	public static final Color ICON_COLOR = new Color(0xF16412);  // League orange?
 	public static final Color DAYBOX_HIGHLIGHT_COLOR = new Color(0xF00000);
+	public static final Color DEFAULT_BGND_TITLE_COLOR = new Color(0xEEEEEE);
 	public static final Color EMPTY_BACKGROUND_COLOR = new Color(0xDDDDDD);
 	public static final Color SELECTED_BACKGROUND_COLOR = new Color(0xDDDDDD);
 	public static final Color UNSELECTED_BACKGROUND_COLOR = Color.WHITE;

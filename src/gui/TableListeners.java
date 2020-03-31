@@ -10,5 +10,6 @@ public interface TableListeners {
 	public void viewPhoneByStudent(int clientID);
 	public void viewActiveTAs();
 	public void viewClassDetails(boolean[] dowSelectList);
+	public void viewPreviousPage();
 	public void deleteLogEntry(int logID);
 }

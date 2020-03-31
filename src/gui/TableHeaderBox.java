@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -45,6 +46,7 @@ public class TableHeaderBox implements ActionListener {
 	// Header and filter labels
 	private static JLabel hdrLabel;
 	private static JLabel blankLabel;
+	private static JLabel paddingLabel;
 	private static JLabel clearLabel;
 	private static JLabel classesLabel;
 	private static JLabel lvlLabel;
@@ -63,8 +65,11 @@ public class TableHeaderBox implements ActionListener {
 	private static JComboBox<Integer> lvlBox;
 	private static JComboBox<Integer> ageBox;
 	private static JRadioButton clearButton;
+	private static JButton backButton;
 	private static JMenuBar dowMenuBar;
 	private static JMenu dowMenu;
+	
+	private static boolean backButtonEnabled = false;
 
 	public TableHeaderBox(JLabel lbl) {
 		hdrLabel = lbl;
@@ -72,6 +77,7 @@ public class TableHeaderBox implements ActionListener {
 
 		// Initialize all labels
 		blankLabel = new JLabel("        ");
+		paddingLabel = new JLabel("        ");
 		clearLabel = new JLabel("Clear filters: ");
 		resetLabel = new JLabel("Reset DOW filter: ");
 		classesLabel = new JLabel("      Min # Classes:  ");
@@ -85,6 +91,7 @@ public class TableHeaderBox implements ActionListener {
 		classesField.setText("0");
 		ageBox = new JComboBox<Integer>(ageArray);
 		lvlBox = new JComboBox<Integer>(lvlArray);
+		backButton = new JButton(" << ");
 
 		dowMenuBar = new JMenuBar();
 		dowMenu = new JMenu("Day-of-Week Filter  ");
@@ -109,30 +116,38 @@ public class TableHeaderBox implements ActionListener {
 		ageBox.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
 		lvlBox.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
 		dowMenuBar.setBorder(BorderFactory.createLineBorder(CustomFonts.TITLE_COLOR, 2, true));
+		backButton.setBorder(BorderFactory.createEmptyBorder());
+		backButton.setForeground(CustomFonts.TITLE_COLOR);
+		backButton.setBackground(CustomFonts.DEFAULT_BGND_TITLE_COLOR);
+		backButton.setFont(CustomFonts.TABLE_HEADER_FONT);
 
 		// Create listeners for clear button, # classes, aga & level boxes
 		clearButton.addActionListener(this);
 		classesField.addActionListener(this);
 		ageBox.addActionListener(this);
 		lvlBox.addActionListener(this);
+		backButton.addActionListener(this);
 	}
 
-	public static JPanel refreshHeader(int state) {
+	public static JPanel refreshHeader(int state, boolean backEnabled) {
 		// Fix classes field if it contains garbage!!
 		if (!classesField.getText().matches("\\d+"))
 			classesField.setText("0");
 
 		// Nothing to do if state unchanged
-		if (hdrState == state)
+		if (hdrState == state && backButtonEnabled == backEnabled)
 			return hdrPanel;
 		hdrState = state;
+		backButtonEnabled = backEnabled;
 
 		// Remove existing components from header panel
 		hdrPanel.removeAll();
 
 		// Create horizontal glue box to align left/center/right
 		Box hdrBox = Box.createHorizontalBox();
-		hdrBox.add(blankLabel, BorderLayout.WEST);
+		hdrBox.add(paddingLabel, BorderLayout.WEST);
+		if (backButtonEnabled)
+			hdrBox.add(backButton);
 		hdrBox.add(Box.createGlue());
 		hdrBox.add(hdrLabel, BorderLayout.CENTER);
 		hdrBox.add(Box.createGlue());
@@ -195,7 +210,10 @@ public class TableHeaderBox implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		if (hdrState == HDR_STUDENT_TA) {
+		if (event.getSource() == backButton)
+			filterListener.viewPreviousPage();
+
+		else if (hdrState == HDR_STUDENT_TA) {
 			if (event.getSource() == clearButton) {
 				// Clear all filter fields
 				clearFilters();

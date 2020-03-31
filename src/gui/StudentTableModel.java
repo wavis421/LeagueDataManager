@@ -126,7 +126,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
 			case STUDENT_NAME_COLUMN:
-				return getStudentNameWithLevel(student); //student.getNameModel();
+				return getStudentNameWithLevel(student);
 			case GENDER_COLUMN:
 				return GenderModel.convertGenderToString(student.getGender());
 			case AGE_COLUMN:
@@ -161,7 +161,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
 			case STUDENT_NAME_COLUMN:
-				return student.getNameModel();
+				return getStudentNameWithLevel(student);
 			case STUDENT_EMAIL_COLUMN:
 				return student.getEmail();
 			case ACCT_MGR_EMAIL_COLUMN:
@@ -176,7 +176,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
 			case STUDENT_NAME_COLUMN:
-				return student.getNameModel();
+				return getStudentNameWithLevel(student);
 			case STUDENT_PHONE_COLUMN:
 				return student.getPhone();
 			case ACCT_MGR_PHONE_COLUMN:
@@ -193,7 +193,7 @@ public class StudentTableModel extends AbstractTableModel {
 			case CLIENT_ID_COLUMN:
 				return String.valueOf(student.getClientID());
 			case STUDENT_NAME_COLUMN:
-				return student.getNameModel();
+				return getStudentNameWithLevel(student);
 			case TA_SINCE_COLUMN:
 				return student.getStaffSinceDate();
 			case TA_PAST_EVENTS:

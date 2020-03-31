@@ -43,6 +43,8 @@ import model.CoursesModel;
 import model.LocationLookup;
 import model.LogDataModel;
 import model.ScheduleModel;
+import model.StudentModel;
+import model.TableHistoryModel;
 import model_for_gui.AttendanceModel;
 import model_for_gui.GithubModel;
 
@@ -74,6 +76,12 @@ public class MainFrame {
 	private static final int STUDENT_TABLE_EMAIL_BY_STUDENT = 5;
 	private static final int STUDENT_TABLE_PHONE_BY_STUDENT = 6;
 	private static final int STUDENT_TABLE_FOR_TA = 7;
+	
+	private static final int ATTEND_TABLE_ALL = 0;
+	private static final int ATTEND_TABLE_BY_CLIENT_ID = 1;
+	private static final int ATTEND_TABLE_BY_CLASS_AND_DATE = 2;
+	private static final int ATTEND_TABLE_BY_CLASS_NAME = 3;
+	private static final int ATTEND_TABLE_BY_COURSE_NAME = 4;
 
 	// Report missing github if 3 or more classes with no github in the last 35 days
 	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
@@ -96,6 +104,8 @@ public class MainFrame {
 	private String activeTableHeader;
 	private ImageIcon icon;
 	private static JFrame frame = new JFrame();
+	private TableHistoryModel currTable;
+	private ArrayList<TableHistoryModel> tableHistoryList = new ArrayList<TableHistoryModel>();
 
 	// Class and Help menu names
 	private final int fileMenuIdx = 0, studentMenuIdx = 1, attendMenuIdx = 2, schedMenuIdx = 3;
@@ -142,7 +152,7 @@ public class MainFrame {
 		headerLabel.setForeground(CustomFonts.TITLE_COLOR);
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		new TableHeaderBox(headerLabel);
-		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY), BorderLayout.NORTH);
+		mainPanel.add(TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, false), BorderLayout.NORTH);
 
 		// Configure panel and each table
 		tablePanel.setPreferredSize(new Dimension(PREF_TABLE_PANEL_WIDTH, PREF_TABLE_PANEL_HEIGHT));
@@ -159,6 +169,7 @@ public class MainFrame {
 		// Default tables to display all data
 		headerLabel.setText(STUDENT_TITLE + " (" + studentTable.getTableRowCount() + " Students)");
 		activeTableHeader = STUDENT_TITLE;
+		currTable = new TableHistoryModel(TableHistoryModel.STUDENT_TABLE, activeTableHeader, 0, STUDENT_TABLE_ALL, "");
 
 		createTableListeners();
 
@@ -267,13 +278,13 @@ public class MainFrame {
 		// Set up listeners for File menu
 		viewLogDataItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshLogTable();
+				refreshLogTable(true);
 			}
 		});
 		clearLogDataItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				controller.clearDbLogData();
-				refreshLogTable();
+				refreshLogTable(true);
 			}
 		});
 		printTableItem.addActionListener(new ActionListener() {
@@ -343,17 +354,7 @@ public class MainFrame {
 		});
 		studentNoRecentGitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				removeDataFromTables();
-				String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
-						.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
-				headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 5)");
-				githubTable.setData(tablePanel,
-						controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
-				searchField.setText("");
-				githubTable.updateSearchField("");
-
-				activeTable = githubTable.getTable();
-				activeTableHeader = headerLabel.getText();
+				refreshGithubTable(true);
 			}
 		});
 		studentViewEmailMenu.addActionListener(new ActionListener() {
@@ -387,7 +388,7 @@ public class MainFrame {
 		// Set up listeners for Attendance menu
 		attendanceViewAllItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshAttendanceTable(controller.getAllAttendance(), "", false);
+				refreshAttendanceTable(ATTEND_TABLE_ALL, "", "", "", "", false, true);
 			}
 		});
 	}
@@ -404,7 +405,7 @@ public class MainFrame {
 		// Set up listeners for Schedule menu
 		scheduleViewMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshScheduleTable();
+				refreshScheduleTable(true);
 			}
 		});
 		schedDetailMenu.addActionListener(new ActionListener() {
@@ -415,7 +416,7 @@ public class MainFrame {
 		});
 		courseViewMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				refreshCoursesTable();
+				refreshCoursesTable(true);
 			}
 		});
 	}
@@ -488,25 +489,25 @@ public class MainFrame {
 
 			@Override
 			public void viewAttendanceByStudent(String clientID, String studentName) {
-				refreshAttendanceTable(controller.getAttendanceByClientID(clientID), " for " + studentName, true);
+				refreshAttendanceTable(ATTEND_TABLE_BY_CLIENT_ID, clientID, "", "", " for " + studentName, true, true);
 			}
 
 			@Override
 			public void viewAttendanceByClass(String className, String classDate) {
 				// Display class by class name
 				if (className.toLowerCase().contains("make-up")) {
-					refreshAttendanceTable(controller.getAttendanceByClassByDate(className, classDate),
-							" for '" + className + "' on " + classDate, false);
+					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_AND_DATE, "", className, classDate,
+							" for '" + className + "' on " + classDate, false, true);
 				} else
-					refreshAttendanceTable(controller.getAttendanceByClassName(className), " for '" + className + "'",
-							false);
+					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_NAME, "", className, "", " for '" + className + "'",
+							false, true);
 			}
 
 			@Override
 			public void viewAttendanceByCourse(String courseName) {
 				// Get attendance by course name
-				refreshAttendanceTable(controller.getAttendanceByCourseName(courseName), " for '" + courseName + "'",
-						false);
+				refreshAttendanceTable(ATTEND_TABLE_BY_COURSE_NAME, "", courseName, "", " for '" + courseName + "'",
+						false, true);
 			}
 
 			@Override
@@ -543,7 +544,41 @@ public class MainFrame {
 			public void deleteLogEntry(int logID) {
 				// Delete entry from Log Table
 				controller.deleteDbLogEntry(logID);
-				refreshLogTable();
+				refreshLogTable(false);
+			}
+
+			@Override
+			public void viewPreviousPage() {
+				int size = tableHistoryList.size();
+				if (size > 0) {
+					TableHistoryModel tbl = tableHistoryList.get(size - 1);
+					tableHistoryList.remove(size - 1);
+					searchField.setText(tbl.getSearchText());
+					switch (tbl.getTableType()) {
+						case TableHistoryModel.STUDENT_TABLE:
+							refreshStudentTable(tbl.getTblSubType(), tbl.getClientID(), false);
+							break;
+						case TableHistoryModel.ATTENDANCE_TABLE:
+							refreshAttendanceTable(tbl.getTblSubType(), tbl.getClientID().toString(), tbl.getClassName(), 
+									tbl.getClassDate(), tbl.getTableHeader(), tbl.isAttendByStudent(), false);
+							break;
+						case TableHistoryModel.COURSE_TABLE:
+							refreshCoursesTable(false);
+							break;
+						case TableHistoryModel.LOG_TABLE:
+							refreshLogTable(false);
+							break;
+						case TableHistoryModel.SCHEDULE_TABLE:
+							refreshScheduleTable(false);
+							break;
+						case TableHistoryModel.SCHED_DETAILS_TABLE:
+							refreshSchedDetailsTable(TableHeaderBox.getDowSelectList(), false);
+							break;
+						case TableHistoryModel.GITHUB_TABLE:
+							refreshGithubTable(false);
+							break;
+					}
+				}
 			}
 		};
 
@@ -575,9 +610,9 @@ public class MainFrame {
 					StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_BY_STUDENT) {
-			headerLabel.setText(STUDENT_TITLE);
-			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
+			ArrayList<StudentModel> students = controller.getStudentByClientID(clientID);
+			headerLabel.setText(STUDENT_TITLE + " for " + students.get(0).getNameModel().toString());
+			studentTable.setData(tablePanel, students, StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
 
 		} else if (tableType == STUDENT_TABLE_EMAIL_ALL) {
 			headerLabel.setText(STUDENT_EMAIL_TITLE);
@@ -591,25 +626,31 @@ public class MainFrame {
 		}
 
 		else if (tableType == STUDENT_TABLE_EMAIL_BY_STUDENT) {
-			headerLabel.setText(STUDENT_EMAIL_TITLE);
-			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.EMAIL_STUDENT_TABLE_TYPE, clearSearch);
+			ArrayList<StudentModel> students = controller.getStudentByClientID(clientID);
+			headerLabel.setText(STUDENT_EMAIL_TITLE + " for " + students.get(0).getNameModel().toString());
+			studentTable.setData(tablePanel, students, StudentTable.EMAIL_STUDENT_TABLE_TYPE, clearSearch);
 		}
 
 		else if (tableType == STUDENT_TABLE_PHONE_BY_STUDENT) {
-			headerLabel.setText(STUDENT_PHONE_TITLE);
-			studentTable.setData(tablePanel, controller.getStudentByClientID(clientID),
-					StudentTable.PHONE_STUDENT_TABLE_TYPE, clearSearch);
+			ArrayList<StudentModel> students = controller.getStudentByClientID(clientID);
+			headerLabel.setText(STUDENT_PHONE_TITLE + " for " + students.get(0).getNameModel().toString());
+			studentTable.setData(tablePanel, students, StudentTable.PHONE_STUDENT_TABLE_TYPE, clearSearch);
 		}
 
 		else { // STUDENT_TABLE_FOR_TA
 			headerLabel.setText(STUDENT_TA_TITLE);
 			state = TableHeaderBox.HDR_STUDENT_TA;
-			TableHeaderBox.refreshHeader(state);
+			TableHeaderBox.refreshHeader(state, (tableHistoryList.size() > 0));
 			studentTable.setData(tablePanel, controller.getActiveTAs(TableHeaderBox.getMinClasses(),
 					TableHeaderBox.getMinAge(), TableHeaderBox.getMinLevel()), StudentTable.TA_STUDENT_TABLE_TYPE, clearSearch);
 		}
+
 		if (clearSearch) {
+			if (currTable.getTableType() != TableHistoryModel.STUDENT_TABLE || currTable.getTblSubType() != tableType) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
 			searchField.setText("");
 			studentTable.updateSearchField("");
 		}
@@ -617,56 +658,117 @@ public class MainFrame {
 		// Update current table type
 		activeTable = studentTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(state);
+		currTable = new TableHistoryModel(TableHistoryModel.STUDENT_TABLE, activeTableHeader, clientID, tableType, searchField.getText());
+		TableHeaderBox.refreshHeader(state, (tableHistoryList.size() > 0));
 	}
 
-	private void refreshAttendanceTable(ArrayList<AttendanceModel> list, String titleExtension,
-			boolean attendanceByStudent) {
+	private void refreshAttendanceTable(int attendType, String clientID, String className, String classDate,
+			String titleExtension, boolean attendanceByStudent, boolean newTable) {
+		
+		// TEST: SPECIAL EXCEPTION
+		if (currTable.getTableType() == TableHistoryModel.ATTENDANCE_TABLE 
+			  && ((currTable.getTblSubType() == ATTEND_TABLE_BY_CLASS_NAME && currTable.getClassName().equals(className)) 
+						||
+				  (currTable.getTblSubType() == ATTEND_TABLE_BY_CLASS_AND_DATE && currTable.getClassName().equals(className) && currTable.getClassDate().equals(classDate))))
+		{
+			attendanceTable.clearSelectedRows();
+			return;
+		}
+		
 		// Remove data being displayed
 		removeDataFromTables();
 
+		// Get appropriate list based on attendance type
+		ArrayList<AttendanceModel> list = null;
+		switch (attendType) {
+			case ATTEND_TABLE_ALL:
+				list = controller.getAllAttendance();
+				break;
+			case ATTEND_TABLE_BY_CLIENT_ID:
+				list = controller.getAttendanceByClientID(clientID);
+				break;
+			case ATTEND_TABLE_BY_CLASS_AND_DATE:
+				list = controller.getAttendanceByClassByDate(className, classDate);
+				break;
+			case ATTEND_TABLE_BY_CLASS_NAME:
+				list = controller.getAttendanceByClassName(className);
+				break;
+			case ATTEND_TABLE_BY_COURSE_NAME:
+				list = controller.getAttendanceByCourseName(className);
+				break;
+		}
 		// Add attendance table and header
 		if (attendanceByStudent)
 			attendanceTable.setAttendDataByStudent(tablePanel, list);
 		else
 			attendanceTable.setAllAttendanceData(tablePanel, list);
 		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
-		searchField.setText("");
-		attendanceTable.updateSearchField("");
+		
+		if (newTable) {
+			if (currTable.getTableType() != TableHistoryModel.ATTENDANCE_TABLE || currTable.getTblSubType() != attendType 
+					|| !currTable.getClassName().equals(className) || !currTable.getClassDate().equals(classDate)) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
+			searchField.setText("");
+			attendanceTable.updateSearchField("");
+		}
 
+		// Update current table type
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
+		currTable = new TableHistoryModel(TableHistoryModel.ATTENDANCE_TABLE, titleExtension, clientID, attendType, 
+				searchField.getText(), className, classDate, attendanceByStudent);
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
 	}
 
-	private void refreshLogTable() {
+	private void refreshLogTable(boolean newTable) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add log data table and header
 		logTable.setData(tablePanel, controller.getDbLogData());
 		headerLabel.setText(LOGGING_TITLE);
-		searchField.setText("");
-		logTable.updateSearchField("");
-
+		if (newTable) {
+			if (currTable.getTableType() != TableHistoryModel.LOG_TABLE) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
+			searchField.setText("");
+			logTable.updateSearchField("");
+		}
+				
+		// Update current table type
 		activeTable = logTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
+		currTable = new TableHistoryModel(TableHistoryModel.LOG_TABLE, activeTableHeader, 0, 0, searchField.getText());
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
 	}
 
-	private void refreshScheduleTable() {
+	private void refreshScheduleTable(boolean newTable) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add log data table and header
 		scheduleTable.setData(tablePanel, controller.getClassSchedule());
 		headerLabel.setText(SCHEDULE_TITLE);
-		searchField.setText("");
-		scheduleTable.updateSearchField("");
-
+		if (newTable) {
+			if (currTable.getTableType() != TableHistoryModel.SCHEDULE_TABLE) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
+			searchField.setText("");
+			scheduleTable.updateSearchField("");
+		}
+						
+		// Update current table type
 		activeTable = scheduleTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
+		currTable = new TableHistoryModel(TableHistoryModel.SCHEDULE_TABLE, activeTableHeader, 0, 0, searchField.getText());
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
 	}
 
 	private void refreshSchedDetailsTable(boolean[] dowSelectList, boolean clearSearch) {
@@ -677,28 +779,72 @@ public class MainFrame {
 		schedDetailsTable.setData(tablePanel, controller.getWeeklyClassDetails(dowSelectList), clearSearch);
 		headerLabel.setText(SCHED_DETAILS_TITLE);
 		if (clearSearch) {
+			if (currTable.getTableType() != TableHistoryModel.SCHED_DETAILS_TABLE) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
 			searchField.setText("");
 			schedDetailsTable.updateSearchField("");
 		}
 
+		// Update current table type
 		activeTable = schedDetailsTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_CLASS_DETAILS);
+		currTable = new TableHistoryModel(TableHistoryModel.SCHED_DETAILS_TABLE, activeTableHeader, 0, 0, searchField.getText());
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_CLASS_DETAILS, (tableHistoryList.size() > 0));
 	}
 
-	private void refreshCoursesTable() {
+	private void refreshCoursesTable(boolean newTable) {
 		// Remove data being displayed
 		removeDataFromTables();
 
 		// Add log data table and header
 		coursesTable.setData(tablePanel, controller.getCourseSchedule());
 		headerLabel.setText(COURSE_TITLE);
-		searchField.setText("");
-		coursesTable.updateSearchField("");
-
+		if (newTable) {
+			if (currTable.getTableType() != TableHistoryModel.COURSE_TABLE) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
+			searchField.setText("");
+			coursesTable.updateSearchField("");
+		}
+										
+		// Update current table type
 		activeTable = coursesTable.getTable();
 		activeTableHeader = headerLabel.getText();
-		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY);
+		currTable = new TableHistoryModel(TableHistoryModel.COURSE_TABLE, activeTableHeader, 0, 0, searchField.getText());
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
+	}
+	
+	private void refreshGithubTable(boolean newTable) {
+		// Remove data being displayed
+		removeDataFromTables();
+
+		// Add github data and header
+		String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
+				.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
+		headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 5)");
+		githubTable.setData(tablePanel,
+				controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
+
+		if (newTable) {
+			if (currTable.getTableType() != TableHistoryModel.GITHUB_TABLE) {
+				// Save last table type
+				currTable.setSearchText(searchField.getText());
+				tableHistoryList.add(currTable);
+			}
+			searchField.setText("");
+			coursesTable.updateSearchField("");
+		}
+												
+		// Update current table type
+		activeTable = githubTable.getTable();
+		activeTableHeader = headerLabel.getText();
+		currTable = new TableHistoryModel(TableHistoryModel.GITHUB_TABLE, activeTableHeader, 0, 0, searchField.getText());
+		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
 	}
 
 	private void removeDataFromTables() {

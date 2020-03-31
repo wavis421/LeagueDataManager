@@ -36,7 +36,7 @@ public class AttendanceTable extends JPanel {
 	private static final int POPUP_MENU_WIDTH = 240;
 	private static final int POPUP_MENU_HEIGHT_1ROW  = 30;
 	private static final int POPUP_MENU_HEIGHT_2ROWS = 50;
-	private static final int POPUP_MENU_HEIGHT_6ROWS = 130;
+	private static final int POPUP_MENU_HEIGHT_5ROWS = 110;
 
 	// Columns for embedded event table
 	private static final int EVENT_TABLE_DATE_COLUMN = 0;
@@ -57,7 +57,8 @@ public class AttendanceTable extends JPanel {
 	private int eventSelectedRow = -1; // row within table row
 	private String selectedClassName, selectedClassDate;
 
-	private TableRowSorter<AttendanceTableModel> rowSorter;
+	private TableRowSorter<AttendanceTableModel>  rowSorter;
+	private TableRowSorter<AttendEventTableModel> rowStudentSorter;
 
 	public AttendanceTable(JPanel tablePanel, ArrayList<AttendanceModel> attendanceList) {
 		this.parentTablePanel = tablePanel;
@@ -76,9 +77,12 @@ public class AttendanceTable extends JPanel {
 		createAttendanceTablePopups();
 		createStudAttendTablePopups();
 
-		// Configure row sorter for main table only
+		// Configure row sorter for main table only, not Github sub-table
 		rowSorter = new TableRowSorter<AttendanceTableModel>((AttendanceTableModel) mainTable.getModel());
 		rowSorter.setSortable(AttendanceTableModel.GITHUB_COMMENTS_COLUMN, false);
+		
+		// Configure row sorter for attend-by-student table
+		rowStudentSorter = new TableRowSorter<AttendEventTableModel>((AttendEventTableModel) studentTable.getModel());
 	}
 
 	public void setTableListener(TableListeners listener) {
@@ -147,6 +151,14 @@ public class AttendanceTable extends JPanel {
 		activeTable.repaint();
 	}
 
+	public void clearSelectedRows() {
+		eventTableSelectedRow = -1;
+		eventSelectedRow = -1;
+		activeTable.clearSelection();
+		for (JTable t : githubEventTableList)
+			t.clearSelection();
+	}
+	
 	private int getEventRow(int selectedRow, int yPos) {
 		// Compute row based on Y-position in event table
 		JTable table = githubEventTableList.get(selectedRow);
@@ -205,6 +217,7 @@ public class AttendanceTable extends JPanel {
 				
 		// Set student table properties
 		studentTable.setDefaultRenderer(Object.class, new EventTableRenderer(new ArrayList<JTable>()));
+		studentTable.setAutoCreateRowSorter(true);
 
 		// Create panel containing main table with scroll
 		activeTable = mainTable;
@@ -319,7 +332,7 @@ public class AttendanceTable extends JPanel {
 						tablePopup.add(showStudentEmailItem);
 						tablePopup.add(showStudentPhoneItem);
 						tablePopup.add(updateGithubUserItem);
-						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_6ROWS));
+						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_5ROWS));
 						tablePopup.show(mainTable, e.getX(), e.getY());
 
 					} else if (mainTable.getSelectedColumn() == AttendanceTableModel.GITHUB_COMMENTS_COLUMN) {
@@ -331,8 +344,7 @@ public class AttendanceTable extends JPanel {
 							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
 							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
 
-							if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java") && !selectedClassName.contains("Make-Up")
-									&& !selectedClassName.startsWith("EL@") && !selectedClassName.startsWith("EL @") 
+							if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java")
 									&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
 								tablePopup.remove(showStudentInfoItem);
 								tablePopup.remove(showStudentAttendanceItem);
@@ -377,7 +389,7 @@ public class AttendanceTable extends JPanel {
 		showStudentInfoItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				// Get Client ID for selected row/column
-				int row = studentTable.getSelectedRow();
+				int row = studentTable.convertRowIndexToModel(studentTable.getSelectedRow());
 				int clientID = (int) attendEventTableModel.getValueAt(row, AttendEventTableModel.CLIENT_ID_COLUMN);
 
 				studentTable.clearSelection();
@@ -394,15 +406,14 @@ public class AttendanceTable extends JPanel {
 		
 		studentTable.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				int row = studentTable.getSelectedRow();
-
-				if (e.getButton() == MouseEvent.BUTTON3 && row > -1) {
+				if (e.getButton() == MouseEvent.BUTTON3 && studentTable.getSelectedRow() > -1) {
+					int row = studentTable.convertRowIndexToModel(studentTable.getSelectedRow());
+					
 					// Show students by class name
 					selectedClassName = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_CLASS_NAME_COLUMN);
 					selectedClassDate = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_DATE_COLUMN);
 
-					if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java") && !selectedClassName.contains("Make-Up")
-							&& !selectedClassName.startsWith("EL@") && !selectedClassName.startsWith("EL @") 
+					if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java")
 							&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
 						// Show pop-up menu, including show-by-class
 						tablePopup.add(showStudentClassItem);
@@ -452,20 +463,38 @@ public class AttendanceTable extends JPanel {
 	}
 
 	public void updateSearchField(String searchText) {
-		if (searchText.equals("")) {
-			rowSorter.setRowFilter(null);
-		} else {
-			try {
-				// Filter only on the 1st 2 columns
-				rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText,
-						AttendanceTableModel.CLIENT_ID_COLUMN, AttendanceTableModel.STUDENT_NAME_COLUMN));
+		if (activeTable == mainTable) {
+			if (searchText.equals("")) {
+				rowSorter.setRowFilter(null);
+			} else {
+				try {
+					// Filter only on the 1st 3 columns
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText,
+							AttendanceTableModel.CLIENT_ID_COLUMN, AttendanceTableModel.STUDENT_NAME_COLUMN, AttendanceTableModel.STUDENT_AGE_COLUMN));
 
-			} catch (java.util.regex.PatternSyntaxException e) {
-				System.out.println(e.getMessage());
-				return;
+				} catch (java.util.regex.PatternSyntaxException e) {
+					System.out.println(e.getMessage());
+					return;
+				}
 			}
+			mainTable.setRowSorter(rowSorter);
+		
+		} else {
+			// Student table
+			if (searchText.equals("")) {
+				rowStudentSorter.setRowFilter(null);
+			} else {
+				try {
+					// Filter all columns
+					rowStudentSorter.setRowFilter(RowFilter.regexFilter("(?i)\\b" + searchText));
+				
+				} catch (java.util.regex.PatternSyntaxException e) {
+					System.out.println(e.getMessage());
+					return;
+				}
+			}
+			studentTable.setRowSorter(rowStudentSorter);
 		}
-		mainTable.setRowSorter(rowSorter);
 	}
 
 	// ===== NESTED Class: Renderer for main table ===== //
