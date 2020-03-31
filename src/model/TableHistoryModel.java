@@ -17,7 +17,7 @@ public class TableHistoryModel {
 	int tblSubType = 0;
 	int clientID = 0;
 	String searchText = "", className, classDate;
-	boolean attendByStudent;
+	boolean byStudentOrSinceDate;
 	
 	public TableHistoryModel (int tableType, String header, int clientID, int subType, String searchString) {
 		this.tableType   = tableType;
@@ -39,7 +39,7 @@ public class TableHistoryModel {
 		this.searchText   = searchString;
 		this.className    = className;
 		this.classDate    = classDate;
-		this.attendByStudent = byStudent;
+		this.byStudentOrSinceDate = byStudent;
 	}
 	
 	public String getTableHeader() {
@@ -74,7 +74,7 @@ public class TableHistoryModel {
 		return classDate;
 	}
 
-	public boolean isAttendByStudent() {
-		return attendByStudent;
+	public boolean isByStudentOrSinceDate() {
+		return byStudentOrSinceDate;
 	}
 }

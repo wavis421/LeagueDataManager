@@ -127,8 +127,8 @@ public class Controller {
 		return result;
 	}
 
-	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
-		ArrayList<AttendanceModel> result = sqlForGui.getAttendanceByClassName(className);
+	public ArrayList<AttendanceModel> getAttendanceByClassName(String className, boolean withDate) {
+		ArrayList<AttendanceModel> result = sqlForGui.getAttendanceByClassName(className, withDate);
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;
@@ -150,6 +150,13 @@ public class Controller {
 
 	public ArrayList<AttendanceModel> getAttendanceByClassByDate(String className, String day) {
 		ArrayList<AttendanceModel> result = sqlForGui.getAttendanceByClassByDate(className, day);
+		if (sqlDb.getConnectError())
+			reportConnectError();
+		return result;
+	}
+
+	public ArrayList<AttendanceModel> getAttendanceByCourseByDate(String className, String day) {
+		ArrayList<AttendanceModel> result = sqlForGui.getAttendanceByCourseByDate(className, day);
 		if (sqlDb.getConnectError())
 			reportConnectError();
 		return result;

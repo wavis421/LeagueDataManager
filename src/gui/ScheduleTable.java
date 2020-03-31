@@ -191,7 +191,7 @@ public class ScheduleTable extends JPanel {
 				DateTime date = today.withDayOfWeek(dow);
 				if (date.toString("yyyy-MM-dd").compareTo(today.toString("yyyy-MM-dd")) < 0)
 					date = date.plusWeeks(1);
-				scheduleListener.viewAttendanceByClass(className, date.toString("yyyy-MM-dd"));
+				scheduleListener.viewAttendanceByClass(className, date.toString("yyyy-MM-dd"), true);
 			}
 		});
 

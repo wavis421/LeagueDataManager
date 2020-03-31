@@ -247,7 +247,7 @@ public class AttendanceTable extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				// Add attendance table and header for selected class
 				mainTable.clearSelection();
-				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate);
+				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate, false);
 			}
 		});
 		showStudentInfoItem.addActionListener(new ActionListener() {
@@ -344,8 +344,7 @@ public class AttendanceTable extends JPanel {
 							selectedClassName = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_CLASS_NAME_COLUMN);
 							selectedClassDate = (String) eventModel.getValueAt(eventSelectedRow, EVENT_TABLE_DATE_COLUMN);
 
-							if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java")
-									&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
+							if (selectedClassName != null && !selectedClassName.contains("Leave of Absence")) {
 								tablePopup.remove(showStudentInfoItem);
 								tablePopup.remove(showStudentAttendanceItem);
 								tablePopup.remove(showStudentEmailItem);
@@ -400,7 +399,7 @@ public class AttendanceTable extends JPanel {
 			public void actionPerformed(ActionEvent event) {
 				// Add attendance table and header for selected class
 				studentTable.clearSelection();
-				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate);
+				attendanceListener.viewAttendanceByClass(selectedClassName, selectedClassDate, false);
 			}
 		});
 		
@@ -413,8 +412,7 @@ public class AttendanceTable extends JPanel {
 					selectedClassName = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_CLASS_NAME_COLUMN);
 					selectedClassDate = (String) attendEventTableModel.getValueAt(row, EVENT_TABLE_DATE_COLUMN);
 
-					if (selectedClassName != null && !selectedClassName.startsWith("Intro to Java")
-							&& !selectedClassName.contains("Leave of Absence") && !selectedClassName.toLowerCase().contains("slam")) {
+					if (selectedClassName != null && !selectedClassName.contains("Leave of Absence")) {
 						// Show pop-up menu, including show-by-class
 						tablePopup.add(showStudentClassItem);
 						tablePopup.setPreferredSize(new Dimension(POPUP_MENU_WIDTH, POPUP_MENU_HEIGHT_2ROWS));

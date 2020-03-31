@@ -157,7 +157,7 @@ public class SchedDetailsTable extends JPanel {
 
 				// Display attendance table for selected class
 				table.clearSelection();
-				schedListener.viewAttendanceByClass(className, null);
+				schedListener.viewAttendanceByClass(className, null, true);
 			}
 		});
 		table.addMouseListener(new MouseAdapter() {

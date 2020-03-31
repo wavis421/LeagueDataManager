@@ -55,6 +55,8 @@ public class MainFrame {
 
 	private static final int PREF_TABLE_PANEL_WIDTH = PREF_FRAME_WIDTH;
 	private static final int PREF_TABLE_PANEL_HEIGHT = PREF_FRAME_HEIGHT - 58;
+	
+	private static final int MAX_TABLE_HISTORY_DEPTH = 12;
 
 	private static final String STUDENT_TITLE = "League Student Info";
 	private static final String STUDENT_EMAIL_TITLE = "League Student Emails";
@@ -79,9 +81,10 @@ public class MainFrame {
 	
 	private static final int ATTEND_TABLE_ALL = 0;
 	private static final int ATTEND_TABLE_BY_CLIENT_ID = 1;
-	private static final int ATTEND_TABLE_BY_CLASS_AND_DATE = 2;
-	private static final int ATTEND_TABLE_BY_CLASS_NAME = 3;
+	private static final int ATTEND_TABLE_BY_CLASS_NAME = 2;
+	private static final int ATTEND_TABLE_BY_CLASS_AND_DATE = 3;
 	private static final int ATTEND_TABLE_BY_COURSE_NAME = 4;
+	private static final int ATTEND_TABLE_BY_COURSE_AND_DATE = 5;
 
 	// Report missing github if 3 or more classes with no github in the last 35 days
 	private static final int NO_RECENT_GITHUB_SINCE_DAYS = 35;
@@ -493,14 +496,17 @@ public class MainFrame {
 			}
 
 			@Override
-			public void viewAttendanceByClass(String className, String classDate) {
+			public void viewAttendanceByClass(String className, String classDate, boolean sinceDateEna) {
 				// Display class by class name
-				if (className.toLowerCase().contains("make-up")) {
+				if (className.toLowerCase().contains("make-up") || className.startsWith("L@")) {
 					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_AND_DATE, "", className, classDate,
+							" for '" + className + "' on " + classDate, false, true);
+				} else if (className.contains("Intro to Java") || className.toLowerCase().contains("slam")) {
+					refreshAttendanceTable(ATTEND_TABLE_BY_COURSE_AND_DATE, "", className, classDate,
 							" for '" + className + "' on " + classDate, false, true);
 				} else
 					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_NAME, "", className, "", " for '" + className + "'",
-							false, true);
+							sinceDateEna, true);
 			}
 
 			@Override
@@ -560,7 +566,7 @@ public class MainFrame {
 							break;
 						case TableHistoryModel.ATTENDANCE_TABLE:
 							refreshAttendanceTable(tbl.getTblSubType(), tbl.getClientID().toString(), tbl.getClassName(), 
-									tbl.getClassDate(), tbl.getTableHeader(), tbl.isAttendByStudent(), false);
+									tbl.getClassDate(), tbl.getTableHeader(), tbl.isByStudentOrSinceDate(), false);
 							break;
 						case TableHistoryModel.COURSE_TABLE:
 							refreshCoursesTable(false);
@@ -649,7 +655,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.STUDENT_TABLE || currTable.getTblSubType() != tableType) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			studentTable.updateSearchField("");
@@ -663,13 +669,13 @@ public class MainFrame {
 	}
 
 	private void refreshAttendanceTable(int attendType, String clientID, String className, String classDate,
-			String titleExtension, boolean attendanceByStudent, boolean newTable) {
+			String titleExtension, boolean byStudentOrSinceDate, boolean newTable) {
 		
-		// TEST: SPECIAL EXCEPTION
+		// Only refresh if something has changed, otherwise the table won't detect "fireTableDataChanged"
 		if (currTable.getTableType() == TableHistoryModel.ATTENDANCE_TABLE 
 			  && ((currTable.getTblSubType() == ATTEND_TABLE_BY_CLASS_NAME && currTable.getClassName().equals(className)) 
-						||
-				  (currTable.getTblSubType() == ATTEND_TABLE_BY_CLASS_AND_DATE && currTable.getClassName().equals(className) && currTable.getClassDate().equals(classDate))))
+				  || (currTable.getTblSubType() == ATTEND_TABLE_BY_CLASS_AND_DATE && currTable.getClassName().equals(className) && currTable.getClassDate().equals(classDate))
+				  || (currTable.getTblSubType() == ATTEND_TABLE_BY_COURSE_AND_DATE && currTable.getClassName().equals(className) && currTable.getClassDate().equals(classDate))))
 		{
 			attendanceTable.clearSelectedRows();
 			return;
@@ -687,29 +693,33 @@ public class MainFrame {
 			case ATTEND_TABLE_BY_CLIENT_ID:
 				list = controller.getAttendanceByClientID(clientID);
 				break;
+			case ATTEND_TABLE_BY_CLASS_NAME:
+				list = controller.getAttendanceByClassName(className, byStudentOrSinceDate);
+				break;
 			case ATTEND_TABLE_BY_CLASS_AND_DATE:
 				list = controller.getAttendanceByClassByDate(className, classDate);
-				break;
-			case ATTEND_TABLE_BY_CLASS_NAME:
-				list = controller.getAttendanceByClassName(className);
 				break;
 			case ATTEND_TABLE_BY_COURSE_NAME:
 				list = controller.getAttendanceByCourseName(className);
 				break;
+			case ATTEND_TABLE_BY_COURSE_AND_DATE:
+				list = controller.getAttendanceByCourseByDate(className, classDate);
+				break;
 		}
+
 		// Add attendance table and header
-		if (attendanceByStudent)
+		if (byStudentOrSinceDate && attendType != ATTEND_TABLE_BY_CLASS_NAME)
 			attendanceTable.setAttendDataByStudent(tablePanel, list);
 		else
 			attendanceTable.setAllAttendanceData(tablePanel, list);
 		headerLabel.setText(ATTENDANCE_TITLE + titleExtension);
-		
+
 		if (newTable) {
 			if (currTable.getTableType() != TableHistoryModel.ATTENDANCE_TABLE || currTable.getTblSubType() != attendType 
 					|| !currTable.getClassName().equals(className) || !currTable.getClassDate().equals(classDate)) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			attendanceTable.updateSearchField("");
@@ -719,7 +729,7 @@ public class MainFrame {
 		activeTable = attendanceTable.getTable();
 		activeTableHeader = headerLabel.getText();
 		currTable = new TableHistoryModel(TableHistoryModel.ATTENDANCE_TABLE, titleExtension, clientID, attendType, 
-				searchField.getText(), className, classDate, attendanceByStudent);
+				searchField.getText(), className, classDate, byStudentOrSinceDate);
 		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
 	}
 
@@ -734,7 +744,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.LOG_TABLE) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			logTable.updateSearchField("");
@@ -758,7 +768,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.SCHEDULE_TABLE) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			scheduleTable.updateSearchField("");
@@ -782,7 +792,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.SCHED_DETAILS_TABLE) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			schedDetailsTable.updateSearchField("");
@@ -806,7 +816,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.COURSE_TABLE) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			coursesTable.updateSearchField("");
@@ -834,7 +844,7 @@ public class MainFrame {
 			if (currTable.getTableType() != TableHistoryModel.GITHUB_TABLE) {
 				// Save last table type
 				currTable.setSearchText(searchField.getText());
-				tableHistoryList.add(currTable);
+				addTableToHistory(currTable);
 			}
 			searchField.setText("");
 			coursesTable.updateSearchField("");
@@ -845,6 +855,13 @@ public class MainFrame {
 		activeTableHeader = headerLabel.getText();
 		currTable = new TableHistoryModel(TableHistoryModel.GITHUB_TABLE, activeTableHeader, 0, 0, searchField.getText());
 		TableHeaderBox.refreshHeader(TableHeaderBox.HDR_EMPTY, (tableHistoryList.size() > 0));
+	}
+
+	private void addTableToHistory (TableHistoryModel table)
+	{
+		tableHistoryList.add(table);
+		while (tableHistoryList.size() > MAX_TABLE_HISTORY_DEPTH)
+			tableHistoryList.remove(0);
 	}
 
 	private void removeDataFromTables() {

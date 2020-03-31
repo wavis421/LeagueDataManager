@@ -2,7 +2,7 @@ package gui;
 
 public interface TableListeners {
 	public void viewStudentTableByStudent(int clientID);
-	public void viewAttendanceByClass (String className, String classDate);
+	public void viewAttendanceByClass (String className, String classDate, boolean sinceDateEna);
 	public void viewAttendanceByCourse (String courseName);
 	public void viewAttendanceByStudent (String clientID, String studentName);
 	public void updateGithubUser(String clientID, String name);

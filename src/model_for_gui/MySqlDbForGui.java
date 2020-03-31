@@ -345,7 +345,7 @@ public class MySqlDbForGui {
 		return attendanceList;
 	}
 
-	public ArrayList<AttendanceModel> getAttendanceByClassName(String className) {
+	public ArrayList<AttendanceModel> getAttendanceByClassName(String className, boolean sinceDateEna) {
 		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
 		ArrayList<AttendanceModel> listByClient;
 		DateTime today = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"));
@@ -355,13 +355,22 @@ public class MySqlDbForGui {
 		for (int i = 0; i < 2; i++) {
 			try {
 				// If Database no longer connected, the exception code will re-connect
-				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
+				PreparedStatement selectStmt;
+				if (sinceDateEna) {
+					selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
 								+ "AND ((State = 'completed' AND EventName = CurrentClass) OR State = 'registered') "
 								+ "AND EventName=? AND ServiceDate > ? AND ServiceDate < ? GROUP BY Students.ClientID;");
-				selectStmt.setString(1, className);
-				selectStmt.setString(2, sinceDate);
-				selectStmt.setString(3, endDate);
+					selectStmt.setString(1, className);
+					selectStmt.setString(2, sinceDate);
+					selectStmt.setString(3, endDate);
+				}
+				else {
+					selectStmt = sqlDb.dbConnection.prepareStatement(
+						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND State = 'completed' AND EventName=? GROUP BY Students.ClientID;");
+					selectStmt.setString(1, className);
+				}
 
 				ResultSet result = selectStmt.executeQuery();
 				while (result.next()) {
@@ -472,6 +481,57 @@ public class MySqlDbForGui {
 										result.getString("ClassLevel"))));
 					else
 						attendanceList.addAll(listByClient);
+				}
+				Collections.sort(attendanceList);
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				} else
+					sqlDb.setConnectError(true);
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.ATTENDANCE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return attendanceList;
+	}
+
+	public ArrayList<AttendanceModel> getAttendanceByCourseByDate(String courseName, String date) {
+		// Special case of getAttendanceByCourseName, selected for specific day
+		ArrayList<AttendanceModel> attendanceList = new ArrayList<AttendanceModel>();
+		ArrayList<AttendanceModel> listByClient;
+		
+		if (courseName.contains("WShop"))
+			courseName = courseName.replace("WShop", "Workshop");
+
+		for (int i = 0; i < 2; i++) {
+			// If Database no longer connected, the exception code will re-connect
+			try {
+				// Get attendance by course and by date; class name in database can have added fields, so
+				//    just make sure that at least the base name is matched.
+				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
+						"SELECT Students.ClientID, Students.FirstName, Students.LastName, GithubName, Attendance.State, "
+								+ "CurrentLevel, LastSFState, ServiceCategory, TeacherNames, Birthdate, ClassLevel "
+								+ "FROM Attendance, Students "
+								+ "WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
+								+ "AND (State = 'completed' OR State = 'registered') AND EventName LIKE '" + courseName + "%' "
+								+ "AND ServiceDate=? GROUP BY Students.ClientID;");
+				selectStmt.setString(1, date);
+
+				ResultSet result = selectStmt.executeQuery();
+				while (result.next()) {
+					// Get attendance for each student in this particular make-up class
+					Integer thisClientID = result.getInt("Students.ClientID");
+					listByClient = getAttendanceByClientID(thisClientID.toString());
+					attendanceList.addAll(listByClient);
 				}
 				Collections.sort(attendanceList);
 
