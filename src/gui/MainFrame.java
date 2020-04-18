@@ -501,7 +501,8 @@ public class MainFrame {
 				if (className.toLowerCase().contains("make-up") || className.startsWith("L@")) {
 					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_AND_DATE, "", className, classDate,
 							" for '" + className + "' on " + classDate, false, true);
-				} else if (className.contains("Intro to Java") || className.toLowerCase().contains("slam")) {
+				} else if (className.toLowerCase().contains("intro to java") || className.toLowerCase().contains("slam") 
+						|| className.toLowerCase().contains("coding camp")) {
 					refreshAttendanceTable(ATTEND_TABLE_BY_COURSE_AND_DATE, "", className, classDate,
 							" for '" + className + "' on " + classDate, false, true);
 				} else

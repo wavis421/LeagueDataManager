@@ -27,14 +27,16 @@ public class AttendanceEventModel implements Comparable<AttendanceEventModel> {
 		// Parse long event names for workshops
 		eventName = event.trim();
 		if (eventName.length() >= 3 && eventName.charAt(1) != '@' && eventName.charAt(2) != '@') {
-			if (eventName.contains("Intro to Java Work"))
+			if (eventName.toLowerCase().contains("intro to java"))
 				eventName = "Intro to Java WShop";
-			else if (eventName.contains("Electrical Engineering Intro Work"))
+			else if (eventName.toLowerCase().contains("coding camp"))
+				eventName = "Coding Camp";
+			else if (eventName.toLowerCase().contains("electrical engineering intro work"))
 				eventName = "Electrical Eng WShop";
-			else if (eventName.contains("Contest: Cyber Security"))
+			else if (eventName.toLowerCase().contains("contest: cyber security"))
 				eventName = "Contest: Cyber Security";
-			else if (eventName.contains("Workshop"))
-				eventName = eventName.replace("Workshop", "WShop");
+			else if (eventName.toLowerCase().contains("workshop"))
+				eventName = eventName.toLowerCase().replace("workshop", "WShop");
 		}
 		int idx = eventName.indexOf('(');
 		if (idx > 0)
