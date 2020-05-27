@@ -31,6 +31,7 @@ import model.StudentNameModel;
  */
 
 public class MySqlDbForGui {
+	private static final String[] dowAsString = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",	"Saturday" };
 	MySqlDatabase sqlDb;
 
 	public MySqlDbForGui(MySqlDatabase sqlDb) {
@@ -136,7 +137,7 @@ public class MySqlDbForGui {
 			try {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
-						"SELECT * FROM Students WHERE NOT isInMasterDb ORDER BY FirstName, LastName;");
+						"SELECT * FROM Students WHERE NOT isInMasterDb AND LastVisitDate IS NOT NULL ORDER BY FirstName, LastName;");
 				ResultSet result = selectStmt.executeQuery();
 
 				while (result.next()) {
@@ -269,6 +270,8 @@ public class MySqlDbForGui {
 							int dowInt = serviceDate.getDayOfWeek();
 							if (dowInt > 6)
 								dowInt -= 7;
+							
+							// "EEEE" represents day of week
 							lastGithubModel = new GithubModel(thisClientID,
 									result.getString("FirstName") + " " + result.getString("LastName"), currLevel,
 									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
@@ -660,6 +663,7 @@ public class MySqlDbForGui {
 	 * ------- Course & Class Database Queries used for GUI -------
 	 */
 	public ArrayList<ScheduleModel> getClassDetails(boolean[] dowSelectList) {
+		// Get class details for all classes
 		ArrayList<ScheduleModel> eventList = new ArrayList<ScheduleModel>();
 
 		// Create dow select fields for the mySql command
@@ -716,5 +720,48 @@ public class MySqlDbForGui {
 			}
 		}
 		return eventList;
+	}
+	
+	public String getClassDowAndTime(String className) {
+		// Get class DOW and start time for a specific class
+		String classDetails = "";
+
+		for (int i = 0; i < 2; i++) {
+			try {
+				// Get schedule data for this class
+				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
+						"SELECT * FROM Schedule WHERE ClassName = ?");
+				selectStmt.setString(1, className);
+				ResultSet result = selectStmt.executeQuery();
+
+				if (result.next()) {
+					String dow  = result.getString("DayOfWeek");
+					String time = result.getString("StartTime");
+					
+					if (dow != null && dow.charAt(0) >= '0' && dow.charAt(0) <= '6' && time != null) {
+						// Convert time to 12-hour time with am/pm
+						DateTime dt = new DateTime("2020-01-01T" + time + ":00.000");
+						classDetails = ", " + dowAsString[dow.charAt(0) - '0'] + " at " + dt.toString("h:mma");
+					}
+				}
+
+				result.close();
+				selectStmt.close();
+				break;
+
+			} catch (CommunicationsException | MySQLNonTransientConnectionException | NullPointerException e1) {
+				if (i == 0) {
+					// First attempt to re-connect
+					sqlDb.connectDatabase();
+				} else
+					sqlDb.setConnectError(true);
+
+			} catch (SQLException e2) {
+				MySqlDbLogging.insertLogData(LogDataModel.SCHEDULE_DB_ERROR, new StudentNameModel("", "", false), 0,
+						": " + e2.getMessage());
+				break;
+			}
+		}
+		return classDetails;
 	}
 }

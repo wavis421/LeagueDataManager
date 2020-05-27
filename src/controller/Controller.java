@@ -175,6 +175,10 @@ public class Controller {
 			reportConnectError();
 		return result;
 	}
+	
+	public String getClassDowAndTime(String className) {
+		return sqlForGui.getClassDowAndTime(className);
+	}
 
 	public ArrayList<CoursesModel> getCourseSchedule() {
 		ArrayList<CoursesModel> result = sqlDb.getCourseSchedule(null);

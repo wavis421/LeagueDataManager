@@ -506,7 +506,7 @@ public class MainFrame {
 					refreshAttendanceTable(ATTEND_TABLE_BY_COURSE_AND_DATE, "", className, classDate,
 							" for '" + className + "' on " + classDate, false, true);
 				} else
-					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_NAME, "", className, "", " for '" + className + "'",
+					refreshAttendanceTable(ATTEND_TABLE_BY_CLASS_NAME, "", className, "", " for '" + className + "'" + controller.getClassDowAndTime(className),
 							sinceDateEna, true);
 			}
 
@@ -612,9 +612,9 @@ public class MainFrame {
 			headerLabel.setText(STUDENT_TITLE + " (" + studentTable.getTableRowCount() + " Students)");
 
 		} else if (tableType == STUDENT_TABLE_NOT_IN_MASTER_DB) {
-			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE);
 			studentTable.setData(tablePanel, controller.getStudentsNotInMasterDB(),
 					StudentTable.STANDARD_STUDENT_TABLE_TYPE, clearSearch);
+			headerLabel.setText(STUDENTS_NOT_IN_MASTER_TITLE + " (" + studentTable.getTableRowCount() + " Students)");
 
 		} else if (tableType == STUDENT_TABLE_BY_STUDENT) {
 			ArrayList<StudentModel> students = controller.getStudentByClientID(clientID);
