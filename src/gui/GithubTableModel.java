@@ -10,13 +10,15 @@ public class GithubTableModel extends AbstractTableModel {
 	public static final int CLIENT_ID_COLUMN = 0;
 	public static final int STUDENT_NAME_COLUMN = 1;
 	public static final int STUDENT_LEVEL_COLUMN = 2;
-	public static final int DOW_COLUMN = 3;
-	public static final int CLASS_NAME_COLUMN = 4;
-	public static final int GITHUB_NAME_COLUMN = 5;
-	public static final int TEACHER_COLUMN = 6;
+	public static final int START_DATE_COLUMN = 3;
+	public static final int LAST_VISIT_COLUMN = 4;
+	public static final int DOW_COLUMN = 5;
+	public static final int CLASS_NAME_COLUMN = 6;
+	public static final int GITHUB_NAME_COLUMN = 7;
+	public static final int TEACHER_COLUMN = 8;
 
 	private ArrayList<GithubModel> githubList;
-	private final String colNames[] = { " ID ", " Student Name ", " Lvl ", " DOW ", " Class ", " Github ", " Teachers " };
+	private final String colNames[] = { " ID ", " Student Name ", " Lvl ", " Start Date ", " Last Visit", " DOW ", " Class ", " Github ", " Teachers " };
 
 	public GithubTableModel(ArrayList<GithubModel> githubList) {
 		this.githubList = githubList;
@@ -68,6 +70,10 @@ public class GithubTableModel extends AbstractTableModel {
 			return student.getStudentName();
 		case STUDENT_LEVEL_COLUMN:
 			return student.getCurrLevel();
+		case START_DATE_COLUMN:
+			return student.getStartDate();
+		case LAST_VISIT_COLUMN:
+			return student.getLastVisit();
 		case DOW_COLUMN:
 			return student.getDow();
 		case CLASS_NAME_COLUMN:

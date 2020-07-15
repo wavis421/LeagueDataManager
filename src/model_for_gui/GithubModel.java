@@ -2,10 +2,10 @@ package model_for_gui;
 
 public class GithubModel implements Comparable<GithubModel> {
 	int clientID, dowInt;
-	String studentName, dow, className, githubName, teachers, currLevel;
+	String studentName, dow, className, githubName, teachers, currLevel, startDate, lastVisit;
 
 	public GithubModel(int clientID, String studentName, String currLevel, String dow, int dowInt, String className, String githubName,
-			String teachers) {
+			String teachers, String startDate, String lastVisit) {
 		this.clientID = clientID;
 		this.studentName = studentName;
 		this.currLevel = currLevel;
@@ -13,6 +13,8 @@ public class GithubModel implements Comparable<GithubModel> {
 		this.dowInt = dowInt;
 		this.className = className;
 		this.teachers = teachers;
+		this.startDate = startDate;
+		this.lastVisit = lastVisit;
 		this.githubName = githubName;
 		if (githubName == null)
 			this.githubName = ""; 
@@ -48,6 +50,14 @@ public class GithubModel implements Comparable<GithubModel> {
 	
 	private int getDowInt() {
 		return dowInt;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public String getLastVisit() {
+		return lastVisit;
 	}
 
 	@Override

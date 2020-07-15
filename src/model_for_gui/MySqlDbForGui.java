@@ -228,7 +228,8 @@ public class MySqlDbForGui {
 				// If Database no longer connected, the exception code will re-connect
 				PreparedStatement selectStmt = sqlDb.dbConnection.prepareStatement(
 						"SELECT * FROM Attendance, Students WHERE isInMasterDb AND Attendance.ClientID = Students.ClientID "
-								+ "AND State = 'completed' AND ServiceDate > ? AND (EventName LIKE 'Java@%' OR EventName LIKE '%Make-Up%') "
+								+ "AND State = 'completed' AND ServiceDate > ? AND "
+								+ "(EventName LIKE 'Java@%' OR EventName LIKE '%Make-Up%' OR EventName LIKE 'CYBERSLAM%') "
 								+ "ORDER BY Attendance.ClientID, ServiceDate ASC, EventName;");
 				selectStmt.setString(1, sinceDate);
 
@@ -275,7 +276,7 @@ public class MySqlDbForGui {
 							lastGithubModel = new GithubModel(thisClientID,
 									result.getString("FirstName") + " " + result.getString("LastName"), currLevel,
 									serviceDate.toString("EEEEE"), dowInt, eventName, result.getString("GithubName"),
-									result.getString("TeacherNames"));
+									result.getString("TeacherNames"), result.getString("StartDate"), result.getString("LastVisitDate"));
 						}
 
 					} else // Ignore this student if ANY github comments exist

@@ -837,9 +837,9 @@ public class MainFrame {
 		// Add github data and header
 		String sinceDate = new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles"))
 				.minusDays(NO_RECENT_GITHUB_SINCE_DAYS).toString("yyyy-MM-dd");
-		headerLabel.setText(GITHUB_TITLE + sinceDate + " (Levels 0 - 5)");
 		githubTable.setData(tablePanel,
 				controller.getStudentsWithNoRecentGithub(sinceDate, MIN_CLASSES_WITH_NO_GITHUB));
+		headerLabel.setText(githubTable.getTableRowCount() + " " + GITHUB_TITLE + sinceDate + " (Levels 0 - 5)");
 
 		if (newTable) {
 			if (currTable.getTableType() != TableHistoryModel.GITHUB_TABLE) {

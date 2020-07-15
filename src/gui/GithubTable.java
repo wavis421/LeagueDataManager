@@ -64,6 +64,10 @@ public class GithubTable extends JPanel {
 	public JTable getTable() {
 		return table;
 	}
+	
+	public int getTableRowCount() {
+		return githubTableModel.getRowCount();
+	}
 
 	public void setData(JPanel tablePanel, ArrayList<GithubModel> githubList) {
 		scrollPane.setVisible(true);
@@ -95,15 +99,19 @@ public class GithubTable extends JPanel {
 
 		// Configure column widths
 		table.getColumnModel().getColumn(GithubTableModel.CLIENT_ID_COLUMN).setMaxWidth(75);
-		table.getColumnModel().getColumn(GithubTableModel.STUDENT_LEVEL_COLUMN).setMaxWidth(60);
+		table.getColumnModel().getColumn(GithubTableModel.STUDENT_LEVEL_COLUMN).setMaxWidth(50);
 		table.getColumnModel().getColumn(GithubTableModel.STUDENT_NAME_COLUMN).setMaxWidth(300);
 		table.getColumnModel().getColumn(GithubTableModel.STUDENT_NAME_COLUMN).setPreferredWidth(230);
 		table.getColumnModel().getColumn(GithubTableModel.GITHUB_NAME_COLUMN).setMaxWidth(300);
-		table.getColumnModel().getColumn(GithubTableModel.GITHUB_NAME_COLUMN).setPreferredWidth(220);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(120);
-		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(120);
-		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setMaxWidth(200);
-		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setPreferredWidth(170);
+		table.getColumnModel().getColumn(GithubTableModel.GITHUB_NAME_COLUMN).setPreferredWidth(200);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setMaxWidth(110);
+		table.getColumnModel().getColumn(GithubTableModel.DOW_COLUMN).setPreferredWidth(110);
+		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setMaxWidth(240);
+		table.getColumnModel().getColumn(GithubTableModel.CLASS_NAME_COLUMN).setPreferredWidth(190);
+		table.getColumnModel().getColumn(GithubTableModel.START_DATE_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GithubTableModel.START_DATE_COLUMN).setPreferredWidth(100);
+		table.getColumnModel().getColumn(GithubTableModel.LAST_VISIT_COLUMN).setMaxWidth(100);
+		table.getColumnModel().getColumn(GithubTableModel.LAST_VISIT_COLUMN).setPreferredWidth(100);
 
 		table.setDefaultRenderer(Object.class, new GithubTableRenderer());
 		table.setCellSelectionEnabled(true);
